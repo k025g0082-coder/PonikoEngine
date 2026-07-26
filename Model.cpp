@@ -273,12 +273,12 @@ void Model::Initialize(){
 void Model::Update(float deltaTime){
 
 	// 時間加算
-	//animationTime_ += (deltaTime / 60.0f);
+	animationTime_ += (deltaTime / 60.0f);
 
 	if (!modelData.animations.empty())
 	{
 		// アニメーションできないので工事中
-		//UpdateAnimation();
+		UpdateAnimation();
 	}
 	else
 	{
@@ -365,22 +365,33 @@ void Model::UpdateAnimation() {
 
 		uint32_t boneIndex = it->second;
 
-		// 回転キーが無い場合は、このボーンは更新しない（バインドを完全維持）
-		if (nodeAnim.rotations.empty())
-		{
-			continue;
-		}
+		//// 回転キーが無い場合は、このボーンは更新しない（バインドを完全維持）
+		//if (nodeAnim.rotations.empty())
+		//{
+
+		//	continue;
+		//}
 
 		Vector3 position = {
 			modelData.bones[boneIndex].localBindMatrix.m[3][0],
 			modelData.bones[boneIndex].localBindMatrix.m[3][1],
 			modelData.bones[boneIndex].localBindMatrix.m[3][2]
 		};
-		Vector4 rotation = SampleRotation(nodeAnim, currentTick);
+		Vector4 rotation = { 0.0f, 0.0f, 0.0f, 1.0f };  // 単位クォータニオン
+		
+		//Vector4 rotation = nodeAnim.rotations[0].value;
+
+		/*DirectXUtility::Log("Bone: %s  Rot key: %f %f %f %f\n",
+			nodeAnim.boneName.c_str(),
+			rotation.x, rotation.y, rotation.z, rotation.w);*/
+
 		Vector3 scale = { 1.0f, 1.0f, 1.0f };
 
-		if (!nodeAnim.translations.empty())
-			position = SampleTransition(nodeAnim, currentTick);
+		if (!nodeAnim.rotations.empty())
+			rotation = SampleRotation(nodeAnim, currentTick);
+
+		/*if (!nodeAnim.translations.empty())
+			position = SampleTransition(nodeAnim, currentTick);*/
 
 		if (!nodeAnim.scales.empty())
 			scale = SampleScale(nodeAnim, currentTick);
@@ -390,46 +401,21 @@ void Model::UpdateAnimation() {
 		Matrix4x4 translateMatrix = makeTranslationMatrix(position);
 
 		modelData.bones[boneIndex].localMatrix =
-			Multiply(Multiply(translateMatrix, rotateMatrix), scaleMatrix);
+			Multiply(Multiply(scaleMatrix, rotateMatrix), translateMatrix);
 	}
 
 	// 親子関係を基に計算する
-	for (Bone& bone : modelData.bones)
+	
+	// ルートボーンから再帰で計算
+	for (size_t i = 0; i < modelData.bones.size(); i++)
 	{
-		if (bone.parentIndex == -1)
+		if (modelData.bones[i].parentIndex == -1)
 		{
-			bone.globalMatrix = bone.localMatrix;
+			Matrix4x4 identity = MakeIdentity4x4(); // 単位行列
+			CalculateGlobalMatrices(static_cast<int>(i), identity);
 		}
-		else
-		{
-			/* 固定！！！ */
-			bone.globalMatrix =
-				Multiply(
-					modelData.bones[bone.parentIndex].globalMatrix,bone.localMatrix
-					
-				);
-		}
-
-		// 最終的にシェーダーに転送する行列
-		bone.finalMatrix =
-			Multiply(bone.globalMatrix,bone.offsetMatrix
-				
-				);
-	}// ルートの代わりにこれ
-	if (modelData.bones.size() > 2)
-	{
-		auto& b = modelData.bones[2]; // 適当な子供
-		DirectXUtility::Log("Time: %f  Bone2 LOCAL pos: %f %f %f\n",
-			currentTick,
-			b.localMatrix.m[3][0],
-			b.localMatrix.m[3][1],
-			b.localMatrix.m[3][2]);
-
-		DirectXUtility::Log("Bone2 FINAL pos: %f %f %f\n",
-			b.finalMatrix.m[3][0],
-			b.finalMatrix.m[3][1],
-			b.finalMatrix.m[3][2]);
 	}
+	
 
 	//// 毎回コピーする
 	for (size_t i = 0; i < modelData.bones.size(); i++)
@@ -652,11 +638,12 @@ Vector3 Model::SampleScale(NodeAnimation& nodeAnim, float currentTick) {
 
 	return vec;
 }
-Vector4 Model::SampleRotation(NodeAnimation& nodeAnim, float currentTick) {
 
+Vector4 Model::SampleRotation(NodeAnimation& nodeAnim, float currentTick)
+{
 	if (nodeAnim.rotations.empty())
 	{
-		return { 0,0,0,1.0f };
+		return { 0.0f, 0.0f, 0.0f, 1.0f };
 	}
 
 	if (currentTick <= nodeAnim.rotations[0].time)
@@ -669,12 +656,9 @@ Vector4 Model::SampleRotation(NodeAnimation& nodeAnim, float currentTick) {
 		return nodeAnim.rotations.back().value;
 	}
 
-	Vector4 vec;
-
 	KeyframeQuaternion* key0 = nullptr;
 	KeyframeQuaternion* key1 = nullptr;
 
-	
 	for (size_t i = 0; i + 1 < nodeAnim.rotations.size(); i++)
 	{
 		if (currentTick >= nodeAnim.rotations[i].time &&
@@ -686,34 +670,36 @@ Vector4 Model::SampleRotation(NodeAnimation& nodeAnim, float currentTick) {
 		}
 	}
 
-	// t求め
+	if (!key0 || !key1)
+	{
+		return nodeAnim.rotations.back().value;
+	}
+
 	float t = 0.0f;
-
 	float timeLength = key1->time - key0->time;
-
 	if (timeLength > 0.0f)
 	{
 		t = (currentTick - key0->time) / timeLength;
 	}
+	t = std::clamp(t, 0.0f, 1.0f);
 
-	
-	/*DirectXUtility::Log(
-		"k0(%f,%f,%f,%f) k1(%f,%f,%f,%f) tick:%f\n",
-		key0->value.x,
-		key0->value.y,
-		key0->value.z,
-		key0->value.w,
-		key1->value.x,
-		key1->value.y,
-		key1->value.z,
-		key1->value.w,
-		currentTick
-	);*/
+	Vector4 q0 = key0->value;
+	Vector4 q1 = key1->value;
 
-	// 補間!
-	vec = Slerp(key0->value, key1->value, t);
-	//vec = Normalize(vec);
-	return vec;
+	// ★ここが重要：最短経路になるように符号を揃える
+	float dot = q0.x * q1.x + q0.y * q1.y + q0.z * q1.z + q0.w * q1.w;
+	if (dot < 0.0f)
+	{
+		q1.x = -q1.x;
+		q1.y = -q1.y;
+		q1.z = -q1.z;
+		q1.w = -q1.w;
+	}
+
+	Vector4 result = Slerp(q0, q1, t);
+	// 念のため正規化
+	// result = Normalize(result);
+	return result;
 }
 
 void Model::Draw(ID3D12GraphicsCommandList* commandList){

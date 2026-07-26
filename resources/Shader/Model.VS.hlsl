@@ -55,11 +55,11 @@ VeltexShaderOutput main( VertexShaderInput input )
         {
             skinnedPosition +=
             mul(input.position,
-                gBoneMatrices[input.boneIndex[i]])
+                gBoneMatrices[input.boneIndex[i]]
+            )
             * input.weight[i];
         }
-        output.position =
-            mul(skinnedPosition, gTransformationMatrix.WVP);
+        output.position = mul( skinnedPosition,gTransformationMatrix.WVP);
         output.texcoord = input.texcoord;
         output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrix.World));
     }

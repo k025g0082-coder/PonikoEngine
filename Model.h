@@ -164,6 +164,24 @@ private:
 	// マテリアル読み取り関数
 	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 
+	// 再帰でグローバル行列を計算する関数
+	void CalculateGlobalMatrices(int boneIndex, const Matrix4x4& parentGlobal)
+	{
+		Bone& bone = modelData.bones[boneIndex];
+
+		// 親 * ローカル に変更
+		bone.globalMatrix = Multiply(parentGlobal, bone.localMatrix);
+
+		// 最終行列も逆順に
+		bone.finalMatrix = Multiply(bone.globalMatrix, bone.offsetMatrix);
+
+		// 子供を再帰的に計算
+		for (int childIndex : bone.children)
+		{
+			CalculateGlobalMatrices(childIndex, bone.globalMatrix);
+		}
+	}
+
 	// マテリアル用のリソース
 	ComPtr <ID3D12Resource> materialResource;
 

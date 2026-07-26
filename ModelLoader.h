@@ -80,7 +80,16 @@ private:
         r.m[3][2] = mat.c4;
         r.m[3][3] = mat.d4;
 
-        return r;
+        // Z-up → Y-up 変換
+        Matrix4x4 C = {
+            1.0f,  0.0f,  0.0f, 0.0f,
+            0.0f,  0.0f,  1.0f, 0.0f,
+            0.0f, -1.0f,  0.0f, 0.0f,
+            0.0f,  0.0f,  0.0f, 1.0f
+        };
+
+        return Multiply(C, r);
+
     };
     static uint32_t boneCount;
 };

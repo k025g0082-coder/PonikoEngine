@@ -15,12 +15,11 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
     // 読み込む条件のフラグ？
     unsigned int flag;
     flag = aiProcess_Triangulate |
-        aiProcess_JoinIdenticalVertices |
         aiProcess_GenNormals |
-        //aiProcess_CalcTangentSpace |
-        //aiProcess_FlipUVs;
-        aiProcess_MakeLeftHanded;         // ← 追加
-        //\aiProcess_FlipWindingOrder;         // ← 追加
+      //  aiProcess_JoinIdenticalVertices |
+        aiProcess_LimitBoneWeights | 
+       // aiProcess_MakeLeftHanded |
+        aiProcess_FlipUVs;                 // 必要に応じて
 
     // ファイルパス
    // std::string path = "resources/Models/" + modelName + "/" + modelName + ".obj";
@@ -43,20 +42,20 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
         ModelVertexData vertex{};
 
         // 座標 (地味に軸変換。)
-        vertex.position = {
-            -mesh->mVertices[i].x,
-            mesh->mVertices[i].y,
-            -mesh->mVertices[i].z,
-            
-        };
-        /* アニメの時、fbxはこっちつかってた
-         vertex.position = {
+ 
+     /*    vertex.position = {
             mesh->mVertices[i].x,
-           -mesh->mVertices[i].z,
+            -mesh->mVertices[i].z,
             mesh->mVertices[i].y,
-          
+
+        };*/
+        vertex.position = {
+         mesh->mVertices[i].x, 
+         mesh->mVertices[i].y,
+         mesh->mVertices[i].z,    // Z ← 元のYを反転
+         // Y ← 元のZ
+    
         };
-        */
 
         vertex.position.w = 1.0f;// これがないと方向ベクトル扱いになって～～～ゴミ!
 
@@ -65,8 +64,8 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
         {
             vertex.normal = {
                 mesh->mNormals[i].x,
+                mesh->mNormals[i].y,
                 mesh->mNormals[i].z,
-                mesh->mNormals[i].y, 
 };
         }
 
@@ -319,6 +318,53 @@ void ModelLoader::LoadBones(uint32_t meshIndex, aiMesh* mesh, ModelData* modelDa
 //    }
 //}
 
+/*
+void ModelLoader::LoadNode(aiNode* node, int parentIndex, const Matrix4x4& parentAccumulated, ModelData* modelData)
+{
+    std::string boneName = node->mName.C_Str();
+    int currentParent = parentIndex;
+
+    // このノードの変換
+    Matrix4x4 nodeMatrix = ConvertMatrix(node->mTransformation);
+
+    // 親から蓄積された変換を掛ける
+    Matrix4x4 accumulated = Multiply(nodeMatrix, parentAccumulated);  // 行ベクトル方式の場合
+
+    auto it = modelData->boneMap.find(boneName);
+    if (it != modelData->boneMap.end())
+    {
+        // このノードはボーン
+        uint32_t boneIndex = it->second;
+
+        if (boneIndex < modelData->bones.size())
+        {
+            auto& bone = modelData->bones[boneIndex];
+            bone.parentIndex = parentIndex;
+
+            // 蓄積された変換をローカル行列として使う
+            bone.localMatrix = accumulated;
+            bone.localBindMatrix = bone.localMatrix;
+
+            if (parentIndex != -1)
+            {
+                modelData->bones[parentIndex].children.push_back(boneIndex);
+            }
+
+            currentParent = static_cast<int>(boneIndex);
+
+            // ボーンになったので、蓄積をリセット（単位行列）
+            accumulated = MakeIdentity4x4();
+        }
+    }
+
+    // 子供へ（蓄積した変換を渡す）
+    for (uint32_t i = 0; i < node->mNumChildren; i++)
+    {
+        LoadNode(node->mChildren[i], currentParent, accumulated, modelData);
+    }
+}
+*/
+
 void ModelLoader::LoadNode(aiNode* node, int parentIndex, ModelData* modelData)
 {
     std::string boneName = node->mName.C_Str();
@@ -328,30 +374,23 @@ void ModelLoader::LoadNode(aiNode* node, int parentIndex, ModelData* modelData)
     if (it != modelData->boneMap.end())
     {
         uint32_t boneIndex = it->second;
+        auto& bone = modelData->bones[boneIndex];
 
-        if (boneIndex < modelData->bones.size())
+        bone.parentIndex = parentIndex;
+
+        // ★ここが重要：ノードの変換をそのままローカルに使う
+        bone.localMatrix = ConvertMatrix(node->mTransformation);
+        bone.localBindMatrix = bone.localMatrix;
+
+        if (parentIndex != -1)
         {
-            auto& bone = modelData->bones[boneIndex];
-            bone.parentIndex = parentIndex;
-            bone.localMatrix = ConvertMatrix(node->mTransformation);
-
-            bone.localBindMatrix = bone.localMatrix; // バインドポーズ
-
-            if (parentIndex != -1)
-            {
-                modelData->bones[parentIndex].children.push_back(boneIndex);
-            }
-            else
-            {
-                // ルートボーンとして記録（必要なら）
-               // modelData->rootBoneIndices.push_back(boneIndex);
-            }
-
-            currentParent = static_cast<int>(boneIndex);
+            modelData->bones[parentIndex].children.push_back(boneIndex);
         }
+
+        currentParent = static_cast<int>(boneIndex);
     }
 
-    // 子供は必ず読む
+    // 子供を再帰
     for (uint32_t i = 0; i < node->mNumChildren; i++)
     {
         LoadNode(node->mChildren[i], currentParent, modelData);
@@ -410,13 +449,10 @@ void ModelLoader::LoadAnimation(const aiScene* scene, ModelData* modelData) {
                 };     
                 */
 
-                pos.value =
-                {
-                    key.mValue.x,  key.mValue.z, 
-                    key.mValue.y,
-                  
-                  
-
+                pos.value = {
+                     key.mValue.x, 
+                     key.mValue.y,
+                     key.mValue.z,
                 };
 
                 nodeAnim.translations.push_back(pos);
@@ -469,7 +505,6 @@ void ModelLoader::LoadAnimation(const aiScene* scene, ModelData* modelData) {
                     key.mValue.x,
                     key.mValue.y,
                     key.mValue.z,
-
                     key.mValue.w
                 };
                 DirectXUtility::Log(

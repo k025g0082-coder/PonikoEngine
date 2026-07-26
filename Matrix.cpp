@@ -544,6 +544,7 @@ Matrix4x4 MakeRotateMatrix(const Vector4& q)
 	m.m[3][1] = 0.0f;
 	m.m[3][2] = 0.0f;
 	m.m[3][3] = 1.0f;
+
 	return m;
 	
 }
