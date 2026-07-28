@@ -40,26 +40,6 @@ private:
 
         Matrix4x4 r{};
 
-      /*  r.m[0][0] = mat.a1;
-        r.m[0][1] = mat.a2;
-        r.m[0][2] = mat.a3;
-        r.m[0][3] = mat.a4;
-
-        r.m[1][0] = mat.b1;
-        r.m[1][1] = mat.b2;
-        r.m[1][2] = mat.b3;
-        r.m[1][3] = mat.b4;
-
-        r.m[2][0] = mat.c1;
-        r.m[2][1] = mat.c2;
-        r.m[2][2] = mat.c3;
-        r.m[2][3] = mat.c4;
-
-        r.m[3][0] = mat.d1;
-        r.m[3][1] = mat.d2;
-        r.m[3][2] = mat.d3;
-        r.m[3][3] = mat.d4;*/
-
         r.m[0][0] = mat.a1;
         r.m[0][1] = mat.b1;
         r.m[0][2] = mat.c1;

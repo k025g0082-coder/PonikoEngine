@@ -18,7 +18,6 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
         aiProcess_GenNormals |
       //  aiProcess_JoinIdenticalVertices |
         aiProcess_LimitBoneWeights | 
-       // aiProcess_MakeLeftHanded |
         aiProcess_FlipUVs;                 // 必要に応じて
 
     // ファイルパス
@@ -52,10 +51,12 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
         vertex.position = {
          mesh->mVertices[i].x, 
          mesh->mVertices[i].y,
-         mesh->mVertices[i].z,    // Z ← 元のYを反転
+         -mesh->mVertices[i].z,    // Z ← 元のYを反転
          // Y ← 元のZ
     
         };
+
+        vertex.position.x *= -1.0f;
 
         vertex.position.w = 1.0f;// これがないと方向ベクトル扱いになって～～～ゴミ!
 
@@ -67,6 +68,7 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
                 mesh->mNormals[i].y,
                 mesh->mNormals[i].z,
 };
+            vertex.normal.x *= -1.0f;
         }
 
         // UV
@@ -455,6 +457,8 @@ void ModelLoader::LoadAnimation(const aiScene* scene, ModelData* modelData) {
                      key.mValue.z,
                 };
 
+                pos.value.x *= -1.0f;
+
                 nodeAnim.translations.push_back(pos);
             }
 
@@ -507,6 +511,8 @@ void ModelLoader::LoadAnimation(const aiScene* scene, ModelData* modelData) {
                     key.mValue.z,
                     key.mValue.w
                 };
+
+
                 DirectXUtility::Log(
                     "%s", channel->mNodeName.C_Str());
                 DirectXUtility::Log(

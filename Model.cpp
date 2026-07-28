@@ -387,11 +387,14 @@ void Model::UpdateAnimation() {
 
 		Vector3 scale = { 1.0f, 1.0f, 1.0f };
 
-		if (!nodeAnim.rotations.empty())
+		if (!nodeAnim.rotations.empty()) {
 			rotation = SampleRotation(nodeAnim, currentTick);
+			rotation.x *= -1.0f;
+			rotation.z *= -1.0f;
+		}
 
-		/*if (!nodeAnim.translations.empty())
-			position = SampleTransition(nodeAnim, currentTick);*/
+		if (!nodeAnim.translations.empty())
+			position = SampleTransition(nodeAnim, currentTick);
 
 		if (!nodeAnim.scales.empty())
 			scale = SampleScale(nodeAnim, currentTick);
@@ -401,7 +404,7 @@ void Model::UpdateAnimation() {
 		Matrix4x4 translateMatrix = makeTranslationMatrix(position);
 
 		modelData.bones[boneIndex].localMatrix =
-			Multiply(Multiply(scaleMatrix, rotateMatrix), translateMatrix);
+			Multiply(Multiply(translateMatrix, rotateMatrix), scaleMatrix);
 	}
 
 	// 親子関係を基に計算する
