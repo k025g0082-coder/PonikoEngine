@@ -1,7 +1,11 @@
 #pragma once
 #include "Matrix.h"
 #include <string>
+
 #include "DirectXUtility.h"
+
+#include <assimp/Importer.hpp>      // Assimpのインポーター
+#include <assimp/scene.h>           // シーンデータ構造
 
 // ボーン
 struct Bone {
@@ -10,20 +14,14 @@ struct Bone {
 	int parentIndex = -1;
 	std::vector<uint32_t> children;// 子供の番号
 
-	Matrix4x4 offsetMatrix;
+	aiMatrix4x4 offsetMatrix;
 
-	Matrix4x4 localBindMatrix; // アニメしてない初期姿勢の行列　初期値？
+	aiMatrix4x4 localBindMatrix; // アニメしてない初期姿勢の行列　初期値？
 
-	Matrix4x4 localMatrix; // SRTから作られる行列
-	Matrix4x4 globalMatrix;// 親Boneから計算される
+	aiMatrix4x4 localMatrix; // SRTから作られる行列
+	aiMatrix4x4 globalMatrix;// 親Boneから計算される
 
-	Matrix4x4 finalMatrix;// 親子関係などの計算を経て、最終的にシェーダーに送る行列
-};
-
-// モデルー＞ボーン空間に変換する行列
-struct BoneInfo {
-	Matrix4x4 offsetMatrix;
-	Matrix4x4 finalTransform;
+	aiMatrix4x4 finalMatrix;// 親子関係などの計算を経て、最終的にシェーダーに送る行列
 };
 
 // ボーン情報

@@ -48,15 +48,15 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
             mesh->mVertices[i].y,
 
         };*/
+        
+        /* UpdateAnimation nuki de tadasiinode kotei */
         vertex.position = {
-         mesh->mVertices[i].x, 
-         mesh->mVertices[i].y,
-         -mesh->mVertices[i].z,    // Z ← 元のYを反転
-         // Y ← 元のZ
-    
+         mesh->mVertices[i].x,
+         mesh->mVertices[i].y,   
+         mesh->mVertices[i].z,
+  
         };
 
-        vertex.position.x *= -1.0f;
 
         vertex.position.w = 1.0f;// これがないと方向ベクトル扱いになって～～～ゴミ!
 
@@ -67,7 +67,8 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
                 mesh->mNormals[i].x,
                 mesh->mNormals[i].y,
                 mesh->mNormals[i].z,
-};
+            };
+
             vertex.normal.x *= -1.0f;
         }
 
@@ -218,13 +219,8 @@ void ModelLoader::LoadBones(uint32_t meshIndex, aiMesh* mesh, ModelData* modelDa
 
             modelData->bones[boneIndex].name = boneName;
 
-            modelData->bones[boneIndex].offsetMatrix =
-                ConvertMatrix(aiBoneData->mOffsetMatrix);
+            modelData->bones[boneIndex].offsetMatrix = aiBoneData->mOffsetMatrix;
 
-            modelData->boneInfos.emplace_back();
-
-            modelData->boneInfos[boneIndex].offsetMatrix =
-                ConvertMatrix(aiBoneData->mOffsetMatrix);
         }
         else {
 
@@ -381,7 +377,7 @@ void ModelLoader::LoadNode(aiNode* node, int parentIndex, ModelData* modelData)
         bone.parentIndex = parentIndex;
 
         // ★ここが重要：ノードの変換をそのままローカルに使う
-        bone.localMatrix = ConvertMatrix(node->mTransformation);
+        bone.localMatrix = node->mTransformation;
         bone.localBindMatrix = bone.localMatrix;
 
         if (parentIndex != -1)
@@ -452,12 +448,11 @@ void ModelLoader::LoadAnimation(const aiScene* scene, ModelData* modelData) {
                 */
 
                 pos.value = {
-                     key.mValue.x, 
-                     key.mValue.y,
-                     key.mValue.z,
+                    key.mValue.x,
+                    key.mValue.y,
+                    key.mValue.z,
+                    
                 };
-
-                pos.value.x *= -1.0f;
 
                 nodeAnim.translations.push_back(pos);
             }
@@ -497,11 +492,12 @@ void ModelLoader::LoadAnimation(const aiScene* scene, ModelData* modelData) {
                 pos.time =
                     (float)key.mTime;
 
-              /*  pos.value =
+                /*pos.value =
                 {
                     key.mValue.x,
-                    key.mValue.z,
                     key.mValue.y,
+                    key.mValue.z,
+                    
                     key.mValue.w
                 }; */
                 pos.value =

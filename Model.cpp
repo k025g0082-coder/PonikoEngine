@@ -285,7 +285,8 @@ void Model::Update(float deltaTime){
 		// ボーンはあるけどアニメ無
 		for (size_t i = 0; i < modelData.bones.size(); i++)
 		{
-			skinningData_->boneMatrices[i] = MakeIdentity4x4();
+
+			skinningData_->boneMatrices[i] = ModelLoader::ConvertYZ();
 		}
 	}
 
@@ -373,24 +374,17 @@ void Model::UpdateAnimation() {
 		//}
 
 		Vector3 position = {
-			modelData.bones[boneIndex].localBindMatrix.m[3][0],
-			modelData.bones[boneIndex].localBindMatrix.m[3][1],
-			modelData.bones[boneIndex].localBindMatrix.m[3][2]
+			modelData.bones[boneIndex].localBindMatrix[3][0],
+			modelData.bones[boneIndex].localBindMatrix[3][1],
+			modelData.bones[boneIndex].localBindMatrix[3][2]
 		};
 		Vector4 rotation = { 0.0f, 0.0f, 0.0f, 1.0f };  // 単位クォータニオン
-		
-		//Vector4 rotation = nodeAnim.rotations[0].value;
-
-		/*DirectXUtility::Log("Bone: %s  Rot key: %f %f %f %f\n",
-			nodeAnim.boneName.c_str(),
-			rotation.x, rotation.y, rotation.z, rotation.w);*/
 
 		Vector3 scale = { 1.0f, 1.0f, 1.0f };
 
 		if (!nodeAnim.rotations.empty()) {
 			rotation = SampleRotation(nodeAnim, currentTick);
-			rotation.x *= -1.0f;
-			rotation.z *= -1.0f;
+			//rotation = { 0.0f, 0.0f, 0.0f, 1.0f };  // 単位クォータニオン
 		}
 
 		if (!nodeAnim.translations.empty())
@@ -399,12 +393,45 @@ void Model::UpdateAnimation() {
 		if (!nodeAnim.scales.empty())
 			scale = SampleScale(nodeAnim, currentTick);
 
-		Matrix4x4 scaleMatrix = makeScaleMatrix(scale);
-		Matrix4x4 rotateMatrix = MakeRotateMatrix(rotation);
-		Matrix4x4 translateMatrix = makeTranslationMatrix(position);
+		aiMatrix4x4 scaleAiMatrix;
+		aiMatrix4x4 rotateAiMatrix;
+		aiMatrix4x4 translateAiMatrix;
+
+		scaleAiMatrix = aiMatrix4x4(
+			scale.x, 0, 0, 0,
+			0, scale.y, 0, 0,
+			0, 0, scale.z, 0,
+			0, 0, 0, 1
+		);
+
+		aiQuaternion q(
+			rotation.w,
+			rotation.x,
+			rotation.y,
+			rotation.z
+		);
+
+		rotateAiMatrix = aiMatrix4x4(q.GetMatrix());
+
+		translateAiMatrix = aiMatrix4x4(
+			1, 0, 0, position.x,
+			0, 1, 0, position.y,
+			0, 0, 1, position.z,
+			0, 0, 0, 1
+		);
 
 		modelData.bones[boneIndex].localMatrix =
-			Multiply(Multiply(translateMatrix, rotateMatrix), scaleMatrix);
+			(translateAiMatrix *
+			rotateAiMatrix) *
+			scaleAiMatrix;
+		
+		//modelData.bones[boneIndex].localMatrix = modelData.bones[boneIndex].localBindMatrix;
+
+		Bone bone = modelData.bones[boneIndex];
+		DirectXUtility::Log("%f %f %f\n",
+			bone.localBindMatrix.a4,
+			bone.localBindMatrix.b4,
+			bone.localBindMatrix.c4);
 	}
 
 	// 親子関係を基に計算する
@@ -414,7 +441,9 @@ void Model::UpdateAnimation() {
 	{
 		if (modelData.bones[i].parentIndex == -1)
 		{
-			Matrix4x4 identity = MakeIdentity4x4(); // 単位行列
+			aiMatrix4x4 identity;
+			identity = aiMatrix4x4();
+
 			CalculateGlobalMatrices(static_cast<int>(i), identity);
 		}
 	}
@@ -425,8 +454,10 @@ void Model::UpdateAnimation() {
 	{
 		//boneMatrices_[i] = modelData.bones[i].finalMatrix;
 
-		skinningData_->boneMatrices[i] =
-			modelData.bones[i].finalMatrix;
+		skinningData_->boneMatrices[i] = Multiply(
+			ModelLoader::ConvertMatrix(
+				modelData.bones[i].finalMatrix),
+			ModelLoader::ConvertYZ());
 	}
 		
 //	}
@@ -542,6 +573,24 @@ void Model::UpdateAnimation() {
 	//	
 	//}
 
+}
+
+// 再帰でグローバル行列を計算する関数
+void Model::CalculateGlobalMatrices(int boneIndex, const aiMatrix4x4& parentGlobal)
+{
+	Bone& bone = modelData.bones[boneIndex];
+
+	// 親 * ローカル に変更
+	bone.globalMatrix = parentGlobal *  bone.localMatrix;
+
+	// 最終行列も逆順に
+	bone.finalMatrix =  bone.globalMatrix * bone.offsetMatrix;
+
+	// 子供を再帰的に計算
+	for (int childIndex : bone.children)
+	{
+		CalculateGlobalMatrices(childIndex, bone.globalMatrix);
+	}
 }
 
 Vector3 Model::SampleTransition(NodeAnimation& nodeAnim, float currentTick) {

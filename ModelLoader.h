@@ -21,7 +21,48 @@ public:
     // aiMeah,　aiMaterial,　aiIndices　でModelData 取得
     static ModelData LoadObjModel(std::string modelPath);
 
-   
+   // 変換 aiMatrix4x4->Matrix4x4
+    static Matrix4x4 ConvertMatrix(const aiMatrix4x4& mat)
+    {
+
+    Matrix4x4 r{};
+
+    r.m[0][0] = mat.a1;
+    r.m[0][1] = mat.b1;
+    r.m[0][2] = mat.c1;
+    r.m[0][3] = mat.d1;
+
+    r.m[1][0] = mat.a2;
+    r.m[1][1] = mat.b2;
+    r.m[1][2] = mat.c2;
+    r.m[1][3] = mat.d2;
+
+    r.m[2][0] = mat.a3;
+    r.m[2][1] = mat.b3;
+    r.m[2][2] = mat.c3;
+    r.m[2][3] = mat.d3;
+
+    r.m[3][0] = mat.a4;
+    r.m[3][1] = mat.b4;
+    r.m[3][2] = mat.c4;
+    r.m[3][3] = mat.d4;
+
+    return r;
+    };
+
+    // 入れ替え座標変換用の配列
+    static Matrix4x4 ConvertYZ()
+    {
+        Matrix4x4 m = MakeIdentity4x4();
+
+        m.m[1][1] = 0;
+        m.m[1][2] = 1;
+
+        m.m[2][1] = 1;
+        m.m[2][2] = 0;
+
+        return m;
+    }
 
 private:
 
@@ -34,43 +75,7 @@ private:
     // アニメ読み取り
     static void LoadAnimation(const aiScene* scene, ModelData* modelData);
 
-    // 変換 aiMatrix4x4->Matrix4x4
-    static Matrix4x4 ConvertMatrix(const aiMatrix4x4& mat)
-    {
-
-        Matrix4x4 r{};
-
-        r.m[0][0] = mat.a1;
-        r.m[0][1] = mat.b1;
-        r.m[0][2] = mat.c1;
-        r.m[0][3] = mat.d1;
-
-        r.m[1][0] = mat.a2;
-        r.m[1][1] = mat.b2;
-        r.m[1][2] = mat.c2;
-        r.m[1][3] = mat.d2;
-
-        r.m[2][0] = mat.a3;
-        r.m[2][1] = mat.b3;
-        r.m[2][2] = mat.c3;
-        r.m[2][3] = mat.d3;
-
-        r.m[3][0] = mat.a4;
-        r.m[3][1] = mat.b4;
-        r.m[3][2] = mat.c4;
-        r.m[3][3] = mat.d4;
-
-        // Z-up → Y-up 変換
-        Matrix4x4 C = {
-            1.0f,  0.0f,  0.0f, 0.0f,
-            0.0f,  0.0f,  1.0f, 0.0f,
-            0.0f, -1.0f,  0.0f, 0.0f,
-            0.0f,  0.0f,  0.0f, 1.0f
-        };
-
-        return Multiply(C, r);
-
-    };
+    
     static uint32_t boneCount;
 };
 
