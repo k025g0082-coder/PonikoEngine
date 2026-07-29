@@ -16,7 +16,7 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
     unsigned int flag;
     flag = aiProcess_Triangulate |
         aiProcess_GenNormals |
-      //  aiProcess_JoinIdenticalVertices |
+        aiProcess_GlobalScale |
         aiProcess_LimitBoneWeights | 
         aiProcess_FlipUVs;                 // 必要に応じて
 
@@ -50,6 +50,10 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
         };*/
         
         /* UpdateAnimation nuki de tadasiinode kotei */
+
+        // memo: blenderのプレビュー正面で、-Yが前、Zが上。
+        // 上からとかになる場合、ボーンの回転に90度とか入ってるのが原因。
+
         vertex.position = {
          mesh->mVertices[i].x,
          mesh->mVertices[i].y,   

@@ -425,7 +425,7 @@ void Model::UpdateAnimation() {
 			rotateAiMatrix) *
 			scaleAiMatrix;
 		
-		//modelData.bones[boneIndex].localMatrix = modelData.bones[boneIndex].localBindMatrix;
+		/*modelData.bones[boneIndex].localMatrix = modelData.bones[boneIndex].localBindMatrix;*/
 
 		Bone bone = modelData.bones[boneIndex];
 		DirectXUtility::Log("%f %f %f\n",

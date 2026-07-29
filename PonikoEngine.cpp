@@ -60,8 +60,9 @@ namespace PonikoEngine {
 
 		impl->sprite.SetPos({ 100.0f,100.0f,0.0f });
 
+		//impl->model = Model::CreateOBJ("resources/Models/test/test.fbx");
 		//impl->model = Model::CreateOBJ("resources/Models/cube/cube.fbx");
-		impl->model = Model::CreateOBJ("resources/Models/test/test.fbx");
+		impl->model = Model::CreateOBJ("resources/Models/test/Capoeira.fbx");
 		//impl->model = Model::CreateOBJ("resources/Models/rail/rail.obj");
 		// impl->model = Model::CreateOBJ("resources/Models/cube/cube.obj");
 		impl->model->SetCamera(&impl->camera);
