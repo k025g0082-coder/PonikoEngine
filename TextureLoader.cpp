@@ -6,7 +6,15 @@ DirectX::ScratchImage TextureLoader::LoadTexture(const std::string& filePath) {
 	//テクスチャファイルを読んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
 	std::wstring filePathW = DirectXUtility::ConvertString(filePath);
+
 	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+
+	// 存在しない場合はデフォルトテクスチャ
+	if (FAILED(hr))
+	{
+		hr = DirectX::LoadFromWICFile(L"resources/default.png", DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+	}
+
 	assert(SUCCEEDED(hr));
 
 
@@ -18,8 +26,10 @@ DirectX::ScratchImage TextureLoader::LoadTexture(const std::string& filePath) {
 	//ミップマップ付きのデータを返す
 	return mipImages;
 }
+
 //2) TextureResourceを作る
 ID3D12Resource* TextureLoader::CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata) {
+
 	//metadataを基にResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
 	resourceDesc.Width = UINT(metadata.width); // Textured

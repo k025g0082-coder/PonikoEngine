@@ -50,7 +50,8 @@ VeltexShaderOutput main( VertexShaderInput input )
         // ボーンの情報をもとに計算？
     
         float4 skinnedPosition = float4(0, 0, 0, 0);
-
+        float3 skinnedNormal = float3(0, 0, 0);
+        
         for (int i = 0; i < 4; i++)
         {
             skinnedPosition +=
@@ -58,16 +59,26 @@ VeltexShaderOutput main( VertexShaderInput input )
                 gBoneMatrices[input.boneIndex[i]]
             )
             * input.weight[i];
+            
+            skinnedNormal +=
+            mul(input.normal, (float3x3) gBoneMatrices[input.boneIndex[i]])
+            * input.weight[i];
         }
         output.position = mul( skinnedPosition,gTransformationMatrix.WVP);
         output.texcoord = input.texcoord;
-        output.normal = normalize(mul(input.normal, (float3x3) gTransformationMatrix.World));
+        output.normal =
+        normalize(
+            mul(skinnedNormal, (float3x3) gTransformationMatrix.World)
+        );
     }
     else
     {
         output.position = mul(input.position, gTransformationMatrix.WVP);
         output.texcoord = input.texcoord;
-        output.normal = input.normal;
+        output.normal =
+        normalize(
+            mul(input.normal, (float3x3) gTransformationMatrix.World)
+        );
     }
     
     return output;

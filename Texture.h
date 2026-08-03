@@ -20,6 +20,10 @@ class Texture
 public:
 	void Initialize(std::string texturePath);
 
+	void Initialize(unsigned char* image, int width, int height);
+
+	void TextTextureUpdate(unsigned char* image);
+
 	// Spriteとかの描画時に必要になる
 	D3D12_CPU_DESCRIPTOR_HANDLE GetTextureSrvHandleCPU() { return textureSrvHandleCPU; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU; }

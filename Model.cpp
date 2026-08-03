@@ -22,8 +22,7 @@ Model* Model::CreateOBJ(const std::string& modelPath) {
 
 	model->modelData = ModelLoader::LoadObjModel(modelPath);
 
-	//model->texture.Initialize(model->modelData.material.textureFilePath);
-	model->texture.Initialize("resources/white100x100.png");
+	model->texture.Initialize(model->modelData.material.textureFilePath);
 
 	//頂点リソースを作る
 	model->vertexResource = DirectXUtility::CreateBufferResource(

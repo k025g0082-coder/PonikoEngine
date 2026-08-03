@@ -22,8 +22,6 @@ public:
 	// 設定
 	void Initialize(DirectionalLightParam param);
 
-	//void Update();
-
 	// 参照w
 	DirectionalLightParam* GetLightData() {
 		return lightData_;

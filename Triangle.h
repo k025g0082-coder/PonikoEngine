@@ -10,7 +10,7 @@
 
 class Triangle{
 public:
-	void Initialize(ID3D12Device* device);
+	void Initialize();
 	void Update();
 	void Draw(ID3D12GraphicsCommandList* commandList);
 

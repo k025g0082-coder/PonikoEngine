@@ -17,6 +17,11 @@ namespace TextureLoader {
 	// TextureResourceを作る
 	ID3D12Resource* CreateTextureResource(ID3D12Device* device, const DirectX::TexMetadata& metadata);
 
+	//ComPtr<ID3D12Resource> CreateTextureResource(
+	//	const unsigned char* image,
+	//	uint32_t width,
+	//	uint32_t height);
+
 	// データを転送する
 	void UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mipImages);
 

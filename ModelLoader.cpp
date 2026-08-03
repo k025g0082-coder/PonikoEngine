@@ -84,6 +84,10 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
                 mesh->mTextureCoords[0][i].y
             };
         }
+        else
+        {
+            vertex.texcoord = { 0,0 };
+        }
 
         modelData.vertices.push_back(vertex);
 
@@ -139,7 +143,13 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
         modelData.material.textureFilePath =
             directory + "/" + texturePath.C_Str();
     }
+    else {
 
+        // デフォの画像パス
+        // 512x512以上の、UVマップのモデルだとエラるかも。
+        modelData.material.textureFilePath = "resources/default.png";
+    
+    }
 
     for (unsigned int i = 0; i < scene->mNumMaterials; i++)
     {

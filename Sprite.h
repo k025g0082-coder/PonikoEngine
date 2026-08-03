@@ -9,7 +9,13 @@
 
 class Sprite {
 public:
-	void Initialize(ID3D12Device* device);
+
+	void Initialize(std::string texturePath);
+
+	void TextTextureInitialize(unsigned char* image, int width, int height);
+
+	void TextTextureUpdate(unsigned char* image);
+
 	void Update();
 	void Draw(ID3D12GraphicsCommandList* commandList);
 

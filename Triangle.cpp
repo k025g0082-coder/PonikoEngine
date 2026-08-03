@@ -9,9 +9,9 @@
 #include "DirectXCommon.h"
 #include "DirectXUtility.h"
 
-void Triangle::Initialize(ID3D12Device* device)
+void Triangle::Initialize()
 {
-	device_ = device;
+	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
 
 	worldTransform_.translate = { 0.0f,0.0f,0.0f };
 	worldTransform_.rotate = { 0.0f,0.0f,0.0f };
@@ -37,7 +37,7 @@ void Triangle::Initialize(ID3D12Device* device)
 
 	// 実際に頂点リソースを作る
 	ID3D12Resource* vertexResource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
+	HRESULT hr = device_->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE,
 		&vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 		IID_PPV_ARGS(&vertexResource));
 
@@ -74,18 +74,18 @@ void Triangle::Initialize(ID3D12Device* device)
 	UINT backBufferIndex = DirectXCommon::GetInstance()->GetSwapChain()->GetCurrentBackBufferIndex();
 
 	// マテリアル用のリソース
-	materialResource = DirectXUtility::CreateBufferResource(device, sizeof(SpriteVertexData));
+	materialResource = DirectXUtility::CreateBufferResource(device_, sizeof(SpriteVertexData));
 	Vector4* materialData = nullptr;
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	*materialData = { 1.0f,1.0f,1.0f,1.0f }; // 白色
 
 	// mvp用のリソース作り
-	wvpResource = DirectXUtility::CreateBufferResource(device, sizeof(Matrix4x4));
+	wvpResource = DirectXUtility::CreateBufferResource(device_, sizeof(Matrix4x4));
 	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&mvpData));
 	*mvpData = MakeIdentity4x4();
 
 	// テクスチャ
-	texture.Initialize("resources/test.png");
+	texture.Initialize("resources/default.png");
 };
 
 void Triangle::Update() {

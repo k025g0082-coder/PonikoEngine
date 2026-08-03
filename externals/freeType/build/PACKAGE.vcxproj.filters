@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\k025g\Desktop\source\PonikoEngine\externals\freeType\build\CMakeFiles\c7ac28898eec653df08e9fa237e43e2f\PACKAGE_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{04673CAC-AFEA-3CC4-ADCA-79DF164E2B5F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
