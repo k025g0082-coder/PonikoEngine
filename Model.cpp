@@ -753,7 +753,9 @@ Vector4 Model::SampleRotation(NodeAnimation& nodeAnim, float currentTick)
 	return result;
 }
 
-void Model::Draw(ID3D12GraphicsCommandList* commandList){
+void Model::Draw(){
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
 
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 

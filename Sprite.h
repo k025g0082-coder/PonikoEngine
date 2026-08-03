@@ -17,7 +17,7 @@ public:
 	void TextTextureUpdate(unsigned char* image);
 
 	void Update();
-	void Draw(ID3D12GraphicsCommandList* commandList);
+	void Draw();
 
 	void SetPos(Vector3 pos) {
 		

@@ -78,7 +78,7 @@ public:
 
 	void Initialize();
 	void Update(float deltaTime = 1.0f);
-	void Draw(ID3D12GraphicsCommandList* commandList);
+	void Draw();
 
 	// アニメ更新
 	void UpdateAnimation();

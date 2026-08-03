@@ -168,7 +168,7 @@ void Text::drawString(const std::u32string& text, Vector2 position, TextAnchor a
 	sprite.SetPos(Vector3{ position.x, position.y, 0.0f });
 
 	// hyouji you sprite
-	sprite.Draw(DirectXCommon::GetInstance()->GetCommandList().Get());
+	sprite.Draw();
 }
 
 unsigned char* Text::getImage() {

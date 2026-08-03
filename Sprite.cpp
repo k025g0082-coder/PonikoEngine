@@ -239,7 +239,9 @@ void Sprite::UpdateMatrix() {
 
 	*mvpData = Multiply(worldMatrix, projectionMatrix);
 };
-void Sprite::Draw(ID3D12GraphicsCommandList* commandList) {
+void Sprite::Draw() {
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
 
 	//RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Sprite).rootSignature);
