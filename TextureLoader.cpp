@@ -12,7 +12,7 @@ DirectX::ScratchImage TextureLoader::LoadTexture(const std::string& filePath) {
 	// 存在しない場合はデフォルトテクスチャ
 	if (FAILED(hr))
 	{
-		hr = DirectX::LoadFromWICFile(L"resources/default.png", DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+		hr = DirectX::LoadFromWICFile(L"resources/Engine/default.png", DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	}
 
 	assert(SUCCEEDED(hr));

@@ -1,4 +1,4 @@
-#include "resources/Shader/Model.hlsli"
+#include "resources/Engine/Shader/Model.hlsli"
 
 Texture2D<float4> texture0 : register(t0);
 SamplerState gSampler : register(s0);

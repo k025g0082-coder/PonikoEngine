@@ -37,11 +37,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 	//=== スプライト
 	Sprite sprite;
-	sprite.Initialize("resources/uvChecker.png");
+	sprite.Initialize("resources/Engine/uvChecker.png");
 	sprite.SetPos({ 0.0f, 0.0f, 0.0f });
 
 	// フォント登録
-	Text::RegisterFont("LINESeedJP_TTF_Bd", "resources/Fonts/LINESeedJP_TTF_Bd.ttf", 32, 32);
+	Text::RegisterFont("LINESeedJP_TTF_Bd", "resources/Engine/default.ttf", 32, 32);
 
 
 	// ===テキスト

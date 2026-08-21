@@ -1,5 +1,5 @@
 
-#include "resources/Shader/Sprite.hlsli"
+#include "resources/Engine/Shader/Sprite.hlsli"
 
 // 移動・拡大・回転などの頂点情報
 struct TransformationMatrix

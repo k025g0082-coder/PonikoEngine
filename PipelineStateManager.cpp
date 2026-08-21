@@ -141,14 +141,14 @@ void PipelineStateManager::createSpritePipeline() {
 	//裏面(時計回り)を表示しない
 	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	//三角形の中を塗りつぶす
-	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;;
 
 	//Shaderをコンパイルする
-	IDxcBlob* vertexShaderBlob = dxcCompiler_.CompileShader(L"resources/Shader/Sprite.VS.hlsl",
+	IDxcBlob* vertexShaderBlob = dxcCompiler_.CompileShader(L"resources/Engine/Shader/Sprite.VS.hlsl",
 		L"vs_6_0", dxcCompiler_.GetIDxcUtils(), dxcCompiler_.GetDxcCompiler(), dxcCompiler_.GetIncludeHandler());
 	assert(vertexShaderBlob != nullptr);
 
-	IDxcBlob* pixelShaderBlob = dxcCompiler_.CompileShader(L"resources/Shader/Sprite.PS.hlsl",
+	IDxcBlob* pixelShaderBlob = dxcCompiler_.CompileShader(L"resources/Engine/Shader/Sprite.PS.hlsl",
 		L"ps_6_0", dxcCompiler_.GetIDxcUtils(), dxcCompiler_.GetDxcCompiler(), dxcCompiler_.GetIncludeHandler());
 	assert(pixelShaderBlob != nullptr);
 
@@ -286,11 +286,11 @@ void PipelineStateManager::createTrianglePipeline() {
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	//Shaderをコンパイルする
-	IDxcBlob* vertexShaderBlob = dxcCompiler_.CompileShader(L"./resources/Shader/Sprite.VS.hlsl",
+	IDxcBlob* vertexShaderBlob = dxcCompiler_.CompileShader(L"./resources/Engine/Shader/Sprite.VS.hlsl",
 		L"vs_6_0", dxcCompiler_.GetIDxcUtils(), dxcCompiler_.GetDxcCompiler(), dxcCompiler_.GetIncludeHandler());
 	assert(vertexShaderBlob != nullptr);
 
-	IDxcBlob* pixelShaderBlob = dxcCompiler_.CompileShader(L"./resources/Shader/Sprite.PS.hlsl",
+	IDxcBlob* pixelShaderBlob = dxcCompiler_.CompileShader(L"./resources/Engine/Shader/Sprite.PS.hlsl",
 		L"ps_6_0", dxcCompiler_.GetIDxcUtils(), dxcCompiler_.GetDxcCompiler(), dxcCompiler_.GetIncludeHandler());
 	assert(pixelShaderBlob != nullptr);
 
@@ -444,11 +444,11 @@ void PipelineStateManager::createModelPipeline(){
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	//Shaderをコンパイルする
-	IDxcBlob* vertexShaderBlob = dxcCompiler_.CompileShader(L"./resources/Shader/Model.VS.hlsl",
+	IDxcBlob* vertexShaderBlob = dxcCompiler_.CompileShader(L"./resources/Engine/Shader/Model.VS.hlsl",
 		L"vs_6_0", dxcCompiler_.GetIDxcUtils(), dxcCompiler_.GetDxcCompiler(), dxcCompiler_.GetIncludeHandler());
 	assert(vertexShaderBlob != nullptr);
 
-	IDxcBlob* pixelShaderBlob = dxcCompiler_.CompileShader(L"./resources/Shader/Model.PS.hlsl",
+	IDxcBlob* pixelShaderBlob = dxcCompiler_.CompileShader(L"./resources/Engine/Shader/Model.PS.hlsl",
 		L"ps_6_0", dxcCompiler_.GetIDxcUtils(), dxcCompiler_.GetDxcCompiler(), dxcCompiler_.GetIncludeHandler());
 	assert(pixelShaderBlob != nullptr);
 

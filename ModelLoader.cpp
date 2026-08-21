@@ -147,7 +147,7 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
 
         // デフォの画像パス
         // 512x512以上の、UVマップのモデルだとエラるかも。
-        modelData.material.textureFilePath = "resources/default.png";
+        modelData.material.textureFilePath = "resources/Engine/default.png";
     
     }
 
