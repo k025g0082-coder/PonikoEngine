@@ -3,7 +3,7 @@
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 {
 
-	PonikoEngine::Initialize(L"ぽにこエンジン");
+	PonikoEngine::Initialize(L"ぽにこエンジンn");
 
 
 	// ===カメラ設定
@@ -28,11 +28,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 	// ===モデル生成
 	Model* model = Model::CreateOBJ("resources/Models/test/Capoeira.fbx");
-	model->SetCamera(&camera);
 	model->SetLight(&light);    // ライト設定
 
 	Model* model2 = Model::CreateOBJ("resources/Models/rail/rail.obj");
-	model2->SetCamera(&camera);
 	model2->SetLight(&light);   // ライト設定
 
 	//=== スプライト
@@ -61,23 +59,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 			model->Update();
 			model2->Update();
 
-			sprite.Update();
-
-			text.Render();
-
 	#ifdef USE_IMGUI
 
-			ImGui::DragFloat3("model-pos", &model->GetWorldTransform().translate.x, 0.5f, 0.0f);
-			ImGui::DragFloat3("model-rot", &model->GetWorldTransform().rotate.x, 0.1f, 0.0f);
-			ImGui::DragFloat3("model-sc ", &model->GetWorldTransform().scale.x, 0.5f, 0.0f);
+			//ImGui::DragFloat3("model-pos", &model->GetWorldTransform().translation_.x, 0.5f, 0.0f);
+			//ImGui::DragFloat3("model-rot", &model->GetWorldTransform().rotation_.x, 0.1f, 0.0f);
+			//ImGui::DragFloat3("model-sc ", &model->GetWorldTransform().scale_.x, 0.5f, 0.0f);
 
-			ImGui::DragFloat3("model2-pos", &model2->GetWorldTransform().translate.x, 0.5f, 0.0f);
-			ImGui::DragFloat3("model2-rot", &model2->GetWorldTransform().rotate.x, 0.5f, 0.0f);
-			ImGui::DragFloat3("model2-sc ", &model2->GetWorldTransform().scale.x, 0.5f, 0.0f);
+			//ImGui::DragFloat3("model2-pos", &model2->GetWorldTransform().translation_.x, 0.5f, 0.0f);
+			//ImGui::DragFloat3("model2-rot", &model2->GetWorldTransform().rotation_.x, 0.5f, 0.0f);
+			//ImGui::DragFloat3("model2-sc ", &model2->GetWorldTransform().scale_.x, 0.5f, 0.0f);
 
-			ImGui::DragFloat4("lightColor", &light.GetLightData()->color.x, 0.5f, 0.0f);
-			ImGui::DragFloat3("lightDIrection", &light.GetLightData()->direction.x, 0.1f, 0.0f);
-			ImGui::DragFloat("lightIntensity", &light.GetLightData()->intensity, 0.5f, 0.0f);
+			//ImGui::DragFloat4("lightColor", &light.GetLightData()->color.x, 0.5f, 0.0f);
+			//ImGui::DragFloat3("lightDIrection", &light.GetLightData()->direction.x, 0.1f, 0.0f);
+			//ImGui::DragFloat("lightIntensity", &light.GetLightData()->intensity, 0.5f, 0.0f);
 
 	#endif
 
@@ -87,8 +81,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 		// 描画
 		DirectXCommon::GetInstance()->PreDraw();
 
-			model->Draw();
-			model2->Draw();
+			model->Draw(camera);
+			//model2->Draw(camera);
 
 			sprite.Draw();
 

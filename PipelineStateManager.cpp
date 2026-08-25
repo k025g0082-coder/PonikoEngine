@@ -351,7 +351,7 @@ void PipelineStateManager::createModelPipeline(){
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
 	// RootParameterの設定(追加時は随時長さを足す）
-	D3D12_ROOT_PARAMETER rootParameters[5] = {};
+	D3D12_ROOT_PARAMETER rootParameters[6] = {};
 
 	// 色
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -377,6 +377,12 @@ void PipelineStateManager::createModelPipeline(){
 	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[4].Descriptor.ShaderRegister = 2;
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	// アニメ有り無し
+	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[5].Descriptor.ShaderRegister = 3;
+	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
 
 	descriptionRootSignature.pParameters = rootParameters;
 	descriptionRootSignature.NumParameters = _countof(rootParameters);

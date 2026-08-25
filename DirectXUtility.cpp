@@ -145,5 +145,6 @@ namespace DirectXUtility
 
 		va_end(args);
 		OutputDebugStringA(buffer);
+
 	}
 }

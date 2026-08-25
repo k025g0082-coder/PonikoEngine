@@ -12,6 +12,7 @@
 #include "Model.h"
 #include "Text.h"
 
+#include "GamePad.h"
 
 
 namespace PonikoEngine {
@@ -26,4 +27,9 @@ namespace PonikoEngine {
 	/// エンジンの終了処理
 	/// </summary>
 		void Finalize();
+
+		/// <summary>
+	/// エンジンのUpdate
+	/// </summary>
+		void Update();
 };

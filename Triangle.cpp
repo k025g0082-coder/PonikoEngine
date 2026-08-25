@@ -13,9 +13,9 @@ void Triangle::Initialize()
 {
 	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
 
-	worldTransform_.translate = { 0.0f,0.0f,0.0f };
-	worldTransform_.rotate = { 0.0f,0.0f,0.0f };
-	worldTransform_.scale = { 1.0f,1.0f,1.0f };
+	worldTransform_.translation_ = { 0.0f,0.0f,0.0f };
+	worldTransform_.rotation_ = { 0.0f,0.0f,0.0f };
+	worldTransform_.scale_ = { 1.0f,1.0f,1.0f };
 
 	//頂点リソース用のヒープ
 	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
@@ -91,10 +91,10 @@ void Triangle::Initialize()
 void Triangle::Update() {
 
 	// 回すだけ
-	worldTransform_.rotate.y += 0.03f;
+	worldTransform_.rotation_.y += 0.03f;
 
 	// 合成
-	Matrix4x4 worldMatrix = MakeAffineMatrix(worldTransform_.scale, worldTransform_.rotate, worldTransform_.translate);
+	Matrix4x4 worldMatrix = MakeAffineMatrix(worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);
 
 	// カメラのと合成して計算
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(camera_->GetViewMatrix(), camera_->GetProjectionMatrix()));

@@ -37,21 +37,22 @@ struct MaterialData {
 	std::string textureFilePath;
 };
 
-struct TransformationMatrix {
-
-	Matrix4x4 WVP;
-	Matrix4x4 World;
+// アニメ有り無し
+struct ModelSkinningParam {
 
 	int32_t isSkinning;// アニメ有り無しフラグ
-	Vector3 padding;
+	float padding[3];
 };
 
 struct ModelData {
 
 	std::vector<ModelVertexData> vertices;  // 頂点データ
 	std::vector<uint32_t> indices;			// 管理番号(面数削減などのため？)
-	MaterialData material;
 
+	MaterialData materials;   // マテリアル
+
+	//std::vector <MaterialData> materials;   // 複数対応マテリアル
+	// 
 	// ボーン
 	std::vector<Bone> bones;
 
@@ -78,7 +79,8 @@ public:
 
 	void Initialize();
 	void Update(float deltaTime = 1.0f);
-	void Draw();
+	void Draw(Camera camera);
+	void Draw(WorldTransform& world,Camera camera);
 
 	// アニメ更新
 	void UpdateAnimation();
@@ -145,14 +147,24 @@ public:
 		return result;
 	}
 
-	// 描画に使うカメラ設定
-	void SetCamera(Camera* camera) { camera_ = camera; }
-
 	// 光源登録
-	void SetLight(DirectionalLight* light) { light_ = light; }
+	void SetLight(DirectionalLight* light) { 
 
+		light_ = light;
 
-	WorldTransform& GetWorldTransform() { return worldTransform_; }
+		// ライト設定をONに
+		materialData->enableLighting = true;
+	}
+
+	// アニメ番号変更
+	void ChangeAnimeIndex(int index) {
+		
+		if (index < modelData.animations.size()) {
+			animationIndex_ = index;
+			animationTime_ = 0;
+		};
+	}
+
 private:
 
 	// モデル読み取り関数
@@ -185,26 +197,29 @@ private:
 
 	// スキニングデータ転送用の
 	Microsoft::WRL::ComPtr<ID3D12Resource> skinningResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> skinningParamResource_;
 
 	SkinningData* skinningData_ = nullptr;
+	ModelSkinningParam* skinningParam = nullptr;
+
+	// WorldTransform,扱いやすくメンバ変数のほう
+	WorldTransform worldTransform_;
+
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 
 	// テクスチャ
 	Texture texture;
 
-	// SRT
-	WorldTransform worldTransform_;
 
-	// カメラ
-	Camera* camera_;
+	Material* materialData = nullptr;
 
 	// Directional（直線）ライト
 	DirectionalLight* light_;
 
 	//0202 mvp用のリソース作り
-	TransformationMatrix* mvpData = nullptr;
-	ID3D12Resource* wvpResource = nullptr;
+	//TransformationMatrix* mvpData = nullptr;
+	//ID3D12Resource* wvpResource = nullptr;
 
 	ID3D12Resource* indexResource;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView{};

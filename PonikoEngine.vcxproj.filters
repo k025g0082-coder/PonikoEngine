@@ -124,6 +124,9 @@
     <ClCompile Include="Bone.cpp">
       <Filter>Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="GamePad.cpp">
+      <Filter>Source\ソース ファイル\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -153,14 +156,8 @@
     <ClInclude Include="PipelineStateManager.h">
       <Filter>Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Vector.h">
-      <Filter>Source\ソース ファイル\math</Filter>
-    </ClInclude>
     <ClInclude Include="Matrix.h">
       <Filter>Source\ヘッダー ファイル\math</Filter>
-    </ClInclude>
-    <ClInclude Include="WorldTransform.h">
-      <Filter>Source\ソース ファイル\math</Filter>
     </ClInclude>
     <ClInclude Include="TextureLoader.h">
       <Filter>Source\ヘッダー ファイル\Graphics</Filter>
@@ -224,6 +221,21 @@
     </ClInclude>
     <ClInclude Include="Bone.h">
       <Filter>Source\ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePad.h">
+      <Filter>Source\ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>Source\ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldTransform.h">
+      <Filter>Source\ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenTransform.h">
+      <Filter>Source\ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -28,11 +28,6 @@ void Text::Init() {
 	sprite.TextTextureInitialize(image, width, height);
 }
 
-void Text::Render() {
-	// おい
-	sprite.Update();
-}
-
 // フォント設定
 bool Text::setFont(const std::string& fontName)
 {

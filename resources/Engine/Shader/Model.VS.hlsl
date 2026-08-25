@@ -1,15 +1,24 @@
 
 #include "resources/Engine/Shader/Model.hlsli"
 
+// WVP
 struct TransformationMatrix
 {
     float4x4 WVP;
     float4x4 World;
-    
+   
+};
+
+// アニメ有り無し
+struct ModelSkinningParam
+{
     int isSkinning;
+    float3 padding;
+   
 };
 
 ConstantBuffer<TransformationMatrix> gTransformationMatrix : register( b0 );
+ConstantBuffer<ModelSkinningParam> gModelSkinningParam : register( b3 ); // b数字はﾊﾟｲﾌﾟﾗｲﾝの数字と一致させるように
 
 // なんでかっこ？ｗ
 cbuffer Skinning : register(b2)
@@ -45,7 +54,7 @@ VeltexShaderOutput main( VertexShaderInput input )
     VeltexShaderOutput output;
     
     // アニメありなら
-    if (gTransformationMatrix.isSkinning != 0)
+    if (gModelSkinningParam.isSkinning != 0)
     {
         // ボーンの情報をもとに計算？
     

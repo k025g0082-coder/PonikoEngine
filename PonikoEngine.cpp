@@ -41,6 +41,13 @@ namespace PonikoEngine {
 		// Imgui初期化
 		ImGuiManager::GetInstance()->Initialize();
 
+		// いんぷと
+		GamePad::GetInstance()->Initialize();
+
+	};
+
+	void Update() {
+		GamePad::GetInstance()->Update();
 	};
 
 	void Finalize() {

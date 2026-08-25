@@ -16,7 +16,6 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
     unsigned int flag;
     flag = aiProcess_Triangulate |
         aiProcess_GenNormals |
-        aiProcess_GlobalScale |
         aiProcess_LimitBoneWeights | 
         aiProcess_FlipUVs;                 // 必要に応じて
 
@@ -122,7 +121,7 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
         }
     }
 
-    // テキスチャパス取得
+    // テキスチャ読込
     aiMaterial* material =
         scene->mMaterials[mesh->mMaterialIndex];
 
@@ -134,24 +133,48 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
         &texturePath
     ) == AI_SUCCESS)
     {
-        std::string path = texturePath.C_Str();
-
-        // cube.png -> resource/Models/ ~ に文字結合する
         std::string directory =
             meshPath.substr(0, meshPath.find_last_of("/\\"));
 
-        modelData.material.textureFilePath =
+        modelData.materials.textureFilePath =
             directory + "/" + texturePath.C_Str();
     }
-    else {
-
-        // デフォの画像パス
-        // 512x512以上の、UVマップのモデルだとエラるかも。
-        modelData.material.textureFilePath = "resources/Engine/default.png";
-    
+    else
+    {
+        // デフォルト
+        modelData.materials.textureFilePath =
+            "resources/Engine/default.png";
     }
 
+        // 複数テキスチャ対応
+  /*  modelData.materials.resize(scene->mNumMaterials);
+
     for (unsigned int i = 0; i < scene->mNumMaterials; i++)
+    {
+        aiMaterial* material = scene->mMaterials[i];
+
+        aiString texturePath;
+
+        if (material->GetTexture(
+            aiTextureType_DIFFUSE,
+            0,
+            &texturePath
+        ) == AI_SUCCESS)
+        {
+            std::string directory =
+                meshPath.substr(0, meshPath.find_last_of("/\\"));
+
+            modelData.materials[i].textureFilePath =
+                directory + "/" + texturePath.C_Str();
+        }
+        else
+        {
+            modelData.materials[i].textureFilePath =
+                "resources/Engine/default.png";
+        }
+    }*/
+
+     /* for (unsigned int i = 0; i < scene->mNumMaterials; i++)
     {
         aiMaterial* mat = scene->mMaterials[i];
 
@@ -179,7 +202,8 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
     printf("Material count : %d\n", scene->mNumMaterials);
 
     printf("Diffuse count : %d\n",
-        material->GetTextureCount(aiTextureType_DIFFUSE));
+        material->GetTextureCount(aiTextureType_DIFFUSE));*/
+
 
     // ボーンがあったら
     if (mesh->mNumBones > 0) {
@@ -209,14 +233,15 @@ ModelData ModelLoader::LoadObjModel(std::string meshPath) {
 // 骨読込　インデックス、メッシュ、格納っするvector
 void ModelLoader::LoadBones(uint32_t meshIndex, aiMesh* mesh, ModelData* modelData) {
 
+    uint32_t boneIndex = 0;
+    boneCount = 0;
+
     // メッシュに登録されてる骨ぶん
     for (uint32_t bone = 0; bone < mesh->mNumBones; bone++) {
 
         aiBone* aiBoneData = mesh->mBones[bone];
 
         std::string boneName = aiBoneData->mName.C_Str();
-
-        uint32_t boneIndex;
 
         // 同名のボーンがあるか端まで検索
         auto it = modelData->boneMap.find(boneName);
@@ -266,116 +291,6 @@ void ModelLoader::LoadBones(uint32_t meshIndex, aiMesh* mesh, ModelData* modelDa
         }
     }
 }
-//
-//void ModelLoader::LoadNode(aiNode* node, int parentIndex, ModelData* modelData) {
-//
-//    std::string boneName = node->mName.C_Str();
-//
-//    int currentParent = parentIndex;
-//
-//    auto it = modelData->boneMap.find(boneName);
-//
-//    if (it != modelData->boneMap.end())
-//    {
-//        // このノードはボーン
-//        uint32_t boneIndex = it->second;
-//
-//        if (boneIndex >= modelData->bones.size())
-//        {
-//            return;
-//        }
-//
-//        modelData->bones[boneIndex].parentIndex = parentIndex;
-//
-//        modelData->bones[boneIndex].localMatrix =
-//            ConvertMatrix(node->mTransformation);
-//
-//        // 初期姿勢
-//        modelData->bones[boneIndex].localBindMatrix = modelData->bones[boneIndex].localMatrix;
-//
-//        // 子供も登録する？
-//        if (parentIndex != -1)
-//        {
-//            modelData->bones[parentIndex].children.push_back(boneIndex);
-//        }
-//
-//        currentParent = boneIndex;
-//
-//        Vector3 pos = {
-//           modelData->bones[boneIndex].localMatrix.m[3][0],
-//            modelData->bones[boneIndex].localMatrix.m[3][1],
-//            modelData->bones[boneIndex].localMatrix.m[3][2]
-//                };
-//
-//      /*  DirectXUtility::Log("local %f %f %f\n",
-//            
-//            pos.x,
-//            pos.y,
-//            pos.z);*/
-//        DirectXUtility::Log("NODE\n");
-//        for (int r = 0; r < 4; r++)
-//        {
-//            DirectXUtility::Log("%f %f %f %f\n",
-//                modelData->bones[boneIndex].localMatrix.m[r][0],
-//                modelData->bones[boneIndex].localMatrix.m[r][1],
-//                modelData->bones[boneIndex].localMatrix.m[r][2],
-//                modelData->bones[boneIndex].localMatrix.m[r][3]);
-//        }
-//    }
-//
-//    // 子供を読むため、再帰
-//    for (uint32_t i = 0; i < node->mNumChildren; i++)
-//    {
-//        LoadNode(node->mChildren[i], currentParent, modelData);
-//    }
-//}
-
-/*
-void ModelLoader::LoadNode(aiNode* node, int parentIndex, const Matrix4x4& parentAccumulated, ModelData* modelData)
-{
-    std::string boneName = node->mName.C_Str();
-    int currentParent = parentIndex;
-
-    // このノードの変換
-    Matrix4x4 nodeMatrix = ConvertMatrix(node->mTransformation);
-
-    // 親から蓄積された変換を掛ける
-    Matrix4x4 accumulated = Multiply(nodeMatrix, parentAccumulated);  // 行ベクトル方式の場合
-
-    auto it = modelData->boneMap.find(boneName);
-    if (it != modelData->boneMap.end())
-    {
-        // このノードはボーン
-        uint32_t boneIndex = it->second;
-
-        if (boneIndex < modelData->bones.size())
-        {
-            auto& bone = modelData->bones[boneIndex];
-            bone.parentIndex = parentIndex;
-
-            // 蓄積された変換をローカル行列として使う
-            bone.localMatrix = accumulated;
-            bone.localBindMatrix = bone.localMatrix;
-
-            if (parentIndex != -1)
-            {
-                modelData->bones[parentIndex].children.push_back(boneIndex);
-            }
-
-            currentParent = static_cast<int>(boneIndex);
-
-            // ボーンになったので、蓄積をリセット（単位行列）
-            accumulated = MakeIdentity4x4();
-        }
-    }
-
-    // 子供へ（蓄積した変換を渡す）
-    for (uint32_t i = 0; i < node->mNumChildren; i++)
-    {
-        LoadNode(node->mChildren[i], currentParent, accumulated, modelData);
-    }
-}
-*/
 
 void ModelLoader::LoadNode(aiNode* node, int parentIndex, ModelData* modelData)
 {

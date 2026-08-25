@@ -22,7 +22,13 @@ Model* Model::CreateOBJ(const std::string& modelPath) {
 
 	model->modelData = ModelLoader::LoadObjModel(modelPath);
 
-	model->texture.Initialize(model->modelData.material.textureFilePath);
+	// テキスチャ読込
+	/*for (MaterialData& m : model->modelData.materials) {
+		model->texture.emplace_back();
+		model->texture.back().Initialize(m.textureFilePath);
+	}*/
+
+	model->texture.Initialize(model->modelData.materials.textureFilePath);
 
 	//頂点リソースを作る
 	model->vertexResource = DirectXUtility::CreateBufferResource(
@@ -46,183 +52,17 @@ Model* Model::CreateOBJ(const std::string& modelPath) {
 	model->Initialize();
 
 	return model;
-	//// モデル読込
-	//modelData = LoadObjFile("resources/Models", modelName + ".obj");
-
-	//// テクスチャ
-	//texture.Initialize("resources/test.png");
-
-	////頂点バッファビューを作成する
-	//vertexBufferView = {};
-	//vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();//リソースの先頭のアドレスから使う
-	//vertexBufferView.SizeInBytes = UINT(sizeof(ModelVertexData) * modelData.vertices.size());//使用するリソースのサイズは頂点のサイズ
-	//vertexBufferView.StrideInBytes = sizeof(ModelVertexData);//1頂点あたりのサイズ
-	//
-	//ModelVertexData* vertexData = nullptr;
-	//vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-
-	//std::memcpy(
-	//	vertexData,
-	//	modelData.vertices.data(),
-	//	sizeof(ModelVertexData) * modelData.vertices.size()
-	//);
-
-	
-
-
 }
-
-ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string& filename)
-{
-
-	//1.中で必要となる変数の宣言
-
-	ModelData modelData;//構築するModelData
-	std::vector<Vector4> positions;// 位置
-	std::vector<Vector3> normals;//法線
-	std::vector<Vector2> texcoords;//テクスチャ座標
-	std::string line;//ファイルから読んだ1行を格納するもの
-
-	//2.ファイルを開く
-	std::ifstream file(directoryPath + "/" + filename); // ファイルを開く
-	assert(file.is_open()); //とりあえず開けなかったら止める
-
-	//3.実際にファイルを読み、ModelDataを構築していく
-
-	while (std::getline(file, line)) {
-
-		std::string identifier;
-		std::istringstream s(line);
-
-		s >> identifier;//先頭の識別子を読む
-
-		if (identifier == "v") {
-			Vector4 position;
-			s >> position.x >> position.y >> position.z;
-			position.x *= -1.0f; // 右手系から左へ
-			position.w = 1.0f;
-			positions.push_back(position);
-		}
-		else if (identifier == "vt") {
-			Vector2 texcoord;
-			s >> texcoord.x >> texcoord.y;
-
-			texcoord.y = 1.0f - texcoord.y;   // UVのYを反転（右手→左手対応）
-
-			texcoords.push_back(texcoord);
-		}
-		else if (identifier == "vn") {
-			Vector3 normal;
-			s >> normal.x >> normal.y >> normal.z;
-
-			normal.x *= -1.0f; // 右手系から左へ
-
-			normals.push_back(normal);
-		}
-		else if (identifier == "f") {
-
-			ModelVertexData triangle[3];
-
-			//面は三角形限定。その他は未対応
-			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
-				std::string vertexDefinition;
-				s >> vertexDefinition;
-				//頂点の要素へのIndexは「位置/UV/法線」で格納されているので、分解してIndexを取得す
-				std::istringstream v(vertexDefinition);
-				uint32_t elementIndices[3];
-				for (int32_t element = 0; element < 3; ++element) {
-					std::string index;
-					std::getline(v, index, '/');///区切りでインデックスを読んでいく
-					elementIndices[element] = std::stoi(index);
-				}
-				//要素へのIndexから、実際の要素の値を取得して、頂点を構築する
-				Vector4 position = positions[elementIndices[0] - 1];
-				Vector2 texcoord = texcoords[elementIndices[1] - 1];
-				Vector3 normal = normals[elementIndices[2] - 1];
-				//VertexData vertex = { position, texcoord, normal };
-				//modelData.vertices.push_back(vertex);
-
-				triangle[faceVertex] = { position, texcoord, normal };
-			}
-
-			// 頂点を逆で登録
-			modelData.vertices.push_back(triangle[2]);
-			modelData.vertices.push_back(triangle[1]);
-			modelData.vertices.push_back(triangle[0]);
-
-		}
-		else if (identifier == "mtllib") {
-			//materialTemplateLibraryファイルの名前を取得する
-			std::string materialFilename;
-			s >> materialFilename;
-			//基本的にobjファイルと同一階層にmtlは存在させるので、ディレクトリ名とファイル名を渡す
-			modelData.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
-		}
-
-	}
-
-	//4.ModelDataを返す
-	return modelData;
-};
-
-MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
-
-	MaterialData materialData; //構築するMaterialData
-	std::string line;//ファイルから読んだ1行を格納するもの
-	std::ifstream file(directoryPath + "/" + filename); //ファイルを開く
-	assert(file.is_open()); //とりあえず開けなかったら止める
-
-	while (std::getline(file, line)) {
-		std::string identifier;
-		std::istringstream s(line);
-		s >> identifier;
-
-		//identifierに応じた処理
-		if (identifier == "map_Kd") {
-			std::string textureFilename;
-			s >> textureFilename;
-			//連結してファイルパスにする
-			materialData.textureFilePath = directoryPath + textureFilename;
-
-		}
-	}
-	return materialData;
-}
-
-//static void PreDraw();
-//static void PostDraw();
 
 void Model::Initialize(){
-
-	// WorldViewProjection用のリソース
-	wvpResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(TransformationMatrix));
-
-	//書き込むためのアドレスを取得
-	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&mvpData));
-	//単位行列を書きこんでおく
-	*mvpData = { MakeIdentity4x4(),MakeIdentity4x4()};
-
-	// アニメ有り無しフラグ
-	if (modelData.isSkinning) {
-		mvpData->isSkinning = 1;
-	}
-	else {
-		mvpData->isSkinning = 0;
-	}
 
 	// マテリアル用のリソース
 	materialResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(Material));
 
-	Material* materialData = nullptr;
-
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	materialData->color = { 1.0f,1.0f,1.0f,1.0f }; // 白色
-	materialData->enableLighting = true; // ライティングはOFFにする
+	materialData->enableLighting = false; // ライティングはOFFにする
 	materialData->uvTransform = MakeIdentity4x4();
-
-	worldTransform_.translate = { 0.0f,0,0 };
-	worldTransform_.rotate = { 0,0,0 };
-	worldTransform_.scale = { 1.0f,1.0f,1.0f };
 
 	// 頂点データ
 	indexResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(uint32_t) * modelData.indices.size());
@@ -265,6 +105,25 @@ void Model::Initialize(){
 			reinterpret_cast<void**>(&skinningData_));
 
 	}
+
+	skinningParamResource_ =
+		DirectXUtility::CreateBufferResource(
+			DirectXCommon::GetInstance()->GetDevice().Get(),
+			sizeof(ModelSkinningParam)
+		);
+
+	skinningParamResource_->Map(
+		0,
+		nullptr,
+		reinterpret_cast<void**>(&skinningParam)
+	);
+
+	// アニメ有り無し
+	skinningParam->isSkinning =
+		modelData.isSkinning ? 1 : 0;
+	
+	worldTransform_.Initialize();
+	worldTransform_.UpdateMatrix();
 
 	// これがrootSignatureをたどってッパイプラインのレイアウトから情報を読み取られるのだーーーーーーーーー
 }
@@ -324,12 +183,7 @@ void Model::Update(float deltaTime){
 	////	if (i >= 20) break; // 最初の20頂点だけ
 	//}
 
-	Matrix4x4 worldMatrix = MakeAffineMatrix(worldTransform_.scale, worldTransform_.rotate, worldTransform_.translate);
-
-	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(camera_->GetViewMatrix(), camera_->GetProjectionMatrix()));
-
-	mvpData->WVP = worldViewProjectionMatrix;
-	mvpData->World = worldMatrix;
+	/*Matrix4x4 worldMatrix = MakeAffineMatrix(worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);*/
 
 }
 
@@ -753,7 +607,14 @@ Vector4 Model::SampleRotation(NodeAnimation& nodeAnim, float currentTick)
 	return result;
 }
 
-void Model::Draw(){
+
+void Model::Draw(Camera camera) {
+
+	Matrix4x4 worldViewProjectionMatrix = Multiply(worldTransform_.matWorld_, Multiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
+
+	worldTransform_.mvpData_->World = worldTransform_.matWorld_;
+	worldTransform_.mvpData_->WVP = worldViewProjectionMatrix;
+
 
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
 
@@ -770,11 +631,68 @@ void Model::Draw(){
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-	commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(1, worldTransform_.GetWvpResource()->GetGPUVirtualAddress());
 
 	if (light_ != nullptr) {
 		commandList->SetGraphicsRootConstantBufferView(3, light_->GetResource()->GetGPUVirtualAddress());
 	}
+
+	commandList->SetGraphicsRootConstantBufferView(5, skinningParamResource_->GetGPUVirtualAddress());
+
+	ID3D12DescriptorHeap* heaps[] = {
+	DirectXCommon::GetInstance()->GetSrvHeap().Get()
+	};
+
+	commandList->SetDescriptorHeaps(1, heaps);
+
+	// MaterialDataの番号とtexture配列の番号が同じなら
+	//const Texture& tex =
+	//	texture[mesh.materialIndex];
+
+	// SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
+	commandList->SetGraphicsRootDescriptorTable(2, texture.GetTextureSrvHandleGPU());
+
+	// もしアニメがあったら
+	if (modelData.isSkinning) {
+		commandList->SetGraphicsRootConstantBufferView(
+			4,
+			skinningResource_->GetGPUVirtualAddress());
+	}
+
+	commandList->DrawIndexedInstanced(static_cast<UINT>(modelData.indices.size()), 1, 0, 0, 0);
+}
+
+
+void Model::Draw(WorldTransform& world,Camera camera){
+
+	Matrix4x4 worldViewProjectionMatrix = Multiply(world.matWorld_, Multiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
+
+	world.mvpData_->World = world.matWorld_;
+	world.mvpData_->WVP = worldViewProjectionMatrix;
+
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
+
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+
+	//RootSignatureを設定。PSOに設定しているけど別途設定が必要
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Model).rootSignature);
+	// PSOを設定
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Model).graphicsPipelineState);
+
+
+	commandList->IASetIndexBuffer(&indexBufferView);
+
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(1, world.GetWvpResource()->GetGPUVirtualAddress());
+
+	if (light_ != nullptr) {
+		commandList->SetGraphicsRootConstantBufferView(3, light_->GetResource()->GetGPUVirtualAddress());
+	}
+
+	commandList->SetGraphicsRootConstantBufferView(5, skinningParamResource_->GetGPUVirtualAddress());
 
 	ID3D12DescriptorHeap* heaps[] = {
 	DirectXCommon::GetInstance()->GetSrvHeap().Get()

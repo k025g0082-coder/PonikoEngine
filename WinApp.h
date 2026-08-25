@@ -17,6 +17,7 @@ public:
 	void Finalize();
 
 	HWND GetHWND() const{ return hwnd_; }
+	WNDCLASS GetWNDCLASS() const { return wc_; };
 
 	int32_t GetClientWidth() const { return clientWidth; }
 	int32_t GetClientHeight() const { return clientHeight; }

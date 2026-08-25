@@ -20,9 +20,6 @@ public:
 	// 使うフォント名
 	void Init();
 
-	// 常に更新
-	void Render();
-
 	// フォント設定
 	bool setFont(const std::string& fontName);
 
