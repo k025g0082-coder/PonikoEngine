@@ -210,7 +210,7 @@ private:
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 
 	// テクスチャ
-	Texture texture;
+	Texture* texture = nullptr;
 
 
 	Material* materialData = nullptr;

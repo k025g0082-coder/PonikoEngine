@@ -29,6 +29,26 @@ public:
 	// farZ(必ずInitialize前に書く)
 	float farZ = 100.0f;
 
+
+	// カメラの前方向をとる（方向ベクトル）
+	Vector3 GetForward() const
+	{
+		Matrix4x4 worldMatrix =
+			MakeAffineMatrix(
+				worldTransform_.scale_,
+				worldTransform_.rotation_,
+				worldTransform_.translation_
+			);
+
+		Vector3 forward{
+			worldMatrix.m[2][0],
+			worldMatrix.m[2][1],
+			worldMatrix.m[2][2]
+		};
+
+		return Normalize(forward);
+	}
+
 private:
 
 	// 初期カメラ位置

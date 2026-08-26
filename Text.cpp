@@ -5,6 +5,9 @@
 #include "DirectXUtility.h"
 #include "DirectXCommon.h"
 
+#include <codecvt>
+#include <locale>
+
 std::map<std::string, Text::FontData> Text::fonts;
 FT_Library Text::library = nullptr;
 
@@ -84,6 +87,22 @@ bool Text::RegisterFont(std::string fontName, const char* font_file_name, int ch
 
 	return !error;
 }
+
+
+void Text::SetFontSize(int size)
+{
+	if (!font)
+		return;
+
+	FT_Set_Char_Size(
+		font->face,
+		0,
+		size * 64,
+		300,
+		300
+	);
+}
+
 
 // 文字列描画
 void Text::drawString(const std::u32string& text, Vector2 position, TextAnchor anchor) {
@@ -200,4 +219,10 @@ void Text::draw_bitmap(int x, int y)
 			image[index + 3] = alpha; // A
 		}
 	}
+}
+
+std::u32string ToU32String(const std::string& str)
+{
+	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
+	return converter.from_bytes(str);
 }

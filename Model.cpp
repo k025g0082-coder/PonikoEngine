@@ -41,7 +41,13 @@ Model* Model::Clone() const
 	// WorldTransform
 	// =========================
 
-	clone->worldTransform_ = worldTransform_;
+	// Resourceとかいろいろあるので初期化してSRT入れる
+	clone->worldTransform_.Initialize();
+
+	clone->worldTransform_.translation_ = worldTransform_.translation_;
+	clone->worldTransform_.rotation_ = worldTransform_.rotation_;
+	clone->worldTransform_.scale_ = worldTransform_.scale_;
+
 
 	// =========================
 	// ライト
@@ -102,13 +108,8 @@ Model* Model::CreateOBJ(const std::string& modelPath) {
 
 	model->modelData = ModelLoader::LoadObjModel(modelPath);
 
-	// テキスチャ読込
-	/*for (MaterialData& m : model->modelData.materials) {
-		model->texture.emplace_back();
-		model->texture.back().Initialize(m.textureFilePath);
-	}*/
-
-	model->texture.Initialize(model->modelData.materials.textureFilePath);
+	model ->texture = new Texture();
+	model->texture->Initialize(model->modelData.materials.textureFilePath);
 
 	//頂点リソースを作る
 	model->vertexResource = DirectXUtility::CreateBufferResource(
@@ -730,7 +731,7 @@ void Model::Draw(Camera camera) {
 	//	texture[mesh.materialIndex];
 
 	// SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
-	commandList->SetGraphicsRootDescriptorTable(2, texture.GetTextureSrvHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(2, texture->GetTextureSrvHandleGPU());
 
 	// もしアニメがあったら
 	if (modelData.isSkinning) {
@@ -781,7 +782,7 @@ void Model::Draw(WorldTransform& world,Camera camera){
 	commandList->SetDescriptorHeaps(1, heaps);
 
 	// SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
-	commandList->SetGraphicsRootDescriptorTable(2, texture.GetTextureSrvHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(2, texture->GetTextureSrvHandleGPU());
 
 	// もしアニメがあったら
 	if (modelData.isSkinning) {

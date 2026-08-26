@@ -23,6 +23,9 @@ public:
 	// フォント設定
 	bool setFont(const std::string& fontName);
 
+	// 文字サイズ変更
+	void SetFontSize(int size);
+
 	// 文字のスタイル
 	enum class TextAnchor {
 		LeftTop,
