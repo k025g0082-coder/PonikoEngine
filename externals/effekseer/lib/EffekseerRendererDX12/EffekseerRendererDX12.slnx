@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Solution>
+	<Configurations>
+		<BuildType Name="Debug"/>
+		<BuildType Name="Release"/>
+		<BuildType Name="MinSizeRel"/>
+		<BuildType Name="RelWithDebInfo"/>
+		<Platform Name="x64"/>
+	</Configurations>
+	<Project Path="../3rdParty/LLGI/src/DX12MipmapShaderCompiler/LLGI_DX12MipmapShaderCompiler.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="ee8a0182-b002-3ce4-97c8-95e2674c3565">
+		<BuildDependency Project="../../ZERO_CHECK.vcxproj"/>
+	</Project>
+	<Folder Name="/CMakePredefinedTargets/">
+		<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="855cde5f-e634-3ca4-abae-1160a6cab75d" DefaultStartup="true">
+			<BuildDependency Project="EffekseerRendererDX12.vcxproj"/>
+			<BuildDependency Project="../../ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="INSTALL.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="1261dfee-7d2d-34d8-9756-7ef4b2100c1f">
+			<BuildDependency Project="ALL_BUILD.vcxproj"/>
+			<BuildDependency Project="../../ZERO_CHECK.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+			<Build Solution="MinSizeRel|*" Project="false"/>
+			<Build Solution="RelWithDebInfo|*" Project="false"/>
+		</Project>
+		<Project Path="../../ZERO_CHECK.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="afbf0401-4ffe-3cc6-82c4-adfb244c3aed"/>
+	</Folder>
+	<Folder Name="/Libraries/">
+		<Project Path="../Effekseer/Effekseer.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="456b8844-d722-3650-a2dc-4baeb8a9b583">
+			<BuildDependency Project="../../ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="../EffekseerRendererCommon/EffekseerRendererCommon.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="5a965416-4617-3ff0-8748-487b8aa3988a">
+			<BuildDependency Project="../Effekseer/Effekseer.vcxproj"/>
+			<BuildDependency Project="../../ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="EffekseerRendererDX12.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="75851998-3abb-3c09-a524-53f2b90979dd">
+			<BuildDependency Project="../Effekseer/Effekseer.vcxproj"/>
+			<BuildDependency Project="../EffekseerRendererCommon/EffekseerRendererCommon.vcxproj"/>
+			<BuildDependency Project="../EffekseerRendererLLGI/EffekseerRendererLLGI.vcxproj"/>
+			<BuildDependency Project="../3rdParty/LLGI/src/LLGI.vcxproj"/>
+			<BuildDependency Project="../../ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="../EffekseerRendererLLGI/EffekseerRendererLLGI.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="71b6c25b-17f1-3db5-999b-0c3a22716b87">
+			<BuildDependency Project="../Effekseer/Effekseer.vcxproj"/>
+			<BuildDependency Project="../EffekseerRendererCommon/EffekseerRendererCommon.vcxproj"/>
+			<BuildDependency Project="../3rdParty/LLGI/src/LLGI.vcxproj"/>
+			<BuildDependency Project="../../ZERO_CHECK.vcxproj"/>
+		</Project>
+	</Folder>
+	<Folder Name="/Thirdparty/">
+		<Project Path="../3rdParty/LLGI/src/LLGI.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="96b3b7b5-776d-36c1-991a-52131df80720">
+			<BuildDependency Project="../3rdParty/LLGI/src/DX12MipmapShaderCompiler/LLGI_DX12MipmapShaderCompiler.vcxproj"/>
+			<BuildDependency Project="../../ZERO_CHECK.vcxproj"/>
+		</Project>
+	</Folder>
+</Solution>

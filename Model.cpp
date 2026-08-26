@@ -14,6 +14,86 @@
 
 #include <fstream>
 #include <sstream>
+Model* Model::Clone() const
+{
+	Model* clone = new Model();
+
+	// =========================
+	// CPU側のモデルデータ
+	// =========================
+
+	// 頂点・インデックス・ボーン・アニメーション等
+	// 読み込み済みデータをコピー
+	clone->modelData = modelData;
+
+	// =========================
+	// アニメーション状態
+	// =========================
+
+	clone->animationTime_ = 0.0f;
+	clone->animationIndex_ = animationIndex_;
+	clone->isLoop_ = isLoop_;
+
+	// ボーン行列は個体ごと
+	clone->boneMatrices_ = boneMatrices_;
+
+	// =========================
+	// WorldTransform
+	// =========================
+
+	clone->worldTransform_ = worldTransform_;
+
+	// =========================
+	// ライト
+	// =========================
+
+	clone->light_ = light_;
+
+	// =========================
+	// GPUリソース
+	// =========================
+
+	// 頂点バッファ
+	clone->vertexResource = vertexResource;
+
+	// Material
+	clone->materialResource = materialResource;
+
+	// IndexBuffer
+	clone->indexResource = indexResource;
+
+	// これらは同じGPUリソースを参照してOK
+	clone->vertexBufferView = vertexBufferView;
+	clone->indexBufferView = indexBufferView;
+
+	// =========================
+	// テクスチャ
+	// =========================
+
+	clone->texture = texture;
+
+	// =========================
+	// Material
+	// =========================
+
+	if (materialData)
+	{
+		clone->materialData = new Material(*materialData);
+	}
+
+	// =========================
+	// スキニング用GPUリソース
+	// =========================
+
+	// ここは共有しない！
+	// 敵ごとに別のボーン行列を書き込むため。
+
+
+	// GPUリソース生成＋materialData生成
+	clone->Initialize();
+
+	return clone;
+}
 
 // 静的メンバ関数
 Model* Model::CreateOBJ(const std::string& modelPath) {

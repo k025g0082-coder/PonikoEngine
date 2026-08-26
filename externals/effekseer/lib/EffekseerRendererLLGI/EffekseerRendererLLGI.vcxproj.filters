@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\Common.cpp">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.GpuTimer.cpp">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.GpuParticles.cpp">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.MaterialLoader.cpp">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.ModelRenderer.cpp">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.Renderer.cpp">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.RenderState.cpp">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.Shader.cpp">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\GraphicsDevice.cpp">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\Common.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.Base.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.Base.Pre.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.GpuTimer.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.GpuParticles.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.MaterialLoader.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.ModelRenderer.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.Renderer.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.RendererImplemented.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.RenderState.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\EffekseerRendererLLGI.Shader.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\EffekseerRendererLLGI\GraphicsDevice.h">
+      <Filter>EffekseerRendererLLGI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererLLGI\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="EffekseerRendererLLGI">
+      <UniqueIdentifier>{2B2A34F9-8C14-3590-809B-A45C21F41FA7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -127,6 +127,12 @@
     <ClCompile Include="GamePad.cpp">
       <Filter>Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="EffeckseerManager.cpp">
+      <Filter>Source\ソース ファイル\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>Source\ソース ファイル\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -236,6 +242,12 @@
     </ClInclude>
     <ClInclude Include="Transform.h">
       <Filter>Source\ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="EffekseerManager.h">
+      <Filter>Source\ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

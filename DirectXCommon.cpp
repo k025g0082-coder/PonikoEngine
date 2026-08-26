@@ -7,6 +7,7 @@
 
 ComPtr<ID3D12Device> DirectXCommon::device_;
 ComPtr<ID3D12GraphicsCommandList> DirectXCommon::commandList_;
+ComPtr<ID3D12CommandQueue> DirectXCommon::commandQueue_;
 ComPtr<IDXGISwapChain4> DirectXCommon::swapChain_;
 ComPtr <ID3D12DescriptorHeap> DirectXCommon::srvHeap_;
 ComPtr <ID3D12DescriptorHeap> DirectXCommon::rtvHeap_;

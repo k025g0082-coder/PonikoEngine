@@ -1,0 +1,450 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{96B3B7B5-776D-36C1-991A-52131DF80720}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>LLGI</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">LLGI.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">LLGId</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">LLGI.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">LLGI</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">LLGI.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">LLGI</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">LLGI.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">LLGI</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32;_WINDOWS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;NOMINMAX;_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;NOMINMAX;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;NOMINMAX;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NOMINMAX;WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;NOMINMAX;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\CMakeFiles\6aaa5161276612aa710ff397d2f953e8\LLGI.DX12MipmapShader.h.rule">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating generated/LLGI.DX12MipmapShader.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/generated
+if %errorlevel% neq 0 goto :cmEnd
+DX12MipmapShaderCompiler\Debug\LLGI_DX12MipmapShaderCompiler.exe C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/generated/LLGI.DX12MipmapShader.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\DX12MipmapShaderCompiler\Debug\LLGI_DX12MipmapShaderCompiler.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated\LLGI.DX12MipmapShader.h</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating generated/LLGI.DX12MipmapShader.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/generated
+if %errorlevel% neq 0 goto :cmEnd
+DX12MipmapShaderCompiler\Release\LLGI_DX12MipmapShaderCompiler.exe C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/generated/LLGI.DX12MipmapShader.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\DX12MipmapShaderCompiler\Release\LLGI_DX12MipmapShaderCompiler.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated\LLGI.DX12MipmapShader.h</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Generating generated/LLGI.DX12MipmapShader.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/generated
+if %errorlevel% neq 0 goto :cmEnd
+DX12MipmapShaderCompiler\MinSizeRel\LLGI_DX12MipmapShaderCompiler.exe C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/generated/LLGI.DX12MipmapShader.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\DX12MipmapShaderCompiler\MinSizeRel\LLGI_DX12MipmapShaderCompiler.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated\LLGI.DX12MipmapShader.h</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Generating generated/LLGI.DX12MipmapShader.h</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/generated
+if %errorlevel% neq 0 goto :cmEnd
+DX12MipmapShaderCompiler\RelWithDebInfo\LLGI_DX12MipmapShaderCompiler.exe C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/generated/LLGI.DX12MipmapShader.h
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\DX12MipmapShaderCompiler\RelWithDebInfo\LLGI_DX12MipmapShaderCompiler.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated\LLGI.DX12MipmapShader.h</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/src/3rdParty/LLGI/src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/k025g/Downloads/EffekseerForCpp1.80.7 -BC:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64 --check-stamp-file C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/src/3rdParty/LLGI/src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/k025g/Downloads/EffekseerForCpp1.80.7 -BC:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64 --check-stamp-file C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/src/3rdParty/LLGI/src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/k025g/Downloads/EffekseerForCpp1.80.7 -BC:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64 --check-stamp-file C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/src/3rdParty/LLGI/src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/k025g/Downloads/EffekseerForCpp1.80.7 -BC:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64 --check-stamp-file C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/build_msvc2026_x64/src/3rdParty/LLGI/src/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Base.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Buffer.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Buffer.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.CommandList.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.CommandList.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Compiler.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Compiler.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Graphics.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Graphics.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.PipelineState.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.PipelineState.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Platform.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Platform.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Query.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Query.h" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Shader.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Texture.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Texture.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\PC\LLGI.CreatePC.cpp" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\Win\LLGI.WindowWin.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\Win\LLGI.WindowWin.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.BaseDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.BaseDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.BufferDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.BufferDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.CommandListDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.CommandListDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.CompilerDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.CompilerDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.DescriptorHeapDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.DescriptorHeapDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.GraphicsDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.GraphicsDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.PipelineStateDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.PipelineStateDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.PlatformDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.PlatformDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.QueryDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.QueryDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.RenderPassDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.RenderPassDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.RenderPassPipelineStateDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.RenderPassPipelineStateDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.ShaderDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.ShaderDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.SingleFrameMemoryPoolDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.SingleFrameMemoryPoolDX12.h" />
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.TextureDX12.cpp" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.TextureDX12.h" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated\LLGI.DX12MipmapShader.h" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\ZERO_CHECK.vcxproj">
+      <Project>{AFBF0401-4FFE-3CC6-82C4-ADFB244C3AED}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\DX12MipmapShaderCompiler\LLGI_DX12MipmapShaderCompiler.vcxproj">
+      <Project>{EE8A0182-B002-3CE4-97C8-95E2674C3565}</Project>
+      <Name>LLGI_DX12MipmapShaderCompiler</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

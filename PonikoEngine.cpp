@@ -3,6 +3,8 @@
 #include <memory>
 #include <filesystem>
 
+#include "EffekseerManager.h"
+
 
 // ここにメンバを書く
 //namespace {
@@ -35,8 +37,17 @@ namespace PonikoEngine {
 		// 各種、パイプライン設定と登録
 		PipelineStateManager::GetInstance()->Initialize(DirectXCommon::GetInstance()->GetDevice().Get());
 
+		// Effekseerの初期化
+		EffekseerManager::GetInstance()->Initialize(
+			DirectXCommon::GetInstance()->GetDevice().Get(),
+			DirectXCommon::GetInstance()->GetCommandQueue().Get()
+		);
+
 		// もじシステム初期化
 		Text::Initialize();
+
+		// 音初期化
+		SoundManager::GetInstance()->Initialize();
 
 		// Imgui初期化
 		ImGuiManager::GetInstance()->Initialize();
@@ -47,7 +58,9 @@ namespace PonikoEngine {
 	};
 
 	void Update() {
+
 		GamePad::GetInstance()->Update();
+
 	};
 
 	void Finalize() {

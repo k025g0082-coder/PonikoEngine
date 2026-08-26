@@ -1,0 +1,11 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-4.4/Modules/CTest.cmake
+C:/Program Files/CMake/share/cmake-4.4/Modules/CTestTargets.cmake
+C:/Program Files/CMake/share/cmake-4.4/Modules/CTestUseLaunchers.cmake
+C:/Program Files/CMake/share/cmake-4.4/Modules/DartConfiguration.tcl.in
+C:/Program Files/CMake/share/cmake-4.4/Modules/ExternalProject.cmake
+C:/Program Files/CMake/share/cmake-4.4/Modules/ExternalProject/shared_internal_commands.cmake
+C:/Program Files/CMake/share/cmake-4.4/Modules/GNUInstallDirs.cmake
+C:/Program Files/CMake/share/cmake-4.4/Templates/CTestScript.cmake.in
+C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/src/3rdParty/LLGI/CMakeLists.txt
+C:/Users/k025g/Downloads/EffekseerForCpp1.80.7/src/3rdParty/LLGI/cmake/ClangFormat.cmake

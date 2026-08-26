@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\EffekseerRendererDX12.Renderer.cpp">
+      <Filter>EffekseerRendererDX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerMaterialCompiler\DirectX12\EffekseerMaterialCompilerDX12.cpp">
+      <Filter>..\EffekseerMaterialCompiler\DirectX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerMaterialCompiler\HLSLGenerator\ShaderGenerator.cpp">
+      <Filter>..\EffekseerMaterialCompiler\HLSLGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerMaterialCompiler\Common\ShaderGeneratorCommon.cpp">
+      <Filter>..\EffekseerMaterialCompiler\Common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12.h" />
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\EffekseerRendererDX12.Base.Pre.h">
+      <Filter>EffekseerRendererDX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\EffekseerRendererDX12.Base.h">
+      <Filter>EffekseerRendererDX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\EffekseerRendererDX12.Renderer.h">
+      <Filter>EffekseerRendererDX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\ad_model_distortion_ps.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\ad_model_distortion_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\ad_model_lit_ps.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\ad_model_lit_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\ad_model_unlit_ps.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\ad_model_unlit_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\ad_sprite_distortion_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\ad_sprite_lit_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\ad_sprite_unlit_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\gpu_particles_clear_cs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\gpu_particles_render_ps.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\gpu_particles_render_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\gpu_particles_spawn_cs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\gpu_particles_update_cs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\model_distortion_ps.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\model_distortion_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\model_lit_ps.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\model_lit_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\model_unlit_ps.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\model_unlit_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\sprite_distortion_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\sprite_lit_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\EffekseerRendererDX12\ShaderHeader\sprite_unlit_vs.h">
+      <Filter>EffekseerRendererDX12\ShaderHeader</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerMaterialCompiler\DirectX12\EffekseerMaterialCompilerDX12.h">
+      <Filter>..\EffekseerMaterialCompiler\DirectX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerMaterialCompiler\HLSLGenerator\ShaderGenerator.h">
+      <Filter>..\EffekseerMaterialCompiler\HLSLGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerMaterialCompiler\Common\ShaderGeneratorCommon.h">
+      <Filter>..\EffekseerMaterialCompiler\Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\EffekseerRendererDX12\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="..">
+      <UniqueIdentifier>{04CB5672-CA76-31B7-BC18-5BC34A9A4176}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\EffekseerMaterialCompiler">
+      <UniqueIdentifier>{81F0EA8D-DAB5-3807-9024-E26E8A6E27DF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\EffekseerMaterialCompiler\Common">
+      <UniqueIdentifier>{DB3450ED-D28F-3015-8AFD-FC001286B4E0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\EffekseerMaterialCompiler\DirectX12">
+      <UniqueIdentifier>{F6264DF7-ED05-3058-83E7-3807BF2E7BB8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\EffekseerMaterialCompiler\HLSLGenerator">
+      <UniqueIdentifier>{F5DA6C14-7C21-34E0-A9ED-94EC71486227}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EffekseerRendererDX12">
+      <UniqueIdentifier>{60C0C8E4-3ABF-3DA3-8E2D-ECBC5C3D3F78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EffekseerRendererDX12\ShaderHeader">
+      <UniqueIdentifier>{1B4720CE-6B9F-3083-98F1-7951A387AB9F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

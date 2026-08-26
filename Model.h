@@ -71,11 +71,12 @@ struct ModelData {
 class Model
 {
 public:
+	
+	// クローンを作る
+	Model* Clone() const;
 
 	// 静的メンバ関数
 	static Model* CreateOBJ(const std::string& modelName);
-	//static void PreDraw();
-	//static void PostDraw();
 
 	void Initialize();
 	void Update(float deltaTime = 1.0f);

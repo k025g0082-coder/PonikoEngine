@@ -37,6 +37,7 @@ public:
 
     // 描画の際
     static ComPtr<ID3D12GraphicsCommandList> GetCommandList() { return commandList_; };
+    static ComPtr<ID3D12CommandQueue> GetCommandQueue() { return commandQueue_; };
 
     // 三角の描画時に必要
     static ComPtr<IDXGISwapChain4> GetSwapChain() { return swapChain_; };
@@ -74,7 +75,7 @@ private:
     ComPtr<IDXGIAdapter4> adapter_;           //使用するアダプタ用の変数
     static ComPtr<ID3D12Device> device_;
 
-    ComPtr<ID3D12CommandQueue> commandQueue_;
+    static ComPtr<ID3D12CommandQueue> commandQueue_;
     ComPtr<ID3D12CommandAllocator> commandAllocator_;
     static ComPtr<ID3D12GraphicsCommandList> commandList_;
 

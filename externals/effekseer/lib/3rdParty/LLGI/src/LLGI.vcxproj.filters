@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Buffer.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.CommandList.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Compiler.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Graphics.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.PipelineState.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Platform.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Query.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Texture.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\PC\LLGI.CreatePC.cpp">
+      <Filter>PC</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\Win\LLGI.WindowWin.cpp">
+      <Filter>Win</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.BaseDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.BufferDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.CommandListDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.CompilerDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.DescriptorHeapDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.GraphicsDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.PipelineStateDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.PlatformDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.QueryDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.RenderPassDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.RenderPassPipelineStateDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.ShaderDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.SingleFrameMemoryPoolDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.TextureDX12.cpp">
+      <Filter>DX12</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Base.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Buffer.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.CommandList.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Compiler.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Graphics.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.PipelineState.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Platform.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Query.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Shader.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\LLGI.Texture.h">
+      <Filter>Base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\Win\LLGI.WindowWin.h">
+      <Filter>Win</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.BaseDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.BufferDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.CommandListDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.CompilerDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.DescriptorHeapDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.GraphicsDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.PipelineStateDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.PlatformDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.QueryDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.RenderPassDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.RenderPassPipelineStateDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.ShaderDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.SingleFrameMemoryPoolDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\DX12\LLGI.TextureDX12.h">
+      <Filter>DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated\LLGI.DX12MipmapShader.h">
+      <Filter>C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\CMakeFiles\6aaa5161276612aa710ff397d2f953e8\LLGI.DX12MipmapShader.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\src\3rdParty\LLGI\src\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Base">
+      <UniqueIdentifier>{C4FA7BFA-9A46-30A7-8020-B26ABC34D856}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C:">
+      <UniqueIdentifier>{622B62B7-66A8-306C-ACEA-4CC7E1CD8582}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C:\Users">
+      <UniqueIdentifier>{15F225D3-02E6-3685-A2FE-863C9624CE10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C:\Users\k025g">
+      <UniqueIdentifier>{92FF05F7-D959-3697-9630-0B3089B161E4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C:\Users\k025g\Downloads">
+      <UniqueIdentifier>{E3082018-321F-3092-9669-687A90824A3D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7">
+      <UniqueIdentifier>{F555D78A-3657-3C23-AAA7-D67A2EBA4FD2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64">
+      <UniqueIdentifier>{552E1D8D-8EEF-3799-A419-D23A9231663C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src">
+      <UniqueIdentifier>{039B9098-667C-34E7-9D59-60FA4032B2B2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty">
+      <UniqueIdentifier>{058C3AFC-1049-3832-B024-E57B9E97315F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI">
+      <UniqueIdentifier>{76A3FFF1-583B-37C1-B936-E34A9581D6A7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src">
+      <UniqueIdentifier>{EF1EB48A-6A4F-38C6-9445-7346E1FBB5AE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C:\Users\k025g\Downloads\EffekseerForCpp1.80.7\build_msvc2026_x64\src\3rdParty\LLGI\src\generated">
+      <UniqueIdentifier>{7D746A1C-0FC3-3FC1-8D5C-0AA14730D682}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{F59A6FF3-746D-3937-AD9A-DA0DCFBA352F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DX12">
+      <UniqueIdentifier>{90CF997A-CC6E-3877-94A9-3E8A80D674D7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PC">
+      <UniqueIdentifier>{4A113B8E-60B3-33A9-BD55-8F30CE1243E0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Win">
+      <UniqueIdentifier>{C7E2DA04-95B1-31EC-95B2-0BAD02968E0C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

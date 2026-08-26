@@ -4,6 +4,8 @@
 #include "ImGuiManager.h"
 #include "PipelineStateManager.h"
 #include "ImGuiManager.h"
+#include "EffekseerManager.h"
+#include "SoundManager.h"
 
 #include "Triangle.h"
 #include "Sprite.h"
