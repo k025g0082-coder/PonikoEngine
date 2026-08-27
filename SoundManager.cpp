@@ -172,4 +172,19 @@ void SoundManager::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) 
 	// 波形データの再生
 	result = pSourceVoice->SubmitSourceBuffer(&buf);
 	result = pSourceVoice->Start();
+
+
+	pSourceVoices.push_back(pSourceVoice);
 };
+
+// 全部停止
+void SoundManager::AllStopSound() {
+
+	for (auto* voice : pSourceVoices) {
+		voice->Stop();
+		voice->FlushSourceBuffers();
+		voice->DestroyVoice();
+	}
+
+	pSourceVoices.clear();
+}

@@ -130,10 +130,7 @@ Effekseer::EffectRef EffekseerManager::LoadEffect(
     );
 }
 
-Effekseer::Handle EffekseerManager::Play(Effekseer::EffectRef effect,Vector3 v)
-{
-    return manager_->Play(effect, v.x,v.y,v.z);
-}
+
 
 void EffekseerManager::Update() {
 
@@ -169,7 +166,6 @@ void EffekseerManager::Draw() {
     GetRenderer()->EndRendering();
 
 }
-
 void EffekseerManager::SetCamera(
     Camera* cam,
     const Effekseer::Matrix44& projection,

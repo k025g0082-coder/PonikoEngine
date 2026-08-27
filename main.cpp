@@ -87,7 +87,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 			sprite.Draw();
 
 			// ２d文字描画
-			text.drawString(U"てすとテキスト", { 0.0f, 0.0f });
+			//text.drawString(U"てすとテキスト", { 0.0f, 0.0f });
 
 			// IMGUI byouga
 			ImGuiManager::GetInstance()->Draw();

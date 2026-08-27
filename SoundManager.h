@@ -8,6 +8,7 @@
 #pragma comment(lib, "xaudio2.lib")
 
 #include <fstream>
+#include <vector>
 
 //ここから音用
 
@@ -53,6 +54,17 @@ public:
 	void Play(const std::string& name);
 
 	void Finalize();
+
+	// 全部停止
+	void AllStopSound();
+
+	// マスターの音量
+	void SetMasterSoundAmp(float n = 1.0f) {
+		if (masterVoice) {
+			masterVoice->SetVolume(n);
+		}
+	}
+
 private:
 
 	// 音
@@ -61,6 +73,7 @@ private:
 
 	std::map<std::string, SoundData> sounds_;
 
+	std::vector<IXAudio2SourceVoice*> pSourceVoices;
 
 	// 読込
 	SoundData SoundLoadWave(const char* filename);
@@ -70,5 +83,6 @@ private:
 
 	// 再生
 	void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData);
+
 };
 

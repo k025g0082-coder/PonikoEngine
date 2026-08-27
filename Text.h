@@ -32,9 +32,13 @@ public:
 		Center,
 	};
 
-	void drawString(const std::u32string& text, Vector2 position, TextAnchor anchor = TextAnchor::LeftTop);
+	void drawString(const std::string& text, Vector2 position, TextAnchor anchor = TextAnchor::LeftTop);
 
 	unsigned char* getImage();
+
+	// 文字横幅取得
+	int GetTextWidth(const std::string& text);
+	int GetTextHeight(const std::string& text);
 
 	// 文字システム初期化
 	static void Initialize();
@@ -67,3 +71,6 @@ private:
 	int height;
 };
 
+
+
+std::u32string ToU32String(const std::string& str);

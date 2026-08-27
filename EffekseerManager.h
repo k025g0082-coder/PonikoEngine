@@ -27,7 +27,33 @@ public:
 
     Effekseer::EffectRef LoadEffect(const std::u16string& path);
 
-    Effekseer::Handle Play(Effekseer::EffectRef effect,Vector3 v);
+    // 再生
+    void Play(std::string tag, Vector3 v)
+    {
+        if (effectDirectories.find(tag) == effectDirectories.end())
+        {
+            return; // tagなかった
+        }
+
+        manager_->Play(effectDirectories[tag], v.x, v.y, v.z);
+       /* return manager_->Play(effect, v.x, v.y, v.z);*/
+    }
+
+    std::map< std::string, Effekseer::EffectRef> effectDirectories;
+
+    // 登録
+    void Region(std::string tag, std::string effectPath) {
+
+        if (effectDirectories.find(tag) != effectDirectories.end())
+        {
+            return; // 既に登録済み
+        }
+
+        effectDirectories[tag] =
+            EffekseerManager::GetInstance()->LoadEffect(
+                std::u16string(effectPath.begin(), effectPath.end()).c_str()
+            );
+    }
 
     void SetCamera(
         Camera* cam,

@@ -5,8 +5,10 @@
 #include "DirectXUtility.h"
 #include "DirectXCommon.h"
 
-#include <codecvt>
-#include <locale>
+#include <Windows.h>
+
+#define NOMINMAX
+#include <algorithm>
 
 std::map<std::string, Text::FontData> Text::fonts;
 FT_Library Text::library = nullptr;
@@ -105,15 +107,20 @@ void Text::SetFontSize(int size)
 
 
 // 文字列描画
-void Text::drawString(const std::u32string& text, Vector2 position, TextAnchor anchor) {
+void Text::drawString(const std::string& text, Vector2 position, TextAnchor anchor)
+{
+	std::u32string u32text = ToU32String(text);
 
-	// キャンバス初期化？
+	// キャンバス初期化
 	memset(image, 0, width * height * 4);
 
-	int curPosX = static_cast<int>(position.x);
-	int curPosY = static_cast<int>(position.y);
+	//int curPosX = static_cast<int>(position.x);
+	//int curPosY = static_cast<int>(position.y);
 
-	int last_height = 0; //最後に文字を書いたときの文字の大きさ
+	int curPosX = 0;
+	int curPosY = -28;
+
+	int last_height = 0;
 
 	int fontHeight = font->face->size->metrics.height >> 6;
 
@@ -123,7 +130,7 @@ void Text::drawString(const std::u32string& text, Vector2 position, TextAnchor a
 	if (anchor == TextAnchor::Center) {
 
 		// 全体の横幅取得
-		for (char32_t c : text)
+		for (char32_t c : u32text)
 		{
 			if (FT_Load_Char(font->face, c, FT_LOAD_RENDER))
 				continue;
@@ -131,15 +138,13 @@ void Text::drawString(const std::u32string& text, Vector2 position, TextAnchor a
 			textWidth += font->slot->advance.x >> 6;
 		}
 
-		// 開始位置を設定
 		curPosX -= textWidth / 2;
 
 		int ascender = font->face->size->metrics.ascender >> 6;
 		curPosY = curPosY - fontHeight / 2 + ascender;
-
 	}
 
-	for (char32_t c : text)
+	for (char32_t c : u32text)
 	{
 		if (c == U'\n')
 		{
@@ -148,30 +153,25 @@ void Text::drawString(const std::u32string& text, Vector2 position, TextAnchor a
 		}
 		else
 		{
-			if (FT_Load_Char(font->	face, c, FT_LOAD_RENDER))
+			if (FT_Load_Char(font->face, c, FT_LOAD_RENDER))
 				continue;
 
-			switch (anchor) {
-
-				// 左上原点
+			switch (anchor)
+			{
 			case TextAnchor::LeftTop:
 				draw_bitmap(
 					curPosX + font->slot->bitmap_left,
-					curPosY + (fontHeight - font->slot->bitmap_top) - 50
+					curPosY + (fontHeight - font->slot->bitmap_top)
 				);
 				break;
 
-				// 中心
 			case TextAnchor::Center:
-
 				draw_bitmap(
 					curPosX + font->slot->bitmap_left,
 					curPosY - font->slot->bitmap_top
 				);
-
 				break;
 			}
-
 
 			curPosX += font->slot->advance.x >> 6;
 		}
@@ -181,13 +181,45 @@ void Text::drawString(const std::u32string& text, Vector2 position, TextAnchor a
 
 	sprite.SetPos(Vector3{ position.x, position.y, 0.0f });
 
-	// hyouji you sprite
 	sprite.Draw();
 }
 
 unsigned char* Text::getImage() {
 	// 画像取得ロジック
 	return image;
+}
+
+int Text::GetTextWidth(const std::string& text)
+{
+	std::u32string u32text = ToU32String(text);
+
+	int width = 0;
+
+	for (char32_t c : u32text)
+	{
+		if (FT_Load_Char(font->face, c, FT_LOAD_DEFAULT))
+			continue;
+
+		width += font->slot->advance.x >> 6;
+	}
+
+	return width;
+}
+int Text::GetTextHeight(const std::string& text)
+{
+	std::u32string u32text = ToU32String(text);
+
+	int height = 0;
+
+	for (char32_t c : u32text)
+	{
+		if (FT_Load_Char(font->face, c, FT_LOAD_DEFAULT))
+			continue;
+
+		height = (std::max)(height, static_cast<int>(font->slot->bitmap.rows));
+	}
+
+	return height;
 }
 
 //生成された位置も自分の画像データをimageにコピーする(RGBAにも変換するみたい)
@@ -208,7 +240,7 @@ void Text::draw_bitmap(int x, int y)
 
 			// FreeTypeが生成したグレースケール値
 			unsigned char alpha =
-				font->slot->bitmap.buffer[q * font->slot->bitmap.width + p];
+				font->slot->bitmap.buffer[q * font->slot->bitmap.pitch + p];
 
 			// RGBAのインデックス
 			int index = (j * width + i) * 4;
@@ -223,6 +255,58 @@ void Text::draw_bitmap(int x, int y)
 
 std::u32string ToU32String(const std::string& str)
 {
-	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> converter;
-	return converter.from_bytes(str);
+	if (str.empty())
+		return {};
+
+	int size = MultiByteToWideChar(
+		CP_UTF8,
+		0,
+		str.data(),
+		static_cast<int>(str.size()),
+		nullptr,
+		0
+	);
+
+	if (size <= 0)
+		return {};
+
+	std::wstring wstr(size, L'\0');
+
+	MultiByteToWideChar(
+		CP_UTF8,
+		0,
+		str.data(),
+		static_cast<int>(str.size()),
+		wstr.data(),
+		size
+	);
+
+	std::u32string result;
+
+	for (size_t i = 0; i < wstr.size(); ++i)
+	{
+		wchar_t c = wstr[i];
+
+		// UTF-16のサロゲートペア
+		if (c >= 0xD800 && c <= 0xDBFF && i + 1 < wstr.size())
+		{
+			wchar_t c2 = wstr[i + 1];
+
+			if (c2 >= 0xDC00 && c2 <= 0xDFFF)
+			{
+				char32_t codePoint =
+					0x10000
+					+ ((c - 0xD800) << 10)
+					+ (c2 - 0xDC00);
+
+				result.push_back(codePoint);
+				++i;
+				continue;
+			}
+		}
+
+		result.push_back(static_cast<char32_t>(c));
+	}
+
+	return result;
 }

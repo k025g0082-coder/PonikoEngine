@@ -166,6 +166,10 @@ public:
 		};
 	}
 
+	void ModelColor(Vector4 rgba) {
+		materialData->color = { rgba.x,rgba.y,rgba.z,rgba.w };
+	};
+
 private:
 
 	// モデル読み取り関数

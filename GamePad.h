@@ -65,6 +65,13 @@ public:
 
 	bool TriggerKey(BYTE keyNum) {return (key[keyNum] && !preKey[keyNum]);}
 	bool ReleaseKey(BYTE keyNum) {return (!key[keyNum] && preKey[keyNum]);}
+	
+	// なにかボタンが押されたら
+	bool PushAnyButton()
+	{
+		return state_.Gamepad.wButtons != 0 &&
+			prevState_.Gamepad.wButtons == 0;
+	}
 
 private:
 	XINPUT_STATE state_{};
