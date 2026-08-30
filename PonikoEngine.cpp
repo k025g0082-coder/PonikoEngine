@@ -55,11 +55,42 @@ namespace PonikoEngine {
 		// いんぷと
 		GamePad::GetInstance()->Initialize();
 
+
+		// Gameシステムの方の初期化
+		Game::GetInstance()->Init();
+
+
 	};
 
 	void Update() {
 
-		GamePad::GetInstance()->Update();
+
+		// 更新
+		ImGuiManager::GetInstance()->Begin();
+
+		/*　ここに更新処理　*/
+			Game::GetInstance()->Update();
+
+			GamePad::GetInstance()->Update();
+
+		ImGuiManager::GetInstance()->End();
+
+
+	};
+
+	void Draw() {
+
+		// 描画
+		DirectXCommon::GetInstance()->PreDraw();
+
+			Game::GetInstance()->Draw();
+
+		// IMGUI byouga
+		ImGuiManager::GetInstance()->Draw();
+
+		// 描画終了
+		DirectXCommon::GetInstance()->PostDraw();
+		
 
 	};
 

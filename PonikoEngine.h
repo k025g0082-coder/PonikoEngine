@@ -16,6 +16,7 @@
 
 #include "GamePad.h"
 
+#include "Game.h"
 
 namespace PonikoEngine {
 
@@ -34,4 +35,9 @@ namespace PonikoEngine {
 	/// エンジンのUpdate
 	/// </summary>
 		void Update();
+
+		/// <summary>
+		/// エンジンのDraw
+		/// </summary>
+		void Draw();
 };
