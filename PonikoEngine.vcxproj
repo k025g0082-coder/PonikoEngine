@@ -130,8 +130,6 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="DxcCompiler.cpp" />
     <ClCompile Include="EffeckseerManager.cpp" />
     <ClCompile Include="Event.cpp" />
-    <ClCompile Include="ExampleGameEvent.cpp" />
-    <ClCompile Include="ExampleGameScene.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -155,8 +153,6 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
-    <ClCompile Include="ExampleTitleEvent.cpp" />
-    <ClCompile Include="ExampleTitleScene.cpp" />
     <ClCompile Include="Triangle.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -179,8 +175,6 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="DxcCompiler.h" />
     <ClInclude Include="EffekseerManager.h" />
     <ClInclude Include="Event.h" />
-    <ClInclude Include="ExampleGameEvent.h" />
-    <ClInclude Include="ExampleGameScene.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -205,8 +199,6 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Text.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureLoader.h" />
-    <ClInclude Include="ExampleTitleEvent.h" />
-    <ClInclude Include="ExampleTitleScene.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="Vector.h" />
