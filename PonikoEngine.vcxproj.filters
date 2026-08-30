@@ -55,6 +55,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{2129c6f4-5ba9-49b6-8f26-ce69eb8638b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Source\ソース ファイル\Graphics\Light">
+      <UniqueIdentifier>{b1fd496d-d185-4605-8613-b4e3b7184084}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Source\ヘッダー ファイル\Graphics\Light">
+      <UniqueIdentifier>{335e1752-c528-46f7-9982-ef7f3bd684d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinApp.cpp">
@@ -82,9 +91,6 @@
       <Filter>Engine\Source\ソース ファイル\base</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectionalLight.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="ModelLoader.cpp">
@@ -154,6 +160,15 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Engine\Source\ソース ファイル\Game</Filter>
     </ClCompile>
+    <ClCompile Include="TestScene.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectionalLight.cpp">
+      <Filter>Engine\Source\ソース ファイル\Graphics\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="SpotLight.cpp">
+      <Filter>Engine\Source\ソース ファイル\Graphics\Light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -195,9 +210,6 @@
       <Filter>Engine\Source\ヘッダー ファイル\base</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectionalLight.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Model.h">
@@ -283,6 +295,15 @@
     </ClInclude>
     <ClInclude Include="Event.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="TestScene.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLight.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="SpotLight.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -15,9 +15,9 @@ FT_Library Text::library = nullptr;
 
 void Text::Init() {
 
-	// 画面サイズ取得[
-	width = 800; // 幅は固定
-	height = 200; // 高さは固定
+	// 描画する区域
+	width = 1280; // 超長くできるように
+	height = 300; // 高さは固定 dekai mojiha kokowo ookiku
 
 	// 初期化
 	delete[] image;
@@ -109,42 +109,38 @@ void Text::SetFontSize(int size)
 // 文字列描画
 void Text::drawString(const std::string& text, Vector2 position, TextAnchor anchor)
 {
+
 	std::u32string u32text = ToU32String(text);
 
 	// キャンバス初期化
 	memset(image, 0, width * height * 4);
 
-	//int curPosX = static_cast<int>(position.x);
-	//int curPosY = static_cast<int>(position.y);
+	// だいにゅ０－
+	anchor_ = anchor;
+	position_ = position;
+	u32text_ = u32text;
 
-	int curPosX = 0;
-	int curPosY = -28;
+	textWidth = 0;
 
-	int last_height = 0;
+	// 全体の横幅取得
+	for (char32_t c : u32text_)
+	{
+		if (FT_Load_Char(font->face, c, FT_LOAD_RENDER))
+			continue;
 
-	int fontHeight = font->face->size->metrics.height >> 6;
-
-	int textWidth = 0;
-
-	// 中央なら
-	if (anchor == TextAnchor::Center) {
-
-		// 全体の横幅取得
-		for (char32_t c : u32text)
-		{
-			if (FT_Load_Char(font->face, c, FT_LOAD_RENDER))
-				continue;
-
-			textWidth += font->slot->advance.x >> 6;
-		}
-
-		curPosX -= textWidth / 2;
-
-		int ascender = font->face->size->metrics.ascender >> 6;
-		curPosY = curPosY - fontHeight / 2 + ascender;
+		textWidth += font->slot->advance.x >> 6;
 	}
 
-	for (char32_t c : u32text)
+
+	// 描画位置とかを設定
+	CursorSet();
+
+
+	// 1) 縁取りを描画
+	// 2) 本体の文字を描画
+
+	// 1.縁取りを先に描画
+	for (char32_t c : u32text_)
 	{
 		if (c == U'\n')
 		{
@@ -159,14 +155,14 @@ void Text::drawString(const std::string& text, Vector2 position, TextAnchor anch
 			switch (anchor)
 			{
 			case TextAnchor::LeftTop:
-				draw_bitmap(
+				draw_bitmap_outline(
 					curPosX + font->slot->bitmap_left,
-					curPosY + (fontHeight - font->slot->bitmap_top)
+					curPosY - font->slot->bitmap_top
 				);
 				break;
 
 			case TextAnchor::Center:
-				draw_bitmap(
+				draw_bitmap_outline(
 					curPosX + font->slot->bitmap_left,
 					curPosY - font->slot->bitmap_top
 				);
@@ -177,11 +173,111 @@ void Text::drawString(const std::string& text, Vector2 position, TextAnchor anch
 		}
 	}
 
+	// 描画位置リセット
+	CursorSet();
+
+	// 2.本体を描画
+	for (char32_t c : u32text_)
+	{
+		if (c == U'\n')
+		{
+			curPosX = static_cast<int>(position.x);
+			curPosY += fontHeight;
+		}
+		else
+		{
+			if (FT_Load_Char(font->face, c, FT_LOAD_RENDER))
+				continue;
+
+			int r = (int)textLayout.textColor.x;
+			int g = (int)textLayout.textColor.y;
+			int b = (int)textLayout.textColor.z;
+
+			switch (anchor)
+			{
+			case TextAnchor::LeftTop:
+				draw_bitmap_core(
+					curPosX + font->slot->bitmap_left,
+					curPosY - font->slot->bitmap_top,
+					r,g,b
+				);
+				break;
+
+			case TextAnchor::Center:
+				draw_bitmap_core(
+					curPosX + font->slot->bitmap_left,
+					curPosY - font->slot->bitmap_top,
+					r, g, b
+				);
+				break;
+			}
+
+			curPosX += font->slot->advance.x >> 6;
+		}
+	}
+
 	sprite.TextTextureUpdate(image);
 
-	sprite.SetPos(Vector3{ position.x, position.y, 0.0f });
-
 	sprite.Draw();
+}
+
+// 左上、真ん中原点にカーソル初期位置やらをセット
+
+void Text::CursorSet() {
+
+	curPosX = 0;
+	curPosY = 0;
+
+	last_height = 0;
+
+	fontHeight = font->face->size->metrics.height >> 6;
+
+	// 左上原点
+	if (anchor_ == TextAnchor::LeftTop) {
+
+		sprite.SetPosition(position_);
+
+		//
+		int maxBitmapTop = 0;
+
+		for (char32_t c : u32text_)
+		{
+			if (c == U'\n')
+				continue;
+
+			if (FT_Load_Char(font->face, c, FT_LOAD_RENDER))
+				continue;
+
+			maxBitmapTop = (std::max)(
+				maxBitmapTop,
+				static_cast<int>(font->slot->bitmap_top)
+				);
+		}
+
+		curPosY = maxBitmapTop;
+
+
+	}
+
+	// 中央なら
+	else if (anchor_ == TextAnchor::Center) {
+
+		// 描画するテキスチャの中央に文字列を配置
+		curPosX = (width - textWidth) / 2;
+
+		int ascender = font->face->size->metrics.ascender >> 6;
+		curPosY = (height - fontHeight) / 2 + ascender;
+
+		// スプライトをposition中央にずらす
+
+		Vector2 spriteCenter = {
+			position_.x - (float)sprite.GetImageWidth() / 2.0f,
+			position_.y - (float)sprite.GetImageHeight() / 2.0f,
+		};
+
+		sprite.SetPosition(spriteCenter);
+
+	}
 }
 
 unsigned char* Text::getImage() {
@@ -223,32 +319,80 @@ int Text::GetTextHeight(const std::string& text)
 }
 
 //生成された位置も自分の画像データをimageにコピーする(RGBAにも変換するみたい)
-void Text::draw_bitmap(int x, int y)
+void Text::draw_bitmap_outline(int x, int y)
 {
-	int i, j, p, q;
+
+	for (int ox = -textLayout.outlineSize; ox <= textLayout.outlineSize; ++ox)
+	{
+		for (int oy = -textLayout.outlineSize; oy <= textLayout.outlineSize; ++oy)
+		{
+			if (ox == 0 && oy == 0)
+				continue;
+
+			float distance = std::sqrt(
+				static_cast<float>(ox * ox + oy * oy)
+			);
+
+			if (distance > textLayout.outlineSize)
+				continue;
+
+			float strength = 1.0f - distance / textLayout.outlineSize;
+
+			int r = (int)textLayout.outlineColor.x;
+			int g = (int)textLayout.outlineColor.y;
+			int b = (int)textLayout.outlineColor.z;
+
+			// もしぼかし無効なら
+			if (textLayout.isOutlineBlur == false) strength = 1.0f;
+
+			draw_bitmap_core(
+				x + ox,
+				y + oy,
+				r, g, b,
+				static_cast<int>( 255.0f * strength)
+			);
+		}
+	}
+
+}
+
+void Text::draw_bitmap_core(
+	int x, int y,
+	int r, int g, int b,
+	unsigned char alphaScale)
+{
 	const int x_max = x + font->slot->bitmap.width;
 	const int y_max = y + font->slot->bitmap.rows;
 
-	for (i = x, p = 0; i < x_max; i++, p++)
+	for (int i = x, p = 0; i < x_max; i++, p++)
 	{
-		for (j = y, q = 0; j < y_max; j++, q++)
+		for (int j = y, q = 0; j < y_max; j++, q++)
 		{
 			if (i < 0 || j < 0 || i >= width || j >= height)
-			{
 				continue;
-			}
 
-			// FreeTypeが生成したグレースケール値
 			unsigned char alpha =
-				font->slot->bitmap.buffer[q * font->slot->bitmap.pitch + p];
+				font->slot->bitmap.buffer[
+					q * font->slot->bitmap.pitch + p
+				];
 
-			// RGBAのインデックス
+			if (alpha == 0)
+				continue;
+
+			// 縁取り側の透明度を掛ける
+			alpha = static_cast<unsigned char>(
+				static_cast<float>(alpha) *
+				static_cast<float>(alphaScale) / 255.0f
+				);
+
 			int index = (j * width + i) * 4;
 
-			image[index + 0] = 255;   // R
-			image[index + 1] = 255;   // G
-			image[index + 2] = 255;   // B
-			image[index + 3] = alpha; // A
+			image[index + 0] = r;
+			image[index + 1] = g;
+			image[index + 2] = b;
+
+			image[index + 3] =
+				(std::max)(image[index + 3], alpha);
 		}
 	}
 }

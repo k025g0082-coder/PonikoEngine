@@ -15,6 +15,9 @@ void Sprite::TextTextureInitialize(unsigned char* image,int width,int height) {
 
 	texture.Initialize(image,width,height);
 
+	imageWidth = width;
+	imageHeight = height;
+
 	//頂点リソース用のヒープ
 	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
 	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;

@@ -219,6 +219,8 @@ private:
 
 	Material* materialData = nullptr;
 
+	int lightMax = 10; // 一種の限界ライト数
+
 	// Directional（直線）ライト
 	DirectionalLight* light_;
 

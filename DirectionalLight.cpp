@@ -5,6 +5,7 @@
 
 // 設定
 void DirectionalLight::Initialize(DirectionalLightParam param) {
+
 	lightParam_ = param;
 
 	// リソース作成

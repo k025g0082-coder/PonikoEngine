@@ -12,7 +12,24 @@ using namespace Microsoft::WRL;
 #include <string>
 #include <map>
 
+// フォントの設定
+struct fontLayout {
 
+	// 文字サイズ
+	int textSize = 0;
+
+	// 文字色
+	Vector3 textColor{ 255.0f,255.0f,255.0f };
+
+	// 縁取り
+	int outlineSize = 0;
+
+	// 縁取り色
+	Vector3 outlineColor;
+
+	// 縁をぼかすか
+	bool isOutlineBlur = false;
+};
 
 class Text {
 public:
@@ -22,9 +39,31 @@ public:
 
 	// フォント設定
 	bool setFont(const std::string& fontName);
+	
 
 	// 文字サイズ変更
 	void SetFontSize(int size);
+	
+	// 縁取りの大きさ設定
+	void SetFontOutlineSize(int s) { textLayout.outlineSize = s; }
+
+	// 文字の色設定
+	void SetFontColor(Vector3 c) {
+		textLayout.textColor = c;
+	}
+
+	// 縁取りの色設定
+	void SetFontOutlineColor(Vector3 c) { 
+		textLayout.outlineColor = c;
+	}
+
+	// 複数の設定を纏めたレイアウトを設定
+	void SetFontLayout(fontLayout l) {
+
+		textLayout = l;
+
+		SetFontSize(l.textSize);
+	}
 
 	// 文字のスタイル
 	enum class TextAnchor {
@@ -58,7 +97,11 @@ private:
 
 	unsigned char* image;
 
-	void draw_bitmap(int x, int y);
+	// 描画開始位置などを設定
+	void CursorSet();
+
+	void draw_bitmap_outline(int x, int y);
+	void draw_bitmap_core(int x, int y,int r,int g, int b, unsigned char alphaScale = 255);
 
 	std::string  str;
 
@@ -69,6 +112,22 @@ private:
 
 	int width;
 	int height;
+	
+	// 縁取りの色とか纏めた
+	fontLayout textLayout;
+
+
+	std::u32string u32text_;
+	Vector2 position_;
+	TextAnchor anchor_;
+
+	int curPosX = 0;
+	int curPosY = 0;
+
+	int last_height = 0;
+	int fontHeight = 0;
+	int textWidth = 0;
+
 };
 
 

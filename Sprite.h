@@ -120,6 +120,9 @@ public:
 			break;
 		}
 	}
+	int GetImageWidth() { return imageWidth; }
+	int GetImageHeight() { return imageHeight; }
+
 
 	void SetColorRGBA(const Vector4& col) {
 		*materialData = col;
