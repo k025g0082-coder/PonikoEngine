@@ -1,8 +1,11 @@
 #pragma once
 #include "Scene.h"
+
 #include "Text.h"
 
-class ExampleScene : public Scene {
+class ExampleGameScene :
+    public Scene
+{
 public:
 	void Init() override;
 	void Update(GamePad* gamepad) override;
@@ -15,5 +18,5 @@ public:
 private:
 	Text text;
 	Text eventText;
-
 };
+

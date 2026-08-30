@@ -27,7 +27,7 @@ public:
 
 	static Fade& GetFade() { return fade; }
 
-	// イベント追加
+	// 各Scene内のイベントを登録
 	static void EventToRegion(Event* e) {
 		events_.push_back(e);
 		events_.back()->Initialize();

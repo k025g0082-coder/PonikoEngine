@@ -7,9 +7,6 @@
     <Filter Include="examples\scene">
       <UniqueIdentifier>{8ea5e54b-d043-45a1-bff1-e7d7e71bfaa1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="examples\scene\event">
-      <UniqueIdentifier>{7c5242b7-d550-42be-b54f-ae830fd5a96f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine">
       <UniqueIdentifier>{32f52462-af85-417b-a1e0-c4f3e2cd4ed1}</UniqueIdentifier>
     </Filter>
@@ -63,6 +60,18 @@
     <Filter Include="Engine\リソース ファイル">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="examples\scene\title">
+      <UniqueIdentifier>{c3486218-c2a9-4ddb-b1bd-800c4d92809c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="examples\scene\title\event">
+      <UniqueIdentifier>{7c5242b7-d550-42be-b54f-ae830fd5a96f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="examples\scene\game">
+      <UniqueIdentifier>{d0aa14bf-73e0-4007-8af6-0c5b70137e26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="examples\scene\game\event">
+      <UniqueIdentifier>{ef3cf0c3-c93d-46df-8e28-9396137269c7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -163,11 +172,17 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Engine\Source\ソース ファイル\Game</Filter>
     </ClCompile>
-    <ClCompile Include="ExampleEvent.cpp">
-      <Filter>examples\scene\event</Filter>
+    <ClCompile Include="ExampleTitleEvent.cpp">
+      <Filter>examples\scene\title\event</Filter>
     </ClCompile>
-    <ClCompile Include="ExampleScene.cpp">
-      <Filter>examples\scene</Filter>
+    <ClCompile Include="ExampleTitleScene.cpp">
+      <Filter>examples\scene\title</Filter>
+    </ClCompile>
+    <ClCompile Include="ExampleGameScene.cpp">
+      <Filter>examples\scene\game</Filter>
+    </ClCompile>
+    <ClCompile Include="ExampleGameEvent.cpp">
+      <Filter>examples\scene\game\event</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -299,11 +314,17 @@
     <ClInclude Include="Event.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
-    <ClInclude Include="ExampleEvent.h">
-      <Filter>examples\scene\event</Filter>
+    <ClInclude Include="ExampleTitleEvent.h">
+      <Filter>examples\scene\title\event</Filter>
     </ClInclude>
-    <ClInclude Include="ExampleScene.h">
-      <Filter>examples\scene</Filter>
+    <ClInclude Include="ExampleTitleScene.h">
+      <Filter>examples\scene\title</Filter>
+    </ClInclude>
+    <ClInclude Include="ExampleGameScene.h">
+      <Filter>examples\scene\game</Filter>
+    </ClInclude>
+    <ClInclude Include="ExampleGameEvent.h">
+      <Filter>examples\scene\game\event</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

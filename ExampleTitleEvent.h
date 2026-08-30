@@ -1,12 +1,12 @@
 #pragma once
-#include "ExampleScene.h"
+#include "ExampleTitleScene.h"
 #include "Event.h"
 
-class ExampleEvent : public Event {
+class ExampleTitleEvent : public Event {
 public:
 
 	// ポインタ受け取り
-	ExampleEvent(ExampleScene* scene){
+	ExampleTitleEvent(ExampleTitleScene* scene){
 		scene_ = scene;
 	}
 
@@ -16,7 +16,7 @@ public:
 
 private:
 
-	ExampleScene* scene_;
+	ExampleTitleScene* scene_;
 
 	float timer_ = 0.0f;
 
