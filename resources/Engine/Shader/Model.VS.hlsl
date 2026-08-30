@@ -18,10 +18,10 @@ struct ModelSkinningParam
 };
 
 ConstantBuffer<TransformationMatrix> gTransformationMatrix : register( b0 );
-ConstantBuffer<ModelSkinningParam> gModelSkinningParam : register( b3 ); // b数字はﾊﾟｲﾌﾟﾗｲﾝの数字と一致させるように
+ConstantBuffer<ModelSkinningParam> gModelSkinningParam : register( b5 ); // b数字はﾊﾟｲﾌﾟﾗｲﾝの数字と一致させるように
 
 // なんでかっこ？ｗ
-cbuffer Skinning : register(b2)
+cbuffer Skinning : register(b4)
 {
     float4x4 gBoneMatrices[128];
 };
@@ -42,53 +42,66 @@ struct VeltexShaderOutput
     float2 texcoord : TEXCOORD0;
     float3 normal : NORMAL0;
     
-    //uint4 boneIndex : BLENDINDICES;　　　// PSにはこの情報はいらないので消す！！！！！！！！！！！！！
-  //  float4 weight : BLENDWEIGHT;
+    float3 worldPosition : POSITION0;
     
 };
 
 
-
-VeltexShaderOutput main( VertexShaderInput input )
+VeltexShaderOutput main(VertexShaderInput input)
 {
     VeltexShaderOutput output;
-    
-    // アニメありなら
+
+    float4 localPosition;
+    float3 localNormal;
+
+    // アニメあり
     if (gModelSkinningParam.isSkinning != 0)
     {
-        // ボーンの情報をもとに計算？
-    
         float4 skinnedPosition = float4(0, 0, 0, 0);
         float3 skinnedNormal = float3(0, 0, 0);
-        
+
         for (int i = 0; i < 4; i++)
         {
             skinnedPosition +=
-            mul(input.position,
-                gBoneMatrices[input.boneIndex[i]]
-            )
-            * input.weight[i];
-            
+                mul(
+                    input.position,
+                    gBoneMatrices[input.boneIndex[i]]
+                ) * input.weight[i];
+
             skinnedNormal +=
-            mul(input.normal, (float3x3) gBoneMatrices[input.boneIndex[i]])
-            * input.weight[i];
+                mul(
+                    input.normal,
+                    (float3x3) gBoneMatrices[input.boneIndex[i]]
+                ) * input.weight[i];
         }
-        output.position = mul( skinnedPosition,gTransformationMatrix.WVP);
-        output.texcoord = input.texcoord;
-        output.normal =
-        normalize(
-            mul(skinnedNormal, (float3x3) gTransformationMatrix.World)
-        );
+
+        localPosition = skinnedPosition;
+        localNormal = skinnedNormal;
     }
     else
     {
-        output.position = mul(input.position, gTransformationMatrix.WVP);
-        output.texcoord = input.texcoord;
-        output.normal =
-        normalize(
-            mul(input.normal, (float3x3) gTransformationMatrix.World)
-        );
+        localPosition = input.position;
+        localNormal = input.normal;
     }
-    
+
+    // 画面に描画する座標
+    output.position =
+        mul(localPosition, gTransformationMatrix.WVP);
+
+    output.texcoord = input.texcoord;
+
+    // ワールド空間の法線
+    output.normal =
+        normalize(
+            mul(
+                localNormal,
+                (float3x3) gTransformationMatrix.World
+            )
+        );
+
+    // ワールド空間の頂点座標
+    output.worldPosition =
+        mul(localPosition, gTransformationMatrix.World).xyz;
+
     return output;
 }

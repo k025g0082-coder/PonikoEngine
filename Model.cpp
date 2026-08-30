@@ -53,7 +53,9 @@ Model* Model::Clone() const
 	// ライト
 	// =========================
 
-	clone->light_ = light_;
+	clone->directionalLight_ = directionalLight_;
+	clone->spotLight_ = spotLight_;
+	clone->pointLight_ = pointLight_;
 
 	// =========================
 	// GPUリソース
@@ -714,11 +716,19 @@ void Model::Draw(Camera camera) {
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	commandList->SetGraphicsRootConstantBufferView(1, worldTransform_.GetWvpResource()->GetGPUVirtualAddress());
 
-	if (light_ != nullptr) {
-		commandList->SetGraphicsRootConstantBufferView(3, light_->GetResource()->GetGPUVirtualAddress());
+	if (materialData->enableLighting) {
+
+		if (directionalLight_ != nullptr)
+			commandList->SetGraphicsRootConstantBufferView(3, directionalLight_->GetResource()->GetGPUVirtualAddress());
+
+		if (spotLight_ != nullptr)
+		commandList->SetGraphicsRootConstantBufferView(4, spotLight_->GetResource()->GetGPUVirtualAddress());
+
+		if (pointLight_ != nullptr)
+		commandList->SetGraphicsRootConstantBufferView(5, pointLight_->GetResource()->GetGPUVirtualAddress());
 	}
 
-	commandList->SetGraphicsRootConstantBufferView(5, skinningParamResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(7, skinningParamResource_->GetGPUVirtualAddress());
 
 	ID3D12DescriptorHeap* heaps[] = {
 	DirectXCommon::GetInstance()->GetSrvHeap().Get()
@@ -769,11 +779,13 @@ void Model::Draw(WorldTransform& world,Camera camera){
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	commandList->SetGraphicsRootConstantBufferView(1, world.GetWvpResource()->GetGPUVirtualAddress());
 
-	if (light_ != nullptr) {
-		commandList->SetGraphicsRootConstantBufferView(3, light_->GetResource()->GetGPUVirtualAddress());
+	if (materialData->enableLighting) {
+		commandList->SetGraphicsRootConstantBufferView(3, directionalLight_->GetResource()->GetGPUVirtualAddress());
+		commandList->SetGraphicsRootConstantBufferView(4, spotLight_->GetResource()->GetGPUVirtualAddress());
+		commandList->SetGraphicsRootConstantBufferView(5, pointLight_->GetResource()->GetGPUVirtualAddress());
 	}
 
-	commandList->SetGraphicsRootConstantBufferView(5, skinningParamResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(7, skinningParamResource_->GetGPUVirtualAddress());
 
 	ID3D12DescriptorHeap* heaps[] = {
 	DirectXCommon::GetInstance()->GetSrvHeap().Get()

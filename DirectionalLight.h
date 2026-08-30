@@ -8,7 +8,14 @@ using namespace Microsoft::WRL;
 
 #include "Vector.h"
 
-// 構造体
+/// <summary>
+/// DirectionalLight 一定の直線から照らす
+/// 
+/// <param name=".color">ライト色</param>
+/// <param name=".direction">ライトの向き</param>
+/// <param name=".intensity">ライトの強さ</param>
+/// 
+/// </summary>
 struct DirectionalLightParam {
 	Vector4 color;    //ライト色
 	Vector3 direction;//ライトの向き

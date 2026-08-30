@@ -169,6 +169,9 @@
     <ClCompile Include="SpotLight.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics\Light</Filter>
     </ClCompile>
+    <ClCompile Include="PointLight.cpp">
+      <Filter>Engine\Source\ソース ファイル\Graphics\Light</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -303,6 +306,9 @@
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
     </ClInclude>
     <ClInclude Include="SpotLight.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="PointLight.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
     </ClInclude>
   </ItemGroup>

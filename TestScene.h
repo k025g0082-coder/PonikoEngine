@@ -2,7 +2,14 @@
 #include "Scene.h"
 
 #include "Text.h"
+
 #include "Sprite.h"
+#include "Model.h"
+
+#include "DirectionalLight.h"
+#include "SpotLight.h"
+#include "PointLight.h"
+
 
 class TestScene :
     public Scene
@@ -15,6 +22,13 @@ public:
 private:
 
 	Sprite sprite;
+	Model* model = nullptr;
+
+	Camera camera;
+
+	DirectionalLight dLight;
+	SpotLight sLight;
+	PointLight pLight;
 
 	Text text;
 	Text text2;

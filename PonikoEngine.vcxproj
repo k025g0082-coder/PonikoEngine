@@ -146,6 +146,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="PipelineStateManager.cpp" />
+    <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="PonikoEngine.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SoundManager.cpp" />
@@ -193,6 +194,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="PipelineStateManager.h" />
+    <ClInclude Include="PointLight.h" />
     <ClInclude Include="PonikoEngine.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ScreenTransform.h" />

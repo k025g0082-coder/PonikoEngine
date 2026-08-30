@@ -2,7 +2,10 @@
 
 #include "Texture.h"
 #include "Camera.h"
+
 #include "DirectionalLight.h"
+#include "SpotLight.h"
+#include "PointLight.h"
 
 #include "Matrix.h"
 #include "WorldTransform.h"
@@ -149,9 +152,27 @@ public:
 	}
 
 	// 光源登録
-	void SetLight(DirectionalLight* light) { 
+	void SetDirectionalLight(DirectionalLight* light) { 
 
-		light_ = light;
+		directionalLight_ = light;
+
+		// ライト設定をONに
+		materialData->enableLighting = true;
+	}
+
+	// 光源登録
+	void SetPointLight(PointLight* light) {
+
+		pointLight_ = light;
+
+		// ライト設定をONに
+		materialData->enableLighting = true;
+	}
+
+	// 光源登録
+	void SetSpotLight(SpotLight* light) {
+
+		spotLight_ = light;
 
 		// ライト設定をONに
 		materialData->enableLighting = true;
@@ -222,7 +243,9 @@ private:
 	int lightMax = 10; // 一種の限界ライト数
 
 	// Directional（直線）ライト
-	DirectionalLight* light_;
+	DirectionalLight* directionalLight_;
+	SpotLight* spotLight_;
+	PointLight* pointLight_;
 
 	//0202 mvp用のリソース作り
 	//TransformationMatrix* mvpData = nullptr;

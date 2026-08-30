@@ -16,5 +16,12 @@ void SpotLight::Initialize(SpotLightParam param) {
 	lightData_->color = lightParam_.color;
 	lightData_->direction = lightParam_.direction;
 	lightData_->intensity = lightParam_.intensity;
+	lightData_->position = lightParam_.position;
+
+	lightData_->innerAngle = lightParam_.innerAngle;
+	lightData_->outerAngle = lightParam_.outerAngle;
+
+	lightData_->distance = lightParam_.distance;
+	lightData_->falloff = lightParam_.falloff;
 
 }
