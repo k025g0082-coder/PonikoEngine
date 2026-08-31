@@ -59,7 +59,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,6 +141,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GamePad.cpp" />
     <ClCompile Include="ImGuiManager.cpp" />
+    <ClCompile Include="LightingManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -149,6 +150,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="PonikoEngine.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneComponentLoader.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="Sprite.cpp" />
@@ -190,13 +192,16 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Game.h" />
     <ClInclude Include="GamePad.h" />
     <ClInclude Include="ImGuiManager.h" />
+    <ClInclude Include="LightingManager.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="PipelineStateManager.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="PonikoEngine.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneComponentLoader.h" />
     <ClInclude Include="ScreenTransform.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="SpotLight.h" />
@@ -239,6 +244,9 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="PonikoEngine.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

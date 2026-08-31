@@ -172,6 +172,12 @@
     <ClCompile Include="PointLight.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics\Light</Filter>
     </ClCompile>
+    <ClCompile Include="LightingManager.cpp">
+      <Filter>Engine\Source\ソース ファイル\Graphics\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneComponentLoader.cpp">
+      <Filter>Engine\Source\ソース ファイル\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -311,6 +317,15 @@
     <ClInclude Include="PointLight.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
     </ClInclude>
+    <ClInclude Include="LightingManager.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Engine\Source\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneComponentLoader.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Engine\Shader\Model.PS.hlsl">
@@ -336,5 +351,10 @@
     <Text Include="externals\imgui\LICENSE.txt">
       <Filter>Engine</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="PonikoEngine.rc">
+      <Filter>Engine\リソース ファイル</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

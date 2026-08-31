@@ -3,6 +3,8 @@
 #include "WinApp.h"
 #include "ImGuiManager.h"
 
+#include "SceneComponentLoader.h"
+
 void TestScene::Init() {
 
 	text.Init();
@@ -12,7 +14,6 @@ void TestScene::Init() {
 	text2.setFont("default");
 
 	camera.Initialize();
-	camera.GetWorldPosition().z = -15.0f;
 
 	//DirectionalLightParam dLightParam {
 	//	.color = {255,255,255},
@@ -20,14 +21,35 @@ void TestScene::Init() {
 	//	.intensity = 1.0f
 	//};
 
-	//PointLightParam pLightParam;
+	PointLightParam pLightParam;
 	SpotLightParam sLightParam;
+	DirectionalLightParam dLightParam;
 
-	sLight.Initialize(sLightParam);
+	
+	LightingManager::GetInstance()->AddLight(pLightParam);
+
 
 	model = Model::CreateOBJ("resources/Models/bunny.obj");
-	model->SetSpotLight(&sLight);
 
+	// LightingManagerで設定した空間のにモデルをセット
+	model->SetLightSets();
+
+
+	// yomikomi
+	if (SceneComponentLoader::GetInstance()->Load("resources/Scene/TestScene.json")) {
+
+		// ※注　ポインタ
+		json& data = SceneComponentLoader::GetInstance()->GetJson();
+
+
+		camera.SetWorldTransform(JsonToWorld(data["camera"]));
+
+
+		//camera.GetWorldPosition() = JsonToVector3(data["camera"]["position"]);
+		//data["player"]["position"] = json::array({ 0.0f, 1.0f, 2.0f});
+
+
+	}
 
 };
 
@@ -37,8 +59,24 @@ void TestScene::Update(GamePad* gamepad) {
 	camera.Update();
 
 #ifdef USE_IMGUI
+	
 	ImGui::DragFloat3("camera", &camera.GetWorldPosition().x, 0.1f);
-	ImGui::DragFloat3("spotLightPosition", &sLight.GetLightData()->position.x, 0.1f);
+
+	if (ImGui::Button("Save")) {
+
+		// ※注　ポインタ
+		json& data = SceneComponentLoader::GetInstance()->GetJson();
+
+
+		data["camera"] =WorldToJson(camera.GetWorldTransform());
+
+
+		SceneComponentLoader::GetInstance()->Save("resources/Scene/TestScene.json");
+
+	}
+
+	//ImGui::DragFloat3("dLightPosition", &dLight.GetLightData(0)->direction.x, 0.1f);
+	//ImGui::DragFloat3("plightPosition", &pLight.GetLightData(0)->position.x, 0.1f);
 #endif
 
 };

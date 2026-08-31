@@ -18,6 +18,16 @@ struct DirectionalLightParam
     float intensity; //ライトの強さ
 };
 
+struct DirectionalLightsParam
+{
+    DirectionalLightParam lights[10];
+    int count;
+    
+    float3 padding;
+};
+
+
+
 struct PointLightParam
 {
 
@@ -30,6 +40,16 @@ struct PointLightParam
 
 };
 
+struct PointLightsParam
+{
+    PointLightParam lights[10];
+    int count;
+    
+    float3 padding;
+};
+
+
+
 struct SpotLightParam
 {
 
@@ -38,19 +58,31 @@ struct SpotLightParam
     float intensity; // ライトの強さ
 
     float3 direction; // ライトの向き
-    float angle; // 光の広がる角度
+    
+    float innerAngle; // この角度以内なら最大の明るさ
+    float outerAngle; // これを超えたら光が0になる
 
     float distance; // 光が届く距離
     float falloff; // 距離による減衰
+    float padding;
 
+};
+
+struct SpotLightsParam
+{
+    SpotLightParam lights[10];
+    int count;
+    
+    float3 padding;
 };
 
 
 ConstantBuffer<Material> material : register(b0);
 
-ConstantBuffer<DirectionalLightParam> directionalLight : register(b1);
-ConstantBuffer<SpotLightParam> spotLight : register(b2);
-ConstantBuffer<PointLightParam> pointLight : register(b3);
+ConstantBuffer<DirectionalLightsParam> directionalLights : register(b1);
+ConstantBuffer<SpotLightsParam> spotLights : register(b2);
+ConstantBuffer<PointLightsParam> pointLights : register(b3);
+
 
 struct PixelShaderOutput {
     float4 color : SV_TARGET0;
@@ -64,91 +96,102 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float2 uv = uvTransform.xy;
     
     float4 textureColor = texture0.Sample(gSampler, uv);
+   
     
     //Lightingする場合
     if (material.enableLighting != 0)
     {
         float3 normal = normalize(input.normal);
-
+        
+        float3 lighting = float3(0.0f, 0.0f, 0.0f);
+    
+      
+        
     // =========================
     // Directional Light
     // =========================
-        float NdotL = dot(
-        normal,
-        -directionalLight.direction
-    );
+     
+        for (int i = 0; i < directionalLights.count; i++)
+        {
+                float NdotL = dot(
+            normal,
+            -directionalLights.lights[i].direction
+            );
 
-        float directionalCos =
-        pow(saturate(NdotL * 0.5f + 0.5f), 2.0f);
+                float directionalCos =
+            pow(saturate(NdotL * 0.5f + 0.5f), 2.0f);
 
-        float3 lighting =
-        directionalLight.color.rgb *
-        directionalCos *
-        directionalLight.intensity;
-
+                lighting +=
+            directionalLights.lights[i].color.rgb *
+            directionalCos *
+            directionalLights.lights[i].intensity;
+        }
 
     // =========================
     // Point Light
     // =========================
-        float3 pointDirection =
-    normalize(pointLight.position - input.worldPosition);
 
-        float pointNdotL =
-    saturate(dot(normal, -pointDirection));
+        for (int i = 0; i < pointLights.count; i++)
+        {
+                float3 pointDirection =
+            normalize(pointLights.lights[i].position - input.worldPosition);
 
-        float pointDistance =
-    distance(pointLight.position, input.worldPosition);
+                float pointNdotL =
+            saturate(dot(normal, -pointDirection));
 
-        float pointAttenuation =
-    saturate(1.0f - pointDistance / pointLight.radius);
+                float pointDistance =
+            distance(pointLights.lights[i].position, input.worldPosition);
 
-        lighting +=
-    pointLight.color.rgb *
-    pointNdotL *
-    pointAttenuation *
-    pointLight.intensity;
+                float pointAttenuation =
+            saturate(
+                1.0f -
+                pointDistance / pointLights.lights[i].radius
+            );
+
+                lighting +=
+            pointLights.lights[i].color.rgb *
+            pointNdotL *
+            pointAttenuation *
+            pointLights.lights[i].intensity;
+        }
 
     // =========================
     // Spot Light
     // =========================
-        float3 spotDirection =
-        normalize(spotLight.position - input.worldPosition);
+        
+        for (int i = 0; i < spotLights.count; i++)
+        {
+    // 表面 → ライト（法線ドット用）
+            float3 toLight = normalize(spotLights.lights[i].position - input.worldPosition);
+            float NdotL = saturate(dot(normal, toLight));
 
-        float spotNdotL =
-        saturate(dot(normal, spotDirection));
+    // 距離減衰
+            float dist = distance(spotLights.lights[i].position, input.worldPosition);
+            float distAtten = saturate(1.0f - dist / spotLights.lights[i].distance);
+            distAtten *= distAtten; // 見た目を良くするなら二乗
 
-        float spotDistance =
-        distance(spotLight.position, input.worldPosition);
+    // 角度減衰（ここが重要）
+            float3 lightToSurface = -toLight; // ライト → 表面
+            float3 lightDir = normalize(spotLights.lights[i].direction);
+            float spotCos = dot(lightDir, lightToSurface);
 
-    // 距離による減衰
-        float distanceAttenuation =
-        saturate(1.0f - spotDistance / spotLight.distance);
+            float innerCos = cos(radians(spotLights.lights[i].innerAngle));
+            float outerCos = cos(radians(spotLights.lights[i].outerAngle));
 
-    // スポットライトの向き
-        float spotCos =
-        dot(
-            normalize(-spotLight.direction),
-            spotDirection
-        );
+            float angleRange = max(innerCos - outerCos, 1e-4f); // ゼロ除算防止
+            float spotFactor = saturate((spotCos - outerCos) / angleRange);
 
-    // 光の範囲
-        float spotFactor =
-        saturate(
-            (spotCos - cos(spotLight.angle))
-        );
-
-        lighting +=
-        spotLight.color.rgb *
-        spotNdotL *
-        distanceAttenuation *
-        spotFactor *
-        spotLight.intensity;
-
-
-        output.color =
+            lighting += spotLights.lights[i].color.rgb
+              * NdotL
+              * distAtten
+              * spotFactor
+              * spotLights.lights[i].intensity;
+        }
+            output.color =
         material.color *
         textureColor *
         float4(lighting, 1.0f);
+        
     }
     else
     {

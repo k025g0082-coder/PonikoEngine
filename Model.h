@@ -3,9 +3,11 @@
 #include "Texture.h"
 #include "Camera.h"
 
-#include "DirectionalLight.h"
-#include "SpotLight.h"
-#include "PointLight.h"
+//#include "DirectionalLight.h"
+//#include "SpotLight.h"
+//#include "PointLight.h"
+
+#include "LightingManager.h"
 
 #include "Matrix.h"
 #include "WorldTransform.h"
@@ -151,32 +153,43 @@ public:
 		return result;
 	}
 
-	// 光源登録
-	void SetDirectionalLight(DirectionalLight* light) { 
+	// LightingManagerから空間すべてのライトを取得して、設定する
+	void SetLightSets() {
 
-		directionalLight_ = light;
-
-		// ライト設定をONに
-		materialData->enableLighting = true;
-	}
-
-	// 光源登録
-	void SetPointLight(PointLight* light) {
-
-		pointLight_ = light;
+		directionalLight_ = LightingManager::GetInstance()->GetLightSets().dLight;
+		spotLight_ = LightingManager::GetInstance()->GetLightSets().sLight;
+		pointLight_ = LightingManager::GetInstance()->GetLightSets().pLight;
 
 		// ライト設定をONに
 		materialData->enableLighting = true;
 	}
 
-	// 光源登録
-	void SetSpotLight(SpotLight* light) {
+	//// 光源登録
+	//void SetDirectionalLight(DirectionalLight* light) { 
 
-		spotLight_ = light;
+	//	directionalLight_ = light;
 
-		// ライト設定をONに
-		materialData->enableLighting = true;
-	}
+	//	// ライト設定をONに
+	//	materialData->enableLighting = true;
+	//}
+
+	//// 光源登録
+	//void SetPointLight(PointLight* light) {
+
+	//	pointLight_ = light;
+
+	//	// ライト設定をONに
+	//	materialData->enableLighting = true;
+	//}
+
+	//// 光源登録
+	//void SetSpotLight(SpotLight* light) {
+
+	//	spotLight_ = light;
+
+	//	// ライト設定をONに
+	//	materialData->enableLighting = true;
+	//}
 
 	// アニメ番号変更
 	void ChangeAnimeIndex(int index) {

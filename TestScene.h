@@ -6,10 +6,6 @@
 #include "Sprite.h"
 #include "Model.h"
 
-#include "DirectionalLight.h"
-#include "SpotLight.h"
-#include "PointLight.h"
-
 
 class TestScene :
     public Scene
@@ -26,9 +22,7 @@ private:
 
 	Camera camera;
 
-	DirectionalLight dLight;
-	SpotLight sLight;
-	PointLight pLight;
+
 
 	Text text;
 	Text text2;

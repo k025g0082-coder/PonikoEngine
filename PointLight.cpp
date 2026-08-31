@@ -4,18 +4,11 @@
 #include "DirectXCommon.h"
 
 // 設定
-void PointLight::Initialize(PointLightParam param) {
-	lightParam_ = param;
+void PointLight::Initialize() {
 
 	// リソース作成
-	resourceLight = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(PointLight));
+	resourceLight = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(PointLightsParam));
 
-	resourceLight->Map(0, nullptr, reinterpret_cast<void**>(&lightData_));
-
-	// 各設定
-	lightData_->color = lightParam_.color;
-	lightData_->intensity = lightParam_.intensity;
-	lightData_->position = lightParam_.position;
-	lightData_->radius = lightParam_.radius;
+	resourceLight->Map(0, nullptr, reinterpret_cast<void**>(&lightDatas_));
 
 }

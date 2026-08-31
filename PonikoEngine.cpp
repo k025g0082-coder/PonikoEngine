@@ -55,6 +55,8 @@ namespace PonikoEngine {
 		// いんぷと
 		GamePad::GetInstance()->Initialize();
 
+		// ３種のライトセットを司るクラスの初期化
+		LightingManager::GetInstance()->Initialize();
 
 		// Gameシステムの方の初期化
 		Game::GetInstance()->Init();

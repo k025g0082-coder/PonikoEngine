@@ -12,6 +12,19 @@ public:
 	Vector3& GetWorldPosition() {return worldTransform_.translation_;}
 	Vector3& GetRotation() { return worldTransform_.rotation_; }
 
+	// 読み取り専用
+	const WorldTransform& GetWorldTransform() const
+	{
+		return worldTransform_;
+	}
+
+	// 設定
+	void SetWorldTransform(const WorldTransform& w)
+	{
+		worldTransform_ = w;
+	}
+
+
 	// ビュー
 	Matrix4x4 GetViewMatrix() { return viewMatrix; }
 	void SetViewMatrix(Matrix4x4 matWorld) { 

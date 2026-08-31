@@ -722,10 +722,10 @@ void Model::Draw(Camera camera) {
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLight_->GetResource()->GetGPUVirtualAddress());
 
 		if (spotLight_ != nullptr)
-		commandList->SetGraphicsRootConstantBufferView(4, spotLight_->GetResource()->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(4, spotLight_->GetResource()->GetGPUVirtualAddress());
 
 		if (pointLight_ != nullptr)
-		commandList->SetGraphicsRootConstantBufferView(5, pointLight_->GetResource()->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(5, pointLight_->GetResource()->GetGPUVirtualAddress());
 	}
 
 	commandList->SetGraphicsRootConstantBufferView(7, skinningParamResource_->GetGPUVirtualAddress());
@@ -746,7 +746,7 @@ void Model::Draw(Camera camera) {
 	// もしアニメがあったら
 	if (modelData.isSkinning) {
 		commandList->SetGraphicsRootConstantBufferView(
-			4,
+			6,
 			skinningResource_->GetGPUVirtualAddress());
 	}
 
@@ -799,7 +799,7 @@ void Model::Draw(WorldTransform& world,Camera camera){
 	// もしアニメがあったら
 	if (modelData.isSkinning) {
 		commandList->SetGraphicsRootConstantBufferView(
-			4,
+			6,
 			skinningResource_->GetGPUVirtualAddress());
 	}
 

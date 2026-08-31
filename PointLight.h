@@ -28,25 +28,56 @@ struct PointLightParam {
 
 };
 
+// １０個まで
+struct PointLightsParam {
+
+	PointLightParam lights[10];
+	int count = 0;
+	float padding[3];
+};
+
 class PointLight
 {
 public:
 
 	// 設定
-	void Initialize(PointLightParam param);
+	void Initialize();
 
 	// 参照w
-	PointLightParam* GetLightData() {
-		return lightData_;
+	PointLightParam* GetLightData(int index) {
+		return &lightDatas_->lights[index];
 	};
+
+	// ライト追加
+	void AddLight(PointLightParam param) {
+
+		// １０個以上は帰る
+		if (lightDatas_->count >= kMaxLight) return;
+
+		// 追加
+		lightDatas_->lights[lightDatas_->count++] = param;
+
+	}
+
+	// ライトリセット
+	void ResetLight()
+	{
+		for (int i = 0; i < kMaxLight; i++) {
+
+			lightDatas_->lights[i] = {};
+		}
+	}
+
 
 	ID3D12Resource* GetResource() { return resourceLight.Get(); }
 
 private:
-	PointLightParam lightParam_;
+	// １０こまで
+	static const int kMaxLight = 10;
 
-	PointLightParam* lightData_ = nullptr;
+	PointLightsParam* lightDatas_;
 
 	ComPtr <ID3D12Resource> resourceLight;
+
 };
 

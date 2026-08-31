@@ -10,7 +10,7 @@
 #include "Triangle.h"
 #include "Sprite.h"
 #include "Camera.h"
-#include "DirectionalLight.h"
+#include "LightingManager.h"
 #include "Model.h"
 #include "Text.h"
 
