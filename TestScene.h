@@ -5,6 +5,7 @@
 
 #include "Sprite.h"
 #include "Model.h"
+#include "Particle.h"
 
 
 class TestScene :
@@ -16,13 +17,16 @@ public:
 	void Draw();
 
 private:
+	Particle particle;
 
 	Sprite sprite;
 	Model* model = nullptr;
+	Model* fieldModel = nullptr;
+	Model* cubeModel = nullptr;
 
 	Camera camera;
 
-
+	PointLightParam* lightAddress = nullptr;
 
 	Text text;
 	Text text2;

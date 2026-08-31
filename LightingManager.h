@@ -18,9 +18,9 @@ public:
 
 	void Initialize();
 
-	void AddLight(DirectionalLightParam p) { dLight.AddLight(p); }
-	void AddLight(SpotLightParam p) { sLight.AddLight(p); };
-	void AddLight(PointLightParam p) { pLight.AddLight(p); }
+	DirectionalLightParam& AddLight(DirectionalLightParam p) { return dLight.AddLight(p); }
+	SpotLightParam& AddLight(SpotLightParam p) { return sLight.AddLight(p); };
+	PointLightParam& AddLight(PointLightParam p) { return pLight.AddLight(p); }
 
 	void ResetLight() {
 

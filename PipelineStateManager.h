@@ -9,7 +9,8 @@
 enum class PipelineType {
 	Sprite,
 	Model,
-	Triangle
+	Triangle,
+	Particle
 };
 
 struct PipelineState {
@@ -52,6 +53,7 @@ private:
 	void createTrianglePipeline();
 	void createSpritePipeline();
 	void createModelPipeline();
+	void createParticlePipeline();
 
 	// bufferResourceを作る関数
 	ID3D12Resource* CreateBufferResource(

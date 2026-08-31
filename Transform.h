@@ -32,7 +32,7 @@ struct Transform {
 
 
 	// 親子の親の方のアドレス
-	Transform* parent_;
+	Transform* parent_ = nullptr;
 
 	const Microsoft::WRL::ComPtr<ID3D12Resource>& GetWvpResource() const { return wvpResource_; }
 

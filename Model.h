@@ -204,10 +204,10 @@ public:
 		materialData->color = { rgba.x,rgba.y,rgba.z,rgba.w };
 	};
 
-private:
-
-	// モデル読み取り関数
+	// モデルデータ読み取り関数
 	static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
+
+private:
 
 	// マテリアル読み取り関数
 	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);

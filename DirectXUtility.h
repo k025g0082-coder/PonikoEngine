@@ -1,6 +1,8 @@
 #pragma once
 #include <d3d12.h>
 #include <string>
+#include <random>
+
 
 namespace DirectXUtility
 {
@@ -14,6 +16,10 @@ namespace DirectXUtility
 		ID3D12Device* device, // デバイス
 		size_t sizeInBytes // バッファのサイズ
 	);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
+
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(ID3D12DescriptorHeap* descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
 	// DepthStencilTextureをつくる
 	ID3D12Resource* CreateDepthStencilTexture(ID3D12Device* device, int width, int height);
@@ -30,5 +36,7 @@ namespace DirectXUtility
 	void Log(const std::wstring& message);
 	void Log(const std::string& message);
 	void Log(const char* format, ...);
+	
+	// ランダムな範囲のfloatを生成
+	float RandomFloat(float min, float max);
 };
-

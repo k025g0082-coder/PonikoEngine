@@ -40,14 +40,15 @@ public:
 		return &lightDatas_->lights[index];
 	};
 
-	// ライト追加
-	void AddLight(DirectionalLightParam param) {
+	// ライト追加 & 参照
+	DirectionalLightParam& AddLight(DirectionalLightParam param) {
 
-		// １０個以上は帰る
-		if (lightDatas_->count >= kMaxLight) return;
+		if (lightDatas_->count >= kMaxLight)
+			return lightDatas_->lights[lightDatas_->count - 1];
 
-		// 追加
-		lightDatas_->lights[lightDatas_->count++] = param;
+		lightDatas_->lights[lightDatas_->count] = param;
+
+		return lightDatas_->lights[lightDatas_->count++];
 
 	}
 

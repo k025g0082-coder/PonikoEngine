@@ -26,7 +26,8 @@ IDxcBlob* DxcCompiler::CompileShader(
 	IDxcCompiler3* dxcCompiler,
 	IDxcIncludeHandler* includeHandler
 ) {
-
+	OutputDebugStringW(profile);
+	OutputDebugStringW(L"\n");
 	//--- 1. ファイルの読み込み
 
 	//Log(ConvertString(std::format("Begin CompileShader, path{},profile:{}\n", filePath,profile)));

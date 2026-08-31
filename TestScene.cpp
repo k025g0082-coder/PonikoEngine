@@ -5,7 +5,11 @@
 
 #include "SceneComponentLoader.h"
 
+#include "ModelLoader.h"
+
 void TestScene::Init() {
+
+	particle.Initialize(ModelLoader::LoadObjModel("resources/Engine/plane.obj"));
 
 	text.Init();
 	text.setFont("default");
@@ -15,24 +19,24 @@ void TestScene::Init() {
 
 	camera.Initialize();
 
-	//DirectionalLightParam dLightParam {
-	//	.color = {255,255,255},
-	//	.direction = {0.0f, -1.0f, 0.0f},
-	//	.intensity = 1.0f
-	//};
-
 	PointLightParam pLightParam;
 	SpotLightParam sLightParam;
 	DirectionalLightParam dLightParam;
 
-	
-	LightingManager::GetInstance()->AddLight(pLightParam);
+
+	lightAddress = &LightingManager::GetInstance()->AddLight(pLightParam);
 
 
 	model = Model::CreateOBJ("resources/Models/bunny.obj");
+	fieldModel = Model::CreateOBJ("resources/Models/field/field.obj");
+
+
+	cubeModel = Model::CreateOBJ("resources/Engine/plane.obj");
+
 
 	// LightingManagerで設定した空間のにモデルをセット
 	model->SetLightSets();
+	fieldModel->SetLightSets();
 
 
 	// yomikomi
@@ -56,11 +60,19 @@ void TestScene::Init() {
 void TestScene::Update(GamePad* gamepad) {
 
 	model->Update();
+	//fieldModel->Update();
+	cubeModel->Update();
+
+	particle.Update(camera);
+
 	camera.Update();
 
 #ifdef USE_IMGUI
 	
-	ImGui::DragFloat3("camera", &camera.GetWorldPosition().x, 0.1f);
+	ImGui::DragFloat3("cameraPosition", &camera.GetWorldPosition().x, 0.1f);
+	ImGui::DragFloat3("cameraRotation", &camera.GetRotation().x, 0.01f);
+
+	ImGui::DragFloat3("lightPos", &lightAddress->position.x, 0.1f);
 
 	if (ImGui::Button("Save")) {
 
@@ -102,6 +114,11 @@ void TestScene::Draw() {
 	};
 
 	model->Draw(camera);
+
+	particle.Draw();
+
+	//fieldModel->Draw(camera);
+	//cubeModel->Draw(camera);
 
 	text.SetFontLayout(layout);
 	text2.SetFontLayout(layout);

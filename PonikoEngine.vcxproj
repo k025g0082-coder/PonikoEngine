@@ -128,6 +128,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="DirectXCommon.cpp" />
     <ClCompile Include="DirectXUtility.cpp" />
     <ClCompile Include="DxcCompiler.cpp" />
+    <ClCompile Include="EasingVec.cpp" />
     <ClCompile Include="EffeckseerManager.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
@@ -146,6 +147,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
+    <ClCompile Include="Particle.cpp" />
     <ClCompile Include="PipelineStateManager.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="PonikoEngine.cpp" />
@@ -166,6 +168,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="Particle.hlsli" />
     <None Include="resources\Engine\Shader\Model.hlsli" />
     <None Include="resources\Engine\Shader\Object3d.hlsli" />
     <None Include="resources\Engine\Shader\Sprite.hlsli" />
@@ -178,6 +181,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="DirectXCommon.h" />
     <ClInclude Include="DirectXUtility.h" />
     <ClInclude Include="DxcCompiler.h" />
+    <ClInclude Include="EasingVec.h" />
     <ClInclude Include="EffekseerManager.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
@@ -196,6 +200,8 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLoader.h" />
+    <ClInclude Include="Particle.h" />
+    <ClInclude Include="ParticleEmit.h" />
     <ClInclude Include="PipelineStateManager.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="PonikoEngine.h" />
@@ -220,6 +226,18 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <Text Include="externals\imgui\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Particle.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Particle.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="resources\Engine\Shader\Model.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -244,9 +262,6 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="PonikoEngine.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

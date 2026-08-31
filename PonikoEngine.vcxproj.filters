@@ -178,6 +178,12 @@
     <ClCompile Include="SceneComponentLoader.cpp">
       <Filter>Engine\Source\ソース ファイル\Game</Filter>
     </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="EasingVec.cpp">
+      <Filter>Engine\Source\ソース ファイル\math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -191,6 +197,9 @@
     </None>
     <None Include=".editorconfig">
       <Filter>Engine</Filter>
+    </None>
+    <None Include="Particle.hlsli">
+      <Filter>Engine\リソース ファイル</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -326,6 +335,15 @@
     <ClInclude Include="SceneComponentLoader.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEmit.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="EasingVec.h">
+      <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Engine\Shader\Model.PS.hlsl">
@@ -346,15 +364,16 @@
     <FxCompile Include="resources\Engine\Shader\Sprite.VS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="Particle.VS.hlsl">
+      <Filter>Engine\リソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="Particle.PS.hlsl">
+      <Filter>Engine\リソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">
       <Filter>Engine</Filter>
     </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="PonikoEngine.rc">
-      <Filter>Engine\リソース ファイル</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>

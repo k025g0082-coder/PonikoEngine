@@ -48,15 +48,15 @@ public:
 		return &lightDatas_->lights[index];
 	};
 
-	// ライト追加
-	void AddLight(PointLightParam param) {
+	// ライト追加 & 参照を返す
+	PointLightParam& AddLight(PointLightParam param)
+	{
+		if (lightDatas_->count >= kMaxLight)
+			return lightDatas_->lights[lightDatas_->count - 1];
 
-		// １０個以上は帰る
-		if (lightDatas_->count >= kMaxLight) return;
+		lightDatas_->lights[lightDatas_->count] = param;
 
-		// 追加
-		lightDatas_->lights[lightDatas_->count++] = param;
-
+		return lightDatas_->lights[lightDatas_->count++];
 	}
 
 	// ライトリセット
