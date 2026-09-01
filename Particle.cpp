@@ -7,10 +7,17 @@
 #include "DirectXCommon.h"
 #include "DirectXUtility.h"
 
+#include "ModelLoader.h"
+
 #include "Matrix.h"
 
 #define _USE_MATH_DEFINES
 #include "math.h"
+
+Particle* Particle::GetInstance() {
+    static Particle instance;
+    return &instance;
+}
 
 void Particle::Initialize(ModelData modeldata) {
 	
@@ -141,15 +148,86 @@ void Particle::Initialize(ModelData modeldata) {
 
     vertexResource->Unmap(0, nullptr);
 
-
-
     // srt初期化
-    for (uint32_t i = 0; i < kNumInstance; ++i)
-    {
-        emits[i] = MakeNewParticle({0,0});
-    }
+    //for (uint32_t i = 0; i < kNumInstance; ++i)
+    //{
+    //    emits[i] = MakeNewParticle({0,0});
+    //}
 
 }
+
+// パーティクル用モデル登録関数
+//void Particle::RegionParticleModel(std::string tag,std::string path) {
+//
+//    // すでによみこんでたらリターン
+//
+//    ParticleModelData* data = &particleModelDatas_[tag];
+//
+//    data->modelData = ModelLoader::LoadObjModel(path);
+//
+//    data->instancingResource =
+//        DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(ParticleData) * kNumInstance);
+//
+//
+//    instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
+//
+//    // 頂点データ
+//    indexResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(uint32_t) * modelData.indices.size());
+//
+//    // リソースの先頭のアドレスから使う
+//    indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
+//
+//    //使用するリソースのサイズはインデックスmodelData.indices.size()つ分のサイズ
+//    indexBufferView.SizeInBytes =
+//        static_cast<UINT>(sizeof(uint32_t) * modelData.indices.size());//インデックスはuint32_tとする
+//
+//    indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+//
+//    uint32_t* indexData = nullptr;
+//
+//    indexResource->Map(
+//        0,
+//        nullptr,
+//        reinterpret_cast<void**>(&indexData)
+//    );
+//
+//    // コピー
+//    std::memcpy(
+//        indexData,
+//        modelData.indices.data(),
+//        sizeof(uint32_t) * modelData.indices.size()
+//    );
+//
+//    indexResource->Unmap(0, nullptr);
+//
+//
+//
+//    texture = new Texture();
+//    texture->Initialize(modelData.materials.textureFilePath);
+//
+//    //頂点リソースを作る
+//    vertexResource = DirectXUtility::CreateBufferResource(
+//        DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(ModelVertexData) * modelData.vertices.size());
+//
+//    vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+//    vertexBufferView.SizeInBytes =
+//        UINT(sizeof(ModelVertexData) * modelData.vertices.size());
+//    vertexBufferView.StrideInBytes = sizeof(ModelVertexData);
+//
+//    ModelVertexData* vertexData = nullptr;
+//    vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+//
+//
+//    std::memcpy(
+//        vertexData,
+//        modelData.vertices.data(),
+//        sizeof(ModelVertexData) * modelData.vertices.size()
+//    );
+//
+//    vertexResource->Unmap(0, nullptr);
+//
+//    // srt初期化
+//};
 
 void Particle::Update(Camera camera) {
 
@@ -166,9 +244,6 @@ void Particle::Update(Camera camera) {
 
         instancingData[i].color = emits[i].color;
 
-        // 新しく
-        if (!emits[i].isActive)
-            emits[i] = MakeNewParticle({ 0,0 });
 
         Matrix4x4 worldViewProjectionMatrix = Multiply(emits[i].transform.matWorld_, Multiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
         
@@ -218,28 +293,35 @@ void Particle::Draw() {
 }
 
 // 生成
-ParticleEmit Particle::MakeNewParticle(Vector3 pos) {
+void Particle::MakeNewParticle(Vector3 pos,int num, ParticleParam param) {
     
-    ParticleEmit emit;
-    emit.transform.scale_ = { 1.0f,1.0f,1.0f };
-    emit.transform.rotation_ = { 0,0,0 };
-    emit.transform.translation_ = pos;
+    for (int i = 0; i < kNumInstance; i++)
+    {
+        if (emits[i].isActive) return;
+            
+            emits[i].isActive = true;
+            emits[i].transform.scale_ = { 1.0f,1.0f,1.0f };
+            emits[i].transform.rotation_ = { 0,0,0 };
+            emits[i].transform.translation_ = pos;
 
-    emit.color ={ DirectXUtility::RandomFloat(0, 1.0f), DirectXUtility::RandomFloat(0, 1.0f),0,1.0f };// aka 
+            emits[i].isBillboard = param.isBilliboard;
 
-    emit.speed = DirectXUtility::RandomFloat(0, 0.1f);
+            emits[i].color = param.color;
 
-    // ランダム
-    emit.velocity = {
-        DirectXUtility::RandomFloat(-1.0f, 1.0f),
-        DirectXUtility::RandomFloat(-1.0f, 1.0f),
-        DirectXUtility::RandomFloat(-1.0f, 1.0f)
-    };
+            emits[i].speed = param.speed + DirectXUtility::RandomFloat(-0.01f, 0.01f);
 
-    // 方向ベクトルを正規化
-    emit.direction = Normalize(emit.velocity);
+        // ランダム
+            emits[i].velocity = {
+            DirectXUtility::RandomFloat(-1.0f, 1.0f),
+            DirectXUtility::RandomFloat(-1.0f, 1.0f),
+            DirectXUtility::RandomFloat(-1.0f, 1.0f)
+            };
 
-    emit.init();
+            // 方向ベクトルを正規化
+            emits[i].direction = Normalize(emits[i].velocity);
 
-    return emit;
+            emits[i].init();
+            break;
+    }
+ 
 }

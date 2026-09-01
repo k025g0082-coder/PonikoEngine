@@ -17,6 +17,7 @@
 #include "GamePad.h"
 
 #include "Game.h"
+#include "Particle.h"
 
 
 namespace PonikoEngine {

@@ -4,7 +4,7 @@
 
 #include "ParticleEmit.h"
 
-
+#include <map>
 // シェーダーに転送用
 struct ParticleData {
 
@@ -15,19 +15,56 @@ struct ParticleData {
 
 };
 
+struct ParticleModelData {
+
+	// モデルデータ
+	ModelData modelData;
+
+	// テクスチャ
+	Texture* texture = nullptr;
+
+	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+
+};
+
+/// <summary>
+/// <param name="color"> 色 </param>
+/// <param name="speed"> 速度 </param>
+/// <param name="life"> 生存時間 </param>
+/// <param name="isBilliboard"> 常に前向くか（板ポリ用） </param>
+/// </summary>
+
+struct ParticleParam {
+	Vector4 color = { 1.0f,1.0f,1.0f,1.0f };
+	float speed = 0.1f;
+	int life = 20;
+	bool isBilliboard = false;
+};
+
 class Particle {
 public:
+
+	// シングルトゥン
+	static Particle* GetInstance();
+
 	void Initialize(ModelData modeldata);
 
 	void Update(Camera camera);
 	void Draw();
+
+	// パーティクル用モデル登録関数
+	void RegionParticleModel(std::string tag,std::string path);
+
+	std::map<std::string, ParticleModelData> particleModelDatas_;
 private:
 
 	// 生成
-	ParticleEmit MakeNewParticle(Vector3 pos);
+	void MakeNewParticle(Vector3 pos,int num, ParticleParam param);
+
 
 	// 最大数
-	static const uint32_t kNumInstance = 10;
+	static const uint32_t kNumInstance = 100;
 
 	ParticleEmit emits[kNumInstance];
 
