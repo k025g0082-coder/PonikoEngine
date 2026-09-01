@@ -26,7 +26,7 @@ namespace PonikoEngine {
 		/// エンジンの初期化
 		/// </summary>
 		/// <param name="title">ウィンドウタイトル</param>
-		void Initialize(const wchar_t* title = L"ここにタイトルを入力");
+		void Initialize(const wchar_t* title = L"ここにタイトルを入力test");
 
 		/// <summary>
 	/// エンジンの終了処理
