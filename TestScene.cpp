@@ -27,8 +27,8 @@ void TestScene::Init() {
 	lightAddress = &LightingManager::GetInstance()->AddLight(pLightParam);
 
 
-	model = Model::CreateOBJ("resources/Models/bunny.obj");
-	fieldModel = Model::CreateOBJ("resources/Models/field/field.obj");
+	model = Model::CreateOBJ("resources/ExampleScene/bunny.obj");
+	fieldModel = Model::CreateOBJ("resources/ExampleScene/field.obj");
 
 
 	cubeModel = Model::CreateOBJ("resources/Engine/plane.obj");
@@ -40,18 +40,13 @@ void TestScene::Init() {
 
 
 	// yomikomi
-	if (SceneComponentLoader::GetInstance()->Load("resources/Scene/TestScene.json")) {
+	if (SceneComponentLoader::GetInstance()->Load("resources/ExampleScene/exampleScene.json")) {
 
 		// ※注　ポインタ
 		json& data = SceneComponentLoader::GetInstance()->GetJson();
 
-
+		// カメラの情報を読み込む
 		camera.SetWorldTransform(JsonToWorld(data["camera"]));
-
-
-		//camera.GetWorldPosition() = JsonToVector3(data["camera"]["position"]);
-		//data["player"]["position"] = json::array({ 0.0f, 1.0f, 2.0f});
-
 
 	}
 
@@ -60,7 +55,7 @@ void TestScene::Init() {
 void TestScene::Update(GamePad* gamepad) {
 
 	model->Update();
-	//fieldModel->Update();
+
 	cubeModel->Update();
 
 	particle.Update(camera);
@@ -87,8 +82,6 @@ void TestScene::Update(GamePad* gamepad) {
 
 	}
 
-	//ImGui::DragFloat3("dLightPosition", &dLight.GetLightData(0)->direction.x, 0.1f);
-	//ImGui::DragFloat3("plightPosition", &pLight.GetLightData(0)->position.x, 0.1f);
 #endif
 
 };
@@ -117,9 +110,6 @@ void TestScene::Draw() {
 
 	particle.Draw();
 
-	//fieldModel->Draw(camera);
-	//cubeModel->Draw(camera);
-
 	text.SetFontLayout(layout);
 	text2.SetFontLayout(layout);
 
@@ -127,8 +117,4 @@ void TestScene::Draw() {
 
 	text.drawString("ponikoEngine", {0,0}, Text::TextAnchor::LeftTop);
 
-	//text2.drawString("Test",pos, Text::TextAnchor::Center);
-
-	//sprite.SetPosition(pos);
-	//sprite.Draw();
 };

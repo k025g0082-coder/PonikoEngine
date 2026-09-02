@@ -50,18 +50,27 @@ void EasingVec::Step() {
 
 		if (time >= 1.0f) {
 			isEasing = false;
+			isFinished = true;
 			time = 1.0f;
 		}
 	}
 }
 
 void EasingVec::Reset() {
-	easingTime = false;
+	easingTime = 0;
 	isEasing = false;
+	isFinished = false;
 }
 
 float EasingVec::getEasingTime() {
+
+	float up;
+	float down;
+
 	switch (type) {
+	case EASE_None:
+		return time;
+		break;
 	case EASE_InSine:
 		return 1 - cosf((time * (float)M_PI) / 2);
 		break;
@@ -86,10 +95,10 @@ float EasingVec::getEasingTime() {
 			return (2.0f - powf(2.0f, -20.0f * time + 10.0f)) / 2.0f;
 		}
 		break;
-		
+
 
 	case EASE_InBack:
-		
+
 
 		return c3 * time * time * time - c1 * time * time;
 		break;
@@ -128,10 +137,13 @@ float EasingVec::getEasingTime() {
 		return powf(2.0f, 10.0f * time - 10.0f);
 		break;
 	case EASE_SmoothTrapezoid:
-		
-			float up = smoothstep(0.0f, 0.25f, time);
-			float down = 1.0f - smoothstep(0.75f, 1.0f, time);
-			return up * down;
+
+		up = smoothstep(0.0f, 0.25f, time);
+		down = 1.0f - smoothstep(0.75f, 1.0f, time);
+		return up * down;
+		break;
+	case EASE_Jump:
+		return 4.0f * time * (1.0f - time);
 		break;
 	}
 	return 0;
@@ -143,9 +155,9 @@ float EasingVec::getEasingNum() {
 Vector2 EasingVec::getEasingVec2() {
 	Vector2 v;
 
-		v.x = lerp(startPosVec2.x, endPosVec2.x, getEasingTime());
-		v.y = lerp(startPosVec2.y, endPosVec2.y, getEasingTime());
-		return v;
+	v.x = lerp(startPosVec2.x, endPosVec2.x, getEasingTime());
+	v.y = lerp(startPosVec2.y, endPosVec2.y, getEasingTime());
+	return v;
 };
 
 Vector3 EasingVec::getEasingVec3() {
