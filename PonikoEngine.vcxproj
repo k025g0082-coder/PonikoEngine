@@ -19,7 +19,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -48,7 +48,7 @@
     <OutDir>$(ProjectDir)lib\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(ProjectDir)lib\$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)exe\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -66,16 +66,18 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/ignore:4049 %(AdditionalOptions)</AdditionalOptions>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
-      <AdditionalLibraryDirectories>$(ProjectDir)externals\DirectXTex\Bin\Desktop_2022_Win10\x64\Debug;$(ProjectDir)externals\freeType\build\Debug;$(SolutionDir)externals\effekseer\lib\Effekseer\Debug;$(ProjectDir)externals\assimp\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freetyped.lib;DirectXTex.lib;Effekseerd.lib;assimp-vc145-mtd.lib;$(SolutionDir)externals\effekseer\lib\3rdParty\LLGI\src\Debug\LLGId.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererDX12\Debug\EffekseerRendererDX12d.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererLLGI\Debug\EffekseerRendererLLGId.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererCommon\Debug\EffekseerRendererCommond.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)externals\DirectXTex\Bin\Desktop_2022_Win10\x64\Debug;$(ProjectDir)externals\freeType\build\Debug;$(SolutionDir)externals\effekseer\lib\Effekseer\Debug;$(ProjectDir)externals\assimp\lib\Debug;$(ProjectDir)resources\zlib\lib;$(ProjectDir)resources\zlib\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freetyped.lib;DirectXTex.lib;Effekseerd.lib;zd.lib;assimp-vc145-mtd.lib;$(SolutionDir)externals\effekseer\lib\3rdParty\LLGI\src\Debug\LLGId.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererDX12\Debug\EffekseerRendererDX12d.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererLLGI\Debug\EffekseerRendererLLGId.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererCommon\Debug\EffekseerRendererCommond.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PostBuildEvent>
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
+copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
 
-copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"</Command>
+copy /Y "$(ProjectDir)resources\zlib\bin\zd.dll" "$(OutDir)"</Command>
+      <Message>exeの確認用にzlibコピーする</Message>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>
@@ -113,7 +115,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </Manifest>
     <PostBuildEvent>
       <Command>rmdir /S /Q "C:\Users\k025g\Desktop\source\PonikoEngineテンプレ\Game\resources\Engine"
-xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\PonikoEngineテンプレ\Game\resources\Engine"</Command>
+xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\PonikoEngineテンプレ\Game\resources\Engine"
+</Command>
       <Message>テンプレのResourceのEngine内を作り直し</Message>
     </PostBuildEvent>
     <PreBuildEvent>

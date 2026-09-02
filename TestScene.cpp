@@ -27,8 +27,8 @@ void TestScene::Init() {
 	lightAddress = &LightingManager::GetInstance()->AddLight(pLightParam);
 
 
-	model = Model::CreateOBJ("resources/ExampleScene/bunny.obj");
-	fieldModel = Model::CreateOBJ("resources/ExampleScene/field.obj");
+	model = Model::CreateOBJ("resources/Models/bunny.obj");
+	fieldModel = Model::CreateOBJ("resources/Models/field/field.obj");
 
 
 	cubeModel = Model::CreateOBJ("resources/Engine/plane.obj");
@@ -40,7 +40,7 @@ void TestScene::Init() {
 
 
 	// yomikomi
-	if (SceneComponentLoader::GetInstance()->Load("resources/ExampleScene/exampleScene.json")) {
+	if (SceneComponentLoader::GetInstance()->Load("resources/Scene/TestScene.json")) {
 
 		// ※注　ポインタ
 		json& data = SceneComponentLoader::GetInstance()->GetJson();
