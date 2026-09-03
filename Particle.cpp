@@ -19,134 +19,136 @@ Particle* Particle::GetInstance() {
     return &instance;
 }
 
-void Particle::Initialize(ModelData modeldata) {
+void Particle::Initialize() {
 	
-    modelData = modeldata;
-
-    instancingResource =
-    DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(ParticleData) * kNumInstance);
-
-
-    instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
     
-    //単位行列を書きこんでおく
-    for (uint32_t index = 0; index < kNumInstance; ++index) {
-        instancingData[index].WVP = MakeIdentity4x4();
-        instancingData[index].World = MakeIdentity4x4();
-        instancingData[index].color = Vector4{ 1.0f,1.0f,1.0f,1.0f };
 
-    }
+    //modelData = modeldata;
+
+    //instancingResource =
+    //DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(ParticleData) * kNumInstance);
+
+
+    //instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
+    //
+    ////単位行列を書きこんでおく
+    //for (uint32_t index = 0; index < kNumInstance; ++index) {
+    //    instancingData[index].WVP = MakeIdentity4x4();
+    //    instancingData[index].World = MakeIdentity4x4();
+    //    instancingData[index].color = Vector4{ 1.0f,1.0f,1.0f,1.0f };
+
+    //}
 
  
-    D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
+    //D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
 
-    instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-    instancingSrvDesc.Shader4ComponentMapping =
-        D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    instancingSrvDesc.ViewDimension =
-        D3D12_SRV_DIMENSION_BUFFER;
+    //instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+    //instancingSrvDesc.Shader4ComponentMapping =
+    //    D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    //instancingSrvDesc.ViewDimension =
+    //    D3D12_SRV_DIMENSION_BUFFER;
 
-    instancingSrvDesc.Buffer.FirstElement = 0;
-    instancingSrvDesc.Buffer.NumElements = kNumInstance;
-    instancingSrvDesc.Buffer.StructureByteStride =
-        sizeof(TransformationMatrix);
-    instancingSrvDesc.Buffer.Flags =
-        D3D12_BUFFER_SRV_FLAG_NONE;
-
-
-    UINT descriptorSize =
-        DirectXCommon::GetInstance()->GetDevice()
-        ->GetDescriptorHandleIncrementSize(
-            D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
-        );
-
-    uint32_t index = DirectXCommon::GetInstance()->GetAllocateSrv();
+    //instancingSrvDesc.Buffer.FirstElement = 0;
+    //instancingSrvDesc.Buffer.NumElements = kNumInstance;
+    //instancingSrvDesc.Buffer.StructureByteStride =
+    //    sizeof(TransformationMatrix);
+    //instancingSrvDesc.Buffer.Flags =
+    //    D3D12_BUFFER_SRV_FLAG_NONE;
 
 
-    instancingSrvHandleCPU =
-        DirectXUtility::GetCPUDescriptorHandle(
-            DirectXCommon::GetInstance()->GetSrvHeap().Get(),
-            descriptorSize,
-            index
-        );
-    instancingSrvHandleGPU =
-        DirectXUtility::GetGPUDescriptorHandle(
-            DirectXCommon::GetInstance()->GetSrvHeap().Get(),
-            descriptorSize,
-            index
-        );
+    //UINT descriptorSize =
+    //    DirectXCommon::GetInstance()->GetDevice()
+    //    ->GetDescriptorHandleIncrementSize(
+    //        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+    //    );
 
-    DirectXCommon::GetInstance()->GetDevice().Get()->CreateShaderResourceView(
-        instancingResource.Get(),
-        &instancingSrvDesc,
-        instancingSrvHandleCPU
-    );
+    //uint32_t index = DirectXCommon::GetInstance()->GetAllocateSrv();
 
 
+    //instancingSrvHandleCPU =
+    //    DirectXUtility::GetCPUDescriptorHandle(
+    //        DirectXCommon::GetInstance()->GetSrvHeap().Get(),
+    //        descriptorSize,
+    //        index
+    //    );
+    //instancingSrvHandleGPU =
+    //    DirectXUtility::GetGPUDescriptorHandle(
+    //        DirectXCommon::GetInstance()->GetSrvHeap().Get(),
+    //        descriptorSize,
+    //        index
+    //    );
 
-
-    // マテリアル用のリソース
-    materialResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(Material));
-
-    materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-    materialData->color = { 1.0f,1.0f,1.0f,1.0f }; // 白色
-    materialData->enableLighting = false; // ライティングはOFFにする
-    materialData->uvTransform = MakeIdentity4x4();
-
-    // 頂点データ
-    indexResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(uint32_t) * modelData.indices.size());
-
-    // リソースの先頭のアドレスから使う
-    indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
-
-    //使用するリソースのサイズはインデックスmodelData.indices.size()つ分のサイズ
-    indexBufferView.SizeInBytes =
-        static_cast<UINT>(sizeof(uint32_t) * modelData.indices.size());//インデックスはuint32_tとする
-
-    indexBufferView.Format = DXGI_FORMAT_R32_UINT;
-
-    uint32_t* indexData = nullptr;
-
-    indexResource->Map(
-        0,
-        nullptr,
-        reinterpret_cast<void**>(&indexData)
-    );
-
-    // コピー
-    std::memcpy(
-        indexData,
-        modelData.indices.data(),
-        sizeof(uint32_t) * modelData.indices.size()
-    );
-
-    indexResource->Unmap(0, nullptr);
+    //DirectXCommon::GetInstance()->GetDevice().Get()->CreateShaderResourceView(
+    //    instancingResource.Get(),
+    //    &instancingSrvDesc,
+    //    instancingSrvHandleCPU
+    //);
 
 
 
-    texture = new Texture();
-    texture->Initialize(modelData.materials.textureFilePath);
 
-    //頂点リソースを作る
-    vertexResource = DirectXUtility::CreateBufferResource(
-        DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(ModelVertexData) * modelData.vertices.size());
+    //// マテリアル用のリソース
+    //materialResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(Material));
 
-    vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-    vertexBufferView.SizeInBytes =
-        UINT(sizeof(ModelVertexData) * modelData.vertices.size());
-    vertexBufferView.StrideInBytes = sizeof(ModelVertexData);
+    //materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+    //materialData->color = { 1.0f,1.0f,1.0f,1.0f }; // 白色
+    //materialData->enableLighting = false; // ライティングはOFFにする
+    //materialData->uvTransform = MakeIdentity4x4();
 
-    ModelVertexData* vertexData = nullptr;
-    vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+    //// 頂点データ
+    //indexResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(uint32_t) * modelData.indices.size());
+
+    //// リソースの先頭のアドレスから使う
+    //indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
+
+    ////使用するリソースのサイズはインデックスmodelData.indices.size()つ分のサイズ
+    //indexBufferView.SizeInBytes =
+    //    static_cast<UINT>(sizeof(uint32_t) * modelData.indices.size());//インデックスはuint32_tとする
+
+    //indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+
+    //uint32_t* indexData = nullptr;
+
+    //indexResource->Map(
+    //    0,
+    //    nullptr,
+    //    reinterpret_cast<void**>(&indexData)
+    //);
+
+    //// コピー
+    //std::memcpy(
+    //    indexData,
+    //    modelData.indices.data(),
+    //    sizeof(uint32_t) * modelData.indices.size()
+    //);
+
+    //indexResource->Unmap(0, nullptr);
 
 
-    std::memcpy(
-        vertexData,
-        modelData.vertices.data(),
-        sizeof(ModelVertexData) * modelData.vertices.size()
-    );
 
-    vertexResource->Unmap(0, nullptr);
+    //texture = new Texture();
+    //texture->Initialize(modelData.materials.textureFilePath);
+
+    ////頂点リソースを作る
+    //vertexResource = DirectXUtility::CreateBufferResource(
+    //    DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(ModelVertexData) * modelData.vertices.size());
+
+    //vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+    //vertexBufferView.SizeInBytes =
+    //    UINT(sizeof(ModelVertexData) * modelData.vertices.size());
+    //vertexBufferView.StrideInBytes = sizeof(ModelVertexData);
+
+    //ModelVertexData* vertexData = nullptr;
+    //vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+
+
+    //std::memcpy(
+    //    vertexData,
+    //    modelData.vertices.data(),
+    //    sizeof(ModelVertexData) * modelData.vertices.size()
+    //);
+
+    //vertexResource->Unmap(0, nullptr);
 
     // srt初期化
     //for (uint32_t i = 0; i < kNumInstance; ++i)
@@ -156,172 +158,430 @@ void Particle::Initialize(ModelData modeldata) {
 
 }
 
-// パーティクル用モデル登録関数
-//void Particle::RegionParticleModel(std::string tag,std::string path) {
-//
-//    // すでによみこんでたらリターン
-//
-//    ParticleModelData* data = &particleModelDatas_[tag];
-//
-//    data->modelData = ModelLoader::LoadObjModel(path);
-//
-//    data->instancingResource =
-//        DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(ParticleData) * kNumInstance);
-//
-//
-//    instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
-//
-//    // 頂点データ
-//    indexResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(uint32_t) * modelData.indices.size());
-//
-//    // リソースの先頭のアドレスから使う
-//    indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
-//
-//    //使用するリソースのサイズはインデックスmodelData.indices.size()つ分のサイズ
-//    indexBufferView.SizeInBytes =
-//        static_cast<UINT>(sizeof(uint32_t) * modelData.indices.size());//インデックスはuint32_tとする
-//
-//    indexBufferView.Format = DXGI_FORMAT_R32_UINT;
-//
-//    uint32_t* indexData = nullptr;
-//
-//    indexResource->Map(
-//        0,
-//        nullptr,
-//        reinterpret_cast<void**>(&indexData)
-//    );
-//
-//    // コピー
-//    std::memcpy(
-//        indexData,
-//        modelData.indices.data(),
-//        sizeof(uint32_t) * modelData.indices.size()
-//    );
-//
-//    indexResource->Unmap(0, nullptr);
-//
-//
-//
-//    texture = new Texture();
-//    texture->Initialize(modelData.materials.textureFilePath);
-//
-//    //頂点リソースを作る
-//    vertexResource = DirectXUtility::CreateBufferResource(
-//        DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(ModelVertexData) * modelData.vertices.size());
-//
-//    vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-//    vertexBufferView.SizeInBytes =
-//        UINT(sizeof(ModelVertexData) * modelData.vertices.size());
-//    vertexBufferView.StrideInBytes = sizeof(ModelVertexData);
-//
-//    ModelVertexData* vertexData = nullptr;
-//    vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-//
-//
-//    std::memcpy(
-//        vertexData,
-//        modelData.vertices.data(),
-//        sizeof(ModelVertexData) * modelData.vertices.size()
-//    );
-//
-//    vertexResource->Unmap(0, nullptr);
-//
-//    // srt初期化
-//};
+// パーティクル用のモデル登録関数
+void Particle::RegionParticleModel(std::string tag,std::string path) {
 
-void Particle::Update(Camera camera) {
-
-    // srt更新
-    for (uint32_t i = 0; i < kNumInstance; ++i)
-    {
-
-        // カメラ目線
-        if (emits[i].isBillboard)
-            emits[i].transform.rotation_ = camera.GetRotation();
-
-
-        emits[i].update();
-
-        instancingData[i].color = emits[i].color;
-
-
-        Matrix4x4 worldViewProjectionMatrix = Multiply(emits[i].transform.matWorld_, Multiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
-        
-        instancingData[i].WVP = worldViewProjectionMatrix;
-        instancingData[i].World = emits[i].transform.matWorld_;
-
+    // すでにおなじタグがあればリターン
+    if (particleModelDatas_.contains(tag)) {
+        return;
     }
 
+    // すでに同じモデルを読み込んでいたらリターン
+    for (const auto& [tag, data] : particleModelDatas_) {
+        if (data.modelPath== path) {
+            return;
+        }
+    }
+
+    ParticleModelData* data = &particleModelDatas_[tag];
+
+    data->modelPath = path;
+
+    data->modelData = ModelLoader::LoadObjModel(path);
+
+    data->instancingResource =
+        DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(ParticleData) * kNumInstance);
+
+    data->instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&data->instancingData));
+
+    // 頂点データ
+    data->indexResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(uint32_t) * data->modelData.indices.size());
+
+    // リソースの先頭のアドレスから使う
+    data->indexBufferView.BufferLocation = data->indexResource->GetGPUVirtualAddress();
+
+    //使用するリソースのサイズはインデックスmodelData.indices.size()つ分のサイズ
+    data->indexBufferView.SizeInBytes =
+        static_cast<UINT>(sizeof(uint32_t) * data->modelData.indices.size());//インデックスはuint32_tとする
+
+    data->indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+
+    uint32_t* indexData = nullptr;
+
+    data->indexResource->Map(
+        0,
+        nullptr,
+        reinterpret_cast<void**>(&indexData)
+    );
+
+    // コピー
+    std::memcpy(
+        indexData,
+        data->modelData.indices.data(),
+        sizeof(uint32_t) * data->modelData.indices.size()
+    );
+
+      D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
+
+        instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+        instancingSrvDesc.Shader4ComponentMapping =
+            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        instancingSrvDesc.ViewDimension =
+            D3D12_SRV_DIMENSION_BUFFER;
+
+        instancingSrvDesc.Buffer.FirstElement = 0;
+        instancingSrvDesc.Buffer.NumElements = kNumInstance;
+        instancingSrvDesc.Buffer.StructureByteStride =
+            sizeof(ParticleData);
+        instancingSrvDesc.Buffer.Flags =
+            D3D12_BUFFER_SRV_FLAG_NONE;
+
+    // SRV（GPUとかに必要な奴）登録
+    UINT descriptorSize =
+        DirectXCommon::GetInstance()->GetDevice()
+        ->GetDescriptorHandleIncrementSize(
+            D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+        );
+
+    // 今のサイズに合わせて
+    uint32_t index = DirectXCommon::GetInstance()->GetAllocateSrv();
+
+    // ハンドルゲットだぜ！
+    data->instancingSrvHandleCPU =
+        DirectXUtility::GetCPUDescriptorHandle(
+            DirectXCommon::GetInstance()->GetSrvHeap().Get(),
+            descriptorSize,
+            index
+        );
+    data->instancingSrvHandleGPU =
+        DirectXUtility::GetGPUDescriptorHandle(
+            DirectXCommon::GetInstance()->GetSrvHeap().Get(),
+            descriptorSize,
+            index
+        );
+
+    DirectXCommon::GetInstance()->GetDevice().Get()->CreateShaderResourceView(
+        data->instancingResource.Get(),
+        &instancingSrvDesc,
+        data->instancingSrvHandleCPU
+    );
+
+
+
+    data->indexResource->Unmap(0, nullptr);
+
+    // テキスチャ
+    data->texture = new Texture();
+    data->texture->Initialize(data->modelData.materials.textureFilePath);
+
+    //頂点リソースを作る
+    data->vertexResource = DirectXUtility::CreateBufferResource(
+        DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(ModelVertexData) * data->modelData.vertices.size());
+
+    data->vertexBufferView.BufferLocation = data->vertexResource->GetGPUVirtualAddress();
+    data->vertexBufferView.SizeInBytes =
+        UINT(sizeof(ModelVertexData) * data->modelData.vertices.size());
+    data->vertexBufferView.StrideInBytes = sizeof(ModelVertexData);
+
+    ModelVertexData* vertexData = nullptr;
+    data->vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+
+    // マテリアル用のリソース
+    materialResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(Material));
+
+    materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+    materialData->color = { 1.0f,1.0f,1.0f,1.0f }; // 白色
+    materialData->enableLighting = false; // ライティングはOFFにする
+    materialData->uvTransform = MakeIdentity4x4();
+
+    std::memcpy(
+        vertexData,
+        data->modelData.vertices.data(),
+        sizeof(ModelVertexData) * data->modelData.vertices.size()
+    );
+
+    data->vertexResource->Unmap(0, nullptr);
+
+    //単位行列を書きこんでおく
+    for (uint32_t index = 0; index < kNumInstance; ++index) {
+        data->instancingData[index].WVP = MakeIdentity4x4();
+        data->instancingData[index].World = MakeIdentity4x4();
+        data->instancingData[index].color = Vector4{ 1.0f,1.0f,1.0f,1.0f };
+    }
+
+};
+
+void Particle::Update() {
+
+    
+
+    // カメラ未設定なら帰る
+    if (camera_ == nullptr) return;
+
+    for (auto& [tag, data] : particleModelDatas_) {
+
+        int instanceIndex = 0;
+
+        // まいかいinstancingDataは、０～からなので
+        for (uint32_t i = 0; i < kNumMaxInstances; ++i)
+        {
+            if (!emits[i].isActive)
+                continue;
+
+            if (emits[i].tag != tag)
+                continue;
+
+            if (instanceIndex >= kNumInstance)
+                break;
+
+
+            // カメラ目線
+            if (emits[i].isBillboard)
+                emits[i].transform.rotation_ = camera_->GetRotation();
+
+            emits[i].update();
+
+            // 定数バッファに
+            data.instancingData[instanceIndex].color = emits[i].color;
+
+            Matrix4x4 worldViewProjectionMatrix = Multiply(emits[i].transform.matWorld_, Multiply(camera_->GetViewMatrix(), camera_->GetProjectionMatrix()));
+
+            data.instancingData[instanceIndex].WVP = worldViewProjectionMatrix;
+            data.instancingData[instanceIndex].World = emits[i].transform.matWorld_;
+
+            instanceIndex++;
+
+        }
+    }
 }
+//
+//    for (uint32_t i = 0; i < kNumMaxInstances; ++i)
+//    {
+//
+//        if (!emits[i].isActive) continue;
+//
+//        // カメラ目線
+//        if (emits[i].isBillboard)
+//            emits[i].transform.rotation_ = camera.GetRotation();
+//
+//
+//        emits[i].update();
+//
+//        
+//        ParticleModelData* data = &particleModelDatas_[emits[i].tag];
+//
+//
+//        data->instancingData[i].color = emits[i].color;
+//
+//        Matrix4x4 worldViewProjectionMatrix = Multiply(emits[i].transform.matWorld_, Multiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
+//
+//        data->instancingData[i].WVP = worldViewProjectionMatrix;
+//        data->instancingData[i].World = emits[i].transform.matWorld_;
+//
+//    }
+//}
+    //// srt更新
+    //for (uint32_t i = 0; i < kNumInstance; ++i)
+    //{
 
-void Particle::Draw() {
+    //    // カメラ目線
+    //    if (emits[i].isBillboard)
+    //        emits[i].transform.rotation_ = camera.GetRotation();
 
-    ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
 
-    commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+    //    emits[i].update();
+
+    //    instancingData[i].color = emits[i].color;
+
+
+    //    Matrix4x4 worldViewProjectionMatrix = Multiply(emits[i].transform.matWorld_, Multiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
+    //    
+    //    instancingData[i].WVP = worldViewProjectionMatrix;
+    //    instancingData[i].World = emits[i].transform.matWorld_;
+
+    //}
+
+//}
+
+
+
+//
+//void Particle::Draw() {
+//
+//    ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
+//
+//    commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+//
+//    //RootSignatureを設定。PSOに設定しているけど別途設定が必要
+//    commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Particle).rootSignature);
+//    // PSOを設定
+//    commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Particle).graphicsPipelineState);
+//
+//
+//    commandList->IASetIndexBuffer(&indexBufferView);
+//
+//    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+//  
+//    ID3D12DescriptorHeap* heaps[] = {
+//    DirectXCommon::GetInstance()->GetSrvHeap().Get()
+//    };
+//    
+//    commandList->SetDescriptorHeaps(1, heaps);
+//
+//    commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+//    commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
+//
+//    // SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
+//    commandList->SetGraphicsRootDescriptorTable(2, texture->GetTextureSrvHandleGPU());
+//
+//
+//    commandList->DrawIndexedInstanced(
+//        UINT(modelData.indices.size()),
+//        kNumInstance,
+//        0,
+//        0,
+//        0
+//    );
+//}
+//
+
+
+void Particle::Draw()
+{
+    // カメラ未設定なら帰る
+    if (camera_ == nullptr) return;
+
+    ID3D12GraphicsCommandList* commandList =
+        DirectXCommon::GetInstance()->GetCommandList().Get();
 
     //RootSignatureを設定。PSOに設定しているけど別途設定が必要
     commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Particle).rootSignature);
     // PSOを設定
     commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Particle).graphicsPipelineState);
 
+    commandList->IASetPrimitiveTopology(
+        D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+    );
 
-    commandList->IASetIndexBuffer(&indexBufferView);
-
-    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-  
     ID3D12DescriptorHeap* heaps[] = {
-    DirectXCommon::GetInstance()->GetSrvHeap().Get()
+        DirectXCommon::GetInstance()->GetSrvHeap().Get()
     };
-    
+
     commandList->SetDescriptorHeaps(1, heaps);
 
-    commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-    commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
+    // モデルごとに1回だけ描画
+    for (auto& [tag, data] : particleModelDatas_)
+    {
+        if (data.currentDrawNum <= 0)
+            continue;
 
-    // SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
-    commandList->SetGraphicsRootDescriptorTable(2, texture->GetTextureSrvHandleGPU());
+        commandList->IASetVertexBuffers(
+            0, 1, &data.vertexBufferView
+        );
 
+        commandList->IASetIndexBuffer(
+            &data.indexBufferView
+        );
 
-    commandList->DrawIndexedInstanced(
-        UINT(modelData.indices.size()),
-        kNumInstance,
-        0,
-        0,
-        0
-    );
+        commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+
+        commandList->SetGraphicsRootDescriptorTable(
+            1,
+            data.instancingSrvHandleGPU
+        );
+
+        
+        commandList->SetGraphicsRootDescriptorTable(
+            2,
+            data.texture->GetTextureSrvHandleGPU()
+        );
+
+        commandList->DrawIndexedInstanced(
+            UINT(data.modelData.indices.size()),
+            data.currentDrawNum,
+            0,
+            0,
+            0
+        );
+    }
 }
 
 // 生成
-void Particle::MakeNewParticle(Vector3 pos,int num, ParticleParam param) {
-    
-    for (int i = 0; i < kNumInstance; i++)
+//void Particle::MakeNewParticle(Vector3 pos,int num, ParticleParam param) {
+//    
+//    for (int i = 0; i < kNumInstance; i++)
+//    {
+//        if (emits[i].isActive) return;
+//            
+//            emits[i].isActive = true;
+//            emits[i].transform.scale_ = { 1.0f,1.0f,1.0f };
+//            emits[i].transform.rotation_ = { 0,0,0 };
+//            emits[i].transform.translation_ = pos;
+//
+//            emits[i].isBillboard = param.isBilliboard;
+//
+//            emits[i].color = param.color;
+//
+//            emits[i].speed = param.speed + DirectXUtility::RandomFloat(-0.01f, 0.01f);
+//
+//        // ランダム
+//            emits[i].velocity = {
+//            DirectXUtility::RandomFloat(-1.0f, 1.0f),
+//            DirectXUtility::RandomFloat(-1.0f, 1.0f),
+//            DirectXUtility::RandomFloat(-1.0f, 1.0f)
+//            };
+//
+//            // 方向ベクトルを正規化
+//            emits[i].direction = Normalize(emits[i].velocity);
+//
+//            emits[i].init();
+//            break;
+//    }
+// 
+//}
+//
+
+// 生成
+void Particle::MakeNewParticle(std::string tag, Vector3 pos, int num, ParticleParam param) {
+
+    ParticleModelData* data = &particleModelDatas_[tag];
+
+    // １モデルの限界描画数超えてたら　リターン
+    if (data->currentDrawNum +  num > kNumInstance) {
+        return;
+    }
+
+    // 描画数足すｗ
+    data->currentDrawNum += num;
+
+    int count = 0;
+
+    for (int i = 0; i < kNumMaxInstances; i++)
     {
-        if (emits[i].isActive) return;
-            
-            emits[i].isActive = true;
-            emits[i].transform.scale_ = { 1.0f,1.0f,1.0f };
-            emits[i].transform.rotation_ = { 0,0,0 };
-            emits[i].transform.translation_ = pos;
+        if (emits[i].isActive) continue;
 
-            emits[i].isBillboard = param.isBilliboard;
+        emits[i].isActive = true;
 
-            emits[i].color = param.color;
+        // タグ名登録
+        emits[i].tag = tag;
+        
+        emits[i].transform.scale_ = { 1.0f,1.0f,1.0f };
+        emits[i].transform.rotation_ = { 0,0,0 };
+        emits[i].transform.translation_ = pos;
 
-            emits[i].speed = param.speed + DirectXUtility::RandomFloat(-0.01f, 0.01f);
+        emits[i].isBillboard = param.isBilliboard;
+
+        emits[i].color = param.color;
+
+        emits[i].speed = param.speed + DirectXUtility::RandomFloat(-0.01f, 0.01f);
 
         // ランダム
-            emits[i].velocity = {
-            DirectXUtility::RandomFloat(-1.0f, 1.0f),
-            DirectXUtility::RandomFloat(-1.0f, 1.0f),
-            DirectXUtility::RandomFloat(-1.0f, 1.0f)
-            };
+        emits[i].velocity = {
+        DirectXUtility::RandomFloat(-1.0f, 1.0f),
+        DirectXUtility::RandomFloat(-1.0f, 1.0f),
+        DirectXUtility::RandomFloat(-1.0f, 1.0f)
+        };
 
-            // 方向ベクトルを正規化
-            emits[i].direction = Normalize(emits[i].velocity);
+        // 方向ベクトルを正規化
+        emits[i].direction = Normalize(emits[i].velocity);
 
-            emits[i].init();
+        emits[i].init();
+
+        // もし規定の数以上ならbreak
+        count++;
+        if (count >= num)
             break;
     }
- 
+
+
 }

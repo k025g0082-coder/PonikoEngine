@@ -1,10 +1,12 @@
 #pragma once
 
 #include "Model.h"
+#include "Camera.h"
 
 #include "ParticleEmit.h"
 
 #include <map>
+
 // シェーダーに転送用
 struct ParticleData {
 
@@ -23,9 +25,27 @@ struct ParticleModelData {
 	// テクスチャ
 	Texture* texture = nullptr;
 
-	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
+	D3D12_INDEX_BUFFER_VIEW indexBufferView{};// 頂点ビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 
+	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource;
+
+	ID3D12Resource* indexResource;
+
+	// マテリアル用のリソース
+	ComPtr <ID3D12Resource> materialResource;
+	ComPtr <ID3D12Resource> vertexResource;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU;
+	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU;// 描画時に必要
+
+
+	//書き込むためのアドレス
+	ParticleData* instancingData = nullptr;
+	std::string modelPath;
+
+	// 描画してる数
+	int currentDrawNum = 0;
 };
 
 /// <summary>
@@ -48,25 +68,41 @@ public:
 	// シングルトゥン
 	static Particle* GetInstance();
 
-	void Initialize(ModelData modeldata);
+	void Initialize();
 
-	void Update(Camera camera);
+	void Update();
+
 	void Draw();
 
 	// パーティクル用モデル登録関数
 	void RegionParticleModel(std::string tag,std::string path);
 
+	// 生成
+	void MakeNewParticle(std::string tag, Vector3 pos, int num, ParticleParam param);
+
+	void Draw(std::string tag);
+
+	// 描画に使うカメラをセットする
+	void SetCamera(Camera& camera) { camera_ = &camera; }
+
 	std::map<std::string, ParticleModelData> particleModelDatas_;
+
+
 private:
 
 	// 生成
 	void MakeNewParticle(Vector3 pos,int num, ParticleParam param);
 
 
-	// 最大数
+	// ひとモデルの最大描画数
 	static const uint32_t kNumInstance = 100;
 
-	ParticleEmit emits[kNumInstance];
+	// すべてのモデルの最大描画数
+	static const uint32_t kNumMaxInstances = 1000;
+
+
+	// 現在のすべてのエミット
+	ParticleEmit emits[kNumMaxInstances];
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource;
 
@@ -98,5 +134,7 @@ private:
 	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 
+	// 描画する際のカメラ
+	Camera* camera_ = nullptr;
 
 };

@@ -4,6 +4,8 @@
 // 粒子
 struct ParticleEmit {
 
+	std::string tag; // 登録されてるモデルのタグ
+
 	WorldTransform transform; // 座標
 
 	Vector3 direction;						 // 方向
@@ -12,7 +14,7 @@ struct ParticleEmit {
 	float speed;							 // スピード
 
 	bool isBillboard = true;				 // 板ポリ用　常にカメラ目線
-	bool isActive = true;
+	bool isActive = false;
 
 	float life = 20;						 // 生存時間
 	float timer = 0;

@@ -7,9 +7,9 @@
 
 #include "ModelLoader.h"
 
-void TestScene::Init() {
+#include "Particle.h"
 
-	particle.Initialize(ModelLoader::LoadObjModel("resources/Engine/plane.obj"));
+void TestScene::Init() {
 
 	text.Init();
 	text.setFont("default");
@@ -24,11 +24,11 @@ void TestScene::Init() {
 	DirectionalLightParam dLightParam;
 
 
-	lightAddress = &LightingManager::GetInstance()->AddLight(pLightParam);
+	lightAddress = &LightingManager::GetInstance()->AddLight(dLightParam);
 
 
 	model = Model::CreateOBJ("resources/Models/bunny.obj");
-	fieldModel = Model::CreateOBJ("resources/Models/field/field.obj");
+	fieldModel = Model::CreateOBJ("resources/Models/backGroundCloud/backGroundCloud.obj");
 
 
 	cubeModel = Model::CreateOBJ("resources/Engine/plane.obj");
@@ -36,8 +36,21 @@ void TestScene::Init() {
 
 	// LightingManagerで設定した空間のにモデルをセット
 	model->SetLightSets();
-	fieldModel->SetLightSets();
+	//fieldModel->SetLightSets();
 
+	ParticleParam param;
+
+
+
+
+	// 登録
+	Particle::GetInstance()->RegionParticleModel("plane", "resources/Engine/plane.obj");
+	
+	// パーティクル放出
+	Particle::GetInstance()->MakeNewParticle("plane", Vector3{ 0,0,50.0f }, 2, param);
+
+	// カメラ登録
+	Particle::GetInstance()->SetCamera(camera);
 
 	// yomikomi
 	if (SceneComponentLoader::GetInstance()->Load("resources/Scene/TestScene.json")) {
@@ -57,8 +70,7 @@ void TestScene::Update(GamePad* gamepad) {
 	model->Update();
 
 	cubeModel->Update();
-
-	particle.Update(camera);
+	fieldModel->Update();
 
 	camera.Update();
 
@@ -67,7 +79,7 @@ void TestScene::Update(GamePad* gamepad) {
 	ImGui::DragFloat3("cameraPosition", &camera.GetWorldPosition().x, 0.1f);
 	ImGui::DragFloat3("cameraRotation", &camera.GetRotation().x, 0.01f);
 
-	ImGui::DragFloat3("lightPos", &lightAddress->position.x, 0.1f);
+	//ImGui::DragFloat3("lightPos", &lightAddress->position.x, 0.1f);
 
 	if (ImGui::Button("Save")) {
 
@@ -107,8 +119,7 @@ void TestScene::Draw() {
 	};
 
 	model->Draw(camera);
-
-	particle.Draw();
+	fieldModel->Draw(camera);
 
 	text.SetFontLayout(layout);
 	text2.SetFontLayout(layout);

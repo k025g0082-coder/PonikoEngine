@@ -61,6 +61,8 @@ namespace PonikoEngine {
 		// Gameシステムの方の初期化
 		Game::GetInstance()->Init();
 
+		// パーティクル
+		//Particle::GetInstance()->Initialize();
 
 	};
 
@@ -70,10 +72,13 @@ namespace PonikoEngine {
 		// 更新
 		ImGuiManager::GetInstance()->Begin();
 
-		/*　ここに更新処理　*/
+			/*　ここに更新処理　*/
 			Game::GetInstance()->Update();
 
 			GamePad::GetInstance()->Update();
+
+			// パーティクル
+			Particle::GetInstance()->Update();
 
 		ImGuiManager::GetInstance()->End();
 
@@ -86,6 +91,9 @@ namespace PonikoEngine {
 		DirectXCommon::GetInstance()->PreDraw();
 
 			Game::GetInstance()->Draw();
+
+			// パーティクル
+			Particle::GetInstance()->Draw();
 
 		// IMGUI byouga
 		ImGuiManager::GetInstance()->Draw();

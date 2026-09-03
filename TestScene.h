@@ -5,8 +5,6 @@
 
 #include "Sprite.h"
 #include "Model.h"
-#include "Particle.h"
-
 
 class TestScene :
     public Scene
@@ -17,7 +15,6 @@ public:
 	void Draw();
 
 private:
-	Particle particle;
 
 	Sprite sprite;
 	Model* model = nullptr;
@@ -26,7 +23,7 @@ private:
 
 	Camera camera;
 
-	PointLightParam* lightAddress = nullptr;
+	DirectionalLightParam* lightAddress = nullptr;
 
 	Text text;
 	Text text2;
