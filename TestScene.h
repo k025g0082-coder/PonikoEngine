@@ -25,6 +25,8 @@ private:
 
 	DirectionalLightParam* lightAddress = nullptr;
 
+	int timer = 0;
+
 	Text text;
 	Text text2;
 	Text text3;

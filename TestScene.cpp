@@ -38,16 +38,9 @@ void TestScene::Init() {
 	model->SetLightSets();
 	//fieldModel->SetLightSets();
 
-	ParticleParam param;
-
-
-
-
 	// 登録
 	Particle::GetInstance()->RegionParticleModel("plane", "resources/Engine/plane.obj");
-	
-	// パーティクル放出
-	Particle::GetInstance()->MakeNewParticle("plane", Vector3{ 0,0,50.0f }, 2, param);
+	Particle::GetInstance()->RegionParticleModel("cube", "resources/Models/cube/cube.obj");
 
 	// カメラ登録
 	Particle::GetInstance()->SetCamera(camera);
@@ -73,6 +66,19 @@ void TestScene::Update(GamePad* gamepad) {
 	fieldModel->Update();
 
 	camera.Update();
+
+	ParticleParam param;
+
+	if (timer % 10 == 0) {
+		// パーティクル放出
+		param.isBilliboard = true;
+		Particle::GetInstance()->MakeNewParticle("plane", Vector3{ 0,0,20.0f }, 2, param);
+		param.isBilliboard = false;
+		param.speed = 1.0f;
+		Particle::GetInstance()->MakeNewParticle("cube", Vector3{ 0,0,20.0f }, 10, param);
+	}
+
+	timer++;
 
 #ifdef USE_IMGUI
 	
@@ -119,7 +125,7 @@ void TestScene::Draw() {
 	};
 
 	model->Draw(camera);
-	fieldModel->Draw(camera);
+	//fieldModel->Draw(camera);
 
 	text.SetFontLayout(layout);
 	text2.SetFontLayout(layout);

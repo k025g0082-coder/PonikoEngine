@@ -342,6 +342,7 @@ void Particle::Update() {
             instanceIndex++;
 
         }
+        data.currentDrawNum = instanceIndex;
     }
 }
 //
@@ -552,24 +553,36 @@ void Particle::MakeNewParticle(std::string tag, Vector3 pos, int num, ParticlePa
 
         emits[i].isActive = true;
 
+        emits[i].ease.Reset();
+        emits[i].timer = 0;
+
         // タグ名登録
         emits[i].tag = tag;
         
-        emits[i].transform.scale_ = { 1.0f,1.0f,1.0f };
+        // 大きさランダム
+        float random = DirectXUtility::RandomFloat(param.scaleAmpMin, param.scaleAmpMax);
+
+        emits[i].transform.scale_ = Vector3(random, random, random);
         emits[i].transform.rotation_ = { 0,0,0 };
         emits[i].transform.translation_ = pos;
+
+        emits[i].gravity = param.gravity;
 
         emits[i].isBillboard = param.isBilliboard;
 
         emits[i].color = param.color;
 
-        emits[i].speed = param.speed + DirectXUtility::RandomFloat(-0.01f, 0.01f);
+        // なんか１．０ｆでも速すぎるのでこうする
+        float speed = param.speed * 0.1f;
+        float speedAmp= param.speedAmp * 0.1f;
+
+        emits[i].speed = param.speed + DirectXUtility::RandomFloat(-speedAmp,speedAmp);
 
         // ランダム
         emits[i].velocity = {
-        DirectXUtility::RandomFloat(-1.0f, 1.0f),
-        DirectXUtility::RandomFloat(-1.0f, 1.0f),
-        DirectXUtility::RandomFloat(-1.0f, 1.0f)
+            DirectXUtility::RandomFloat(-1.0f, 1.0f),
+            DirectXUtility::RandomFloat(-1.0f, 1.0f),
+            DirectXUtility::RandomFloat(-1.0f, 1.0f)
         };
 
         // 方向ベクトルを正規化

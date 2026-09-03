@@ -56,9 +56,29 @@ struct ParticleModelData {
 /// </summary>
 
 struct ParticleParam {
+
+	// 色
 	Vector4 color = { 1.0f,1.0f,1.0f,1.0f };
-	float speed = 0.1f;
+	
+	// スピード
+	float speed = 1.0f;
+	
+	// 生成時のスピードの幅
+	float speedAmp = 0.0f;
+
+	// 重力(0.25f～)
+	float gravity = 0.0f;
+
+	// 生成時の最小の小ささ(1.0f基準)
+	float scaleAmpMin = 1.0f;
+
+	// 生成時の最大の大きさ(1.0f基準)
+	float scaleAmpMax = 1.0f;
+
+	// 生存時間
 	int life = 20;
+
+	// 常にカメラ方向を向くか
 	bool isBilliboard = false;
 };
 

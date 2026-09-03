@@ -13,6 +13,8 @@ struct ParticleEmit {
 	Vector4 color;						     // 色( のアドレス)
 	float speed;							 // スピード
 
+	float gravity = 0.0f;	     			 // 重力
+
 	bool isBillboard = true;				 // 板ポリ用　常にカメラ目線
 	bool isActive = false;
 
@@ -33,6 +35,9 @@ struct ParticleEmit {
 			speed = ease.getEasingNum();
 
 			velocity = direction * speed;
+
+			// 重力分毎フレーム加算（下に落下）
+			velocity.y -= gravity;
 
 			transform.translation_.x += velocity.x;
 			transform.translation_.y += velocity.y;
