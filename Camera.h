@@ -13,7 +13,7 @@ public:
 	Vector3& GetRotation() { return worldTransform_.rotation_; }
 
 	// 読み取り専用
-	const WorldTransform& GetWorldTransform() const
+	WorldTransform& GetWorldTransform()
 	{
 		return worldTransform_;
 	}

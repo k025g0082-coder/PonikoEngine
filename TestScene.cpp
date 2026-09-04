@@ -28,37 +28,43 @@ void TestScene::Init() {
 
 
 	model = Model::CreateOBJ("resources/Models/bunny.obj");
-	fieldModel = Model::CreateOBJ("resources/Models/backGroundCloud/backGroundCloud.obj");
+	fieldModel = Model::CreateOBJ("resources/Models/field/field.obj");
 
 
 	cubeModel = Model::CreateOBJ("resources/Engine/plane.obj");
 
-
 	// LightingManagerで設定した空間のにモデルをセット
 	model->SetLightSets();
-	//fieldModel->SetLightSets();
+	fieldModel->SetLightSets();
 
 	// 登録
-	Particle::GetInstance()->RegionParticleModel("plane", "resources/Engine/plane.obj");
+	Particle::GetInstance()->RegionParticleModel("plane", "resources/Models/plane/plane.obj");
 	Particle::GetInstance()->RegionParticleModel("cube", "resources/Models/cube/cube.obj");
 
 	// カメラ登録
 	Particle::GetInstance()->SetCamera(camera);
 
-	// yomikomi
+	// 読込み
 	if (SceneComponentLoader::GetInstance()->Load("resources/Scene/TestScene.json")) {
 
-		// ※注　ポインタ
-		json& data = SceneComponentLoader::GetInstance()->GetJson();
+		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+		
+		// ライト配置のロード
+		SceneComponentLoader::GetInstance()->LightLoad();
 
 		// カメラの情報を読み込む
-		camera.SetWorldTransform(JsonToWorld(data["camera"]));
+		camera.SetWorldTransform(loder->GetWorldTransformData("camera"));
+		model->SetWorldTransform(loder->GetWorldTransformData("player"));
 
+		
 	}
 
 };
 
 void TestScene::Update(GamePad* gamepad) {
+
+	// 必ず必要
+	Scene::Update(gamepad);
 
 	model->Update();
 
@@ -82,18 +88,20 @@ void TestScene::Update(GamePad* gamepad) {
 
 #ifdef USE_IMGUI
 	
-	ImGui::DragFloat3("cameraPosition", &camera.GetWorldPosition().x, 0.1f);
-	ImGui::DragFloat3("cameraRotation", &camera.GetRotation().x, 0.01f);
+	camera.GetWorldTransform().ImGuiView("camera");
 
-	//ImGui::DragFloat3("lightPos", &lightAddress->position.x, 0.1f);
+	model->GetWorldTransform().ImGuiView("bunny");
 
 	if (ImGui::Button("Save")) {
 
 		// ※注　ポインタ
 		json& data = SceneComponentLoader::GetInstance()->GetJson();
 
+		// ライト配置のセーブ
+		SceneComponentLoader::GetInstance()->LightSave();
 
-		data["camera"] =WorldToJson(camera.GetWorldTransform());
+		data["camera"] = WorldToJson(camera.GetWorldTransform());
+		data["player"] = WorldToJson(model->GetWorldTransform());
 
 
 		SceneComponentLoader::GetInstance()->Save("resources/Scene/TestScene.json");
@@ -125,7 +133,7 @@ void TestScene::Draw() {
 	};
 
 	model->Draw(camera);
-	//fieldModel->Draw(camera);
+	fieldModel->Draw(camera);
 
 	text.SetFontLayout(layout);
 	text2.SetFontLayout(layout);

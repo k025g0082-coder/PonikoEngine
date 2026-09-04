@@ -3,6 +3,7 @@
 #include "Transform.h"
 
 #include "Matrix.h"
+#include "ImGuiManager.h"
 
 // 3D用
 struct WorldTransform : public Transform {
@@ -37,4 +38,15 @@ struct WorldTransform : public Transform {
 
 	TransformationMatrix* mvpData_ = nullptr;
 
+	// imgui用
+	void ImGuiView(const char* label) {
+
+		if (ImGui::TreeNode(label)) {
+			ImGui::DragFloat3("translation", &translation_.x, 0.1f);
+			ImGui::DragFloat3("rotation", &rotation_.x, 0.1f);
+			ImGui::DragFloat3("scale", &scale_.x, 0.1f);
+			ImGui::TreePop();
+		}
+
+	}
 };

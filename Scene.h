@@ -2,6 +2,12 @@
 
 #include "GamePad.h"
 
+#include "Model.h"
+
+#include "DirectionalLight.h"
+#include "SpotLight.h"
+#include "PointLight.h"
+
 class Scene {
 
 private:
@@ -43,6 +49,6 @@ public:
 		instance->Init();
 	}
 
-
+	std::vector<Model*> models;
 
 };

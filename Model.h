@@ -207,6 +207,15 @@ public:
 	// モデルデータ読み取り関数
 	static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
+	// 標準のWorldTransform
+	WorldTransform& GetWorldTransform() { return worldTransform_; }
+
+	// 設定
+	void SetWorldTransform(const WorldTransform& w)
+	{
+		worldTransform_ = w;
+	}
+	
 private:
 
 	// マテリアル読み取り関数

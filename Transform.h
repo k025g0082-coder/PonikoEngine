@@ -21,8 +21,8 @@ struct TransformationMatrix {
 struct Transform {
 
 	Vector3 scale_ = { 1.0f,1.0f,1.0f };
-	Vector3 rotation_;
-	Vector3 translation_;
+	Vector3 rotation_ = { 0.0f,0.0f,0.0f };
+	Vector3 translation_ = { 0.0f,0.0f,0.0f };
 
 	Matrix4x4 matWorld_;
 

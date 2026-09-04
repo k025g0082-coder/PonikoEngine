@@ -7,6 +7,20 @@
 
 using json = nlohmann::json;
 
+
+// Vector3->Jsonの形式に変換
+json Vector3ToJson(const Vector3& value);
+
+// Json->Vector3の形式に変換
+Vector3 JsonToVector3(const json& value);
+
+// WorldTransform->Jsonの形式に変換
+json WorldToJson(const WorldTransform& world);
+
+// Json->Vector3の形式に変換
+WorldTransform JsonToWorld(const json& value);
+
+
 class SceneComponentLoader
 {
 public:
@@ -24,20 +38,29 @@ public:
 		return jsonData_;
 	}
 
+	// ワールドトランスフォーム読み取り
+	WorldTransform GetWorldTransformData(std::string tag) {
+
+		WorldTransform world;
+		world.Initialize();
+		world.UpdateMatrix();
+
+		// もし存在しなかったら
+		if (!jsonData_.contains(tag)) {
+			return world;
+		}
+
+		return JsonToWorld(jsonData_[tag]);
+	}
+
+	// LightingManagerからライトをロード
+	void LightLoad();
+	
+	// LightingManagerからライトをセーブ
+	void LightSave();
+
 private:
 
 	json jsonData_;
 };
 
-// Vector3->Jsonの形式に変換
-json Vector3ToJson(const Vector3& value);
-
-// Json->Vector3の形式に変換
-Vector3 JsonToVector3(const json& value);
-
-
-// WorldTransform->Jsonの形式に変換
-json WorldToJson(const WorldTransform& world);
-
-// Json->Vector3の形式に変換
-WorldTransform JsonToWorld(const json& value);

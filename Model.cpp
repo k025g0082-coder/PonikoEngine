@@ -231,43 +231,8 @@ void Model::Update(float deltaTime){
 		}
 	}
 
-	//for (size_t i = 0; i < modelData.bones.size(); i++)
-	//{
-	//	skinningData_->boneMatrices[i] = MakeIdentity4x4();
-	//}
-
-	/*modelData.bones[0].localMatrix = makeTranslationMatrix({ 1.1f,0,0 });
-
-	modelData.bones[0].globalMatrix =
-		modelData.bones[0].localMatrix;
-
-	modelData.bones[0].finalMatrix =
-		modelData.bones[0].globalMatrix;
-
-	skinningData_->boneMatrices[0] =
-		modelData.bones[0].finalMatrix;*/
-	//for (size_t i = 0; i < modelData.vertices.size(); i++)
-	//{
-	//	auto& bw = modelData.vertices[i].boneWeight;
-
-	//	DirectXUtility::Log("Vertex %zu\n", i);
-	//	DirectXUtility::Log("  Index : %u %u %u %u\n",
-	//		bw.boneIndex[0],
-	//		bw.boneIndex[1],
-	//		bw.boneIndex[2],
-	//		bw.boneIndex[3]);
-
-	//	DirectXUtility::Log("  Weight: %.3f %.3f %.3f %.3f\n",
-	//		bw.weight[0],
-	//		bw.weight[1],
-	//		bw.weight[2],
-	//		bw.weight[3]);
-
-	////	if (i >= 20) break; // 最初の20頂点だけ
-	//}
-
-	/*Matrix4x4 worldMatrix = MakeAffineMatrix(worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);*/
-
+	worldTransform_.UpdateMatrix();
+	
 }
 
 // アニメ更新

@@ -80,6 +80,26 @@ public:
 
 	ID3D12Resource* GetResource() { return resourceLight.Get(); }
 
+	// imgui用
+	SpotLightsParam& GetSpotLightsParam()
+	{
+		return *lightDatas_;
+	}
+
+	void RemoveLight(int i)
+	{
+		if (i < 0 || i >= lightDatas_->count)
+			return;
+
+		// i番目以降を1つ前に詰める
+		for (int j = i; j < lightDatas_->count - 1; ++j)
+		{
+			lightDatas_->lights[j] = lightDatas_->lights[j + 1];
+		}
+
+		// 要素数を減らす
+		--lightDatas_->count;
+	}
 private:
 	// １０こまで
 	static const int kMaxLight = 10;
