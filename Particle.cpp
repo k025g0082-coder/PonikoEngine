@@ -535,7 +535,14 @@ void Particle::Draw()
 // 生成
 void Particle::MakeNewParticle(std::string tag, Vector3 pos, int num, ParticleParam param) {
 
-    ParticleModelData* data = &particleModelDatas_[tag];
+    auto it = particleModelDatas_.find(tag);
+
+    if (it == particleModelDatas_.end()) {
+        return;
+    }
+
+    // secondはその値の右側（値側）を取得
+    ParticleModelData* data = &it->second;
 
     // １モデルの限界描画数超えてたら　リターン
     if (data->currentDrawNum +  num > kNumInstance) {
@@ -569,6 +576,7 @@ void Particle::MakeNewParticle(std::string tag, Vector3 pos, int num, ParticlePa
         emits[i].gravity = param.gravity;
 
         emits[i].isBillboard = param.isBilliboard;
+        emits[i].isDilute = param.isDilute;
 
         emits[i].color = param.color;
 

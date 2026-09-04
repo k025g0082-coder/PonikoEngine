@@ -1,0 +1,79 @@
+{
+    "EffectParticleCompornents": {
+        "plane": {
+            "num": 30,
+            "param": {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "gravity": 0.0,
+                "isBilliboard": false,
+                "isDilute": true,
+                "life": 20,
+                "scaleAmpMax": 1.0,
+                "scaleAmpMin": 1.0,
+                "speed": 1.0,
+                "speedAmp": 0.0
+            },
+            "particleTag": "plane",
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "plane2": {
+            "num": 1,
+            "param": {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "gravity": 0.0,
+                "isBilliboard": false,
+                "isDilute": true,
+                "life": 20,
+                "scaleAmpMax": 1.0,
+                "scaleAmpMin": 1.0,
+                "speed": 1.0,
+                "speedAmp": 0.0
+            },
+            "particleTag": "plane",
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "plane3": {
+            "num": 1,
+            "param": {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "gravity": 0.0,
+                "isBilliboard": false,
+                "isDilute": true,
+                "life": 20,
+                "scaleAmpMax": 1.0,
+                "scaleAmpMin": 1.0,
+                "speed": 1.0,
+                "speedAmp": 0.0
+            },
+            "particleTag": "plane",
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    }
+}

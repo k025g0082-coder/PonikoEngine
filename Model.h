@@ -84,7 +84,7 @@ public:
 	static Model* CreateOBJ(const std::string& modelName);
 
 	void Initialize();
-	void Update(float deltaTime = 1.0f);
+	void Update();
 	void Draw(Camera camera);
 	void Draw(WorldTransform& world,Camera camera);
 
@@ -215,6 +215,11 @@ public:
 	{
 		worldTransform_ = w;
 	}
+
+	// アニメーションのスピードを設定
+	void SetAnimationSpeed(float s) {
+		animationSpeed = s;
+	}
 	
 private:
 
@@ -269,11 +274,10 @@ private:
 	SpotLight* spotLight_;
 	PointLight* pointLight_;
 
-	//0202 mvp用のリソース作り
-	//TransformationMatrix* mvpData = nullptr;
-	//ID3D12Resource* wvpResource = nullptr;
-
 	ID3D12Resource* indexResource;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
+
+	// アニメーションスピード
+	float animationSpeed = 1.0f;
 };
 

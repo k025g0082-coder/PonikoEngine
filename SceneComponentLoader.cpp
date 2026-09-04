@@ -28,6 +28,10 @@ bool SceneComponentLoader::Load(const std::string& filePath)
 
 bool SceneComponentLoader::Save(const std::string& filePath)
 {
+	// 親ディレクトリを自動生成
+	std::filesystem::path path(filePath);
+	std::filesystem::create_directories(path.parent_path());
+
 	std::ofstream file(filePath);
 
 	if (!file.is_open()) {
@@ -45,6 +49,9 @@ void SceneComponentLoader::LightSave() {
 		return;
 	}
 
+	// こっちのシングルトンのほうのjsonは消えてもクラスの方のメンバの方のは消えないのでcleanしちゃう
+	jsonData_.clear();
+	
 	// ===DirectionalLight
 	auto& param = LightingManager::GetInstance()->GetLightSets().dLight->GetDirectionalLightsParam();
 
@@ -279,6 +286,74 @@ void SceneComponentLoader::LightLoad() {
 }
 
 
+void SceneComponentLoader::EffectParticleCompornentSave(std::string tag, ParticleCompornent& param_) {
+
+	auto& data = jsonData_["EffectParticleCompornents"][tag];
+
+	data["particleTag"] = param_.tag;
+		
+	data["position"] = Vector3ToJson(param_.position);
+
+	data["num"] = param_.num;
+
+
+	data["param"]["color"] = Vector4ToJson(param_.param_.color);
+
+	data["param"]["speed"] = param_.param_.speed;
+	data["param"]["speedAmp"] = param_.param_.speedAmp;
+	data["param"]["gravity"] = param_.param_.gravity;
+
+	data["param"]["scaleAmpMin"] = param_.param_.scaleAmpMin;
+	data["param"]["scaleAmpMax"] = param_.param_.scaleAmpMax;
+
+	data["param"]["life"] = param_.param_.life;
+
+	data["param"]["isBilliboard"] = param_.param_.isBilliboard;
+	data["param"]["isDilute"] = param_.param_.isDilute;
+
+}
+
+
+void SceneComponentLoader::EffectParticleCompornentLoad(
+	std::map<std::string, ParticleCompornent>& particleEmitParams_)
+{
+	if (jsonData_.empty()) {
+		return;
+	}
+
+	if (!jsonData_.contains("EffectParticleCompornents")) {
+		return;
+	}
+
+	for (auto& [tag, data] : jsonData_["EffectParticleCompornents"].items()) {
+
+		ParticleCompornent& param = particleEmitParams_[tag];
+
+		param.tag = data["particleTag"];
+
+		param.position = JsonToVector3(data["position"]);
+
+		param.num = data["num"];
+
+
+		param.param_.color = JsonToVector4(data["param"]["color"]);
+
+		param.param_.speed = data["param"]["speed"];
+		param.param_.speedAmp = data["param"]["speedAmp"];
+		param.param_.gravity = data["param"]["gravity"];
+
+		param.param_.scaleAmpMin = data["param"]["scaleAmpMin"];
+		param.param_.scaleAmpMax = data["param"]["scaleAmpMax"];
+
+		param.param_.life = data["param"]["life"];
+
+		param.param_.isBilliboard = data["param"]["isBilliboard"];
+		param.param_.isDilute = data["param"]["isDilute"];
+	}
+}
+
+
+
 json Vector3ToJson(const Vector3& value)
 {
 	return {
@@ -295,6 +370,26 @@ Vector3 JsonToVector3(const json& value)
 		value[2].get<float>()
 	};
 }
+
+json Vector4ToJson(const Vector4& value)
+{
+	return {
+		value.x,
+		value.y,
+		value.z,
+		value.w
+	};
+}
+Vector4 JsonToVector4(const json& value)
+{
+	return Vector4{
+		value[0].get<float>(),
+		value[1].get<float>(),
+		value[2].get<float>(),
+		value[3].get<float>()
+	};
+}
+
 
 // WorldTransform->Jsonの形式に変換
 json WorldToJson(const WorldTransform& world){

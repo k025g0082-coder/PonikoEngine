@@ -5,6 +5,8 @@
 
 #include "ParticleEmit.h"
 
+#include "ImGuiManager.h"
+
 #include <map>
 
 // シェーダーに転送用
@@ -53,6 +55,7 @@ struct ParticleModelData {
 /// <param name="speed"> 速度 </param>
 /// <param name="life"> 生存時間 </param>
 /// <param name="isBilliboard"> 常に前向くか（板ポリ用） </param>
+/// <param name="isDilute"> 色を薄くしていくか </param>
 /// </summary>
 
 struct ParticleParam {
@@ -80,6 +83,32 @@ struct ParticleParam {
 
 	// 常にカメラ方向を向くか
 	bool isBilliboard = false;
+
+    // 色を薄くしていくか
+	bool isDilute = true;
+
+
+	// ImGuiデバッグ用
+	void ImGuiView() {
+
+#ifdef USE_IMGUI
+			ImGui::ColorEdit4("Color", &color.x);
+
+			ImGui::DragFloat("Speed", &speed, 0.01f, 0.0f, 10.0f);
+			ImGui::DragFloat("Speed Amp", &speedAmp, 0.01f, 0.0f, 10.0f);
+
+			ImGui::DragFloat("Gravity", &gravity, 0.01f, 0.0f, 10.0f);
+
+			ImGui::DragFloat("Scale Min", &scaleAmpMin, 0.01f, 0.1f, scaleAmpMax);
+			ImGui::DragFloat("Scale Max", &scaleAmpMax, 0.01f, scaleAmpMin, 10.0f);
+
+			ImGui::InputInt("Life", &life);
+
+			ImGui::Checkbox("Billboard", &isBilliboard);
+			ImGui::Checkbox("Dilute", &isDilute);
+#endif
+	
+	}
 };
 
 class Particle {
@@ -99,6 +128,19 @@ public:
 
 	// 生成
 	void MakeNewParticle(std::string tag, Vector3 pos, int num, ParticleParam param);
+
+	// Path存在チェック見つかったらタグ名で返して　みつかんなかったら
+	std::string GetExistencePathToTag(std::string path) {
+
+		for (const auto& [tag, data] : particleModelDatas_) {
+			if (data.modelPath == path) {
+				return tag;
+				break;
+			}
+		}
+
+		return "";
+	}
 
 	void Draw(std::string tag);
 

@@ -7,7 +7,12 @@
 
 #include "ModelLoader.h"
 
+
 #include "Particle.h"
+
+#include "ExampleEffect.h"
+#include "EffectManager.h"
+
 
 void TestScene::Init() {
 
@@ -27,22 +32,16 @@ void TestScene::Init() {
 	lightAddress = &LightingManager::GetInstance()->AddLight(dLightParam);
 
 
-	model = Model::CreateOBJ("resources/Models/bunny.obj");
-	fieldModel = Model::CreateOBJ("resources/Models/field/field.obj");
+	model = Model::CreateOBJ("resources/Models/player/player.fbx");
+	model->SetAnimationSpeed(0.5f);
 
+	fieldModel = Model::CreateOBJ("resources/Models/field/field.obj");
 
 	cubeModel = Model::CreateOBJ("resources/Engine/plane.obj");
 
 	// LightingManagerで設定した空間のにモデルをセット
 	model->SetLightSets();
 	fieldModel->SetLightSets();
-
-	// 登録
-	Particle::GetInstance()->RegionParticleModel("plane", "resources/Models/plane/plane.obj");
-	Particle::GetInstance()->RegionParticleModel("cube", "resources/Models/cube/cube.obj");
-
-	// カメラ登録
-	Particle::GetInstance()->SetCamera(camera);
 
 	// 読込み
 	if (SceneComponentLoader::GetInstance()->Load("resources/Scene/TestScene.json")) {
@@ -59,6 +58,8 @@ void TestScene::Init() {
 		
 	}
 
+	world.Initialize();
+
 };
 
 void TestScene::Update(GamePad* gamepad) {
@@ -73,16 +74,8 @@ void TestScene::Update(GamePad* gamepad) {
 
 	camera.Update();
 
-	ParticleParam param;
+	world.UpdateMatrix();
 
-	if (timer % 10 == 0) {
-		// パーティクル放出
-		param.isBilliboard = true;
-		Particle::GetInstance()->MakeNewParticle("plane", Vector3{ 0,0,20.0f }, 2, param);
-		param.isBilliboard = false;
-		param.speed = 1.0f;
-		Particle::GetInstance()->MakeNewParticle("cube", Vector3{ 0,0,20.0f }, 10, param);
-	}
 
 	timer++;
 
@@ -90,12 +83,16 @@ void TestScene::Update(GamePad* gamepad) {
 	
 	camera.GetWorldTransform().ImGuiView("camera");
 
-	model->GetWorldTransform().ImGuiView("bunny");
+	model->GetWorldTransform().ImGuiView("player");
 
 	if (ImGui::Button("Save")) {
 
 		// ※注　ポインタ
 		json& data = SceneComponentLoader::GetInstance()->GetJson();
+
+		// 必ず
+		SceneComponentLoader::GetInstance()->ClearJson();
+
 
 		// ライト配置のセーブ
 		SceneComponentLoader::GetInstance()->LightSave();
@@ -107,7 +104,15 @@ void TestScene::Update(GamePad* gamepad) {
 		SceneComponentLoader::GetInstance()->Save("resources/Scene/TestScene.json");
 
 	}
+	if (ImGui::Button("Effect")) {
 
+
+		Particle::GetInstance()->SetCamera(camera);
+
+		// とうろく
+		EffectManager::AddEffect(new ExampleEffect, {0,0,0});
+
+	}
 #endif
 
 };
@@ -132,7 +137,7 @@ void TestScene::Draw() {
 
 	};
 
-	model->Draw(camera);
+	model->Draw(world,camera);
 	fieldModel->Draw(camera);
 
 	text.SetFontLayout(layout);

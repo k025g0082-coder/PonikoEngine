@@ -11,6 +11,7 @@
 #include "Sprite.h"
 #include "Camera.h"
 #include "LightingManager.h"
+#include "EffectManager.h"
 #include "Model.h"
 #include "Text.h"
 
@@ -18,6 +19,8 @@
 
 #include "Game.h"
 #include "Particle.h"
+
+#include "Timer.h"
 
 
 namespace PonikoEngine {

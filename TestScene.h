@@ -6,6 +6,8 @@
 #include "Sprite.h"
 #include "Model.h"
 
+#include "WorldTransform.h"
+
 class TestScene :
     public Scene
 {
@@ -22,6 +24,8 @@ private:
 	Model* cubeModel = nullptr;
 
 	Camera camera;
+
+	WorldTransform world;
 
 	DirectionalLightParam* lightAddress = nullptr;
 

@@ -39,6 +39,16 @@ struct SoundData {
 	// バッファのサイズ
 	unsigned int bufferSize;
 
+	// ループ
+	bool isLoop = false;
+
+	// 範囲ループするか
+	bool isRangeLoop = false;
+
+	float rangeStart;
+	float rangeLength;
+
+	IXAudio2SourceVoice* sourceVoice = nullptr;
 };
 
 class SoundManager {
@@ -49,10 +59,22 @@ public:
 
 	void Initialize();
 
+	// wavファイル読込
 	void LoadWave(const std::string& name, const char* filename);
 
-	void Play(const std::string& name);
+	// 再生
+	void Play(const std::string& name, float playSpeed = 1.0f, float startTime = 0.0f);
 
+	// 一時停止
+	void StopSound(const std::string& name);
+
+	// ループとループ範囲を設定
+	void SetSoundLoop(const std::string& name);
+	void SetSoundLoop(const std::string& name, float loopStart, float loopEnd);
+
+	// 左右のパン
+	void SetSoundPan(const std::string& name, float pan);
+	
 	void Finalize();
 
 	// 全部停止
@@ -82,7 +104,7 @@ private:
 	void SoundUnload(SoundData* soundData);
 
 	// 再生
-	void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData);
+	void SoundPlayWave(IXAudio2* xAudio2, SoundData& soundData, float startTime, float playSpeed);
 
 };
 

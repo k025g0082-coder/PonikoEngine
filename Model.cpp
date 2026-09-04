@@ -12,6 +12,8 @@
 
 #include "Matrix.h"
 
+#include "Timer.h"
+
 #include <fstream>
 #include <sstream>
 Model* Model::Clone() const
@@ -211,10 +213,10 @@ void Model::Initialize(){
 	// これがrootSignatureをたどってッパイプラインのレイアウトから情報を読み取られるのだーーーーーーーーー
 }
 
-void Model::Update(float deltaTime){
+void Model::Update(){
 
 	// 時間加算
-	animationTime_ += (deltaTime / 60.0f);
+	animationTime_ += Timer::GetDeltaTime() * animationSpeed;
 
 	if (!modelData.animations.empty())
 	{

@@ -41,12 +41,13 @@ struct WorldTransform : public Transform {
 	// imgui用
 	void ImGuiView(const char* label) {
 
+#ifdef USE_IMGUI
 		if (ImGui::TreeNode(label)) {
 			ImGui::DragFloat3("translation", &translation_.x, 0.1f);
 			ImGui::DragFloat3("rotation", &rotation_.x, 0.1f);
 			ImGui::DragFloat3("scale", &scale_.x, 0.1f);
 			ImGui::TreePop();
 		}
-
+#endif
 	}
 };

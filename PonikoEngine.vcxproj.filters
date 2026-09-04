@@ -64,6 +64,12 @@
     <Filter Include="Engine\Source\ヘッダー ファイル\Graphics\Light">
       <UniqueIdentifier>{335e1752-c528-46f7-9982-ef7f3bd684d2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Source\ヘッダー ファイル\Game\Effect">
+      <UniqueIdentifier>{6a7c1aa3-66b5-4dfd-a757-ee5b3e04bcf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Source\ソース ファイル\Game\Effect">
+      <UniqueIdentifier>{2d58d595-5089-4e55-bfb1-a829024b2780}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinApp.cpp">
@@ -183,6 +189,18 @@
     </ClCompile>
     <ClCompile Include="EasingVec.cpp">
       <Filter>Engine\Source\ソース ファイル\math</Filter>
+    </ClCompile>
+    <ClCompile Include="timer.cpp">
+      <Filter>Engine\Source\ソース ファイル\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectManager.cpp">
+      <Filter>Engine\Source\ソース ファイル\Game\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Effect.cpp">
+      <Filter>Engine\Source\ソース ファイル\Game\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ExampleEffect.cpp">
+      <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -343,6 +361,18 @@
     </ClInclude>
     <ClInclude Include="EasingVec.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Effect.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Game\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectManager.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Game\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="ExampleEffect.h">
+      <Filter>test</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

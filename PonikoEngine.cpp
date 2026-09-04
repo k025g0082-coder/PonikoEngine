@@ -61,13 +61,15 @@ namespace PonikoEngine {
 		// Gameシステムの方の初期化
 		Game::GetInstance()->Init();
 
-		// パーティクル
-		//Particle::GetInstance()->Initialize();
+		// タイマー
+		Timer::GetInstance()->Initialize();
 
 	};
 
 	void Update() {
 
+		// 時間更新
+		Timer::GetInstance()->UpdateDeltaTime();
 
 		// 更新
 		ImGuiManager::GetInstance()->Begin();
@@ -77,11 +79,14 @@ namespace PonikoEngine {
 
 			GamePad::GetInstance()->Update();
 
-			// パーティクル
+			// エフェクト更新
+			EffectManager::Update();
+
+			// パーティクル更新
 			Particle::GetInstance()->Update();
 
-		ImGuiManager::GetInstance()->End();
 
+		ImGuiManager::GetInstance()->End();
 
 	};
 

@@ -16,16 +16,21 @@ struct ParticleEmit {
 	float gravity = 0.0f;	     			 // 重力
 
 	bool isBillboard = true;				 // 板ポリ用　常にカメラ目線
+	bool isDilute = true;				     // 色を薄くしていくか
 	bool isActive = false;
 
 	float life = 20;						 // 生存時間
 	float timer = 0;
 
 	EasingVec ease;						// 減速用 
+	EasingVec colorEase;				// 薄くする用 
 	
 	void init() {
 		ease.Reset();
 		ease.Start(EasingVec::EASE_OutSine, life, speed, 0);
+
+		colorEase.Reset();
+		colorEase.Start(EasingVec::EASE_None, life, 1.0f, 0.0f);
 	}
 	void update() {
 
@@ -33,6 +38,12 @@ struct ParticleEmit {
 
 			ease.Step();
 			speed = ease.getEasingNum();
+			
+			// 徐々に透明
+			if (isDilute) {
+				colorEase.Step();
+				color.w = colorEase.getEasingNum();
+			}
 
 			velocity = direction * speed;
 
@@ -57,4 +68,5 @@ struct ParticleEmit {
 			isActive = false;
 		}
 	}
+
 };

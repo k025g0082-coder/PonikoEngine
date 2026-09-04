@@ -2,6 +2,8 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
+#include "Effect.h"
+
 #include "Vector.h"
 #include "WorldTransform.h"
 
@@ -10,9 +12,11 @@ using json = nlohmann::json;
 
 // Vector3->Jsonの形式に変換
 json Vector3ToJson(const Vector3& value);
+json Vector4ToJson(const Vector4& value);
 
 // Json->Vector3の形式に変換
 Vector3 JsonToVector3(const json& value);
+Vector4 JsonToVector4(const json& value);
 
 // WorldTransform->Jsonの形式に変換
 json WorldToJson(const WorldTransform& world);
@@ -59,6 +63,12 @@ public:
 	// LightingManagerからライトをセーブ
 	void LightSave();
 
+	//こっちのシングルトンのほうのjsonDataは消えても、クラスの方のメンバの方のは消えないので中身をcleanしたいときに使う関数
+	void ClearJson() { jsonData_.clear(); }
+
+	// Effect内のParticleCompornentのセーブ
+	void EffectParticleCompornentSave(std::string tag, ParticleCompornent& param_);
+	void EffectParticleCompornentLoad(std::map<std::string, ParticleCompornent>& particleEmitParams_);
 private:
 
 	json jsonData_;
