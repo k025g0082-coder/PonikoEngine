@@ -34,7 +34,7 @@ void ExampleEffect::Update() {
 		//Particle::GetInstance()->RegionParticleModel("plane", "resources/Engine/plane.obj");
 
 		// パーティクル放出
-		Effect::EmitParticleCompornent("a");
+		Effect::EmitParticleCompornent("aaa");
 
 		Effect::EmitParticleCompornent("particle");
 

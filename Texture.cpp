@@ -33,6 +33,7 @@ void Texture::Initialize(std::string texturePath) {
 
 	// 1～
 	uint32_t index = DirectXCommon::GetInstance()->GetAllocateSrv();
+	srvIndex_ = index;
 
 	// 現在のサイズをもらう（３２らしい。ディスクリプタは３２、６４、１２８と並んでいる）
 	UINT increment =
@@ -93,6 +94,7 @@ void Texture::Initialize(unsigned char* image, int width, int height) {
 
 	// 1～
 	uint32_t index = DirectXCommon::GetInstance()->GetAllocateSrv();
+	srvIndex_ = index;
 
 	// 現在のサイズをもらう（３２らしい。ディスクリプタは３２、６４、１２８と並んでいる）
 	UINT increment =

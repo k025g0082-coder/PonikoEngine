@@ -297,6 +297,7 @@ void Particle::RegionParticleModel(std::string tag,std::string path) {
         data->instancingData[index].WVP = MakeIdentity4x4();
         data->instancingData[index].World = MakeIdentity4x4();
         data->instancingData[index].color = Vector4{ 1.0f,1.0f,1.0f,1.0f };
+        data->instancingData[index].textureIndex = 0;
     }
 
 };
@@ -358,6 +359,7 @@ void Particle::Update() {
 
             data.instancingData[instanceIndex].WVP = worldViewProjectionMatrix;
             data.instancingData[instanceIndex].World = emits[i].transform.matWorld_;
+            data.instancingData[instanceIndex].textureIndex = particleTextureDatas_[emits[i].textureTag]->GetSrvIndex();
 
             instanceIndex++;
 
@@ -479,7 +481,7 @@ void Particle::Draw()
     };
 
     commandList->SetDescriptorHeaps(1, heaps);
-
+    
     // モデルごとに1回だけ描画
     for (auto& [tag, data] : particleModelDatas_)
     {
@@ -500,12 +502,13 @@ void Particle::Draw()
             1,
             data.instancingSrvHandleGPU
         );
-
         
         commandList->SetGraphicsRootDescriptorTable(
             2,
             
-            data.texture->GetTextureSrvHandleGPU()
+            DirectXCommon::GetInstance()
+            ->GetSrvHeap()
+            ->GetGPUDescriptorHandleForHeapStart()
         );
 
         commandList->DrawIndexedInstanced(

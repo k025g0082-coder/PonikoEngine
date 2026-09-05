@@ -1,6 +1,6 @@
 #include "resources/Engine/Shader/Particle.hlsli"
 
-Texture2D<float4> texture0 : register(t0);
+Texture2D<float4> gTextures[] : register(t1);
 SamplerState gSampler : register(s0);
 
 struct Material
@@ -21,18 +21,28 @@ struct PixelShaderOutput
 PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
-    
-    float4 uvTransform = mul(float4(input.texcoord, 0.0f, 1.0f), material.uvTransform);
-    float2 uv = uvTransform.xy;
-    
-    float4 textureColor = texture0.Sample(gSampler, uv);
-    
-    output.color = material.color * input.color * textureColor;
 
-    if (output.color.a == 0.0)
+    float4 uvTransform =
+        mul(
+            float4(input.texcoord, 0.0f, 1.0f),
+            material.uvTransform
+        );
+
+    float2 uv = uvTransform.xy;
+
+    // ★ インスタンスごとのテクスチャを取得
+    float4 textureColor =
+        gTextures[input.textureIndex].Sample(gSampler, uv);
+
+    output.color =
+        material.color *
+        input.color *
+        textureColor;
+
+    if (output.color.a == 0.0f)
     {
         discard;
     }
-    
-        return output;
+
+    return output;
 }

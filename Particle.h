@@ -17,6 +17,8 @@ struct ParticleData {
 
 	Vector4 color;
 
+	uint32_t textureIndex;// 描画に使うテクスチャのSRVの番号
+
 };
 
 struct ParticleModelData {
@@ -26,6 +28,9 @@ struct ParticleModelData {
 
 	// テクスチャ（のアドレス）
 	Texture* texture = nullptr;
+
+	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> textureSrvHandles;
+
 
 	D3D12_INDEX_BUFFER_VIEW indexBufferView{};// 頂点ビュー
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;

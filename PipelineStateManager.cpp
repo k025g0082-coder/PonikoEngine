@@ -528,13 +528,23 @@ void PipelineStateManager::createParticlePipeline() {
 	descriptionRootSignature.Flags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT; // InputLayoutを使うことを許可
 
-	// === SRVの設定 複数枚の設定をまとめて設定する設定する設定する設定する設定ｓｒsrsrsrrsrsrrrrrr
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	descriptorRange[0].BaseShaderRegister = 0; // 0から始める
-	descriptorRange[0].NumDescriptors = 1; // 一つ。ここを増やすと同時に描画できる数が増える？
-	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRVを使う。
-	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
+	// === SRVの設定 複数枚の設定をまとめて設定する設定する設定する設定する設定ｓｒsrsrsrrsrsrrrrrr
+	
+	D3D12_DESCRIPTOR_RANGE particleRange[1] = {};
+	particleRange[0].BaseShaderRegister = 0; // t0
+	particleRange[0].NumDescriptors = 1;
+	particleRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	particleRange[0].OffsetInDescriptorsFromTableStart =
+		D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	// テキスチャの設定？
+	D3D12_DESCRIPTOR_RANGE textureRange[1] = {};
+	textureRange[0].BaseShaderRegister = 1; // t1
+	textureRange[0].NumDescriptors = UINT_MAX;
+	textureRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	textureRange[0].OffsetInDescriptorsFromTableStart =
+		D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	// === Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
@@ -558,16 +568,29 @@ void PipelineStateManager::createParticlePipeline() {
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // 全てのシェーダーから見えるように
 
 	// 座標
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTable15
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // VS
-	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRange; // Tableの中身の配列を指定
-	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange); // Table3
+	rootParameters[1].ParameterType =
+		D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+
+	rootParameters[1].ShaderVisibility =
+		D3D12_SHADER_VISIBILITY_VERTEX;
+
+	rootParameters[1].DescriptorTable.pDescriptorRanges =
+		particleRange;
+
+	rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
+
 
 	// テクスチャ
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTable15
-	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader5
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange; // Tableの中身の配列を指定
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange); // Table3
+	rootParameters[2].ParameterType =
+		D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+
+	rootParameters[2].ShaderVisibility =
+		D3D12_SHADER_VISIBILITY_PIXEL;
+
+	rootParameters[2].DescriptorTable.pDescriptorRanges =
+		textureRange;
+
+	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
 
 
 	descriptionRootSignature.pParameters = rootParameters;

@@ -6,6 +6,7 @@ struct ParticleData
     float4x4 WVP;
     float4x4 World;
     float4 color;
+    uint textureIndex;
 };
 
 StructuredBuffer<ParticleData> gParticles : register(t0);
@@ -38,5 +39,9 @@ VertexShaderOutput main(VertexShaderInput input,uint instanceId : SV_InstanceID)
     // インスタンスごとの色
     output.color = gParticles[instanceId].color;
     
+    // インスタンスごとのテクスチャ番号
+    output.textureIndex =
+        gParticles[instanceId].textureIndex;
+
     return output;
 }
