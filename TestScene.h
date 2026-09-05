@@ -23,6 +23,10 @@ private:
 	Model* fieldModel = nullptr;
 	Model* cubeModel = nullptr;
 
+	Model* backModel = nullptr;
+	WorldTransform backWorld1;
+	WorldTransform backWorld2;
+
 	Camera camera;
 
 	WorldTransform world;

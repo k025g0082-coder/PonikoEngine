@@ -39,7 +39,9 @@
 struct ParticleCompornent {
 
 	std::string tag;			// particleクラスに登録されてるほうのタグ
-	std::string path;			// particleクラスに登録されてるパーティクルモデルのpath
+	//std::string path;			// particleクラスに登録されてるパーティクルモデルのpath
+
+	std::string textureTag;		// particleクラスに登録されてるTextureのタグ
 
 	Vector3 position = { 0,0,0 };
 	int num = 1;
@@ -87,7 +89,7 @@ protected:
 
 
 	// 登録
-	void RegionParticleCompornent(std::string tag, std::string path);
+	void RegionParticleCompornent(std::string tag, std::string particleModelTag, std::string particleTextureTag);
 
 	// 発生
 	void EmitParticleCompornent(std::string tag) {
@@ -96,7 +98,8 @@ protected:
 
 		Particle::GetInstance()->MakeNewParticle(
 			particleEmitParams_[tag].tag,
-			particleEmitParams_[tag].position,
+			particleEmitParams_[tag].textureTag,
+			particleEmitParams_[tag].position + pos,
 			particleEmitParams_[tag].num,
 			particleEmitParams_[tag].param_);
 	};

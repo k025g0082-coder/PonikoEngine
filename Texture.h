@@ -31,6 +31,10 @@ public:
 	float GetTextureWidth() { return textureWidth; }
 	float GetTextureHeight() { return textureHeight; }
 
+	std::string texturePath_;
+
+	uint32_t GetSrvIndex() { return srvIndex_; }
+
 private:
 
 	DirectX::ScratchImage mipImages;
@@ -44,5 +48,7 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU;
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU;
 
+	// srvのインデックス番号
+	uint32_t srvIndex_;
 };
 

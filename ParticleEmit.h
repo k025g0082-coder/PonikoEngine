@@ -4,7 +4,8 @@
 // 粒子
 struct ParticleEmit {
 
-	std::string tag; // 登録されてるモデルのタグ
+	std::string tag;		// 登録されてるモデルのタグ
+	std::string textureTag; // 登録されてるテキスチャーのタグ
 
 	WorldTransform transform; // 座標
 

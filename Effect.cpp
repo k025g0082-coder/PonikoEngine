@@ -24,29 +24,32 @@ void Effect::Update() {
 	ImGuiViewParticleCompornent();
 }
 
-void Effect::RegionParticleCompornent(std::string tag, std::string path) {
+void Effect::RegionParticleCompornent(std::string tag, std::string particleModelTag, std::string particleTextureTag) {
+//void Effect::RegionParticleCompornent(std::string tag, std::string path) {
 
 	// もし既に登録されているタグがあれば帰る
 	if (particleEmitParams_.contains(tag)) return;
 
 	// 使うモデルを登録（既にあるのは弾くのでそれは大丈夫）
-	Particle::GetInstance()->RegionParticleModel(tag, path);
+	//Particle::GetInstance()->RegionParticleModel(tag, path);
 
 	// もしpathが既に読み込まれてたものだったら、そのタグ名を返す　ないなら空
-	std::string getParticleTag = Particle::GetInstance()->GetExistencePathToTag(path);
+	//std::string getParticleTag = Particle::GetInstance()->GetExistencePathToTag(path);
 
 	// 見つかったら
-	if (!getParticleTag.empty()) {
+//	if (!getParticleTag.empty()) {
 	
 		// 登録
 		particleEmitParams_[tag] = ParticleCompornent{
-			.tag = getParticleTag,
-			.path = path,
+
+			.tag = particleModelTag,
+			.textureTag = particleTextureTag,
+			
 			.position = {0,0},
 			.num = 1,
 			
 		};
-	}
+//	}
 
 }
 
@@ -88,32 +91,36 @@ void Effect::ImGuiViewParticleCompornent() {
 
 	}
 
-	static std::string selectedTag;
+	static std::string selectedModelTag;
+	static std::string selectedTextureTag;
 
 	if (ImGui::BeginPopup("AddParticle")) {
 
 		static char tag_[64] = "";
-		bool selected = false;
+
+		bool modelSelected = false;
+		bool textureSelected = false;
+
 		ImGui::InputText("Tag", tag_, sizeof(tag_));
 
 
-		// 選択中の名前
-		const char* preview = selectedTag.empty()
+		// モデル選択中の名前
+		const char* modelPreview = selectedModelTag.empty()
 			? "Select Particle"
-			: selectedTag.c_str();
+			: selectedModelTag.c_str();
 
-		if (ImGui::BeginCombo("Particle", preview)) {
+		if (ImGui::BeginCombo("Model", modelPreview)) {
 
 			// Particle側の登録済みタグを回す
 			for (const auto& tag : Particle::GetInstance()->GetParticleModelList()) {
 
-				selected = (selectedTag == tag);
+				modelSelected = (selectedModelTag == tag);
 
-				if (ImGui::Selectable(tag.c_str(), selected)) {
-					selectedTag = tag;
+				if (ImGui::Selectable(tag.c_str(), modelSelected)) {
+					selectedModelTag = tag;
 				}
 
-				if (selected) {
+				if (modelSelected) {
 					ImGui::SetItemDefaultFocus();
 				}
 			}
@@ -121,13 +128,43 @@ void Effect::ImGuiViewParticleCompornent() {
 			ImGui::EndCombo();
 		}
 
+		// テキスチャ選択中の名前
+		const char* texturePreview = selectedTextureTag.empty()
+			? "Select Particle"
+			: selectedTextureTag.c_str();
+
+		if (ImGui::BeginCombo("Texture", texturePreview)) {
+
+			// Particle側の登録済みタグを回す
+			for (const auto& tag : Particle::GetInstance()->GetParticleTextureList()) {
+
+				textureSelected = (selectedTextureTag == tag);
+
+				if (ImGui::Selectable(tag.c_str(), textureSelected)) {
+					selectedTextureTag = tag;
+				}
+
+				if (textureSelected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+
+
+
 		// 追加
 		if (ImGui::Button("Add")) {
 
 			// 空チェック
-			if (tag_[0] != '\0' && !selectedTag.empty()) {
+			if (tag_[0] != '\0' && !selectedModelTag.empty() && !selectedTextureTag.empty()) {
 
-				RegionParticleCompornent(tag_, Particle::GetInstance()->GetPath(selectedTag));
+				RegionParticleCompornent(
+					tag_,
+					selectedModelTag,
+					selectedTextureTag
+				);
 				
 				ImGui::CloseCurrentPopup();
 			}

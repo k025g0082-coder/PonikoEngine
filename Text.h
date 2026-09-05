@@ -103,7 +103,8 @@ private:
 	void draw_bitmap_outline(int x, int y);
 	void draw_bitmap_core(int x, int y,int r,int g, int b, unsigned char alphaScale = 255);
 
-	std::string  str;
+	std::string str;
+	std::string previousText_; // 前の文字
 
 	FontData* font = nullptr;
 

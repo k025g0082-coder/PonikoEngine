@@ -6,9 +6,11 @@ void ExampleEffect::Initialize(Vector3 position) {
 	Effect::Initialize(position);
 
 	// 素材登録
+	Particle::GetInstance()->RegionParticleModel("plane", "resources/Engine/plane.obj");
+	Particle::GetInstance()->RegionParticleTexture("texture", "resources/Engine/uvChecker.png");
+	Particle::GetInstance()->RegionParticleTexture("texture2", "resources/Engine/default.png");
 
-	//Particle::GetInstance()->RegionParticleModel("plane", "resources/Engine/plane.obj");
-
+	//Effect::RegionParticleCompornent("particle", "plane","texture");
 
 	// 使うモデルを登録（既にあるのは弾くのでそれは大丈夫）
 	//Effect::RegionParticleCompornent("plane", "resources/Engine/plane.obj");
@@ -28,8 +30,14 @@ void ExampleEffect::Update() {
 		Particle::GetInstance()->MakeNewParticle("plane", pos, 2, param_);
 		*/
 
+		// モデル登録
+		//Particle::GetInstance()->RegionParticleModel("plane", "resources/Engine/plane.obj");
+
 		// パーティクル放出
-		Effect::EmitParticleCompornent("111");
+		Effect::EmitParticleCompornent("a");
+
+		Effect::EmitParticleCompornent("particle");
+
 		//Effect::EmitParticleCompornent("plane2");
 	}
 

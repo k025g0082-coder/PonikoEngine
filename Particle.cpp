@@ -301,9 +301,29 @@ void Particle::RegionParticleModel(std::string tag,std::string path) {
 
 };
 
-void Particle::Update() {
+// パーティクル用のテキスチャ登録関数
+void Particle::RegionParticleTexture(std::string tag, std::string path) {
 
-    
+    // すでにおなじタグがあればリターン
+    if (particleTextureDatas_.contains(tag)) {
+        return;
+    }
+
+    // すでに同じテキスチャを読み込んでいたらリターン
+    for (const auto& [tag, data] : particleTextureDatas_) {
+        if (data->texturePath_ == path) {
+            return;
+        }
+    }
+
+    Texture* data = new Texture();
+    data->Initialize(path);
+
+    particleTextureDatas_[tag] = data;
+}
+
+
+void Particle::Update() {
 
     // カメラ未設定なら帰る
     if (camera_ == nullptr) return;
@@ -484,6 +504,7 @@ void Particle::Draw()
         
         commandList->SetGraphicsRootDescriptorTable(
             2,
+            
             data.texture->GetTextureSrvHandleGPU()
         );
 
@@ -533,21 +554,33 @@ void Particle::Draw()
 //
 
 // 生成
-void Particle::MakeNewParticle(std::string tag, Vector3 pos, int num, ParticleParam param) {
+void Particle::MakeNewParticle(std::string tag, std::string textureTag, Vector3 pos, int num, ParticleParam param) {
 
-    auto it = particleModelDatas_.find(tag);
+    auto itm = particleModelDatas_.find(tag);
 
-    if (it == particleModelDatas_.end()) {
+    if (itm == particleModelDatas_.end()) {
         return;
     }
 
+    auto it = particleTextureDatas_.find(textureTag);
+
+    if (it == particleTextureDatas_.end()) {
+        return;
+    }
+
+
     // secondはその値の右側（値側）を取得
-    ParticleModelData* data = &it->second;
+    ParticleModelData* data = &itm->second;
 
     // １モデルの限界描画数超えてたら　リターン
     if (data->currentDrawNum +  num > kNumInstance) {
         return;
     }
+
+
+    // 描画に使うテキスチャのアドレス登録
+    data->texture = particleTextureDatas_[textureTag];
+
 
     // 描画数足すｗ
     data->currentDrawNum += num;
@@ -565,6 +598,7 @@ void Particle::MakeNewParticle(std::string tag, Vector3 pos, int num, ParticlePa
 
         // タグ名登録
         emits[i].tag = tag;
+        emits[i].textureTag = textureTag;
         
         // 大きさランダム
         float random = DirectXUtility::RandomFloat(param.scaleAmpMin, param.scaleAmpMax);

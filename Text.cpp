@@ -16,8 +16,8 @@ FT_Library Text::library = nullptr;
 void Text::Init() {
 
 	// 描画する区域
-	width = 1280; // 超長くできるように
-	height = 300; // 高さは固定 dekai mojiha kokowo ookiku
+	width = 640; // 超長くできるように
+	height = 200; // 高さは固定 dekai mojiha kokowo ookiku
 
 	// 初期化
 	delete[] image;
@@ -109,6 +109,14 @@ void Text::SetFontSize(int size)
 // 文字列描画
 void Text::drawString(const std::string& text, Vector2 position, TextAnchor anchor)
 {
+
+	// もし前回までと同じ文字ならすぐ帰る
+	if (text == previousText_) {
+		sprite.Draw();
+		return;
+	}
+
+	previousText_ = text;
 
 	std::u32string u32text = ToU32String(text);
 

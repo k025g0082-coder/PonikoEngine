@@ -17,7 +17,7 @@
 void TestScene::Init() {
 
 	text.Init();
-	text.setFont("default");
+
 
 	text2.Init();
 	text2.setFont("default");
@@ -38,6 +38,10 @@ void TestScene::Init() {
 	fieldModel = Model::CreateOBJ("resources/Models/field/field.obj");
 
 	cubeModel = Model::CreateOBJ("resources/Engine/plane.obj");
+
+	backModel = Model::CreateOBJ("resources/Models/backGroundCloud/backGroundCloud.obj");
+	backWorld1.Initialize();
+	backWorld2.Initialize();
 
 	// LightingManagerで設定した空間のにモデルをセット
 	model->SetLightSets();
@@ -60,6 +64,8 @@ void TestScene::Init() {
 
 	world.Initialize();
 
+	Text::RegisterFont("main", "resources/Fonts/DenkiChip.ttf", 32, 32);
+	text.setFont("main");
 };
 
 void TestScene::Update(GamePad* gamepad) {
@@ -71,11 +77,17 @@ void TestScene::Update(GamePad* gamepad) {
 
 	cubeModel->Update();
 	fieldModel->Update();
+	backModel->Update();
 
 	camera.Update();
 
 	world.UpdateMatrix();
 
+	backWorld1.scale_ = { 2.0f,2.0f,2.0f };
+	backWorld1.rotation_.y += 0.01f;
+
+	backWorld1.UpdateMatrix();
+	backWorld2.UpdateMatrix();
 
 	timer++;
 
@@ -140,11 +152,16 @@ void TestScene::Draw() {
 	model->Draw(world,camera);
 	fieldModel->Draw(camera);
 
+	backModel->Draw(backWorld1,camera);
+	backModel->Draw(backWorld2,camera);
+
 	text.SetFontLayout(layout);
 	text2.SetFontLayout(layout);
 
-	text2.SetFontSize(10);
+	std::string t = "スコア：";
 
-	text.drawString("ponikoEngine", {0,0}, Text::TextAnchor::LeftTop);
+	text.drawString(t, {0,0}, Text::TextAnchor::LeftTop);
+
+	text2.drawString(std::to_string(timer), {50,0}, Text::TextAnchor::LeftTop);
 
 };

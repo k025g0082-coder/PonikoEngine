@@ -24,7 +24,7 @@ struct ParticleModelData {
 	// モデルデータ
 	ModelData modelData;
 
-	// テクスチャ
+	// テクスチャ（のアドレス）
 	Texture* texture = nullptr;
 
 	D3D12_INDEX_BUFFER_VIEW indexBufferView{};// 頂点ビュー
@@ -126,12 +126,20 @@ public:
 	// パーティクル用モデル登録関数
 	void RegionParticleModel(std::string tag,std::string path);
 
+	// パーティクル用テキスチャ登録関数
+	void RegionParticleTexture(std::string tag, std::string path);
+
+
 	// 生成
-	void MakeNewParticle(std::string tag, Vector3 pos, int num, ParticleParam param);
+	void MakeNewParticle(std::string tag, std::string textureTag, Vector3 pos, int num, ParticleParam param);
 
 
 	// 登録済のパーティクルモデルのパスゲット   どうせ登録でなかったら弾いてるのでいいでしょこれで
-	std::string GetPath(std::string name) {
+	std::string GetModelPath(std::string name) {
+		return particleModelDatas_[name].modelPath;
+	};
+	// 登録済のパーティクルモデルのパスゲット   どうせ登録でなかったら弾いてるのでいいでしょこれで
+	std::string GetTexturePath(std::string name) {
 		return particleModelDatas_[name].modelPath;
 	};
 
@@ -141,6 +149,18 @@ public:
 		std::vector<std::string> list;
 
 		for (const auto& [tag, data] : particleModelDatas_) {
+			list.push_back(tag);
+		}
+
+		return list;
+
+	};
+	// 登録済のパーティクルテキスチャーの名前表ゲット
+	std::vector<std::string> GetParticleTextureList() {
+
+		std::vector<std::string> list;
+
+		for (const auto& [tag, data] : particleTextureDatas_) {
 			list.push_back(tag);
 		}
 
@@ -166,7 +186,11 @@ public:
 	// 描画に使うカメラをセットする
 	void SetCamera(Camera& camera) { camera_ = &camera; }
 
+	// パーティクル用モデル辞典
 	std::map<std::string, ParticleModelData> particleModelDatas_;
+
+	// パーティクル用テキスチャ辞典
+	std::map<std::string, Texture*> particleTextureDatas_;
 
 
 private:

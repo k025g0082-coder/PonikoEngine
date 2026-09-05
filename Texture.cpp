@@ -49,7 +49,7 @@ void Texture::Initialize(std::string texturePath) {
 
 	//SRVの生成
 	DirectXCommon::GetInstance()->GetDevice().Get()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
-
+	texturePath_ = texturePath;
 }
 
 	// imageからtextureを作る場合の初期化処理
@@ -109,6 +109,7 @@ void Texture::Initialize(unsigned char* image, int width, int height) {
 
 	//SRVの生成
 	DirectXCommon::GetInstance()->GetDevice().Get()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
+
 
 }
 

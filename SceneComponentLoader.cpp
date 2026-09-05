@@ -291,7 +291,9 @@ void SceneComponentLoader::EffectParticleCompornentSave(std::string tag, Particl
 	auto& data = jsonData_["EffectParticleCompornents"][tag];
 
 	data["particleTag"] = param_.tag;
-	data["particlePath"] = param_.path;
+	data["textureTag"] = param_.textureTag;
+
+//	data["particlePath"] = param_.path;
 		
 	data["position"] = Vector3ToJson(param_.position);
 
@@ -332,10 +334,12 @@ void SceneComponentLoader::EffectParticleCompornentLoad(
 		ParticleCompornent& param = particleEmitParams_[tag];
 
 		param.tag = data["particleTag"];
-		param.path = data["particlePath"];
+		param.textureTag = data["textureTag"];
+
+//		param.path = data["particlePath"];
 
 		// 使うモデルを登録（既にあるのは弾くのでそれは大丈夫）
-		Particle::GetInstance()->RegionParticleModel(param.tag, param.path);
+		//Particle::GetInstance()->RegionParticleModel(param.tag, param.path);
 
 
 		param.position = JsonToVector3(data["position"]);
