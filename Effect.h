@@ -39,6 +39,7 @@
 struct ParticleCompornent {
 
 	std::string tag;			// particleクラスに登録されてるほうのタグ
+	std::string path;			// particleクラスに登録されてるパーティクルモデルのpath
 
 	Vector3 position = { 0,0,0 };
 	int num = 1;
@@ -71,14 +72,15 @@ public:
 
 protected:
 
+	// エフェクト名
+	std::string effectName;
+
+
 	// エフェクト発生する座標
 	Vector3 pos; 
 
 	// 修了確認処理
 	bool isFinished_ = false;
-
-
-	
 
 	// デバッグ用表示するか
 	bool isImGuiView_ = false;

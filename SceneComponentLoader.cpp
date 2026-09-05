@@ -291,6 +291,7 @@ void SceneComponentLoader::EffectParticleCompornentSave(std::string tag, Particl
 	auto& data = jsonData_["EffectParticleCompornents"][tag];
 
 	data["particleTag"] = param_.tag;
+	data["particlePath"] = param_.path;
 		
 	data["position"] = Vector3ToJson(param_.position);
 
@@ -315,6 +316,7 @@ void SceneComponentLoader::EffectParticleCompornentSave(std::string tag, Particl
 
 
 void SceneComponentLoader::EffectParticleCompornentLoad(
+
 	std::map<std::string, ParticleCompornent>& particleEmitParams_)
 {
 	if (jsonData_.empty()) {
@@ -330,8 +332,14 @@ void SceneComponentLoader::EffectParticleCompornentLoad(
 		ParticleCompornent& param = particleEmitParams_[tag];
 
 		param.tag = data["particleTag"];
+		param.path = data["particlePath"];
+
+		// 使うモデルを登録（既にあるのは弾くのでそれは大丈夫）
+		Particle::GetInstance()->RegionParticleModel(param.tag, param.path);
+
 
 		param.position = JsonToVector3(data["position"]);
+
 
 		param.num = data["num"];
 

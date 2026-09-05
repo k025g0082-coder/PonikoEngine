@@ -129,6 +129,25 @@ public:
 	// 生成
 	void MakeNewParticle(std::string tag, Vector3 pos, int num, ParticleParam param);
 
+
+	// 登録済のパーティクルモデルのパスゲット   どうせ登録でなかったら弾いてるのでいいでしょこれで
+	std::string GetPath(std::string name) {
+		return particleModelDatas_[name].modelPath;
+	};
+
+	// 登録済のパーティクルモデルの名前表ゲット
+	std::vector<std::string> GetParticleModelList() {
+
+		std::vector<std::string> list;
+
+		for (const auto& [tag, data] : particleModelDatas_) {
+			list.push_back(tag);
+		}
+
+		return list;
+
+	};
+
 	// Path存在チェック見つかったらタグ名で返して　みつかんなかったら
 	std::string GetExistencePathToTag(std::string path) {
 

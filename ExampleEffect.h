@@ -5,6 +5,12 @@
 class ExampleEffect : public Effect {
 
 public:
+	ExampleEffect()
+	{
+		// エフェクト名
+		effectName = "ExampleEffect";
+	}
+
 	void Initialize(Vector3 position) override;
 	void Update() override;
 
