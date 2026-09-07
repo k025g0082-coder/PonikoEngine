@@ -29,9 +29,13 @@ void Fade::Update() {
 
 		// 1フレーム分の秒数をカウントアップ
 		counter_ += 1.0f / 60.0f;
+
 		// フェード継続時間に達したら打ち止め
 		if (counter_ >= duration_) {
+
+			isFading_ = false;
 			counter_ = duration_;
+
 		}
 		// 0.0fから1.0fの間で、経過時間がフェード継続時間に近づくほどアルファ値を大きくする
 		sprite.SetColorRGBA(Vector4(0, 0, 0, 1.0f - std::clamp(counter_ / duration_, 0.0f, 1.0f)));
@@ -45,7 +49,10 @@ void Fade::Update() {
 		counter_ += 1.0f / 60.0f;
 		// フェード継続時間に達したら打ち止め
 		if (counter_ >= duration_) {
+
+			isFading_ = false;
 			counter_ = duration_;
+
 		}
 		// 0.0fから1.0fの間で、経過時間がフェード継続時間に近づくほどアルファ値を大きくする
 		sprite.SetColorRGBA(Vector4(0, 0, 0, std::clamp(counter_ / duration_, 0.0f, 1.0f)));
@@ -65,6 +72,9 @@ void Fade::Draw() {
 };
 
 void Fade::Start(Status status, float duration) { 
+
+	isFading_ = true;
+
 	status_ = status;
 	duration_ = duration;
 	counter_ = 0.0f;

@@ -120,6 +120,51 @@ public:
 			break;
 		}
 	}
+
+
+	// スプライトの描画Rectを指定
+	void SetTextureRect(
+		float left,
+		float top,
+		float width,
+		float height)
+	{
+		// テクスチャ上の範囲をUVに変換
+		float u0 = left / imageWidth;
+		float v0 = top / imageHeight;
+
+		float u1 = (left + width) / imageWidth;
+		float v1 = (top + height) / imageHeight;
+
+		// 描画する四角形のサイズ
+		float tWidth = width;
+		float tHeight = height;
+
+		// 左下
+		vertexDataSprite[0].position = { 0.0f, tHeight, 0.0f, 1.0f };
+		vertexDataSprite[0].texcoord = { u0, v1 };
+
+		// 左上
+		vertexDataSprite[1].position = { 0.0f, 0.0f, 0.0f, 1.0f };
+		vertexDataSprite[1].texcoord = { u0, v0 };
+
+		// 右下
+		vertexDataSprite[2].position = { tWidth, tHeight, 0.0f, 1.0f };
+		vertexDataSprite[2].texcoord = { u1, v1 };
+
+		// 左上
+		vertexDataSprite[3].position = { 0.0f, 0.0f, 0.0f, 1.0f };
+		vertexDataSprite[3].texcoord = { u0, v0 };
+
+		// 右上
+		vertexDataSprite[4].position = { tWidth, 0.0f, 0.0f, 1.0f };
+		vertexDataSprite[4].texcoord = { u1, v0 };
+
+		// 右下
+		vertexDataSprite[5].position = { tWidth, tHeight, 0.0f, 1.0f };
+		vertexDataSprite[5].texcoord = { u1, v1 };
+	}
+
 	int GetImageWidth() { return imageWidth; }
 	int GetImageHeight() { return imageHeight; }
 
@@ -129,7 +174,7 @@ public:
 	}
 
 	void SetScreenTransform(ScreenTransform screenTransform) { screenTransform_ = screenTransform; }
-	ScreenTransform GetScreenTransform() { return screenTransform_; }
+	ScreenTransform& GetScreenTransform() { return screenTransform_; }
 	
 	// 行列更新
 	void UpdateScreenTransform() {

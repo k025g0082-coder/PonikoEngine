@@ -7,6 +7,7 @@
 #include "Model.h"
 
 #include "WorldTransform.h"
+#include "ScreenTransform.h"
 
 class TestScene :
     public Scene
@@ -19,6 +20,8 @@ public:
 private:
 
 	Sprite sprite;
+	Sprite combo;
+
 	Model* model = nullptr;
 	Model* fieldModel = nullptr;
 	Model* cubeModel = nullptr;
@@ -38,5 +41,29 @@ private:
 	Text text;
 	Text text2;
 	Text text3;
+
+	int testCombo = 0;
+	ScreenTransform comboPositions_[5];
+
+	// telop
+	Sprite telopSprite;
+	Text telopText;
+
+	Vector2 ps = { 100.0f,100.0f };
+	int fontWidth = 32;
+	float margin = 5.0f;
+
+	// 体力バー
+	int hp_ = 30;
+	int maxHp_ = 30;
+	Sprite hpBarBackSprite;
+	Sprite hpBarFrontSprite;
+
+	Vector2 barps = { 100.0f,100.0f };
+
+	float barWidth = 100.0f;
+	float barHeight = 100.0f;
+	float barMargin = 5.0f;
+
 };
 

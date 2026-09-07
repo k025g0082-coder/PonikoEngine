@@ -5,7 +5,9 @@
 #include "Effect.h"
 
 #include "Vector.h"
+
 #include "WorldTransform.h"
+#include "ScreenTransform.h"
 
 using json = nlohmann::json;
 
@@ -17,12 +19,6 @@ json Vector4ToJson(const Vector4& value);
 // Json->Vector3の形式に変換
 Vector3 JsonToVector3(const json& value);
 Vector4 JsonToVector4(const json& value);
-
-// WorldTransform->Jsonの形式に変換
-json WorldToJson(const WorldTransform& world);
-
-// Json->Vector3の形式に変換
-WorldTransform JsonToWorld(const json& value);
 
 
 class SceneComponentLoader
@@ -57,6 +53,34 @@ public:
 		return JsonToWorld(jsonData_[tag]);
 	}
 
+// スクリーントランスフォーム読み取り
+	ScreenTransform GetScreenTransformData(std::string tag) {
+
+		ScreenTransform screen;
+		screen.Initialize();
+		screen.UpdateMatrix();
+
+		// もし存在しなかったら
+		if (!jsonData_.contains(tag)) {
+			return screen;
+		}
+
+		return JsonToScreen(jsonData_[tag]);
+	}
+
+	// ワールドトランスフォーム書き込み
+	void SetWorldTransformData(std::string tag, WorldTransform world) {
+
+			jsonData_[tag] = WorldToJson(world);
+
+	};
+	// スクリーントランスフォーム書き込み
+	void SetScreenTransformData(std::string tag, ScreenTransform screen) {
+
+			jsonData_[tag] = ScreenToJson(screen);
+
+	};
+
 	// LightingManagerからライトをロード
 	void LightLoad();
 	
@@ -72,5 +96,17 @@ public:
 private:
 
 	json jsonData_;
+
+
+	// WorldTransform->Jsonの形式に変換
+	json WorldToJson(const WorldTransform& world);
+	// WorldTransform->Jsonの形式に変換
+	json ScreenToJson(const ScreenTransform& screen);
+
+	// Json->Vector3の形式に変換
+	WorldTransform JsonToWorld(const json& value);
+	// Json->Vector2の形式に変換
+	ScreenTransform JsonToScreen(const json& value);
+
 };
 

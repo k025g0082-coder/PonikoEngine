@@ -19,6 +19,9 @@ public:
 	void Start(Status status, float dration);
 	void Stop();
 
+	// 再生ちゅうか
+	bool IsPlayFading() { return isFading_; }
+
 	// 終了判定
 	bool IsFinished() const;
 
@@ -28,4 +31,5 @@ private:
 	float duration_ = 0.0f; // 計測時間
 	float counter_ = 0.0f;  // 経過時間カウンター
 
+	bool isFading_ = false;  // 再生ちゅうか
 };

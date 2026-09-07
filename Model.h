@@ -200,6 +200,18 @@ public:
 		};
 	}
 
+	// アニメ一時停止か
+	void AnimationStop() { isAnimation_ = false; }
+	void AnimationPlay() { isAnimation_ = true; }
+
+	// ループ設定
+	void SetAnimationLoop(bool b) { isLoop_ = b; }
+
+	// アニメーションのスピードを設定
+	void SetAnimationSpeed(float s) {
+		animationSpeed = s;
+	}
+
 	void ModelColor(Vector4 rgba) {
 		materialData->color = { rgba.x,rgba.y,rgba.z,rgba.w };
 	};
@@ -216,10 +228,7 @@ public:
 		worldTransform_ = w;
 	}
 
-	// アニメーションのスピードを設定
-	void SetAnimationSpeed(float s) {
-		animationSpeed = s;
-	}
+
 	
 private:
 
@@ -244,6 +253,9 @@ private:
 	// 現在のアニメ番号
 	uint32_t animationIndex_ = 0;
 
+	// 再生ちゅうか
+	bool isAnimation_ = true;
+	
 	bool isLoop_ = true;
 
 	std::vector<Matrix4x4> boneMatrices_;

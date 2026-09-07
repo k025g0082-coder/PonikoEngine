@@ -404,7 +404,7 @@ Vector4 JsonToVector4(const json& value)
 
 
 // WorldTransform->Jsonの形式に変換
-json WorldToJson(const WorldTransform& world){
+json  SceneComponentLoader::WorldToJson(const WorldTransform& world){
 	return {
 			{"scale",  Vector3ToJson(world.scale_)},
 			{"rotation", Vector3ToJson(world.rotation_)},
@@ -412,8 +412,17 @@ json WorldToJson(const WorldTransform& world){
 	};
 }
 
-// Json->Vector3の形式に変換
-WorldTransform JsonToWorld(const json& value) {
+// ScreenTransform->Jsonの形式に変換
+json  SceneComponentLoader::ScreenToJson(const ScreenTransform& screen) {
+	return {
+			{"scale",  Vector3ToJson(screen.scale_)},
+			{"rotation", Vector3ToJson(screen.rotation_)},
+			{"translation",Vector3ToJson(screen.translation_)}
+	};
+}
+
+// Json->WorldTransformの形式に変換
+WorldTransform  SceneComponentLoader::JsonToWorld(const json& value) {
 
 	WorldTransform world;
 	world.Initialize();
@@ -425,4 +434,20 @@ WorldTransform JsonToWorld(const json& value) {
 	world.UpdateMatrix();
 
 	return world;
+}
+
+
+// Json->ScreenTransformの形式に変換
+ScreenTransform  SceneComponentLoader::JsonToScreen(const json& value) {
+
+	ScreenTransform screen;
+	screen.Initialize();
+
+	screen.scale_ = JsonToVector3(value["scale"]);
+	screen.rotation_ = JsonToVector3(value["rotation"]);
+	screen.translation_ = JsonToVector3(value["translation"]);
+
+	screen.UpdateMatrix();
+
+	return screen;
 }

@@ -16,7 +16,7 @@ FT_Library Text::library = nullptr;
 void Text::Init() {
 
 	// 描画する区域
-	width = 640; // 超長くできるように
+	width = 1280; // 超長くできるように
 	height = 200; // 高さは固定 dekai mojiha kokowo ookiku
 
 	// 初期化
@@ -112,6 +112,7 @@ void Text::drawString(const std::string& text, Vector2 position, TextAnchor anch
 
 	// もし前回までと同じ文字ならすぐ帰る
 	if (text == previousText_) {
+		sprite.SetPosition(position);
 		sprite.Draw();
 		return;
 	}
@@ -233,7 +234,7 @@ void Text::drawString(const std::string& text, Vector2 position, TextAnchor anch
 
 void Text::CursorSet() {
 
-	curPosX = 0;
+	curPosX = textLayout.outlineSize;
 	curPosY = 0;
 
 	last_height = 0;
@@ -262,7 +263,7 @@ void Text::CursorSet() {
 				);
 		}
 
-		curPosY = maxBitmapTop;
+		curPosY = maxBitmapTop + textLayout.outlineSize;
 
 
 	}

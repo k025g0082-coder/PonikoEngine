@@ -216,7 +216,10 @@ void Model::Initialize(){
 void Model::Update(){
 
 	// 時間加算
-	animationTime_ += Timer::GetDeltaTime() * animationSpeed;
+	if (isAnimation_) {
+		animationTime_ += Timer::GetDeltaTime() * animationSpeed;
+	}
+
 
 	if (!modelData.animations.empty())
 	{
@@ -256,9 +259,23 @@ void Model::UpdateAnimation() {
 	float currentTick =
 		animationTime_ * animation.ticksPerSecond;
 
-	// ループ
-	currentTick =
-		fmod(currentTick, animation.duration);
+
+	float animationLength =
+		animation.duration / animation.ticksPerSecond;
+
+	if (!isLoop_ && animationTime_ >= animationLength) {
+		animationTime_ = animationLength;
+		isAnimation_ = false;
+	}
+
+	// ループか
+	if (isLoop_) {
+		currentTick = fmod(currentTick, animation.duration);
+	}
+	else {
+		currentTick = std::min(currentTick, animation.duration);
+	}
+
 
 	// SRT、それぞれ取り出して計算
 	// arm, leg, など各部位ひとつづつ取り出し更新
