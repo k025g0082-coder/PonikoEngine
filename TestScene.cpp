@@ -19,8 +19,8 @@ void TestScene::Init() {
 	text.Init();
 
 
-	text2.Init();
-	text2.setFont("default");
+	/*text2.Init();
+	text2.setFont("default");*/
 
 	camera.Initialize();
 
@@ -65,7 +65,8 @@ void TestScene::Init() {
 
 		sprite.SetScreenTransform(loder->GetScreenTransformData("sprite"));
 
-		
+		loder->LoadTextData("text", &text2);
+
 	}
 
 	world.Initialize();
@@ -148,6 +149,7 @@ void TestScene::Update(GamePad* gamepad) {
 		loder->SetWorldTransformData("player", model->GetWorldTransform());
 		loder->SetScreenTransformData("sprite", sprite.GetScreenTransform());
 		
+		loder->SaveTextData("text", &text2);
 
 		SceneComponentLoader::GetInstance()->Save("resources/Scene/TestScene.json");
 
@@ -174,6 +176,9 @@ void TestScene::Update(GamePad* gamepad) {
 	ImGui::DragFloat("Margin", &barMargin, 1.0f, 0.0f, 50.0f);
 
 	ImGui::DragFloat2("Position", &barps.x, 1.0f);
+
+	text2.ImGuiView();
+
 #endif
 
 	telopSprite.UpdateScreenTransform();
@@ -211,7 +216,6 @@ void TestScene::Draw() {
 	backModel->Draw(backWorld2,camera);
 
 	text.SetFontLayout(layout);
-	text2.SetFontLayout(layout);
 
 	//sprite.Draw();
 
@@ -219,9 +223,9 @@ void TestScene::Draw() {
 
 	//testCombo++;
 	
-	//text.drawString(t, { (float)testCombo ,(float)testCombo }, Text::TextAnchor::Center);
+	//text.drawString("test", {(float)testCombo ,(float)testCombo}, Text::TextAnchor::Center);
 
-	//text2.drawString(std::to_string(timer), {50,0}, Text::TextAnchor::LeftTop);
+	text2.drawString("textTest", TextAnchor::LeftTop);
 
 
 	// telop

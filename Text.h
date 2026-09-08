@@ -29,6 +29,49 @@ struct fontLayout {
 
 	// 縁をぼかすか
 	bool isOutlineBlur = false;
+
+	// 使用するフォントネーム
+	std::string fontName;
+
+	// 比較用ｗ
+	bool operator==(const fontLayout& other) const
+	{
+		return textSize == other.textSize
+
+			&& textColor.x == other.textColor.x
+			&& textColor.y == other.textColor.y
+			&& textColor.z == other.textColor.z
+
+			&& outlineSize == other.outlineSize
+
+			&& outlineColor.x == other.outlineColor.x
+			&& outlineColor.y == other.outlineColor.y
+			&& outlineColor.z == other.outlineColor.z
+
+			&& isOutlineBlur == other.isOutlineBlur
+
+			&& fontName == other.fontName;
+	}
+
+
+};
+
+// 文字のスタイル
+enum class TextAnchor {
+	LeftTop,
+	Center,
+};
+
+
+// JSON保存用
+struct TextDatas {
+
+	std::string text;     // 文字
+	std::string fontName; // 使用するフォント名
+	fontLayout textLayout;// レイアウト
+	Vector2 position_;    // 座標
+	TextAnchor anchor_;   // アンカー
+
 };
 
 class Text {
@@ -57,6 +100,7 @@ public:
 		textLayout.outlineColor = c;
 	}
 
+
 	// 複数の設定を纏めたレイアウトを設定
 	void SetFontLayout(fontLayout l) {
 
@@ -64,14 +108,10 @@ public:
 
 		SetFontSize(l.textSize);
 	}
-
-	// 文字のスタイル
-	enum class TextAnchor {
-		LeftTop,
-		Center,
-	};
+	fontLayout GetFontLayout() { return textLayout; }
 
 	void drawString(const std::string& text, Vector2 position, TextAnchor anchor = TextAnchor::LeftTop);
+	void drawString(const std::string& text,TextAnchor anchor = TextAnchor::LeftTop);
 
 	unsigned char* getImage();
 
@@ -84,6 +124,31 @@ public:
 
 	// 新規フォント登録
 	static bool RegisterFont(std::string fontName, const char* font_file_name, int char_width, int char_height);
+
+	// ImGui
+	void ImGuiView();
+
+	Vector2 GetPosition() { return position_; }
+	void SetPosition(Vector2 p) { position_ = p; }
+
+	// JSON用
+	TextDatas GetTextDatas() {
+		TextDatas data = {
+			.text = previousText_,
+			.fontName = textLayout.fontName,
+			.textLayout = textLayout,
+			.position_ = position_,
+			.anchor_ = anchor_,
+		};
+		return data;
+	}
+	void SetTextDatas(TextDatas data) {
+		previousText_ = data.text;
+		textLayout = data.textLayout;
+		textLayout.fontName = data.textLayout.fontName;
+		anchor_ = data.anchor_;
+		position_ = data.position_;
+	}
 
 private:
 
@@ -116,7 +181,7 @@ private:
 	
 	// 縁取りの色とか纏めた
 	fontLayout textLayout;
-
+	fontLayout previewTextLayout_;
 
 	std::u32string u32text_;
 	Vector2 position_;

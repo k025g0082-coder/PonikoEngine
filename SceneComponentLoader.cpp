@@ -451,3 +451,86 @@ ScreenTransform  SceneComponentLoader::JsonToScreen(const json& value) {
 
 	return screen;
 }
+
+
+TextDatas SceneComponentLoader::JsonToTextDatas(const json& value)
+{
+	TextDatas data;
+
+	data.text = value["text"].get<std::string>();
+	data.fontName = value["fontName"].get<std::string>();
+
+	// textLayout
+	const auto& layout = value["textLayout"];
+
+	data.textLayout.textSize =
+		layout["textSize"].get<int>();
+
+	data.textLayout.textColor = Vector3{
+		layout["textColor"][0].get<float>(),
+		layout["textColor"][1].get<float>(),
+		layout["textColor"][2].get<float>()
+	};
+
+	data.textLayout.outlineSize =
+		layout["outlineSize"].get<int>();
+
+	data.textLayout.outlineColor = Vector3{
+		layout["outlineColor"][0].get<float>(),
+		layout["outlineColor"][1].get<float>(),
+		layout["outlineColor"][2].get<float>()
+	};
+
+	data.textLayout.isOutlineBlur =
+		layout["isOutlineBlur"].get<bool>();
+
+	// position
+	data.position_ = Vector2{
+		value["position"][0].get<float>(),
+		value["position"][1].get<float>()
+	};
+
+	// anchor
+	data.anchor_ =
+		static_cast<TextAnchor>(value["anchor"].get<int>());
+
+	return data;
+}
+
+json  SceneComponentLoader::TextDatasToJson(const TextDatas& data)
+{
+	json value;
+
+	value["text"] = data.text;
+	value["fontName"] = data.fontName;
+
+	value["textLayout"] = {
+		{"textSize", data.textLayout.textSize},
+
+		{"textColor", {
+			data.textLayout.textColor.x,
+			data.textLayout.textColor.y,
+			data.textLayout.textColor.z
+		}},
+
+		{"outlineSize", data.textLayout.outlineSize},
+
+		{"outlineColor", {
+			data.textLayout.outlineColor.x,
+			data.textLayout.outlineColor.y,
+			data.textLayout.outlineColor.z
+		}},
+
+		{"isOutlineBlur", data.textLayout.isOutlineBlur}
+	};
+
+	value["position"] = {
+		data.position_.x,
+		data.position_.y
+	};
+
+	value["anchor"] =
+		static_cast<int>(data.anchor_);
+
+	return value;
+}

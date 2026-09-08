@@ -9,6 +9,8 @@
 #include "WorldTransform.h"
 #include "ScreenTransform.h"
 
+#include "Text.h"
+
 using json = nlohmann::json;
 
 
@@ -81,6 +83,30 @@ public:
 
 	};
 
+	// === テキスト用
+	void LoadTextData(std::string tag, Text* text) {
+
+		text->Init();
+		text->setFont("default");
+		text->SetFontSize(20);
+
+		// もし存在しなかったら
+		if (!jsonData_.contains(tag)) {
+			return;
+		}
+		TextDatas data = JsonToTextDatas(jsonData_[tag]);
+
+		text->SetTextDatas(data);
+
+		text->setFont(data.fontName);
+
+	}
+
+	void SaveTextData(std::string tag, Text* text) {
+		jsonData_[tag] = TextDatasToJson(text->GetTextDatas());
+	}
+
+
 	// LightingManagerからライトをロード
 	void LightLoad();
 	
@@ -108,5 +134,8 @@ private:
 	// Json->Vector2の形式に変換
 	ScreenTransform JsonToScreen(const json& value);
 
+	// Json <-> TextDatas
+	TextDatas JsonToTextDatas(const json& value);
+	json TextDatasToJson(const TextDatas& data);
 };
 

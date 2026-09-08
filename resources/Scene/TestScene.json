@@ -49,5 +49,29 @@
             111.80000305175781,
             0.0
         ]
+    },
+    "text": {
+        "anchor": 0,
+        "fontName": "default",
+        "position": [
+            0.0,
+            0.0
+        ],
+        "text": "textTest",
+        "textLayout": {
+            "isOutlineBlur": false,
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "outlineSize": 0,
+            "textColor": [
+                255.0,
+                255.0,
+                255.0
+            ],
+            "textSize": 20
+        }
     }
 }

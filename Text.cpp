@@ -5,6 +5,8 @@
 #include "DirectXUtility.h"
 #include "DirectXCommon.h"
 
+#include "ImGuiManager.h"
+
 #include <Windows.h>
 
 #define NOMINMAX
@@ -46,6 +48,8 @@ bool Text::setFont(const std::string& fontName)
 	}
 
 	font = &it->second;
+
+	textLayout.fontName = fontName;
 
 	return true;
 }
@@ -96,6 +100,8 @@ void Text::SetFontSize(int size)
 	if (!font)
 		return;
 
+	textLayout.textSize = size;
+
 	FT_Set_Char_Size(
 		font->face,
 		0,
@@ -110,14 +116,27 @@ void Text::SetFontSize(int size)
 void Text::drawString(const std::string& text, Vector2 position, TextAnchor anchor)
 {
 
-	// もし前回までと同じ文字ならすぐ帰る
-	if (text == previousText_) {
+	//// もし前回までと同じ文字ならすぐ帰る
+	//if (text == previousText_) {
+	//	sprite.SetPosition(position);
+	//	sprite.Draw();
+	//	return;
+	//}
+
+	//previousText_ = text;
+	// 
+		// もし前回までと同じ文字かレイアウトならすぐ帰る
+	if (text == previousText_ && textLayout == previewTextLayout_) {
 		sprite.SetPosition(position);
 		sprite.Draw();
 		return;
 	}
 
 	previousText_ = text;
+	previewTextLayout_ = textLayout;
+
+	SetFontSize(textLayout.textSize);
+
 
 	std::u32string u32text = ToU32String(text);
 
@@ -230,6 +249,134 @@ void Text::drawString(const std::string& text, Vector2 position, TextAnchor anch
 	sprite.Draw();
 }
 
+// 文字列描画(内蔵型)
+void Text::drawString(const std::string& text, TextAnchor anchor)
+{
+
+	// もし前回までと同じ文字かレイアウトならすぐ帰る
+	if (text == previousText_ && textLayout == previewTextLayout_) {
+		sprite.SetPosition(position_);
+		sprite.Draw();
+		return;
+	}
+
+	previousText_ = text;
+	previewTextLayout_ = textLayout;
+	
+	SetFontSize(textLayout.textSize);
+
+	std::u32string u32text = ToU32String(text);
+
+	// キャンバス初期化
+	memset(image, 0, width * height * 4);
+
+	// だいにゅ０－
+	anchor_ = anchor;
+	u32text_ = u32text;
+
+	textWidth = 0;
+
+	// 全体の横幅取得
+	for (char32_t c : u32text_)
+	{
+		if (FT_Load_Char(font->face, c, FT_LOAD_RENDER))
+			continue;
+
+		textWidth += font->slot->advance.x >> 6;
+	}
+
+
+	// 描画位置とかを設定
+	CursorSet();
+
+
+	// 1) 縁取りを描画
+	// 2) 本体の文字を描画
+
+	// 1.縁取りを先に描画
+	for (char32_t c : u32text_)
+	{
+		if (c == U'\n')
+		{
+			curPosX = static_cast<int>(position_.x);
+			curPosY += fontHeight;
+		}
+		else
+		{
+			if (FT_Load_Char(font->face, c, FT_LOAD_RENDER))
+				continue;
+
+			switch (anchor)
+			{
+			case TextAnchor::LeftTop:
+				draw_bitmap_outline(
+					curPosX + font->slot->bitmap_left,
+					curPosY - font->slot->bitmap_top
+				);
+				break;
+
+			case TextAnchor::Center:
+				draw_bitmap_outline(
+					curPosX + font->slot->bitmap_left,
+					curPosY - font->slot->bitmap_top
+				);
+				break;
+			}
+
+			curPosX += font->slot->advance.x >> 6;
+		}
+	}
+
+	// 描画位置リセット
+	CursorSet();
+
+	// 2.本体を描画
+	for (char32_t c : u32text_)
+	{
+		if (c == U'\n')
+		{
+			curPosX = static_cast<int>(position_.x);
+			curPosY += fontHeight;
+		}
+		else
+		{
+			if (FT_Load_Char(font->face, c, FT_LOAD_RENDER))
+				continue;
+
+			int r = (int)textLayout.textColor.x;
+			int g = (int)textLayout.textColor.y;
+			int b = (int)textLayout.textColor.z;
+
+			switch (anchor)
+			{
+			case TextAnchor::LeftTop:
+				draw_bitmap_core(
+					curPosX + font->slot->bitmap_left,
+					curPosY - font->slot->bitmap_top,
+					r, g, b
+				);
+				break;
+
+			case TextAnchor::Center:
+				draw_bitmap_core(
+					curPosX + font->slot->bitmap_left,
+					curPosY - font->slot->bitmap_top,
+					r, g, b
+				);
+				break;
+			}
+
+			curPosX += font->slot->advance.x >> 6;
+		}
+	}
+
+	sprite.TextTextureUpdate(image);
+
+	sprite.Draw();
+}
+
+
+
 // 左上、真ん中原点にカーソル初期位置やらをセット
 
 void Text::CursorSet() {
@@ -292,6 +439,33 @@ void Text::CursorSet() {
 unsigned char* Text::getImage() {
 	// 画像取得ロジック
 	return image;
+}
+
+void Text::ImGuiView() {
+	
+	if (previousText_.empty()) return;
+
+#ifdef USE_IMGUI
+
+	if (ImGui::TreeNode(previousText_.c_str())) {
+
+		ImGui::DragFloat2("pos", &position_.x, 3.0f);
+
+		ImGui::Text("FontName:%s", textLayout.fontName.c_str());
+		
+		ImGui::DragInt("Text Size", &textLayout.textSize, 1.0f, 1, 200);
+		ImGui::ColorEdit3("Text Color", &textLayout.textColor.x);
+
+		ImGui::DragInt("Outline Size", &textLayout.outlineSize, 1.0f, 0, 50);
+		ImGui::ColorEdit3("Outline Color", &textLayout.outlineColor.x);
+
+		ImGui::Checkbox("Outline Blur", &textLayout.isOutlineBlur);
+
+		ImGui::TreePop();
+	}
+
+#endif
+
 }
 
 int Text::GetTextWidth(const std::string& text)
