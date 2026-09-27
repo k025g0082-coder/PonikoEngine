@@ -4,6 +4,7 @@
 #include "ImGuiManager.h"
 
 #include "SceneComponentLoader.h"
+#include "SoundManager.h"
 
 #include "ModelLoader.h"
 
@@ -28,6 +29,10 @@ void TestScene::Init() {
 	SpotLightParam sLightParam;
 	DirectionalLightParam dLightParam;
 
+	//SoundManager::GetInstance()->LoadWave("bgm", "resources/Sound/grandciel.wav");
+	//SoundManager::GetInstance()->SetSoundLoop("bgm", 28.375f, 99.5f);
+	//SoundManager::GetInstance()->Play("bgm",1.0f,95.0f);
+
 
 	lightAddress = &LightingManager::GetInstance()->AddLight(dLightParam);
 
@@ -35,6 +40,8 @@ void TestScene::Init() {
 	model = Model::CreateOBJ("resources/Models/player/player.fbx");
 	model->SetAnimationSpeed(0.5f);
 	model->SetAnimationLoop(false);
+
+	sheldModel = Model::CreateOBJ("resources/Models/sheld/sheld.obj");
 
 	fieldModel = Model::CreateOBJ("resources/Models/field/field.obj");
 
@@ -50,6 +57,9 @@ void TestScene::Init() {
 
 	sprite.Initialize("resources/Engine/uvChecker.png");
 	sprite.SetTextureRect(110.0f, 10.0f, 100.0f, 100.0f);
+
+	spworld1.Initialize();
+	spworld2.Initialize();
 
 	// 読込み
 	if (SceneComponentLoader::GetInstance()->Load("resources/Scene/TestScene.json")) {
@@ -68,6 +78,8 @@ void TestScene::Init() {
 		loder->LoadTextData("text", &text2);
 
 	}
+	
+	sheldModel->SetLightSets();
 
 	world.Initialize();
 
@@ -88,10 +100,6 @@ void TestScene::Init() {
 	telopText.Init();
 	telopText.setFont("main");
 
-	hpBarBackSprite.Initialize("resources/white100x100.png");
-	hpBarFrontSprite.Initialize("resources/white100x100.png");
-	hpBarFrontSprite.SetColorRGBA({ 1.0f,0,0,1.0f });
-
 };
 
 void TestScene::Update(GamePad* gamepad) {
@@ -105,6 +113,7 @@ void TestScene::Update(GamePad* gamepad) {
 	fieldModel->Update();
 	backModel->Update();
 
+	sheldModel->Update();
 	sprite.UpdateScreenTransform();
 
 	camera.Update();
@@ -114,12 +123,18 @@ void TestScene::Update(GamePad* gamepad) {
 	backWorld1.scale_ = { 2.0f,2.0f,2.0f };
 	backWorld1.rotation_.y += 0.01f;
 
+	backWorld2.rotation_.y += 0.02f;
+
 	backWorld1.UpdateMatrix();
 	backWorld2.UpdateMatrix();
 
 	for (int i = 0; i < 5; i++) {
 		comboPositions_[i].UpdateMatrix();
 	}
+
+	spworld1.UpdateMatrix();
+	spworld2.UpdateMatrix();
+
 
 	timer++;
 
@@ -157,10 +172,15 @@ void TestScene::Update(GamePad* gamepad) {
 	if (ImGui::Button("Effect")) {
 
 
-		Particle::GetInstance()->SetCamera(camera);
+		Particle::GetInstance()->SetCamera(&camera);
 
 		// とうろく
 		EffectManager::AddEffect(new ExampleEffect, {0,0,0});
+
+	}
+	if (ImGui::Button("FadeStopBgm")) {
+
+		SoundManager::GetInstance()->FadeOut("bgm", 1.0f);
 
 	}
 	ImGui::DragFloat2("Position", &ps.x, 1.0f);
@@ -168,23 +188,18 @@ void TestScene::Update(GamePad* gamepad) {
 	ImGui::DragFloat("Margin", &margin, 0.1f);
 	ImGui::Separator();
 
-	ImGui::DragInt("HP", &hp_, 1, 0, maxHp_);
-	ImGui::DragInt("Max HP", &maxHp_, 1, 1, 999);
-
-	ImGui::DragFloat("Bar Width", &barWidth, 1.0f, 1.0f, 1000.0f);
-	ImGui::DragFloat("Bar Height", &barHeight, 1.0f, 1.0f, 200.0f);
-	ImGui::DragFloat("Margin", &barMargin, 1.0f, 0.0f, 50.0f);
-
-	ImGui::DragFloat2("Position", &barps.x, 1.0f);
-
 	text2.ImGuiView();
 
+	ImGui::Separator();
+
+	sheldModel->GetWorldTransform().ImGuiView("sheld");
+
+	//spworld1.ImGuiView("sp1");
+	//spworld2.ImGuiView("sp2");
 #endif
 
 	telopSprite.UpdateScreenTransform();
 
-	hpBarBackSprite.UpdateScreenTransform();
-	hpBarFrontSprite.UpdateScreenTransform();
 };
 
 void TestScene::Draw() {
@@ -211,9 +226,14 @@ void TestScene::Draw() {
 	//fieldModel->Draw(camera);
 
 	sprite.Draw();
-
+	// 複数テスト用
+	//sprite.Draw(spworld1);
+	//sprite.Draw(spworld2);
+	sheldModel->Draw(camera);
 	backModel->Draw(backWorld1,camera);
 	backModel->Draw(backWorld2,camera);
+
+
 
 	text.SetFontLayout(layout);
 
@@ -269,31 +289,6 @@ void TestScene::Draw() {
 	);
 	comboPositions_[1].translation_ = { 128.0f,0 };
 	comboPositions_[1].UpdateMatrix();
-
-
-
-	// 背景
-	hpBarBackSprite.SetPosition(barps);
-	hpBarBackSprite.SetSize(
-		(int)barWidth,
-		(int)barHeight
-		);
-	hpBarBackSprite.Draw();
-
-	// HP割合
-	float hpRate = static_cast<float>(hp_) / maxHp_;
-
-	// 前景
-	hpBarFrontSprite.SetPosition({
-		barps.x + barMargin,
-		barps.y + barMargin
-		});
-
-	hpBarFrontSprite.SetSize(
-		(int)((barWidth - barMargin * 2.0f) * hpRate),
-		(int)(barHeight - barMargin * 2.0f)
-		);
-	hpBarFrontSprite.Draw();
 
 	//combo.Draw(comboPositions_[1]);
 

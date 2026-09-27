@@ -189,7 +189,7 @@ public:
 	void Draw(std::string tag);
 
 	// 描画に使うカメラをセットする
-	void SetCamera(Camera& camera) { camera_ = &camera; }
+	void SetCamera(Camera* camera) { camera_ = camera; }
 
 	// パーティクル用モデル辞典
 	std::map<std::string, ParticleModelData> particleModelDatas_;

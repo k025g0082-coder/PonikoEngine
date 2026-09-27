@@ -48,6 +48,10 @@ struct SoundData {
 	float rangeStart;
 	float rangeLength;
 
+	bool isFadingOut;
+	float fadeTimer;
+	float fadeTime;
+
 	IXAudio2SourceVoice* sourceVoice = nullptr;
 };
 
@@ -59,6 +63,9 @@ public:
 
 	void Initialize();
 
+	// 毎回更新
+	void Update();
+	
 	// wavファイル読込
 	void LoadWave(const std::string& name, const char* filename);
 
@@ -71,6 +78,9 @@ public:
 	// ループとループ範囲を設定
 	void SetSoundLoop(const std::string& name);
 	void SetSoundLoop(const std::string& name, float loopStart, float loopEnd);
+
+	// フェーディング設定
+	void FadeOut(const std::string& name, float fadeTime);
 
 	// 左右のパン
 	void SetSoundPan(const std::string& name, float pan);

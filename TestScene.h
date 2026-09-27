@@ -26,6 +26,8 @@ private:
 	Model* fieldModel = nullptr;
 	Model* cubeModel = nullptr;
 
+	Model* sheldModel = nullptr;
+
 	Model* backModel = nullptr;
 	WorldTransform backWorld1;
 	WorldTransform backWorld2;
@@ -53,17 +55,8 @@ private:
 	int fontWidth = 32;
 	float margin = 5.0f;
 
-	// 体力バー
-	int hp_ = 30;
-	int maxHp_ = 30;
-	Sprite hpBarBackSprite;
-	Sprite hpBarFrontSprite;
-
-	Vector2 barps = { 100.0f,100.0f };
-
-	float barWidth = 100.0f;
-	float barHeight = 100.0f;
-	float barMargin = 5.0f;
+	ScreenTransform spworld1;
+	ScreenTransform spworld2;
 
 };
 

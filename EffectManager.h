@@ -8,10 +8,18 @@ class EffectManager
 {
 public:
 
-	static void AddEffect(Effect* effect, Vector3 position);
+	/// <summary>
+	/// エフェクト増やす
+	/// <param name="effect">増やすエフェクトクラス</param>
+	/// <param name="position">生成座標</param>
+	/// <param name="isDebugMode">デバッグモード（ウインドウ出すか）</param>
+	/// </summary>
+	static void AddEffect(Effect* effect, Vector3 position,bool isDebugMode = true);
 	static void Update();
 
-//	static void SetCamera(Camera& c);
+	// エフェクト消去 すべての終了フラグ立てる
+	static void ResetEffect();
+
 private:
 	static std::vector<Effect*> effects_;
 

@@ -19,7 +19,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -76,8 +76,10 @@
       <Command>copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
 copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dxil.dll"
 
-copy /Y "$(ProjectDir)resources\zlib\bin\zd.dll" "$(OutDir)"</Command>
-      <Message>exeの確認用にzlibコピーする</Message>
+copy /Y "$(ProjectDir)resources\zlib\bin\zd.dll" "$(OutDir)"
+
+xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Debug\resources\Engine"</Command>
+      <Message>exeの確認用にzlibコピーする あとシェーダーをexeのところにコピー</Message>
     </PostBuildEvent>
     <PreBuildEvent>
       <Command>

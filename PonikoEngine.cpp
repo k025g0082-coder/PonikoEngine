@@ -71,6 +71,10 @@ namespace PonikoEngine {
 		// 時間更新
 		Timer::GetInstance()->UpdateDeltaTime();
 
+		// 音楽更新
+		SoundManager::GetInstance()->Update();
+
+
 		// 更新
 		ImGuiManager::GetInstance()->Begin();
 

@@ -454,10 +454,36 @@ void Text::ImGuiView() {
 		ImGui::Text("FontName:%s", textLayout.fontName.c_str());
 		
 		ImGui::DragInt("Text Size", &textLayout.textSize, 1.0f, 1, 200);
-		ImGui::ColorEdit3("Text Color", &textLayout.textColor.x);
+
+		Vector3 color = textLayout.textColor;
+
+		color.x /= 255.0f;
+		color.y /= 255.0f;
+		color.z /= 255.0f;
+
+		if (ImGui::ColorEdit3("Text Color", &color.x))
+		{
+			textLayout.textColor.x = color.x * 255.0f;
+			textLayout.textColor.y = color.y * 255.0f;
+			textLayout.textColor.z = color.z * 255.0f;
+		}
+
+
+
+		Vector3 outlineColor = textLayout.outlineColor;
+
+		outlineColor.x /= 255.0f;
+		outlineColor.y /= 255.0f;
+		outlineColor.z /= 255.0f;
+
+		if (ImGui::ColorEdit3("OutlineColor", &outlineColor.x))
+		{
+			textLayout.outlineColor.x = outlineColor.x * 255.0f;
+			textLayout.outlineColor.y = outlineColor.y * 255.0f;
+			textLayout.outlineColor.z = outlineColor.z * 255.0f;
+		}
 
 		ImGui::DragInt("Outline Size", &textLayout.outlineSize, 1.0f, 0, 50);
-		ImGui::ColorEdit3("Outline Color", &textLayout.outlineColor.x);
 
 		ImGui::Checkbox("Outline Blur", &textLayout.isOutlineBlur);
 

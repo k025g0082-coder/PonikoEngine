@@ -98,6 +98,12 @@ PixelShaderOutput main(VertexShaderOutput input) {
     float4 textureColor = texture0.Sample(gSampler, uv);
    
     
+    if (textureColor.a <= 0.1f)
+    {
+       discard;
+    }
+    
+    
     //Lightingする場合
     if (material.enableLighting != 0)
     {

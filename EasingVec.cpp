@@ -1,4 +1,5 @@
 #include "EasingVec.h"
+#include "Timer.h"
 
 void EasingVec::Start(int t, float total, float start, float end) {
 
@@ -46,7 +47,7 @@ void EasingVec::Step() {
 	if (isEasing) {
 		time = easingTime / easingTotalTime;
 
-		easingTime++;
+		easingTime += Timer::GetDeltaTime() * 60.0f;
 
 		if (time >= 1.0f) {
 			isEasing = false;

@@ -4,6 +4,9 @@
 #include "ImGuiManager.h"
 #include "LightingManager.h"
 
+#include "Particle.h"
+#include "EffectManager.h"
+
 Scene* Scene::instance = nullptr;
 Scene* Scene::nextInstance = nullptr;
 bool Scene::isChanging = false;
@@ -206,6 +209,12 @@ void Scene::ProcessChange() {
 	if (isChanging &&
 		Game::GetFade().IsFinished()
 		) {
+
+		// エフェクト全削除
+		EffectManager::ResetEffect();
+
+		// nullを代入
+		Particle::GetInstance()->SetCamera(nullptr);
 
 		delete instance;
 

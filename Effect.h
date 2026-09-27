@@ -61,11 +61,13 @@ public:
 
 //	virtual void Draw() = 0;　既にパーティクルの方で描画処理はあるので・・
 
+	void SetDebugMode(bool d) { isDebugMode_ = d; }
 
 	// エフェクト終了か
 	bool IsFinished() { return isFinished_; };
 
-
+	// エフェクト終了
+	void FinishEffect() { isFinished_ = true; }
 
 	// ImGuiの識別ID
 	void SetImGuiId(int id) {
@@ -77,6 +79,8 @@ protected:
 	// エフェクト名
 	std::string effectName;
 
+	// デバッグモードか
+	bool isDebugMode_ = false;
 
 	// エフェクト発生する座標
 	Vector3 pos; 
@@ -90,6 +94,10 @@ protected:
 
 	// 登録
 	void RegionParticleCompornent(std::string tag, std::string particleModelTag, std::string particleTextureTag);
+
+	// アドレスゲット
+	ParticleCompornent* GetParticleCompornent(std::string tag);
+
 
 	// 発生
 	void EmitParticleCompornent(std::string tag) {

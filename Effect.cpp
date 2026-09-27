@@ -25,9 +25,9 @@ void Effect::Update() {
 }
 
 void Effect::RegionParticleCompornent(std::string tag, std::string particleModelTag, std::string particleTextureTag) {
-//void Effect::RegionParticleCompornent(std::string tag, std::string path) {
+	//void Effect::RegionParticleCompornent(std::string tag, std::string path) {
 
-	// もし既に登録されているタグがあれば帰る
+		// もし既に登録されているタグがあれば帰る
 	if (particleEmitParams_.contains(tag)) return;
 
 	// 使うモデルを登録（既にあるのは弾くのでそれは大丈夫）
@@ -38,25 +38,36 @@ void Effect::RegionParticleCompornent(std::string tag, std::string particleModel
 
 	// 見つかったら
 //	if (!getParticleTag.empty()) {
-	
+
 		// 登録
-		particleEmitParams_[tag] = ParticleCompornent{
+	particleEmitParams_[tag] = ParticleCompornent{
 
-			.tag = particleModelTag,
-			.textureTag = particleTextureTag,
-			
-			.position = {0,0},
-			.num = 1,
-			
-		};
-//	}
+		.tag = particleModelTag,
+		.textureTag = particleTextureTag,
 
+		.position = {0,0},
+		.num = 1,
+
+	};
+	//	}
+}
+
+
+ParticleCompornent* Effect::GetParticleCompornent(std::string tag) {
+
+	// もしタグなけりゃサヨナラ
+	if (!particleEmitParams_.contains(tag)) return nullptr;
+
+	return &particleEmitParams_[tag];
 }
 
 // ImGui表示用
 void Effect::ImGuiViewParticleCompornent() {
 
 	if (particleEmitParams_.size() == 0) return;
+
+	// デバッグでなければ帰る
+	if (!isDebugMode_) return;
 
 #ifdef USE_IMGUI
 

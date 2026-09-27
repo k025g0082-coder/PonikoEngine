@@ -1,4 +1,5 @@
 #include "SoundManager.h"
+#include "Timer.h"
 #include <algorithm>
 #include <cmath>
 
@@ -16,6 +17,37 @@ void SoundManager::Initialize() {
 	hr = xAudio2->CreateMasteringVoice(&masterVoice);
 	assert(SUCCEEDED(hr));
 };
+
+void SoundManager::Update()
+{
+	for (auto& sound : sounds_) {
+
+		SoundData& data = sound.second;
+
+		if (!data.sourceVoice) {
+			continue;
+		}
+
+		if (data.isFadingOut) {
+
+			data.fadeTimer += Timer::GetDeltaTime();
+
+			float t = data.fadeTimer / data.fadeTime;
+
+			t = std::clamp(t, 0.0f, 1.0f);
+
+			// 1 → 0
+			float volume = 1.0f - t;
+
+			data.sourceVoice->SetVolume(volume);
+
+			if (t >= 1.0f) {
+				data.sourceVoice->Stop();
+				data.isFadingOut = false;
+			}
+		}
+	}
+}
 
 void SoundManager::LoadWave(const std::string& name, const char* filename) {
 
@@ -283,6 +315,25 @@ void SoundManager::SoundPlayWave(IXAudio2* xAudio2, SoundData& soundData,float s
 
 	pSourceVoices.push_back(pSourceVoice);
 };
+
+void SoundManager::FadeOut(const std::string& name, float fadeTime)
+{
+	auto it = sounds_.find(name);
+
+	if (it == sounds_.end()) {
+		return;
+	}
+
+	SoundData& soundData = it->second;
+
+	if (!soundData.sourceVoice) {
+		return;
+	}
+
+	soundData.isFadingOut = true;
+	soundData.fadeTimer = 0.0f;
+	soundData.fadeTime = fadeTime;
+}
 
 // 全部停止
 void SoundManager::AllStopSound() {

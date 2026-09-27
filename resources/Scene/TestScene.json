@@ -35,18 +35,18 @@
     },
     "sprite": {
         "rotation": [
-            -0.30000001192092896,
             0.0,
-            0.4000000059604645
+            0.0,
+            0.0
         ],
         "scale": [
-            6.5,
-            8.0,
+            1.0,
+            1.0,
             1.0
         ],
         "translation": [
-            178.6999969482422,
-            111.80000305175781,
+            35.0,
+            58.0,
             0.0
         ]
     },
@@ -59,15 +59,15 @@
         ],
         "text": "textTest",
         "textLayout": {
-            "isOutlineBlur": false,
+            "isOutlineBlur": true,
             "outlineColor": [
-                0.0,
-                0.0,
+                255.0,
+                94.0,
                 0.0
             ],
-            "outlineSize": 0,
+            "outlineSize": 15,
             "textColor": [
-                255.0,
+                0.0,
                 255.0,
                 255.0
             ],
