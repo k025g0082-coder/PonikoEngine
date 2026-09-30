@@ -10,7 +10,8 @@ enum class PipelineType {
 	Sprite,
 	Model,
 	Triangle,
-	Particle
+	Particle,
+	Shadow
 };
 
 struct PipelineState {
@@ -51,9 +52,12 @@ private:
 	static std::unordered_map<PipelineType, PipelineState> pipelines_;
 	
 	void createTrianglePipeline();
+
 	void createSpritePipeline();
 	void createModelPipeline();
 	void createParticlePipeline();
+
+	void createShadowPipeline();
 
 	// bufferResourceを作る関数
 	ID3D12Resource* CreateBufferResource(

@@ -163,6 +163,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="PonikoEngine.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneComponentLoader.cpp" />
+    <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="Sprite.cpp" />
@@ -223,6 +224,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneComponentLoader.h" />
     <ClInclude Include="ScreenTransform.h" />
+    <ClInclude Include="ShadowManager.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Sprite.h" />
@@ -272,6 +274,16 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <FxCompile Include="resources\Engine\Shader\Sprite.VS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shadow.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shadow.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

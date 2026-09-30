@@ -26,6 +26,8 @@ void PipelineStateManager::Initialize(ID3D12Device* device){
 	// パーティクル
 	createParticlePipeline();
 
+	// 影用
+	createShadowPipeline();
 }
 
 void PipelineStateManager::createSpritePipeline() {
@@ -700,4 +702,211 @@ void PipelineStateManager::createParticlePipeline() {
 		IID_PPV_ARGS(&state.graphicsPipelineState));
 	assert(SUCCEEDED(hr));
 
+}
+
+void PipelineStateManager::createShadowPipeline()
+{
+	PipelineState& state = pipelines_[PipelineType::Shadow];
+
+	// ============================================================
+	// RootSignature
+	// b0 : Shadow用WVP
+	// ============================================================
+
+	D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc{};
+
+	rootSignatureDesc.Flags =
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	D3D12_ROOT_PARAMETER rootParameter{};
+
+	rootParameter.ParameterType =
+		D3D12_ROOT_PARAMETER_TYPE_CBV;
+
+	rootParameter.Descriptor.ShaderRegister = 0; // b0
+	rootParameter.Descriptor.RegisterSpace = 0;
+
+	rootParameter.ShaderVisibility =
+		D3D12_SHADER_VISIBILITY_VERTEX;
+
+	rootSignatureDesc.pParameters = &rootParameter;
+	rootSignatureDesc.NumParameters = 1;
+
+	// ============================================================
+	// RootSignature生成
+	// ============================================================
+
+	ID3DBlob* rootSignatureBlob = nullptr;
+	ID3DBlob* errorBlob = nullptr;
+
+	HRESULT hr = D3D12SerializeRootSignature(
+		&rootSignatureDesc,
+		D3D_ROOT_SIGNATURE_VERSION_1,
+		&rootSignatureBlob,
+		&errorBlob);
+
+	if (FAILED(hr))
+	{
+		assert(false);
+	}
+
+	hr = device_->CreateRootSignature(
+		0,
+		rootSignatureBlob->GetBufferPointer(),
+		rootSignatureBlob->GetBufferSize(),
+		IID_PPV_ARGS(&state.rootSignature));
+
+	assert(SUCCEEDED(hr));
+
+	// ============================================================
+	// InputLayout
+	// ============================================================
+
+	// ModelのVertexBufferに合わせる
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[5]{};
+
+	inputElementDescs[0].SemanticName = "POSITION";
+	inputElementDescs[0].SemanticIndex = 0;
+	inputElementDescs[0].Format =
+		DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDescs[0].AlignedByteOffset =
+		D3D12_APPEND_ALIGNED_ELEMENT;
+
+	inputElementDescs[1].SemanticName = "TEXCOORD";
+	inputElementDescs[1].SemanticIndex = 0;
+	inputElementDescs[1].Format =
+		DXGI_FORMAT_R32G32_FLOAT;
+	inputElementDescs[1].AlignedByteOffset =
+		D3D12_APPEND_ALIGNED_ELEMENT;
+
+	inputElementDescs[2].SemanticName = "NORMAL";
+	inputElementDescs[2].SemanticIndex = 0;
+	inputElementDescs[2].Format =
+		DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDescs[2].AlignedByteOffset =
+		D3D12_APPEND_ALIGNED_ELEMENT;
+
+	inputElementDescs[3].SemanticName = "BLENDINDICES";
+	inputElementDescs[3].SemanticIndex = 0;
+	inputElementDescs[3].Format =
+		DXGI_FORMAT_R32G32B32A32_UINT;
+	inputElementDescs[3].AlignedByteOffset =
+		D3D12_APPEND_ALIGNED_ELEMENT;
+
+	inputElementDescs[4].SemanticName = "BLENDWEIGHT";
+	inputElementDescs[4].SemanticIndex = 0;
+	inputElementDescs[4].Format =
+		DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDescs[4].AlignedByteOffset =
+		D3D12_APPEND_ALIGNED_ELEMENT;
+
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+
+	inputLayoutDesc.pInputElementDescs =
+		inputElementDescs;
+
+	inputLayoutDesc.NumElements =
+		_countof(inputElementDescs);
+
+	// ============================================================
+	// Rasterizer
+	// ============================================================
+
+	D3D12_RASTERIZER_DESC rasterizerDesc{};
+
+	rasterizerDesc.FillMode =
+		D3D12_FILL_MODE_SOLID;
+
+	rasterizerDesc.CullMode =
+		D3D12_CULL_MODE_BACK;
+
+	// ============================================================
+	// Blend
+	// ShadowMapはカラーを書かないので基本不要
+	// ============================================================
+
+	D3D12_BLEND_DESC blendDesc{};
+
+	// ============================================================
+	// Shader
+	// ============================================================
+
+	IDxcBlob* vertexShaderBlob =
+		dxcCompiler_.CompileShader(
+			L"./resources/Engine/Shader/Shadow.VS.hlsl",
+			L"vs_6_0",
+			dxcCompiler_.GetIDxcUtils(),
+			dxcCompiler_.GetDxcCompiler(),
+			dxcCompiler_.GetIncludeHandler());
+
+	assert(vertexShaderBlob != nullptr);
+
+	// ============================================================
+	// PSO
+	// ============================================================
+
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
+
+	graphicsPipelineStateDesc.pRootSignature =
+		state.rootSignature;
+
+	graphicsPipelineStateDesc.InputLayout =
+		inputLayoutDesc;
+
+	graphicsPipelineStateDesc.VS =
+	{
+		vertexShaderBlob->GetBufferPointer(),
+		vertexShaderBlob->GetBufferSize()
+	};
+
+	// PixelShaderは使用しない
+	graphicsPipelineStateDesc.PS = {};
+
+	graphicsPipelineStateDesc.BlendState =
+		blendDesc;
+
+	graphicsPipelineStateDesc.RasterizerState =
+		rasterizerDesc;
+
+	// カラーRTVは使わない
+	graphicsPipelineStateDesc.NumRenderTargets = 0;
+
+	// 深度だけ使う
+	graphicsPipelineStateDesc.DSVFormat =
+		DXGI_FORMAT_D32_FLOAT;
+
+	graphicsPipelineStateDesc.PrimitiveTopologyType =
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+	graphicsPipelineStateDesc.SampleDesc.Count = 1;
+
+	graphicsPipelineStateDesc.SampleMask =
+		D3D12_DEFAULT_SAMPLE_MASK;
+
+	// ============================================================
+	// Depth
+	// ============================================================
+
+	graphicsPipelineStateDesc.DepthStencilState =
+	{};
+
+	graphicsPipelineStateDesc.DepthStencilState.DepthEnable =
+		TRUE;
+
+	graphicsPipelineStateDesc.DepthStencilState.DepthWriteMask =
+		D3D12_DEPTH_WRITE_MASK_ALL;
+
+	graphicsPipelineStateDesc.DepthStencilState.DepthFunc =
+		D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	// ============================================================
+	// 作成
+	// ============================================================
+
+	hr = device_->CreateGraphicsPipelineState(
+		&graphicsPipelineStateDesc,
+		IID_PPV_ARGS(
+			&state.graphicsPipelineState));
+
+	assert(SUCCEEDED(hr));
 }

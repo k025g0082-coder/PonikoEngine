@@ -85,8 +85,12 @@ public:
 
 	void Initialize();
 	void Update();
+
 	void Draw(Camera camera);
 	void Draw(WorldTransform& world,Camera camera);
+
+	// 指定された光源のおち影の描画をする
+	void DrawShadow(Matrix4x4 lightView_, Matrix4x4 lightProjection);
 
 	// アニメ更新
 	void UpdateAnimation();

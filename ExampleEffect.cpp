@@ -12,12 +12,7 @@ void ExampleEffect::Initialize(Vector3 position) {
 	Particle::GetInstance()->RegionParticleTexture("texture2", "resources/Engine/default.png");
 	Particle::GetInstance()->RegionParticleTexture("texture3", "resources/white100x100.png");
 
-	//Effect::RegionParticleCompornent("particle", "plane","texture");
-
-	// 使うモデルを登録（既にあるのは弾くのでそれは大丈夫）
-	//Effect::RegionParticleCompornent("plane", "resources/Engine/plane.obj");
-	//Effect::RegionParticleCompornent("plane2", "resources/Engine/plane.obj");
-	//Effect::RegionParticleCompornent("plane3", "resources/Engine/plane.obj");
+	Particle::GetInstance()->RegionParticleTexture("star04", "resources/Engine/texture/emits/kennyParticles/star_04.png");
 
 }
 
@@ -27,19 +22,10 @@ void ExampleEffect::Update() {
 
 	if (timer_ % 10 == 0) {
 
-		/*
-		param_.isBilliboard = true;
-		Particle::GetInstance()->MakeNewParticle("plane", pos, 2, param_);
-		*/
-
-		// モデル登録
-		//Particle::GetInstance()->RegionParticleModel("plane", "resources/Engine/plane.obj");
-
 		// パーティクル放出
-		Effect::EmitParticleCompornent("aaa");
-		Effect::EmitParticleCompornent("aa");
 
 		Effect::EmitParticleCompornent("particle");
+		Effect::EmitParticleCompornent("particle2");
 
 		//Effect::EmitParticleCompornent("plane2");
 	}

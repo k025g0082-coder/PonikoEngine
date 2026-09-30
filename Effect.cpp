@@ -105,12 +105,14 @@ void Effect::ImGuiViewParticleCompornent() {
 	static std::string selectedModelTag;
 	static std::string selectedTextureTag;
 
+	bool modelSelected = false;
+	bool textureSelected = false;
+
 	if (ImGui::BeginPopup("AddParticle")) {
 
 		static char tag_[64] = "";
 
-		bool modelSelected = false;
-		bool textureSelected = false;
+
 
 		ImGui::InputText("Tag", tag_, sizeof(tag_));
 
@@ -209,6 +211,36 @@ void Effect::ImGuiViewParticleCompornent() {
 
 
 		if (open) {
+
+			// テクスチャ選択
+			const char* texturePreview = selectedTextureTag.empty()
+				? "Select Particle"
+				: selectedTextureTag.c_str();
+
+			if (ImGui::BeginCombo("Texture", texturePreview)) {
+
+				// Particle側の登録済みタグを回す
+				for (const auto& tag : Particle::GetInstance()->GetParticleTextureList()) {
+
+					textureSelected = (selectedTextureTag == tag);
+
+					if (ImGui::Selectable(tag.c_str(), textureSelected)) {
+
+						// 選択されたとき？
+						selectedTextureTag = tag;
+
+						parametor_.textureTag = tag;
+
+					}
+
+					if (textureSelected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+
 
 			ImGui::DragFloat3(
 				"position_",

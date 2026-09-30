@@ -789,3 +789,32 @@ void Model::Draw(WorldTransform& world,Camera camera){
 
 	commandList->DrawIndexedInstanced(static_cast<UINT>(modelData.indices.size()), 1, 0, 0, 0);
 }
+
+// 影
+void Model::DrawShadow(Matrix4x4 lightView_, Matrix4x4 lightProjection_) {
+
+	// ライトをカメラ位置にした時の
+	Matrix4x4 worldViewProjectionMatrix = Multiply(worldTransform_.matWorld_, Multiply(lightView_, lightProjection_));
+
+	worldTransform_.mvpData_->World = worldTransform_.matWorld_;
+	worldTransform_.mvpData_->WVP = worldViewProjectionMatrix;
+
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
+
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+
+	//RootSignatureを設定。PSOに設定しているけど別途設定が必要
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Model).rootSignature);
+	// PSOを設定
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Model).graphicsPipelineState);
+
+
+	commandList->IASetIndexBuffer(&indexBufferView);
+
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	commandList->SetGraphicsRootConstantBufferView(0, worldTransform_.GetWvpResource()->GetGPUVirtualAddress());
+
+	commandList->DrawIndexedInstanced(static_cast<UINT>(modelData.indices.size()), 1, 0, 0, 0);
+}
