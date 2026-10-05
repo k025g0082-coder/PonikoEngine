@@ -1,5 +1,8 @@
 <Solution>
   <Configurations>
+    <BuildType Name="DebugLib" />
+    <BuildType Name="Development" />
+    <BuildType Name="ReleaseLib" />
     <Platform Name="x64" />
   </Configurations>
   <Project Path="PonikoEngine.vcxproj" Id="aed56af8-0df8-4ff9-80dd-fb130c2a0cf7" />
