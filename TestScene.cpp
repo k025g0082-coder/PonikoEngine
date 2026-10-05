@@ -14,6 +14,8 @@
 #include "ExampleEffect.h"
 #include "EffectManager.h"
 
+#include "DebugLine.h"
+
 
 void TestScene::Init() {
 
@@ -116,7 +118,8 @@ void TestScene::Update(GamePad* gamepad) {
 	sheldModel->Update();
 	sprite.UpdateScreenTransform();
 
-	camera.Update();
+	// キャラ中心に回す専用のUpdate
+	camera.SphericalCameraUpdate(world.translation_);
 
 	world.UpdateMatrix();
 
@@ -193,13 +196,15 @@ void TestScene::Update(GamePad* gamepad) {
 	ImGui::Separator();
 
 	sheldModel->GetWorldTransform().ImGuiView("sheld");
+	ImGui::Separator();
+	
+	// 球面座標設定用
+	camera.SphericalImGuiView();
 
-	//spworld1.ImGuiView("sp1");
-	//spworld2.ImGuiView("sp2");
 #endif
 
 	telopSprite.UpdateScreenTransform();
-
+	
 };
 
 void TestScene::Draw() {
@@ -289,6 +294,12 @@ void TestScene::Draw() {
 	);
 	comboPositions_[1].translation_ = { 128.0f,0 };
 	comboPositions_[1].UpdateMatrix();
+
+	
+	DebugLine::SetCamera(&camera);
+
+	// デバッグ用の線 追加
+	DebugLine::AddLine(world.translation_, sheldModel->GetWorldTransform().translation_ + Vector3{ 0,1,0 }, Vector4{ 1,0,0,1 });
 
 	//combo.Draw(comboPositions_[1]);
 

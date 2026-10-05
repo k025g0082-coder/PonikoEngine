@@ -7,11 +7,19 @@
 #include "Vector.h"
 
 enum class PipelineType {
+
 	Sprite,
 	Model,
+
 	Triangle,
+
 	Particle,
-	Shadow
+	Shadow,
+
+	DebugLine,
+
+	PostEffect
+
 };
 
 struct PipelineState {
@@ -58,6 +66,10 @@ private:
 	void createParticlePipeline();
 
 	void createShadowPipeline();
+
+	void createDebugLinePipeline();
+
+	void createPostEffectPipeline();
 
 	// bufferResourceを作る関数
 	ID3D12Resource* CreateBufferResource(

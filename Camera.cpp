@@ -29,3 +29,71 @@ void Camera::SetCamera(Camera camera) {
 	viewMatrix = camera.GetViewMatrix();
 	projectionMatrix = camera.GetProjectionMatrix();
 }
+
+
+void Camera::SphericalCameraUpdate(Vector3 targetPos, float offset, float theta, float phi) {
+
+	// もし０だったら何も映んないので
+	if (phi == 0.0f) {
+		phi = 0.01f;
+	}
+
+	Spherical s{
+		offset,
+		theta,
+		phi
+	};
+
+	// カメラの位置
+	Vector3 offsett = ToCartesian(s);
+	Vector3 eye = targetPos + offsett;
+
+	// カメラの角度
+	Vector3 worldUp{ 0.0f, 1.0f, 0.0f };
+	Vector3 forward = Normalize(targetPos - eye);
+	Vector3 right = Normalize(Cross(worldUp, forward));
+	Vector3 up = Cross(forward, right);
+
+	// カメラの行列に合体
+	Matrix4x4 cameraMatrix{ {
+		{right.x,  right.y, right.z, 0.0f},
+		{up.x,     up.y,    up.z   , 0.0f},
+		{forward.x,forward.y,forward.z, 0.0f},
+		{eye.x,    eye.y,   eye.z,    1.0f},
+	} };
+
+	viewMatrix = Inverse(cameraMatrix);
+}
+
+void Camera::SphericalCameraUpdate(Vector3 targetPos) {
+
+	// カメラの位置
+	Vector3 offsett = ToCartesian(spherical);
+	Vector3 eye = targetPos + offsett;
+
+	// カメラの角度
+	Vector3 worldUp{ 0.0f, 1.0f, 0.0f };
+	Vector3 forward = Normalize(targetPos - eye);
+	Vector3 right = Normalize(Cross(worldUp, forward));
+	Vector3 up = Cross(forward, right);
+
+	// カメラの行列に合体
+	Matrix4x4 cameraMatrix{ {
+		{right.x,  right.y, right.z, 0.0f},
+		{up.x,     up.y,    up.z   , 0.0f},
+		{forward.x,forward.y,forward.z, 0.0f},
+		{eye.x,    eye.y,   eye.z,    1.0f},
+	} };
+
+	viewMatrix = Inverse(cameraMatrix);
+}
+
+void Camera::SphericalImGuiView() {
+
+#ifdef USE_IMGUI
+	ImGui::DragFloat("CameraOffset", &spherical.radius, 0.01f);
+	ImGui::DragFloat("CameraTheta", &spherical.theta, 0.01f);
+	ImGui::DragFloat("CameraPhi", &spherical.phi, 0.01f);
+#endif
+
+}

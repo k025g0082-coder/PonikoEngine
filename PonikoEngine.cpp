@@ -43,6 +43,9 @@ namespace PonikoEngine {
 			DirectXCommon::GetInstance()->GetCommandQueue().Get()
 		);
 
+		// ポストエフェクトの初期化
+		PostEffectManager::GetInstance()->Initialize();
+
 		// もじシステム初期化
 		Text::Initialize();
 
@@ -60,6 +63,9 @@ namespace PonikoEngine {
 
 		// Gameシステムの方の初期化
 		Game::GetInstance()->Init();
+
+		// デバッグ用ライン
+		DebugLine::GetInstance()->Initialize();
 
 		// タイマー
 		Timer::GetInstance()->Initialize();
@@ -89,6 +95,8 @@ namespace PonikoEngine {
 			// パーティクル更新
 			Particle::GetInstance()->Update();
 
+			// こおしｎ(前回の線全削除
+			DebugLine::GetInstance()->Render();
 
 		ImGuiManager::GetInstance()->End();
 
@@ -103,6 +111,9 @@ namespace PonikoEngine {
 
 			// パーティクル
 			Particle::GetInstance()->Draw();
+
+			// デバッグ用
+			DebugLine::GetInstance()->Draw();
 
 		// IMGUI byouga
 		ImGuiManager::GetInstance()->Draw();

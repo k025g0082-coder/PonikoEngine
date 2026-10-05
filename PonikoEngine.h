@@ -12,6 +12,11 @@
 #include "Camera.h"
 #include "LightingManager.h"
 #include "EffectManager.h"
+
+#include "PostEffectManager.h"
+
+#include "DebugLine.h"
+
 #include "Model.h"
 #include "Text.h"
 

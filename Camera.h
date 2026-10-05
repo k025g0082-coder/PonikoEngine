@@ -2,6 +2,10 @@
 #include "Matrix.h"
 #include "WorldTransform.h"
 
+#include "Coordinate.h"
+
+#include <numbers>
+
 class Camera
 {
 public:
@@ -62,6 +66,23 @@ public:
 		return Normalize(forward);
 	}
 
+	/// <summary>
+	/// ある原点中心にカメラ回す. camera.Updateはよばない
+	/// </summary>
+	/// <param name="pos">原点</param>
+	/// <param name="offset">原点からの距離</param>
+	/// <param name="theta">横</param>
+	/// <param name="phi">縦</param>
+	void SphericalCameraUpdate(Vector3 targetPos, float offset, float theta, float phi = -std::numbers::pi_v<float> / 2.0f);
+
+	/// <summary>
+	/// ある原点中心にカメラ回す. カメラ内蔵用　camera.Updateはよばない
+	/// </summary>
+	void SphericalCameraUpdate(Vector3 targetPos);
+
+	void SphericalImGuiView();
+
+	Spherical& GetSpherical() { return spherical; }
 private:
 
 	// 初期カメラ位置
@@ -72,6 +93,14 @@ private:
 
 	// プロジェクション
 	Matrix4x4 projectionMatrix;
+
+
+	// 球面座標系よう
+	Spherical spherical	{
+			6.0f, // どれくらい原点から離れるか
+			0,
+			-std::numbers::pi_v<float> / 2.0f
+	};
 
 };
 

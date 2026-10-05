@@ -9,8 +9,13 @@ ComPtr<ID3D12Device> DirectXCommon::device_;
 ComPtr<ID3D12GraphicsCommandList> DirectXCommon::commandList_;
 ComPtr<ID3D12CommandQueue> DirectXCommon::commandQueue_;
 ComPtr<IDXGISwapChain4> DirectXCommon::swapChain_;
+
 ComPtr <ID3D12DescriptorHeap> DirectXCommon::srvHeap_;
 ComPtr <ID3D12DescriptorHeap> DirectXCommon::rtvHeap_;
+
+ComPtr<ID3D12Resource> DirectXCommon::renderTargets_[];
+D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::rtvHandles[];
+
 DXGI_FORMAT DirectXCommon::rtvDescFormat_;
 UINT DirectXCommon::swapChainBufferCount_;
 D3D12_DEPTH_STENCIL_DESC DirectXCommon::depthStencilDesc = {};

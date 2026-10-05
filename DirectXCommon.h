@@ -49,7 +49,10 @@ public:
     static ComPtr <ID3D12DescriptorHeap> GetSrvHeap() { return srvHeap_; }
 
     static ComPtr <ID3D12DescriptorHeap> GetRtvHeap() { return rtvHeap_; }
-   
+
+    static ComPtr<ID3D12Resource> GetBackBuffer(int i) { return renderTargets_[i];}
+    static D3D12_CPU_DESCRIPTOR_HANDLE GetBackBufferRTV(int i) { return rtvHandles[i]; }
+
     // モデルのパイプライン設定で必要
     static D3D12_DEPTH_STENCIL_DESC GetDepthStencilDesc() { return depthStencilDesc; }
 
@@ -86,9 +89,9 @@ private:
     static UINT swapChainBufferCount_;
 
     static ComPtr<ID3D12DescriptorHeap> rtvHeap_;
-    ComPtr<ID3D12Resource> renderTargets_[2];
 
-    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
+    static ComPtr<ID3D12Resource> renderTargets_[2];
+    static D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 
     static D3D12_DEPTH_STENCIL_DESC depthStencilDesc;
     ComPtr<ID3D12Resource> depthStencilResource;
