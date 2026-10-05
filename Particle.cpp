@@ -643,3 +643,12 @@ void Particle::MakeNewParticle(std::string tag, std::string textureTag, Vector3 
 
 
 }
+
+void Particle::Finalize() {
+	for (auto& [tag, data] : particleModelDatas_) {
+		delete data.texture;
+	}
+	for (auto& [tag, data] : particleTextureDatas_) {
+		delete data;
+	}
+}

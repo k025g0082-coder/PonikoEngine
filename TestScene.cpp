@@ -104,10 +104,10 @@ void TestScene::Init() {
 
 };
 
-void TestScene::Update(GamePad* gamepad) {
+void TestScene::Update(Input* input) {
 
 	// 必ず必要
-	Scene::Update(gamepad);
+	Scene::Update(input);
 
 	model->Update();
 

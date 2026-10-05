@@ -20,7 +20,7 @@
 #include "Model.h"
 #include "Text.h"
 
-#include "GamePad.h"
+#include "Input.h"
 
 #include "Game.h"
 #include "Particle.h"

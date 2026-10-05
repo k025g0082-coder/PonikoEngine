@@ -128,6 +128,8 @@ public:
 
 	void Draw();
 
+	void Finalize();
+
 	// パーティクル用モデル登録関数
 	void RegionParticleModel(std::string tag,std::string path);
 

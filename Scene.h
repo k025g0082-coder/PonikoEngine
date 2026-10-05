@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GamePad.h"
+#include "Input.h"
 
 #include "Model.h"
 
@@ -24,7 +24,7 @@ public:
 	/// <summary>
 	/// 各Sceneクラス内の更新
 	/// </summary>
-	virtual void Update(GamePad* gamepad) = 0;
+	virtual void Update(Input* gamepad) = 0;
 
 	/// <summary>
 	/// 各Sceneクラス内の描画

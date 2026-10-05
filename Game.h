@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Scene.h"
-#include "GamePad.h"
+#include "Input.h"
 #include "Fade.h"
 
 #include "Event.h"
@@ -39,5 +39,5 @@ private:
 	static std::list<Event*> events_;
 
 	static Fade fade;
-	GamePad gamepad;
+	Input gamepad;
 };

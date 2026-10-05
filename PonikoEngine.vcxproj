@@ -207,7 +207,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Fade.cpp" />
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GamePad.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="ImGuiManager.cpp" />
     <ClCompile Include="LightingManager.cpp" />
     <ClCompile Include="main.cpp" />
@@ -271,7 +271,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="Fade.h" />
     <ClInclude Include="Game.h" />
-    <ClInclude Include="GamePad.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="ImGuiManager.h" />
     <ClInclude Include="LightingManager.h" />
     <ClInclude Include="Matrix.h" />

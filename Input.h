@@ -18,36 +18,25 @@
 
 
 // 凄
-class GamePad
+class Input
 {
 public:    
-	// シングルトン
-	static GamePad* GetInstance();
 
+	// シングルトン
+	static Input* GetInstance();
+
+
+	// 初期化
 	void Initialize();
 
-	void Update() {
+	// 更新
+	void Update();
 
-		// キーボード
-		keyboard->Acquire();
+	// 終了処理
+	void Finalize();
 
-		memcpy(preKey, key, sizeof(key));
-
-		keyboard->GetDeviceState(sizeof(key), key);
-
-		// ゲームパッド
-		prevState_ = state_;
-
-		DWORD result = XInputGetState(0, &state_);
-
-		if (result != ERROR_SUCCESS)
-		{
-			state_ = {};
-		}
-	};
 
 	// おした瞬間
-// おした瞬間
 	bool TriggerButton(WORD button);
 
 	// おされている
@@ -74,6 +63,15 @@ public:
 	}
 
 private:
+
+	//Input() = default;
+	//~Input() = default;
+
+	//// コピーコンストラクタを禁止
+	//Input(const Input&) = delete;
+	//Input& operator=(const Input&) = delete;
+
+
 	XINPUT_STATE state_{};
 	XINPUT_STATE prevState_{};
 

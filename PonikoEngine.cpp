@@ -5,22 +5,6 @@
 
 #include "EffekseerManager.h"
 
-
-// ここにメンバを書く
-//namespace {
-//	class EngineImpl { // 内部実装、の略
-//	public:
-//		Triangle triangle;
-//		Sprite sprite;
-//		Model* model;
-//		Model* model2;
-//		Text text;
-//		Camera camera;
-//		DirectionalLight light;
-//	};
-//	static std::unique_ptr<EngineImpl> impl; //　一つのポインタ、そしてメモリを自動で開放してくれるらしい
-//}
-
 namespace PonikoEngine {
 
 	void Initialize(const wchar_t* title) {
@@ -56,7 +40,7 @@ namespace PonikoEngine {
 		ImGuiManager::GetInstance()->Initialize();
 
 		// いんぷと
-		GamePad::GetInstance()->Initialize();
+		Input::GetInstance()->Initialize();
 
 		// ３種のライトセットを司るクラスの初期化
 		LightingManager::GetInstance()->Initialize();
@@ -87,7 +71,7 @@ namespace PonikoEngine {
 			/*　ここに更新処理　*/
 			Game::GetInstance()->Update();
 
-			GamePad::GetInstance()->Update();
+			Input::GetInstance()->Update();
 
 			// エフェクト更新
 			EffectManager::Update();
@@ -129,7 +113,8 @@ namespace PonikoEngine {
 		WinApp::GetInstance()->Finalize();
 
 		ImGuiManager::GetInstance()->Finalize();
-
+		Input::GetInstance()->Finalize();
+		SoundManager::GetInstance()->Finalize();
 
 		CoUninitialize();
 

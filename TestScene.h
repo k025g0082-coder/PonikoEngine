@@ -14,7 +14,7 @@ class TestScene :
 {
 public:
 	void Init();
-	void Update(GamePad* gamepad);
+	void Update(Input* input);
 	void Draw();
 
 private:

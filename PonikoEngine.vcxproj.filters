@@ -145,7 +145,7 @@
     <ClCompile Include="Bone.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="GamePad.cpp">
+    <ClCompile Include="Input.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="EffeckseerManager.cpp">
@@ -314,7 +314,7 @@
     <ClInclude Include="Bone.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="GamePad.h">
+    <ClInclude Include="Input.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Vector.h">

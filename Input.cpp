@@ -1,14 +1,14 @@
-#include "GamePad.h"
+#include "Input.h"
 
 #include "WinApp.h"
 
 // シングルトン
-GamePad* GamePad::GetInstance(){
-	static GamePad instance;
+Input* Input::GetInstance(){
+	static Input instance;
 	return &instance;
 }
 
-void GamePad::Initialize()
+void Input::Initialize()
 {
 	state_ = {};
 	prevState_ = {};
@@ -31,8 +31,40 @@ void GamePad::Initialize()
 		, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 };
 
+void Input::Update() {
+
+	// キーボード
+	keyboard->Acquire();
+
+	memcpy(preKey, key, sizeof(key));
+
+	keyboard->GetDeviceState(sizeof(key), key);
+
+	// ゲームパッド
+	prevState_ = state_;
+
+	DWORD result = XInputGetState(0, &state_);
+
+	if (result != ERROR_SUCCESS)
+	{
+		state_ = {};
+	}
+};
+
+void Input::Finalize() {
+	if (keyboard) {
+		keyboard->Unacquire();
+		keyboard->Release();
+		keyboard = nullptr;
+	}
+	if (directInput) {
+		directInput->Release();
+		directInput = nullptr;
+	}
+};
+
 // おした瞬間
-bool GamePad::TriggerButton(WORD button)
+bool Input::TriggerButton(WORD button)
 {
 	return
 		(state_.Gamepad.wButtons & button) &&
@@ -40,7 +72,7 @@ bool GamePad::TriggerButton(WORD button)
 };
 
 // おされている
-bool GamePad::PushButton(WORD button)
+bool Input::PushButton(WORD button)
 {
 	return
 		(state_.Gamepad.wButtons & button) &&
@@ -48,7 +80,7 @@ bool GamePad::PushButton(WORD button)
 };
 
 // 左スティック　０～１．０ｆ
-Vector2 GamePad::GetLeftStick()
+Vector2 Input::GetLeftStick()
 {
 	Vector2 result{};
 
@@ -59,7 +91,7 @@ Vector2 GamePad::GetLeftStick()
 };
 
 // 右スティック　０～１．０ｆ
-Vector2 GamePad::GetRightStick()
+Vector2 Input::GetRightStick()
 {
 	Vector2 result{};
 

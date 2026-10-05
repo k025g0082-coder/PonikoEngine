@@ -11,7 +11,7 @@ Scene* Scene::instance = nullptr;
 Scene* Scene::nextInstance = nullptr;
 bool Scene::isChanging = false;
 
-void Scene::Update(GamePad* gamepad){
+void Scene::Update(Input* gamepad){
 	gamepad;
 
 #ifdef USE_IMGUI
