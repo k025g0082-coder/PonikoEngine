@@ -75,14 +75,14 @@ void DebugLine::DrawAABB(const AABB& aabb, const Vector4& color) {
 		{ aabb.min.x, aabb.max.y, aabb.max.z }  // 7
 	};
 
-	// スクリーン変換
-	Vector3 screen[8];
+	//// スクリーン変換
+	//Vector3 screen[8];
 
-	for (int i = 0; i < 8; i++) {
+	//for (int i = 0; i < 8; i++) {
 
-		screen[i] = Transform(vertices[i], camera_->GetProjectionMatrix());
-		screen[i] = Transform(screen[i], camera_->GetViewMatrix());
-	}
+	//	screen[i] = Transform(vertices[i], camera_->GetProjectionMatrix());
+	//	screen[i] = Transform(screen[i], camera_->GetViewMatrix());
+	//}
 
 	// 辺の接続
 	int edges[12][2] = {
@@ -112,7 +112,7 @@ void DebugLine::DrawAABB(const AABB& aabb, const Vector4& color) {
 		int start = edges[i][0];
 		int end = edges[i][1];
 
-		AddLine(screen[start], screen[end], color);
+		AddLine(vertices[start], vertices[end], color);
 
 	}
 

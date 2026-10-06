@@ -27,11 +27,11 @@ public:
 	// 初期化
 	void Initialize();
 
-    // 線追加
+    // 線追加(SceneのDraw内限定)
 	static void AddLine(const Vector3& start, const Vector3& end, const Vector4& color);
 
 
-	// AABB描画
+	// AABB描画(SceneのDraw内限定)
 	static void DrawAABB(const AABB& aabb, const Vector4& color);
 
 
