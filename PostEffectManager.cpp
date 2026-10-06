@@ -2,10 +2,13 @@
 #include "PostEffectManager.h"
 
 #include "PipelineStateManager.h"
+#include "ImGuiManager.h"
 
 #include "DirectXCommon.h"
 #include "WinApp.h"
 #include "DirectXUtility.h"
+
+#include <format>
 
 // （安心安定の）シングルトン
 PostEffectManager* PostEffectManager::GetInstance() {
@@ -30,31 +33,53 @@ void PostEffectManager::Initialize() {
 
 	VertexData* vertexDataScreen = nullptr;
 	vertexResourceScreen->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataScreen));
+	//// 左下
+	//vertexDataScreen[0].position = { 0.0f,   720.0f, 0.0f, 1.0f };
+	//vertexDataScreen[0].texcoord = { 0.0f, 1.0f };
+
+	//// 左上
+	//vertexDataScreen[1].position = { 0.0f,   0.0f, 0.0f, 1.0f };
+	//vertexDataScreen[1].texcoord = { 0.0f, 0.0f };
+
+	//// 右下
+	//vertexDataScreen[2].position = { 1280.0f, 720.0f, 0.0f, 1.0f };
+	//vertexDataScreen[2].texcoord = { 1.0f, 1.0f };
+
+	//// 左上
+	//vertexDataScreen[3].position = { 0.0f,   0.0f, 0.0f, 1.0f };
+	//vertexDataScreen[3].texcoord = { 0.0f, 0.0f };
+
+	//// 右上
+	//vertexDataScreen[4].position = { 1280.0f, 0.0f, 0.0f, 1.0f };
+	//vertexDataScreen[4].texcoord = { 1.0f, 0.0f };
+
+	//// 右下
+	//vertexDataScreen[5].position = { 1280.0f, 720.0f, 0.0f, 1.0f };
+	//vertexDataScreen[5].texcoord = { 1.0f, 1.0f };
+
 	// 左下
-	vertexDataScreen[0].position = { 0.0f,   720.0f, 0.0f, 1.0f };
+	vertexDataScreen[0].position = { -1.0f, -1.0f, 0.0f, 1.0f };
 	vertexDataScreen[0].texcoord = { 0.0f, 1.0f };
 
 	// 左上
-	vertexDataScreen[1].position = { 0.0f,   0.0f, 0.0f, 1.0f };
+	vertexDataScreen[1].position = { -1.0f,  1.0f, 0.0f, 1.0f };
 	vertexDataScreen[1].texcoord = { 0.0f, 0.0f };
 
 	// 右下
-	vertexDataScreen[2].position = { 1280.0f, 720.0f, 0.0f, 1.0f };
+	vertexDataScreen[2].position = { 1.0f, -1.0f, 0.0f, 1.0f };
 	vertexDataScreen[2].texcoord = { 1.0f, 1.0f };
 
 	// 左上
-	vertexDataScreen[3].position = { 0.0f,   0.0f, 0.0f, 1.0f };
+	vertexDataScreen[3].position = { -1.0f,  1.0f, 0.0f, 1.0f };
 	vertexDataScreen[3].texcoord = { 0.0f, 0.0f };
 
 	// 右上
-	vertexDataScreen[4].position = { 1280.0f, 0.0f, 0.0f, 1.0f };
+	vertexDataScreen[4].position = { 1.0f,  1.0f, 0.0f, 1.0f };
 	vertexDataScreen[4].texcoord = { 1.0f, 0.0f };
 
 	// 右下
-	vertexDataScreen[5].position = { 1280.0f, 720.0f, 0.0f, 1.0f };
+	vertexDataScreen[5].position = { 1.0f, -1.0f, 0.0f, 1.0f };
 	vertexDataScreen[5].texcoord = { 1.0f, 1.0f };
-
-
 
 	// オフスクリーンRTV用ヒープ
 	rtvHeapOffscreen = DirectXUtility::CreateDescriptorHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1, false);
@@ -89,9 +114,27 @@ void PostEffectManager::Initialize() {
 	rtvDescOff.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 	device_->CreateRenderTargetView(offscreenRenderTarget, &rtvDescOff, rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart());
 
-	// SRV作成（ポストエフェクトで使う）
-	offscreenSRVHandleCPU = DirectXUtility::GetCPUDescriptorHandle(DirectXCommon::GetSrvHeap().Get(), DirectXCommon::GetAllocateSrv(), 3); // 3番目に確保
-	offscreenSRVHandleGPU = DirectXUtility::GetGPUDescriptorHandle(DirectXCommon::GetSrvHeap().Get(), DirectXCommon::GetAllocateSrv(), 3);
+
+	UINT index = DirectXCommon::GetInstance()->GetAllocateSrv();
+
+	UINT descriptorSize =
+		DirectXCommon::GetInstance()
+			->GetDevice()
+			->GetDescriptorHandleIncrementSize(
+				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+	offscreenSRVHandleCPU =
+		DirectXUtility::GetCPUDescriptorHandle(
+			DirectXCommon::GetInstance()->GetSrvHeap().Get(),
+			descriptorSize,
+			index);
+
+	offscreenSRVHandleGPU =
+		DirectXUtility::GetGPUDescriptorHandle(
+			DirectXCommon::GetInstance()->GetSrvHeap().Get(),
+			descriptorSize,
+			index);
+
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescOff{};
 	srvDescOff.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
@@ -124,21 +167,58 @@ void PostEffectManager::Initialize() {
 
 	postEffectData->neon = 0.0f;
 	postEffectData->noise = 0.0f;
+	postEffectData->scanLine = 0.0f;
 	postEffectData->fishLens = 0.0f;
 
+
+	OutputDebugStringA(std::format(
+		"offscreenSRVHandleGPU.ptr = 0x{:X}\n",
+		offscreenSRVHandleGPU.ptr
+	).c_str());
 }
 
 // ポストエフェクト受付開始
 void PostEffectManager::BeginScene() {
 
-	// オフスクリーンRTVに切り替え
+	
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
+
+	if (!firstFrame_) {
+		// オフスクリーンを描画可能に戻す
+		D3D12_RESOURCE_BARRIER barrier{};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+		barrier.Transition.pResource =
+			offscreenRenderTarget;
+
+		barrier.Transition.StateBefore =
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+		barrier.Transition.StateAfter =
+			D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+		commandList->ResourceBarrier(1, &barrier);
+	}
+
+	firstFrame_ = false;
+
+	// オフスクリーンRTVに切り替え
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandleOffscreen = rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart();
-	commandList->OMSetRenderTargets(1, &rtvHandleOffscreen, false, nullptr);
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DirectXCommon::GetInstance()->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
+
+	commandList->OMSetRenderTargets(1, &rtvHandleOffscreen, FALSE, &dsvHandle);
 
 	// クリア
-	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
+	float clearColor[] = { 0.1f, 0.25f, 0.5f,1.0f };// 青色。RGBAの順
 	commandList->ClearRenderTargetView(rtvHandleOffscreen, clearColor, 0, nullptr);
+
+	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+	commandList->RSSetViewports(1, &DirectXCommon::GetInstance()->GetViewport());
+	commandList->RSSetScissorRects(1, &DirectXCommon::GetInstance()->GetScissorRect());
+
+	
 
 }
 
@@ -156,25 +236,44 @@ void PostEffectManager::ApplyScene() {
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		commandList->ResourceBarrier(1, &barrier);
 
-		// これから書き込むRTVのインデックス
-		UINT backBufferIndex = DirectXCommon::GetSwapChain()->GetCurrentBackBufferIndex();
 
-		barrier.Transition.pResource = DirectXCommon::GetBackBuffer(backBufferIndex).Get();
+
+
+		// ★バックバッファを RENDER_TARGET に（安全のため入れる）
+		UINT backBufferIndex = DirectXCommon::GetInstance()->GetSwapChain()->GetCurrentBackBufferIndex();
+		barrier.Transition.pResource = DirectXCommon::GetInstance()->GetBackBuffer(backBufferIndex).Get(); // 適切な取得関数に合わせて
 		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		commandList->ResourceBarrier(1, &barrier);
-	
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = DirectXCommon::GetBackBufferRTV(backBufferIndex);
-		commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
-		//RootSignatureを設定。PSOに設定しているけど別途設定が必要
-		//commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Sprite).rootSignature);
+
+
+
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle =
+			DirectXCommon::GetInstance()->GetBackBufferRTV(backBufferIndex);
+
+		commandList->OMSetRenderTargets(
+			1,
+			&rtvHandle,
+			FALSE,
+			nullptr);
+
+		// RootSignatureを設定。
+		commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).rootSignature);
 		
 		// PSOを設定
 		commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).graphicsPipelineState);
 
+		ID3D12DescriptorHeap* descriptorHeaps[] = {
+		DirectXCommon::GetSrvHeap().Get()
+		};
+
+		commandList->SetDescriptorHeaps(1, descriptorHeaps);
+
+
 		commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 
 		// ポストエフェクト　テキスチャ
 		commandList->SetGraphicsRootDescriptorTable(0, offscreenSRVHandleGPU);
@@ -184,4 +283,28 @@ void PostEffectManager::ApplyScene() {
 
 		commandList->DrawInstanced(6, 1, 0, 0);
 	
+}
+
+void PostEffectManager::ImGuiView() {
+
+#ifdef USE_IMGUI
+
+	ImGui::Begin("PostEffectManager");
+
+	ImGui::SliderFloat("blurPower", &postEffectData->blurPower, 0.0f, 10.0f);
+	ImGui::SliderFloat("vtWavePower", &postEffectData->vtWavePower, 0.0f, 1.0f);
+	ImGui::SliderFloat("hzWavePower", &postEffectData->hzWavePower, 0.0f, 1.0f);
+	ImGui::ColorEdit4("color", (float*)&postEffectData->color);
+	ImGui::SliderFloat("monotone", &postEffectData->monotone, 0.0f, 1.0f);
+	ImGui::SliderFloat("colorInversion", &postEffectData->colorInversion, 0.0f, 1.0f);
+	ImGui::SliderFloat("neon", &postEffectData->neon, 0.0f, 1.0f);
+	ImGui::SliderFloat("noise", &postEffectData->noise, 0.0f, 1.0f);
+	ImGui::SliderFloat("scanLine", &postEffectData->scanLine, 0.0f, 1.0f);
+	ImGui::SliderFloat("fishLens", &postEffectData->fishLens, 0.0f, 1.0f);
+
+
+	ImGui::End();
+
+#endif
+
 }

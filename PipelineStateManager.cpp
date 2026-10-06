@@ -1158,6 +1158,8 @@ descriptionRootSignature.pParameters = rootParameters;
 	postEffectDesc.DepthStencilState.DepthEnable = false;
 	postEffectDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
 
+	state.rootSignature = rootSignature;	
+
 	hr = device_->CreateGraphicsPipelineState(
 		&postEffectDesc,
 		IID_PPV_ARGS(&state.graphicsPipelineState)

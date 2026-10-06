@@ -13,6 +13,11 @@ ComPtr<IDXGISwapChain4> DirectXCommon::swapChain_;
 ComPtr <ID3D12DescriptorHeap> DirectXCommon::srvHeap_;
 ComPtr <ID3D12DescriptorHeap> DirectXCommon::rtvHeap_;
 
+ComPtr <ID3D12DescriptorHeap> DirectXCommon::dsvDescriptorHeap;
+
+D3D12_VIEWPORT DirectXCommon::viewport{};
+D3D12_RECT DirectXCommon::scissorRect{};
+
 ComPtr<ID3D12Resource> DirectXCommon::renderTargets_[];
 D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::rtvHandles[];
 
@@ -211,7 +216,7 @@ void DirectXCommon::CreateRTV() {
 
 	// RTVの設定
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
-	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 	// ディスクリプタヒープからCPUハンドルを取得
@@ -324,15 +329,15 @@ void DirectXCommon::PreDraw() {
 
 
 	//指定した色で画面全体をクリアする
-	float clearColor[] = { 0.1f, 0.25f, 0.5f,1.0f };// 青色。RGBAの順
-	commandList_->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+	//float clearColor[] = { 0.1f, 0.25f, 0.5f,1.0f };// 青色。RGBAの順
+	//commandList_->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 
 	// 画面の深さ？
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	commandList_->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	//描画先のRTVを設定する
-	commandList_->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
+	//commandList_->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
 
 	// ビューの設定
 	commandList_->RSSetViewports(1, &viewport);

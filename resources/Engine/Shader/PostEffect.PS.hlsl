@@ -17,6 +17,8 @@ struct PostEffectParam
     float noise; // ノイズ
     float neon; // ネオン
     
+    float scanLine; // 走査線
+    
     float fishLens; // 魚眼レンズ
     
     float glitch; // グリッチ
@@ -80,7 +82,7 @@ PixelShaderOutput main(VertexShaderOutput input)
 {
 
     PixelShaderOutput output;
-    
+ 
     float2 uv = input.texcoord;
     float4 color = texture0.Sample(gSampler, uv);
     
@@ -261,7 +263,7 @@ PixelShaderOutput main(VertexShaderOutput input)
 
     if (fmod(y, 2.0f) < 1.0f)
     {
-        finalColor.rgb *= 0.7f; // 30%暗くする
+        finalColor.rgb *= (1.0- gPostEffect.scanLine); // 暗くする
     }
 // ===
     

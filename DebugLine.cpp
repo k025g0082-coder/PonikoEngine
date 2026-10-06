@@ -56,6 +56,68 @@ void DebugLine::AddLine(const Vector3& start, const Vector3& end, const Vector4&
 	vertices_.push_back({ end, color });
 }
 
+
+void DebugLine::DrawAABB(const AABB& aabb, const Vector4& color) {
+
+	// 8頂点
+	Vector3 vertices[8] = {
+
+		// 手前
+		{ aabb.min.x, aabb.min.y, aabb.min.z }, // 0
+		{ aabb.max.x, aabb.min.y, aabb.min.z }, // 1
+		{ aabb.max.x, aabb.max.y, aabb.min.z }, // 2
+		{ aabb.min.x, aabb.max.y, aabb.min.z }, // 3
+
+		// 奥
+		{ aabb.min.x, aabb.min.y, aabb.max.z }, // 4
+		{ aabb.max.x, aabb.min.y, aabb.max.z }, // 5
+		{ aabb.max.x, aabb.max.y, aabb.max.z }, // 6
+		{ aabb.min.x, aabb.max.y, aabb.max.z }  // 7
+	};
+
+	// スクリーン変換
+	Vector3 screen[8];
+
+	for (int i = 0; i < 8; i++) {
+
+		screen[i] = Transform(vertices[i], camera_->GetProjectionMatrix());
+		screen[i] = Transform(screen[i], camera_->GetViewMatrix());
+	}
+
+	// 辺の接続
+	int edges[12][2] = {
+
+		// 手前
+		{0,1},
+		{1,2},
+		{2,3},
+		{3,0},
+
+		// 奥
+		{4,5},
+		{5,6},
+		{6,7},
+		{7,4},
+
+		// 前後接続
+		{0,4},
+		{1,5},
+		{2,6},
+		{3,7}
+	};
+
+	// 描画
+	for (int i = 0; i < 12; i++) {
+
+		int start = edges[i][0];
+		int end = edges[i][1];
+
+		AddLine(screen[start], screen[end], color);
+
+	}
+
+};
+
 void DebugLine::Render() {
 	Clear();
 }

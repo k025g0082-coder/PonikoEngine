@@ -24,11 +24,13 @@ struct PostEffectParam
 	float noise; // ノイズ
 	float neon;  // ネオン
 
+	float scanLine; // 走査線
+
 	float fishLens; // 魚眼レンズ
 
 	float glitch; // グリッチ
 
-	float padding[2]; // ←調整用　多すぎるほど青くなる
+	float padding; // ←調整用　多すぎるほど青くなる
 
 	Vector4 color;
 
@@ -50,8 +52,13 @@ public:
 	// ポストエフェクト受付終了
 	void ApplyScene();
 
+	// パラメータデバッグ用
+	void ImGuiView();
 
 private:
+
+	bool firstFrame_ = true;
+
 	ID3D12Device* device_;
 
 	ID3D12Resource* vertexResourceScreen = nullptr;

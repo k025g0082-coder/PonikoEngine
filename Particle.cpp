@@ -367,97 +367,6 @@ void Particle::Update() {
         data.currentDrawNum = instanceIndex;
     }
 }
-//
-//    for (uint32_t i = 0; i < kNumMaxInstances; ++i)
-//    {
-//
-//        if (!emits[i].isActive) continue;
-//
-//        // カメラ目線
-//        if (emits[i].isBillboard)
-//            emits[i].transform.rotation_ = camera.GetRotation();
-//
-//
-//        emits[i].update();
-//
-//        
-//        ParticleModelData* data = &particleModelDatas_[emits[i].tag];
-//
-//
-//        data->instancingData[i].color = emits[i].color;
-//
-//        Matrix4x4 worldViewProjectionMatrix = Multiply(emits[i].transform.matWorld_, Multiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
-//
-//        data->instancingData[i].WVP = worldViewProjectionMatrix;
-//        data->instancingData[i].World = emits[i].transform.matWorld_;
-//
-//    }
-//}
-    //// srt更新
-    //for (uint32_t i = 0; i < kNumInstance; ++i)
-    //{
-
-    //    // カメラ目線
-    //    if (emits[i].isBillboard)
-    //        emits[i].transform.rotation_ = camera.GetRotation();
-
-
-    //    emits[i].update();
-
-    //    instancingData[i].color = emits[i].color;
-
-
-    //    Matrix4x4 worldViewProjectionMatrix = Multiply(emits[i].transform.matWorld_, Multiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
-    //    
-    //    instancingData[i].WVP = worldViewProjectionMatrix;
-    //    instancingData[i].World = emits[i].transform.matWorld_;
-
-    //}
-
-//}
-
-
-
-//
-//void Particle::Draw() {
-//
-//    ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
-//
-//    commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-//
-//    //RootSignatureを設定。PSOに設定しているけど別途設定が必要
-//    commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Particle).rootSignature);
-//    // PSOを設定
-//    commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Particle).graphicsPipelineState);
-//
-//
-//    commandList->IASetIndexBuffer(&indexBufferView);
-//
-//    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//  
-//    ID3D12DescriptorHeap* heaps[] = {
-//    DirectXCommon::GetInstance()->GetSrvHeap().Get()
-//    };
-//    
-//    commandList->SetDescriptorHeaps(1, heaps);
-//
-//    commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-//    commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
-//
-//    // SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
-//    commandList->SetGraphicsRootDescriptorTable(2, texture->GetTextureSrvHandleGPU());
-//
-//
-//    commandList->DrawIndexedInstanced(
-//        UINT(modelData.indices.size()),
-//        kNumInstance,
-//        0,
-//        0,
-//        0
-//    );
-//}
-//
-
 
 void Particle::Draw()
 {
@@ -520,41 +429,6 @@ void Particle::Draw()
         );
     }
 }
-
-// 生成
-//void Particle::MakeNewParticle(Vector3 pos,int num, ParticleParam param) {
-//    
-//    for (int i = 0; i < kNumInstance; i++)
-//    {
-//        if (emits[i].isActive) return;
-//            
-//            emits[i].isActive = true;
-//            emits[i].transform.scale_ = { 1.0f,1.0f,1.0f };
-//            emits[i].transform.rotation_ = { 0,0,0 };
-//            emits[i].transform.translation_ = pos;
-//
-//            emits[i].isBillboard = param.isBilliboard;
-//
-//            emits[i].color = param.color;
-//
-//            emits[i].speed = param.speed + DirectXUtility::RandomFloat(-0.01f, 0.01f);
-//
-//        // ランダム
-//            emits[i].velocity = {
-//            DirectXUtility::RandomFloat(-1.0f, 1.0f),
-//            DirectXUtility::RandomFloat(-1.0f, 1.0f),
-//            DirectXUtility::RandomFloat(-1.0f, 1.0f)
-//            };
-//
-//            // 方向ベクトルを正規化
-//            emits[i].direction = Normalize(emits[i].velocity);
-//
-//            emits[i].init();
-//            break;
-//    }
-// 
-//}
-//
 
 // 生成
 void Particle::MakeNewParticle(std::string tag, std::string textureTag, Vector3 pos, int num, ParticleParam param) {
@@ -643,6 +517,105 @@ void Particle::MakeNewParticle(std::string tag, std::string textureTag, Vector3 
 
 
 }
+
+
+// 生成
+void Particle::MakeNewParticle(std::string tag, std::string textureTag, AABB aabb, int num, ParticleParam param) {
+
+    // ランダム
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    std::uniform_real_distribution<float> distX(aabb.min.x, aabb.max.x);
+    std::uniform_real_distribution<float> distY(aabb.min.y, aabb.max.y);
+    std::uniform_real_distribution<float> distZ(aabb.min.z, aabb.max.z);
+
+    auto itm = particleModelDatas_.find(tag);
+
+    if (itm == particleModelDatas_.end()) {
+        return;
+    }
+
+    auto it = particleTextureDatas_.find(textureTag);
+
+    if (it == particleTextureDatas_.end()) {
+        return;
+    }
+
+
+    // secondはその値の右側（値側）を取得
+    ParticleModelData* data = &itm->second;
+
+    // １モデルの限界描画数超えてたら　リターン
+    if (data->currentDrawNum + num > kNumInstance) {
+        return;
+    }
+
+
+    // 描画に使うテキスチャのアドレス登録
+    data->texture = particleTextureDatas_[textureTag];
+
+
+    // 描画数足すｗ
+    data->currentDrawNum += num;
+
+    int count = 0;
+
+    for (int i = 0; i < kNumMaxInstances; i++)
+    {
+        if (emits[i].isActive) continue;
+
+        emits[i].isActive = true;
+
+        emits[i].ease.Reset();
+        emits[i].timer = 0;
+
+        // タグ名登録
+        emits[i].tag = tag;
+        emits[i].textureTag = textureTag;
+
+        // 大きさランダム
+        float random = DirectXUtility::RandomFloat(param.scaleAmpMin, param.scaleAmpMax);
+
+        emits[i].transform.scale_ = Vector3(random, random, random);
+        emits[i].transform.rotation_ = { 0,0,0 };
+        emits[i].transform.translation_ = { distX(gen), distY(gen), distZ(gen) }; // ランダム位置に設定
+
+        emits[i].gravity = param.gravity;
+
+        emits[i].isBillboard = param.isBilliboard;
+        emits[i].isDilute = param.isDilute;
+
+        emits[i].color = param.color;
+
+        // なんか１．０ｆでも速すぎるのでこうする
+        float speed = param.speed * 0.1f;
+        float speedAmp = param.speedAmp * 0.1f;
+
+        emits[i].speed = param.speed + DirectXUtility::RandomFloat(-speedAmp, speedAmp);
+
+        // ランダム
+        emits[i].velocity = {
+            DirectXUtility::RandomFloat(-1.0f, 1.0f),
+            DirectXUtility::RandomFloat(-1.0f, 1.0f),
+            DirectXUtility::RandomFloat(-1.0f, 1.0f)
+        };
+
+        // 方向ベクトルを正規化
+        emits[i].direction = Normalize(emits[i].velocity);
+
+        emits[i].init();
+
+        // もし規定の数以上ならbreak
+        count++;
+        if (count >= num)
+            break;
+    }
+
+
+}
+
+
 
 void Particle::Finalize() {
 	for (auto& [tag, data] : particleModelDatas_) {

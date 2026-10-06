@@ -91,16 +91,22 @@ namespace PonikoEngine {
 		// 描画
 		DirectXCommon::GetInstance()->PreDraw();
 
-			Game::GetInstance()->Draw();
 
-			// パーティクル
-			Particle::GetInstance()->Draw();
+			PostEffectManager::GetInstance()->BeginScene();
 
-			// デバッグ用
-			DebugLine::GetInstance()->Draw();
+				Game::GetInstance()->Draw();
 
-		// IMGUI byouga
-		ImGuiManager::GetInstance()->Draw();
+				// パーティクル
+				Particle::GetInstance()->Draw();
+
+				// デバッグ用
+				DebugLine::GetInstance()->Draw();
+
+			PostEffectManager::GetInstance()->ApplyScene();
+
+
+			// IMGUI byouga
+			ImGuiManager::GetInstance()->Draw();
 
 		// 描画終了
 		DirectXCommon::GetInstance()->PostDraw();

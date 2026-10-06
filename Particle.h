@@ -7,6 +7,8 @@
 
 #include "ImGuiManager.h"
 
+#include "AABB.h"
+
 #include <map>
 
 // シェーダーに転送用
@@ -58,6 +60,10 @@ struct ParticleModelData {
 /// <summary>
 /// <param name="color"> 色 </param>
 /// <param name="speed"> 速度 </param>
+/// <param name="speedAmp"> 速度の幅 </param>
+/// <param name="gravity"> 重力 </param>
+/// <param name="scaleAmpMin"> 最小の小ささ(1.0f基準) </param>
+/// <param name="scaleAmpMax"> 最大の大きさ(1.0f基準) </param>
 /// <param name="life"> 生存時間 </param>
 /// <param name="isBilliboard"> 常に前向くか（板ポリ用） </param>
 /// <param name="isDilute"> 色を薄くしていくか </param>
@@ -139,6 +145,9 @@ public:
 
 	// 生成
 	void MakeNewParticle(std::string tag, std::string textureTag, Vector3 pos, int num, ParticleParam param);
+
+	// AABB範囲のランダムな位置に生成
+	void MakeNewParticle(std::string tag, std::string textureTag, AABB aabb, int num, ParticleParam param);
 
 
 	// 登録済のパーティクルモデルのパスゲット   どうせ登録でなかったら弾いてるのでいいでしょこれで

@@ -3,6 +3,8 @@
 #include "WinApp.h"
 #include "ImGuiManager.h"
 
+#include "PostEffectManager.h"
+
 #include "SceneComponentLoader.h"
 #include "SoundManager.h"
 
@@ -201,10 +203,17 @@ void TestScene::Update(Input* input) {
 	// 球面座標設定用
 	camera.SphericalImGuiView();
 
+	aabb.ImGuiView();
+	
 #endif
+
+	// ポストエフェクトお試し
+	PostEffectManager::GetInstance()->ImGuiView();
+
 
 	telopSprite.UpdateScreenTransform();
 	
+
 };
 
 void TestScene::Draw() {
@@ -301,39 +310,8 @@ void TestScene::Draw() {
 	// デバッグ用の線 追加
 	DebugLine::AddLine(world.translation_, sheldModel->GetWorldTransform().translation_ + Vector3{ 0,1,0 }, Vector4{ 1,0,0,1 });
 
-	//combo.Draw(comboPositions_[1]);
 
+	// AABB描画
+	DebugLine::DrawAABB(aabb, { 0,0,1,1 });
 
-	//int c = 75678;
-
-	//for (int i = 0; i < 5; i++)
-	//{
-	//	int digit = c % 10;
-	//	c /= 10;
-
-	//	float left = digit * fontW;
-
-	//	combo.SetTextureRect(
-	//		left,
-	//		0.0f,
-	//		fontW,
-	//		fontH
-	//	);
-
-	//	comboPositions_[i].translation_ = {
-	//		pos.x + i * fontW,
-	//		pos.y,
-	//		0.0f
-	//	};
-
-	//	comboPositions_[i].UpdateMatrix();
-
-	//	/*combo.Draw(comboPositions_[i]);*/
-
-	//	// 全桁読み終わった
-	//	if (c == 0)
-	//	{
-	//		break;
-	//	}
-	//}
 };

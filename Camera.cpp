@@ -86,6 +86,21 @@ void Camera::SphericalCameraUpdate(Vector3 targetPos) {
 	} };
 
 	viewMatrix = Inverse(cameraMatrix);
+
+	// 上の行列から回転行列を割り出す
+	float rotationY = std::atan2(forward.x, forward.z);
+	float rotationX = std::atan2(
+		-forward.y,
+		std::sqrt(
+			forward.x * forward.x +
+			forward.z * forward.z
+		)
+	);
+
+	worldTransform_.rotation_ = { rotationX, rotationY, 0.0f };
+	
+	/*worldTransform_.translation_ = eye;*/
+
 }
 
 void Camera::SphericalImGuiView() {

@@ -50,8 +50,13 @@ public:
 
     static ComPtr <ID3D12DescriptorHeap> GetRtvHeap() { return rtvHeap_; }
 
+    static ComPtr<ID3D12DescriptorHeap> GetDsvHeap() { return dsvDescriptorHeap; }
+
     static ComPtr<ID3D12Resource> GetBackBuffer(int i) { return renderTargets_[i];}
     static D3D12_CPU_DESCRIPTOR_HANDLE GetBackBufferRTV(int i) { return rtvHandles[i]; }
+
+	static D3D12_VIEWPORT& GetViewport() { return viewport; }
+	static D3D12_RECT& GetScissorRect() { return scissorRect; }
 
     // モデルのパイプライン設定で必要
     static D3D12_DEPTH_STENCIL_DESC GetDepthStencilDesc() { return depthStencilDesc; }
@@ -95,7 +100,7 @@ private:
 
     static D3D12_DEPTH_STENCIL_DESC depthStencilDesc;
     ComPtr<ID3D12Resource> depthStencilResource;
-    ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
+    static ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
 
     ComPtr<ID3D12Fence> fence_;
     HANDLE fenceEvent_;
@@ -112,9 +117,9 @@ private:
     static uint32_t srvIndex_;
 
     //ビューポート
-    D3D12_VIEWPORT viewport{};
+    static D3D12_VIEWPORT viewport;
     //シザー矩形
-    D3D12_RECT scissorRect{};
+    static D3D12_RECT scissorRect;
 
     // リソースの開放のリークをチェックする
     // 消されたら自動で呼ばれるらしい

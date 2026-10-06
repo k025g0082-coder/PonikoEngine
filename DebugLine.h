@@ -4,6 +4,8 @@
 #include "Vector.h"
 #include "Matrix.h"
 
+#include "AABB.h"
+
 #include "Camera.h"
 
 #include <vector>
@@ -27,6 +29,11 @@ public:
 
     // 線追加
 	static void AddLine(const Vector3& start, const Vector3& end, const Vector4& color);
+
+
+	// AABB描画
+	static void DrawAABB(const AABB& aabb, const Vector4& color);
+
 
 	void Render();
 

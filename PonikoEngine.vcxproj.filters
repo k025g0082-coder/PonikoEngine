@@ -214,6 +214,9 @@
     <ClCompile Include="PostEffectManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="AABB.cpp">
+      <Filter>Engine\Source\ソース ファイル\math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -400,6 +403,9 @@
     </ClInclude>
     <ClInclude Include="PostEffectManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="AABB.h">
+      <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

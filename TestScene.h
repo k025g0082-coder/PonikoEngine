@@ -6,6 +6,8 @@
 #include "Sprite.h"
 #include "Model.h"
 
+#include "AABB.h"
+
 #include "WorldTransform.h"
 #include "ScreenTransform.h"
 
@@ -58,5 +60,6 @@ private:
 	ScreenTransform spworld1;
 	ScreenTransform spworld2;
 
+	AABB aabb;
 };
 
