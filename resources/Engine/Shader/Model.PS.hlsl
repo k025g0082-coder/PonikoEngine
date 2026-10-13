@@ -121,6 +121,42 @@ PixelShaderOutput main(VertexShaderOutput input) {
     
     PixelShaderOutput output;
     
+//    float3 proj = input.lightPosition.xyz / input.lightPosition.w;
+//    float2 uv;
+//    uv.x = proj.x * 0.5f + 0.5f;
+//    uv.y = -proj.y * 0.5f + 0.5f;
+
+//// 範囲外は青
+//    if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1 ||
+//    proj.z < 0 || proj.z > 1)
+//    {
+//        output.color = float4(0, 0, 1, 1);
+//        return output;
+//    }
+
+//    float mapDepth = shadowMap.Sample(gSampler, uv).r;
+//    output.color = float4(mapDepth, mapDepth, mapDepth, 1);
+//    return output;
+    
+    
+    
+    //float3 proj = input.lightPosition.xyz / input.lightPosition.w;
+
+    //// 範囲外は赤で分かるようにする
+    //if (proj.x < -1.0f || proj.x > 1.0f ||
+    //    proj.y < -1.0f || proj.y > 1.0f ||
+    //    proj.z < 0.0f || proj.z > 1.0f)
+    //{
+    //    output.color = float4(1.0f, 0.0f, 0.0f, 1.0f); // 範囲外 = 赤
+    //    return output;
+    //}
+
+    //// 深度を白黒で表示（近いほど白、遠いほど黒）
+    //float depth = proj.z;
+    //output.color = float4(depth, depth, depth, 1.0f);
+    //return output;
+    
+    
     float4 uvTransform = mul(float4(input.texcoord, 0.0f, 1.0f), material.uvTransform);
     float2 uv = uvTransform.xy;
     

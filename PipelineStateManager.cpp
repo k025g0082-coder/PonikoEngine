@@ -868,7 +868,12 @@ void PipelineStateManager::createShadowPipeline()
 		D3D12_FILL_MODE_SOLID;
 
 	rasterizerDesc.CullMode =
-		D3D12_CULL_MODE_BACK;
+		D3D12_CULL_MODE_NONE;
+
+	//rasterizerDesc.DepthBias = 1000;
+	//rasterizerDesc.SlopeScaledDepthBias = 1.5f;
+	//rasterizerDesc.DepthBiasClamp = 0.0f;
+	//rasterizerDesc.DepthClipEnable = TRUE;
 //
 //	rasterizerDesc.FrontCounterClockwise = FALSE;
 //rasterizerDesc.DepthClipEnable = TRUE;

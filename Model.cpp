@@ -729,7 +729,7 @@ void Model::Draw(Camera camera) {
 
 
 	ID3D12DescriptorHeap* heaps[] = {
-	DirectXCommon::GetInstance()->GetSrvHeap().Get()
+	DirectXCommon::GetInstance()->GetSrvHeap().Get(),
 	};
 
 	commandList->SetDescriptorHeaps(1, heaps);
@@ -823,9 +823,10 @@ void Model::DrawShadow(Matrix4x4 lightView_, Matrix4x4 lightProjection_) {
 
 	// ライトをカメラ位置にした時の
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldTransform_.matWorld_, Multiply(lightView_, lightProjection_));
-
-	worldTransform_.mvpData_->World = worldTransform_.matWorld_;
+	
 	worldTransform_.mvpData_->WVP = worldViewProjectionMatrix;
+	worldTransform_.mvpData_->World = worldTransform_.matWorld_;
+
 
 
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();

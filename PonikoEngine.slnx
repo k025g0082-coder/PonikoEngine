@@ -1,5 +1,6 @@
 <Solution>
   <Configurations>
+    <BuildType Name="Debug" />
     <BuildType Name="DebugLib" />
     <BuildType Name="Development" />
     <BuildType Name="ReleaseLib" />

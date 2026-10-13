@@ -180,6 +180,19 @@ void ShadowManager::Initialize()
             &srvDesc,
             shadowMapSrvHeap_->GetCPUDescriptorHandleForHeapStart()
         );
+
+        // ライトの位置(例
+        lightPosition = {
+            0.0f,
+            1.0f,
+            0.0f
+        };
+
+        lightDirection = {
+        0.0f,
+        -1.0f,
+        1.0f
+        };
 }
 
 void ShadowManager::Register(Model* model) {
@@ -270,12 +283,12 @@ void ShadowManager::RenderShadowMap() {
 
     // ライトの正射影行列
     lightProjection_ = MakeOrthographicMatrix(
-        -20.0f,  // left
-        20.0f,  // top
-        20.0f,  // right
-        -20.0f,  // bottom
-        0.1f,   // near
-        100.0f   // far
+        -1.0f,
+        1.0f,
+        1.0f,
+        -1.0f,
+        1.0f,
+        100.0f
     );
 
     // ④ 登録されたモデルを全部描画
@@ -308,12 +321,15 @@ Matrix4x4 ShadowManager::MakeLightViewMatrix(
 
     // forward がほぼ上下方向のときは別の up を使う
     Vector3 worldUp = { 0.0f, 1.0f, 0.0f };
-    if (fabsf(forward.y) > 0.99f) {
-        worldUp = { 0.0f, 0.0f, 1.0f };  // 横方向を up にする
-    }
+    Vector3 right = Cross(worldUp, forward);
 
-    Vector3 right = Normalize(Cross(worldUp, forward));
-    Vector3 up = Cross(forward, right);
+    // forward と worldUp がほぼ平行なら別の up
+    if (Length(right) < 0.001f) {
+        worldUp = { 0.0f, 0.0f, 1.0f };
+        right = Cross(worldUp, forward);
+    }
+    right = Normalize(right);
+    Vector3 up = Normalize(Cross(forward, right));
 
     Matrix4x4 lightWorldMatrix{ {
         { right.x,   right.y,   right.z,   0.0f },

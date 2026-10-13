@@ -54,17 +54,9 @@ private:
 public:
 
     // ライトの位置(例
-    Vector3 lightPosition = {
-        0.0f,
-        0.0f,
-        0.0f
-    };
+    Vector3 lightPosition;
 
-    Vector3 lightDirection = {
-    0.0f,
-    -1.0f,
-    0.0f
-    };
+    Vector3 lightDirection;
 
 
     // シングルトン
@@ -83,6 +75,10 @@ public:
 
     D3D12_GPU_DESCRIPTOR_HANDLE GetShadowMapSrvHandle() const {
         return shadowMapSrvHeap_->GetGPUDescriptorHandleForHeapStart();
+    }
+
+    Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetShadowMapSrv() {
+        return shadowMapSrvHeap_;
     }
 
     Matrix4x4 GetLightWVP() const {

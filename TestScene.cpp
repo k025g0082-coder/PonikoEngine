@@ -110,7 +110,7 @@ void TestScene::Init() {
 	telopText.setFont("main");
 
 	ShadowManager::GetInstance()->Register(model);
-//	ShadowManager::GetInstance()->Register(fieldModel);
+	//ShadowManager::GetInstance()->Register(fieldModel);
 };
 
 void TestScene::Update(Input* input) {
@@ -158,6 +158,7 @@ void TestScene::Update(Input* input) {
 	camera.GetWorldTransform().ImGuiView("camera");
 
 	model->GetWorldTransform().ImGuiView("player");
+	fieldModel->GetWorldTransform().ImGuiView("field");
 	//world.ImGuiView("player");
 
 	sprite.GetScreenTransform().ImGuiView("sprite");
