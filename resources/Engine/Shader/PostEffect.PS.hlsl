@@ -86,6 +86,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     float2 uv = input.texcoord;
     float4 color = texture0.Sample(gSampler, uv);
     
+    
     //　魚眼レンズ
     
     // 距離
@@ -152,7 +153,7 @@ PixelShaderOutput main(VertexShaderOutput input)
             move *= -1.0f;
         }
 
-        uv.x += move;
+        uv.x += move * gPostEffect.glitch;
     }
    
    

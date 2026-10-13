@@ -10,6 +10,8 @@
 
 #include "ModelLoader.h"
 
+#include "ShadowManager.h"
+
 #include "Matrix.h"
 
 #include "Timer.h"
@@ -211,6 +213,17 @@ void Model::Initialize(){
 	worldTransform_.UpdateMatrix();
 
 	// これがrootSignatureをたどってッパイプラインのレイアウトから情報を読み取られるのだーーーーーーーーー
+
+	// 定数バッファを作成
+	shadowTransformResource_ =
+		DirectXUtility::CreateBufferResource(
+			DirectXCommon::GetInstance()->GetDevice().Get(),
+			sizeof(ShadowTransform));
+
+	// GPUに書き込むためのアドレスを取得
+	shadowTransformResource_->Map(
+		0, nullptr,
+		reinterpret_cast<void**>(&shadowTransformData_));
 }
 
 void Model::Update(){
@@ -714,6 +727,7 @@ void Model::Draw(Camera camera) {
 
 	commandList->SetGraphicsRootConstantBufferView(7, skinningParamResource_->GetGPUVirtualAddress());
 
+
 	ID3D12DescriptorHeap* heaps[] = {
 	DirectXCommon::GetInstance()->GetSrvHeap().Get()
 	};
@@ -733,6 +747,20 @@ void Model::Draw(Camera camera) {
 			6,
 			skinningResource_->GetGPUVirtualAddress());
 	}
+
+	shadowTransformData_->lightWVP =
+		ShadowManager::GetInstance()->GetLightWVP();
+
+	commandList->SetGraphicsRootConstantBufferView(
+		8,
+		shadowTransformResource_->GetGPUVirtualAddress()
+	);
+
+	// 陰ようのSRVをPSように設定する
+	commandList->SetGraphicsRootDescriptorTable(
+		9,
+		ShadowManager::GetInstance()->GetShadowMapSrvHandle()
+	);
 
 	commandList->DrawIndexedInstanced(static_cast<UINT>(modelData.indices.size()), 1, 0, 0, 0);
 }
@@ -805,15 +833,16 @@ void Model::DrawShadow(Matrix4x4 lightView_, Matrix4x4 lightProjection_) {
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 
 	//RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Model).rootSignature);
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Shadow).rootSignature);
 	// PSOを設定
-	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Model).graphicsPipelineState);
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Shadow).graphicsPipelineState);
 
 
 	commandList->IASetIndexBuffer(&indexBufferView);
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	// WVPをb0に設定
 	commandList->SetGraphicsRootConstantBufferView(0, worldTransform_.GetWvpResource()->GetGPUVirtualAddress());
 
 	commandList->DrawIndexedInstanced(static_cast<UINT>(modelData.indices.size()), 1, 0, 0, 0);

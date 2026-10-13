@@ -26,6 +26,15 @@ cbuffer Skinning : register(b4)
     float4x4 gBoneMatrices[128];
 };
 
+
+struct ShadowTransform
+{
+    float4x4 lightWVP;
+};
+
+ConstantBuffer<ShadowTransform> gShadowTransform : register(b6);
+
+
 struct VertexShaderInput
 {
     float4 position : POSITION;
@@ -44,6 +53,8 @@ struct VeltexShaderOutput
     
     float3 worldPosition : POSITION0;
     
+    // 追加：ライト空間のクリップ座標
+    float4 lightPosition : TEXCOORD1;
 };
 
 
@@ -102,6 +113,12 @@ VeltexShaderOutput main(VertexShaderInput input)
     // ワールド空間の頂点座標
     output.worldPosition =
         mul(localPosition, gTransformationMatrix.World).xyz;
+    
+    float4 worldPosition =
+    mul(localPosition, gTransformationMatrix.World);// 上のと一緒じゃね
+
+    output.lightPosition =
+    mul(worldPosition, gShadowTransform.lightWVP);
 
     return output;
 }

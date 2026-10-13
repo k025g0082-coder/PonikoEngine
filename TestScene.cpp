@@ -8,6 +8,8 @@
 #include "SceneComponentLoader.h"
 #include "SoundManager.h"
 
+#include "ShadowManager.h"
+
 #include "ModelLoader.h"
 
 
@@ -41,9 +43,12 @@ void TestScene::Init() {
 	lightAddress = &LightingManager::GetInstance()->AddLight(dLightParam);
 
 
-	model = Model::CreateOBJ("resources/Models/player/player.fbx");
-	model->SetAnimationSpeed(0.5f);
-	model->SetAnimationLoop(false);
+//	model = Model::CreateOBJ("resources/Models/player/player.fbx");
+	model = Model::CreateOBJ("resources/Models/cube/cube.obj");
+
+
+	//model->SetAnimationSpeed(0.5f);
+	//model->SetAnimationLoop(false);
 
 	sheldModel = Model::CreateOBJ("resources/Models/sheld/sheld.obj");
 
@@ -60,7 +65,7 @@ void TestScene::Init() {
 	fieldModel->SetLightSets();
 
 	sprite.Initialize("resources/Engine/uvChecker.png");
-	sprite.SetTextureRect(110.0f, 10.0f, 100.0f, 100.0f);
+	//sprite.SetTextureRect(110.0f, 10.0f, 100.0f, 100.0f);
 
 	spworld1.Initialize();
 	spworld2.Initialize();
@@ -104,6 +109,8 @@ void TestScene::Init() {
 	telopText.Init();
 	telopText.setFont("main");
 
+	ShadowManager::GetInstance()->Register(model);
+//	ShadowManager::GetInstance()->Register(fieldModel);
 };
 
 void TestScene::Update(Input* input) {
@@ -120,8 +127,11 @@ void TestScene::Update(Input* input) {
 	sheldModel->Update();
 	sprite.UpdateScreenTransform();
 
+	
+	camera.Update();
+	
 	// キャラ中心に回す専用のUpdate
-	camera.SphericalCameraUpdate(world.translation_);
+	//camera.SphericalCameraUpdate(world.translation_);
 
 	world.UpdateMatrix();
 
@@ -148,6 +158,7 @@ void TestScene::Update(Input* input) {
 	camera.GetWorldTransform().ImGuiView("camera");
 
 	model->GetWorldTransform().ImGuiView("player");
+	//world.ImGuiView("player");
 
 	sprite.GetScreenTransform().ImGuiView("sprite");
 
@@ -166,7 +177,7 @@ void TestScene::Update(Input* input) {
 		SceneComponentLoader::GetInstance()->LightSave();
 
 		loder->SetWorldTransformData("camera", camera.GetWorldTransform());
-		loder->SetWorldTransformData("player", model->GetWorldTransform());
+		loder->SetWorldTransformData("player",model->GetWorldTransform());
 		loder->SetScreenTransformData("sprite", sprite.GetScreenTransform());
 		
 		loder->SaveTextData("text", &text2);
@@ -174,6 +185,7 @@ void TestScene::Update(Input* input) {
 		SceneComponentLoader::GetInstance()->Save("resources/Scene/TestScene.json");
 
 	}
+
 	if (ImGui::Button("Effect")) {
 
 
@@ -204,7 +216,12 @@ void TestScene::Update(Input* input) {
 	camera.SphericalImGuiView();
 
 	aabb.ImGuiView();
-	
+	ImGui::Text("MousePositionX:%f, Y:%f", Input::GetInstance()->GetMousePosition().x, Input::GetInstance()->GetMousePosition().y);
+	ImGui::Text("MouseCliCK:L %d, R:%d", Input::GetInstance()->GetLeftMouseButtonDown(), Input::GetInstance()->GetRightMouseButtonDown());
+	ImGui::Text("Mousewheel:%d", Input::GetInstance()->GetMouseWheel());
+
+	ImGui::DragFloat3("LightShadowPosition", &ShadowManager::GetInstance()->lightPosition.x, 1.0f);
+	ImGui::DragFloat3("LightShadowDirection", &ShadowManager::GetInstance()->lightDirection.x, 1.0f);
 #endif
 
 	// ポストエフェクトお試し
@@ -236,16 +253,20 @@ void TestScene::Draw() {
 
 	};
 
-	model->Draw(world,camera);
-	//fieldModel->Draw(camera);
+	model->Draw(camera);
+	//model->Draw(world,camera);
 
-	sprite.Draw();
+	fieldModel->Draw(camera);
+
 	// 複数テスト用
 	//sprite.Draw(spworld1);
 	//sprite.Draw(spworld2);
-	sheldModel->Draw(camera);
-	backModel->Draw(backWorld1,camera);
-	backModel->Draw(backWorld2,camera);
+
+
+	//sheldModel->Draw(camera);
+
+//	backModel->Draw(backWorld1,camera);
+//	backModel->Draw(backWorld2,camera);
 
 
 
@@ -304,14 +325,17 @@ void TestScene::Draw() {
 	comboPositions_[1].translation_ = { 128.0f,0 };
 	comboPositions_[1].UpdateMatrix();
 
-	
+
+	sprite.DrawShadowTexture();
+
+
 	DebugLine::SetCamera(&camera);
 
 	// デバッグ用の線 追加
-	DebugLine::AddLine(world.translation_, sheldModel->GetWorldTransform().translation_ + Vector3{ 0,1,0 }, Vector4{ 1,0,0,1 });
+	//DebugLine::AddLine(world.translation_, sheldModel->GetWorldTransform().translation_ + Vector3{ 0,1,0 }, Vector4{ 1,0,0,1 });
 
 
 	// AABB描画
-	DebugLine::DrawAABB(aabb, { 0,0,1,1 });
+	//DebugLine::DrawAABB(aabb, { 0,0,1,1 });
 
 };

@@ -8,6 +8,8 @@
 #include "WinApp.h"
 #include "DirectXUtility.h"
 
+#include "timer.h"
+
 #include <format>
 
 // （安心安定の）シングルトン
@@ -33,29 +35,6 @@ void PostEffectManager::Initialize() {
 
 	VertexData* vertexDataScreen = nullptr;
 	vertexResourceScreen->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataScreen));
-	//// 左下
-	//vertexDataScreen[0].position = { 0.0f,   720.0f, 0.0f, 1.0f };
-	//vertexDataScreen[0].texcoord = { 0.0f, 1.0f };
-
-	//// 左上
-	//vertexDataScreen[1].position = { 0.0f,   0.0f, 0.0f, 1.0f };
-	//vertexDataScreen[1].texcoord = { 0.0f, 0.0f };
-
-	//// 右下
-	//vertexDataScreen[2].position = { 1280.0f, 720.0f, 0.0f, 1.0f };
-	//vertexDataScreen[2].texcoord = { 1.0f, 1.0f };
-
-	//// 左上
-	//vertexDataScreen[3].position = { 0.0f,   0.0f, 0.0f, 1.0f };
-	//vertexDataScreen[3].texcoord = { 0.0f, 0.0f };
-
-	//// 右上
-	//vertexDataScreen[4].position = { 1280.0f, 0.0f, 0.0f, 1.0f };
-	//vertexDataScreen[4].texcoord = { 1.0f, 0.0f };
-
-	//// 右下
-	//vertexDataScreen[5].position = { 1280.0f, 720.0f, 0.0f, 1.0f };
-	//vertexDataScreen[5].texcoord = { 1.0f, 1.0f };
 
 	// 左下
 	vertexDataScreen[0].position = { -1.0f, -1.0f, 0.0f, 1.0f };
@@ -167,6 +146,7 @@ void PostEffectManager::Initialize() {
 
 	postEffectData->neon = 0.0f;
 	postEffectData->noise = 0.0f;
+	postEffectData->glitch = 0.0f;
 	postEffectData->scanLine = 0.0f;
 	postEffectData->fishLens = 0.0f;
 
@@ -180,7 +160,8 @@ void PostEffectManager::Initialize() {
 // ポストエフェクト受付開始
 void PostEffectManager::BeginScene() {
 
-	
+	postEffectData->time += Timer::GetDeltaTime();
+
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
 
 	if (!firstFrame_) {
@@ -258,6 +239,19 @@ void PostEffectManager::ApplyScene() {
 			FALSE,
 			nullptr);
 
+
+		// ポストエフェクト用のViewport / Scissorを設定
+		commandList->RSSetViewports(
+			1,
+			&DirectXCommon::GetInstance()->GetViewport()
+		);
+
+		commandList->RSSetScissorRects(
+			1,
+			&DirectXCommon::GetInstance()->GetScissorRect()
+		);
+
+
 		// RootSignatureを設定。
 		commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).rootSignature);
 		
@@ -299,6 +293,7 @@ void PostEffectManager::ImGuiView() {
 	ImGui::SliderFloat("colorInversion", &postEffectData->colorInversion, 0.0f, 1.0f);
 	ImGui::SliderFloat("neon", &postEffectData->neon, 0.0f, 1.0f);
 	ImGui::SliderFloat("noise", &postEffectData->noise, 0.0f, 1.0f);
+	ImGui::SliderFloat("glitch", &postEffectData->glitch, 0.0f, 1.0f);
 	ImGui::SliderFloat("scanLine", &postEffectData->scanLine, 0.0f, 1.0f);
 	ImGui::SliderFloat("fishLens", &postEffectData->fishLens, 0.0f, 1.0f);
 

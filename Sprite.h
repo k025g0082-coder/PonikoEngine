@@ -17,6 +17,7 @@ public:
 	void TextTextureUpdate(unsigned char* image);
 
 	void Draw();
+	void DrawShadowTexture();
 	void Draw(ScreenTransform& screenTransform);
 
 	void SetPos(Vector3 pos) {

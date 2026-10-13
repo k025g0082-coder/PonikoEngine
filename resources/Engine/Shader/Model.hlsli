@@ -5,4 +5,7 @@ struct VertexShaderOutput
     float3 normal : NORMAL0;
     
     float3 worldPosition : POSITION0;
+    
+    // 追加：ライト空間のクリップ座標
+    float4 lightPosition : TEXCOORD1;
 };

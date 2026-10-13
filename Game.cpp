@@ -5,8 +5,6 @@
 
 Fade Game::fade;
 
-std::list<Event*> Game::events_;
-
 // シングルトン
 Game* Game::GetInstance() {
 	static Game game;
@@ -29,22 +27,6 @@ void Game::Update() {
 
 	Scene::ProcessChange();
 
-	// イベントアプデ
-	for (Event* e_ : events_) {
-
-		// 条件確認
-		e_->TriggerCheck();
-
-		if (!e_->IsExecuted()) {
-		
-			// 条件満たしてないなら
-			continue;
-		}
-
-		// アプデ
-		e_->Update();
-	}
-
 	// 各画面のアプデ
 	Scene::getInstance()->Update(&gamepad);
 
@@ -62,11 +44,5 @@ void Game::Draw() {
 }
 
 void Game::Finalize() {
-
-	for (Event* event : events_) {
-		delete event;
-	}
-
-	events_.clear();
 
 }

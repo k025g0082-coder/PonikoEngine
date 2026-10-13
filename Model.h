@@ -9,6 +9,8 @@
 
 #include "LightingManager.h"
 
+#include "ShadowManager.h"
+
 #include "Matrix.h"
 #include "WorldTransform.h"
 
@@ -72,6 +74,7 @@ struct ModelData {
 	// アニメがあるか
 	bool isSkinning = false;
 };
+
 
 class Model
 {
@@ -295,5 +298,9 @@ private:
 
 	// アニメーションスピード
 	float animationSpeed = 1.0f;
+
+	// 陰行列　転送用
+	Microsoft::WRL::ComPtr<ID3D12Resource> shadowTransformResource_;
+	ShadowTransform* shadowTransformData_ = nullptr;
 };
 

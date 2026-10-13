@@ -6,6 +6,8 @@
 #include "WinApp.h"
 #include "PipelineStateManager.h"
 
+#include "ShadowManager.h"
+
 #include "DirectXCommon.h"
 #include "DirectXUtility.h"
 
@@ -293,6 +295,52 @@ void Sprite::Draw() {
 
 	// SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
 	commandList->SetGraphicsRootDescriptorTable(2, texture.GetTextureSrvHandleGPU());
+
+	//描画!(DrawCall/ドローコール)
+	commandList->DrawInstanced(6, 1, 0, 0);
+}
+
+void Sprite::DrawShadowTexture() {
+
+	// 正射影行列を生成(カメラを使わない、表面のアレのため)
+	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(
+		0.0f,
+		0.0f,
+		(float)WinApp::GetInstance()->GetClientWidth(),
+		(float)WinApp::GetInstance()->GetClientHeight(),
+		0.0f,
+		100.0f);
+
+	*screenTransform_.mvpData_ = Multiply(screenTransform_.matWorld_, projectionMatrix);
+
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
+
+	//RootSignatureを設定。PSOに設定しているけど別途設定が必要
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Sprite).rootSignature);
+	// PSOを設定
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Sprite).graphicsPipelineState);
+
+	// VBVを設定
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+
+	//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// マテリアルCBufferの場所を設定
+	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+
+	// 座標CBufferの場所を設定
+	commandList->SetGraphicsRootConstantBufferView(1, screenTransform_.GetWvpResource()->GetGPUVirtualAddress());
+
+	ID3D12DescriptorHeap* heaps[] = {
+	DirectXCommon::GetInstance()->GetSrvHeap().Get()
+	};
+
+	commandList->SetDescriptorHeaps(1, heaps);
+
+	// SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
+	commandList->SetGraphicsRootDescriptorTable(2, ShadowManager::GetInstance()->GetShadowMapSrvHandle());
 
 	//描画!(DrawCall/ドローコール)
 	commandList->DrawInstanced(6, 1, 0, 0);

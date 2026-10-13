@@ -45,6 +45,9 @@ namespace PonikoEngine {
 		// ３種のライトセットを司るクラスの初期化
 		LightingManager::GetInstance()->Initialize();
 
+		// 陰
+		ShadowManager::GetInstance()->Initialize();
+
 		// Gameシステムの方の初期化
 		Game::GetInstance()->Init();
 
@@ -63,7 +66,6 @@ namespace PonikoEngine {
 
 		// 音楽更新
 		SoundManager::GetInstance()->Update();
-
 
 		// 更新
 		ImGuiManager::GetInstance()->Begin();
@@ -90,6 +92,9 @@ namespace PonikoEngine {
 
 		// 描画
 		DirectXCommon::GetInstance()->PreDraw();
+
+		// 陰
+		ShadowManager::GetInstance()->RenderShadowMap();
 
 
 			PostEffectManager::GetInstance()->BeginScene();

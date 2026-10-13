@@ -9,24 +9,21 @@ struct VSOutput
 };
 
 
-struct ShadowTransform
+struct TransformationMatrix
 {
-    float4x4 world;
-    float4x4 lightViewProjection;
+    float4x4 World;
+    float4x4 WVP;
 };
 
 
-ConstantBuffer<ShadowTransform> gShadow : register(b0);
+
+ConstantBuffer<TransformationMatrix> gTransform : register(b0);
 
 VSOutput main(VSInput input)
 {
     VSOutput output;
 
-    float4 worldPosition =
-        mul(input.position, gShadow.world);
-
-    output.position =
-        mul(worldPosition, gShadow.lightViewProjection);
+    output.position = mul(input.position, gTransform.WVP);
 
     return output;
 }

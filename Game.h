@@ -4,7 +4,6 @@
 #include "Input.h"
 #include "Fade.h"
 
-#include "Event.h"
 
 class Game {
 public:
@@ -27,16 +26,7 @@ public:
 
 	static Fade& GetFade() { return fade; }
 
-	// 各Scene内のイベントを登録
-	static void EventToRegion(Event* e) {
-		events_.push_back(e);
-		events_.back()->Initialize();
-	}
-
 private:
-
-	// イベントリスト
-	static std::list<Event*> events_;
 
 	static Fade fade;
 	Input gamepad;

@@ -1,6 +1,8 @@
 #include "WinApp.h"
 #include "ImGuiManager.h"
 
+#include "Input.h"
+
 // imguiで必要奴
 #ifdef USE_IMGUI
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -18,6 +20,35 @@ LRESULT CALLBACK WinApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 		switch (message)
 		{
+		case WM_MOUSEMOVE:
+
+			// マウス座標セット
+			Input::GetInstance()->SetMousePosition(LOWORD(lParam), HIWORD(lParam));
+
+			break;
+		case WM_MOUSEWHEEL:
+
+			// ホイール
+			Input::GetInstance()->SetMouseWheel(GET_WHEEL_DELTA_WPARAM(wParam));
+
+			break;
+
+		// それぞれ右左クリック押された、判定など
+		case WM_LBUTTONDOWN:
+			Input::GetInstance()->SetLeftButton(true);
+			break;
+
+		case WM_LBUTTONUP:
+			Input::GetInstance()->SetLeftButton(false);
+			break;
+
+		case WM_RBUTTONDOWN:
+			Input::GetInstance()->SetRightButton(true);
+			break;
+
+		case WM_RBUTTONUP:
+			Input::GetInstance()->SetRightButton(false);
+			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;

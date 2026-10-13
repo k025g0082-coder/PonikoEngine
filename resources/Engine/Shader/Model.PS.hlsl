@@ -83,6 +83,35 @@ ConstantBuffer<DirectionalLightsParam> directionalLights : register(b1);
 ConstantBuffer<SpotLightsParam> spotLights : register(b2);
 ConstantBuffer<PointLightsParam> pointLights : register(b3);
 
+Texture2D<float> shadowMap : register(t1);
+SamplerComparisonState shadowSampler : register(s1);
+
+float CalculateShadow(float4 lightPosition)
+{
+    // 透視除算（ライト視点のNDC座標）
+    float3 proj = lightPosition.xyz / lightPosition.w;
+
+    // NDC座標をUV座標に変換
+    float2 shadowUV;
+    shadowUV.x = proj.x * 0.5f + 0.5f;
+    shadowUV.y = -proj.y * 0.5f + 0.5f;
+
+    // ライトの範囲外なら影なし
+    if (shadowUV.x < 0.0f || shadowUV.x > 1.0f ||
+        shadowUV.y < 0.0f || shadowUV.y > 1.0f ||
+        proj.z < 0.0f || proj.z > 1.0f)
+    {
+        return 1.0f;
+    }
+
+    // 深度比較用のバイアス
+    float depth = proj.z - 0.001f;
+
+    // シャドウマップの深度と比較
+    return shadowMap.SampleCmpLevelZero(
+        shadowSampler, shadowUV, depth);
+}
+
 
 struct PixelShaderOutput {
     float4 color : SV_TARGET0;
@@ -97,6 +126,13 @@ PixelShaderOutput main(VertexShaderOutput input) {
     
     float4 textureColor = texture0.Sample(gSampler, uv);
    
+    
+    float shadow = CalculateShadow(input.lightPosition);
+
+    // 影判定だけを表示
+    //output.color = float4(shadow, shadow, shadow, 1.0f);
+    //return output;
+    
     
     if (textureColor.a <= 0.1f)
     {
@@ -193,10 +229,19 @@ PixelShaderOutput main(VertexShaderOutput input) {
               * spotFactor
               * spotLights.lights[i].intensity;
         }
-            output.color =
-        material.color *
-        textureColor *
-        float4(lighting, 1.0f);
+        //    output.color =
+        //material.color *
+        //textureColor *
+        //float4(lighting, 1.0f);
+        
+        float shadow = CalculateShadow(input.lightPosition);
+
+        // 影なら暗くする
+        float shadowFactor = lerp(0.05f, 1.0f, shadow);
+
+        output.color =
+         material.color * textureColor *
+         float4(lighting * shadowFactor, 1.0f);
         
     }
     else
@@ -207,3 +252,4 @@ PixelShaderOutput main(VertexShaderOutput input) {
     
     return output;
 }
+

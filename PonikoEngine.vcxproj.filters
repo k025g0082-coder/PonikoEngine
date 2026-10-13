@@ -154,9 +154,6 @@
     <ClCompile Include="SoundManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Event.cpp">
-      <Filter>Engine\Source\ソース ファイル\Game</Filter>
-    </ClCompile>
     <ClCompile Include="Fade.cpp">
       <Filter>Engine\Source\ソース ファイル\Game</Filter>
     </ClCompile>
@@ -345,9 +342,6 @@
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
-      <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Event.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
     <ClInclude Include="TestScene.h">

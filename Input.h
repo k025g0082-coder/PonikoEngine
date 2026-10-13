@@ -62,6 +62,34 @@ public:
 			prevState_.Gamepad.wButtons == 0;
 	}
 
+	void SetMousePosition(int x, int y) {
+		mousePositionX_ = x;
+		mousePositionY_ = y;
+	}
+
+	// マウス座標取得
+	Vector2 GetMousePosition() {
+		return Vector2{
+			static_cast<float> (mousePositionX_),
+			static_cast<float> (mousePositionY_),
+		};
+	}
+
+	// 左クリック
+	void SetLeftButton(bool isDown) { leftButton_ = isDown; }
+	bool GetLeftMouseButtonDown() const { return leftButton_; }
+
+	// 右クリック
+	void SetRightButton(bool isDown) { rightButton_ = isDown; }
+	bool GetRightMouseButtonDown() const { return rightButton_; }
+
+	// ホイール操作
+	int GetMouseWheel() const { return mouseWheel_; }
+
+	void SetMouseWheel(int value) {
+		mouseWheel_ = value;
+	}
+
 private:
 
 	//Input() = default;
@@ -71,10 +99,16 @@ private:
 	//Input(const Input&) = delete;
 	//Input& operator=(const Input&) = delete;
 
+	int mousePositionX_ = 0;
+	int mousePositionY_ = 0;
+
+	bool leftButton_ = false;
+	bool rightButton_ = false;
+
+	int mouseWheel_ = 0;
 
 	XINPUT_STATE state_{};
 	XINPUT_STATE prevState_{};
-
 
 	BYTE key[256] = {};
 	BYTE preKey[256] = {};

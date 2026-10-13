@@ -7,21 +7,27 @@
 using namespace Microsoft::WRL;
 
 #include "Matrix.h"
-#include "Model.h"
+#include "Vector.h"
+
+#include "WorldTransform.h"
 
 #include <vector>
 
-// シェーダー用
-struct ShadowTransform
-{
-    Matrix4x4 world;
-    Matrix4x4 lightViewProjection;
+// シャドウマップ用の行列
+struct ShadowTransform {
+    Matrix4x4 lightWVP;
 };
+
+class Model;
 
 class ShadowManager
 {
 
 private:
+
+    Matrix4x4 MakeLightViewMatrix(
+        const Vector3& eye,
+        const Vector3& target);
 
 	// 登録してるモデルのアドレスs
 	std::vector<Model*> shadowCaster_;
@@ -39,7 +45,30 @@ private:
     // ShadowMapを見るためのDSV
     ComPtr<ID3D12DescriptorHeap> shadowMapDsvHeap_;
 
+
+    // ShadowMapをシェーダーから読むためのヒープ
+    Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> shadowMapSrvHeap_;
+
+    // SRVのディスクリプタサイズ
+    UINT srvDescriptorSize_ = 0;
 public:
+
+    // ライトの位置(例
+    Vector3 lightPosition = {
+        0.0f,
+        0.0f,
+        0.0f
+    };
+
+    Vector3 lightDirection = {
+    0.0f,
+    -1.0f,
+    0.0f
+    };
+
+
+    // シングルトン
+    static ShadowManager* GetInstance();
 
     void Initialize();
 
@@ -52,5 +81,12 @@ public:
     
     WorldTransform& GetWorldTransform() { return worldTransform_; }
 
+    D3D12_GPU_DESCRIPTOR_HANDLE GetShadowMapSrvHandle() const {
+        return shadowMapSrvHeap_->GetGPUDescriptorHandleForHeapStart();
+    }
+
+    Matrix4x4 GetLightWVP() const {
+        return Multiply(lightView_, lightProjection_);
+    }
 };
 

@@ -13,6 +13,7 @@
 #include "LightingManager.h"
 #include "EffectManager.h"
 
+#include "ShadowManager.h"
 #include "PostEffectManager.h"
 
 #include "DebugLine.h"

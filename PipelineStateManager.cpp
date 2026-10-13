@@ -64,6 +64,7 @@ void PipelineStateManager::createSpritePipeline() {
 	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;
 	staticSamplers[0].ShaderRegister = 0;// レジスタ番号0を使う
 	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
 	descriptionRootSignature.pStaticSamplers = staticSamplers;
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
@@ -343,15 +344,20 @@ void PipelineStateManager::createModelPipeline(){
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT; // InputLayoutを使うことを許可
 
 	// === SRVの設定 複数枚の設定をまとめて設定する設定する設定する設定する設定ｓｒsrsrsrrsrsrrrrrr
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
 	descriptorRange[0].BaseShaderRegister = 0; // 0から始める
 	descriptorRange[0].NumDescriptors = 1; // 一つ。ここを増やすと同時に描画できる数が増える？
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRVを使う。
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
+	// シャドウマップ t1
+	descriptorRange[1].BaseShaderRegister = 1;
+	descriptorRange[1].NumDescriptors = 1;
+	descriptorRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRange[1].OffsetInDescriptorsFromTableStart = 0;
 
 	// === Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[2] = {};
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -360,11 +366,26 @@ void PipelineStateManager::createModelPipeline(){
 	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;
 	staticSamplers[0].ShaderRegister = 0;// レジスタ番号0を使う
 	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	// シャドウマップ比較用 s1
+	staticSamplers[1].Filter =
+		D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	staticSamplers[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	staticSamplers[1].BorderColor =
+		D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	staticSamplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	staticSamplers[1].MinLOD = 0.0f;
+	staticSamplers[1].MaxLOD = D3D12_FLOAT32_MAX;
+	staticSamplers[1].ShaderRegister = 1;
+	staticSamplers[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
 	descriptionRootSignature.pStaticSamplers = staticSamplers;
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
 	// RootParameterの設定(追加時は随時長さを足す）
-	D3D12_ROOT_PARAMETER rootParameters[8] = {};
+	D3D12_ROOT_PARAMETER rootParameters[10] = {};
 
 	// 色
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -379,8 +400,8 @@ void PipelineStateManager::createModelPipeline(){
 	// 上のSRVの複数枚の設定の設定の（ｒｙ
 	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTable15
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader5
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange; // Tableの中身の配列を指定
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange); // Table3
+	rootParameters[2].DescriptorTable.pDescriptorRanges = &descriptorRange[0]; // Tableの中身の配列を指定
+	rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
 
 
 	// DirectionalLight
@@ -408,6 +429,18 @@ void PipelineStateManager::createModelPipeline(){
 	rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[7].Descriptor.ShaderRegister = 5;
 	rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	// 影行列
+	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[8].Descriptor.ShaderRegister = 6;
+	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+
+	rootParameters[9].ParameterType =
+		D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[9].DescriptorTable.pDescriptorRanges = &descriptorRange[1];
+	rootParameters[9].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 
 	descriptionRootSignature.pParameters = rootParameters;
@@ -767,52 +800,63 @@ void PipelineStateManager::createShadowPipeline()
 	// ============================================================
 	// InputLayout
 	// ============================================================
-
-	// ModelのVertexBufferに合わせる
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[5]{};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[1]{};
 
 	inputElementDescs[0].SemanticName = "POSITION";
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format =
 		DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputElementDescs[0].AlignedByteOffset =
-		D3D12_APPEND_ALIGNED_ELEMENT;
-
-	inputElementDescs[1].SemanticName = "TEXCOORD";
-	inputElementDescs[1].SemanticIndex = 0;
-	inputElementDescs[1].Format =
-		DXGI_FORMAT_R32G32_FLOAT;
-	inputElementDescs[1].AlignedByteOffset =
-		D3D12_APPEND_ALIGNED_ELEMENT;
-
-	inputElementDescs[2].SemanticName = "NORMAL";
-	inputElementDescs[2].SemanticIndex = 0;
-	inputElementDescs[2].Format =
-		DXGI_FORMAT_R32G32B32_FLOAT;
-	inputElementDescs[2].AlignedByteOffset =
-		D3D12_APPEND_ALIGNED_ELEMENT;
-
-	inputElementDescs[3].SemanticName = "BLENDINDICES";
-	inputElementDescs[3].SemanticIndex = 0;
-	inputElementDescs[3].Format =
-		DXGI_FORMAT_R32G32B32A32_UINT;
-	inputElementDescs[3].AlignedByteOffset =
-		D3D12_APPEND_ALIGNED_ELEMENT;
-
-	inputElementDescs[4].SemanticName = "BLENDWEIGHT";
-	inputElementDescs[4].SemanticIndex = 0;
-	inputElementDescs[4].Format =
-		DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputElementDescs[4].AlignedByteOffset =
-		D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDescs[0].AlignedByteOffset = 0;
 
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 
-	inputLayoutDesc.pInputElementDescs =
-		inputElementDescs;
+	inputLayoutDesc.pInputElementDescs = inputElementDescs;
+	inputLayoutDesc.NumElements = _countof(inputElementDescs);
+	//// ModelのVertexBufferに合わせる
+	//D3D12_INPUT_ELEMENT_DESC inputElementDescs[5]{};
 
-	inputLayoutDesc.NumElements =
-		_countof(inputElementDescs);
+	//inputElementDescs[0].SemanticName = "POSITION";
+	//inputElementDescs[0].SemanticIndex = 0;
+	//inputElementDescs[0].Format =
+	//	DXGI_FORMAT_R32G32B32A32_FLOAT;
+	//inputElementDescs[0].AlignedByteOffset =
+	//	D3D12_APPEND_ALIGNED_ELEMENT;
+
+	//inputElementDescs[1].SemanticName = "TEXCOORD";
+	//inputElementDescs[1].SemanticIndex = 0;
+	//inputElementDescs[1].Format =
+	//	DXGI_FORMAT_R32G32_FLOAT;
+	//inputElementDescs[1].AlignedByteOffset =
+	//	D3D12_APPEND_ALIGNED_ELEMENT;
+
+	//inputElementDescs[2].SemanticName = "NORMAL";
+	//inputElementDescs[2].SemanticIndex = 0;
+	//inputElementDescs[2].Format =
+	//	DXGI_FORMAT_R32G32B32_FLOAT;
+	//inputElementDescs[2].AlignedByteOffset =
+	//	D3D12_APPEND_ALIGNED_ELEMENT;
+
+	//inputElementDescs[3].SemanticName = "BLENDINDICES";
+	//inputElementDescs[3].SemanticIndex = 0;
+	//inputElementDescs[3].Format =
+	//	DXGI_FORMAT_R32G32B32A32_UINT;
+	//inputElementDescs[3].AlignedByteOffset =
+	//	D3D12_APPEND_ALIGNED_ELEMENT;
+
+	//inputElementDescs[4].SemanticName = "BLENDWEIGHT";
+	//inputElementDescs[4].SemanticIndex = 0;
+	//inputElementDescs[4].Format =
+	//	DXGI_FORMAT_R32G32B32A32_FLOAT;
+	//inputElementDescs[4].AlignedByteOffset =
+	//	D3D12_APPEND_ALIGNED_ELEMENT;
+
+	//D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+
+	//inputLayoutDesc.pInputElementDescs =
+	//	inputElementDescs;
+
+	//inputLayoutDesc.NumElements =
+	//	_countof(inputElementDescs);
 
 	// ============================================================
 	// Rasterizer
@@ -825,6 +869,14 @@ void PipelineStateManager::createShadowPipeline()
 
 	rasterizerDesc.CullMode =
 		D3D12_CULL_MODE_BACK;
+//
+//	rasterizerDesc.FrontCounterClockwise = FALSE;
+//rasterizerDesc.DepthClipEnable = TRUE;
+//rasterizerDesc.MultisampleEnable = FALSE;
+//rasterizerDesc.AntialiasedLineEnable = FALSE;
+//rasterizerDesc.ForcedSampleCount = 0;
+//rasterizerDesc.ConservativeRaster =
+//    D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
 	// ============================================================
 	// Blend
@@ -832,6 +884,12 @@ void PipelineStateManager::createShadowPipeline()
 	// ============================================================
 
 	D3D12_BLEND_DESC blendDesc{};
+	blendDesc.AlphaToCoverageEnable = FALSE;
+	blendDesc.IndependentBlendEnable = FALSE;
+
+	blendDesc.RenderTarget[0].BlendEnable = FALSE;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask =
+		D3D12_COLOR_WRITE_ENABLE_ALL;
 
 	// ============================================================
 	// Shader
