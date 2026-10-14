@@ -243,6 +243,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="AABB.cpp" />
     <ClCompile Include="Bone.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Coordinate.cpp" />
     <ClCompile Include="DebugLine.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
@@ -307,6 +308,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Bone.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="Coordinate.h" />
     <ClInclude Include="DebugLine.h" />
     <ClInclude Include="DirectionalLight.h" />
@@ -331,6 +333,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Input.h" />
     <ClInclude Include="ImGuiManager.h" />
     <ClInclude Include="LightingManager.h" />
+    <ClInclude Include="LineSegment.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelLoader.h" />
@@ -346,6 +349,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="ScreenTransform.h" />
     <ClInclude Include="ShadowManager.h" />
     <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="Sphere.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="TestScene.h" />

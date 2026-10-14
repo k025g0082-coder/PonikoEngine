@@ -4,6 +4,8 @@
 #include "DirectXCommon.h"
 #include "DirectXUtility.h"
 
+#include <numbers>
+
 std::vector<DebugLineVertex> DebugLine::vertices_{};
 Camera* DebugLine::camera_ = nullptr;
 
@@ -117,6 +119,95 @@ void DebugLine::DrawAABB(const AABB& aabb, const Vector4& color) {
 	}
 
 };
+
+// 球描画(SceneのDraw内限定)
+void DebugLine::DrawSphere(const Sphere& sphere, const Vector4& color, const int subdivision) {
+
+	// 円周率
+	const float kPi = std::numbers::pi_v<float>;
+
+
+	const float kLatEvery =
+		static_cast<float>(kPi) / static_cast<float>(subdivision);
+
+	const float kLonEvery =
+		static_cast<float>(2.0f * kPi) / static_cast<float>(subdivision);
+
+
+	//緯度の方向に分割-T/2~ T/2
+	for (int latIndex = 0; latIndex < subdivision; ++latIndex) {
+
+		float lat = -static_cast<float>(kPi) / 2.0f + kLatEvery * latIndex;//現在の緯度
+
+		////経度の方向に分割 0 ~ 2π
+		for (int lonIndex = 0; lonIndex < subdivision; ++lonIndex) {
+
+			float lon = lonIndex * kLonEvery;//現在の経度
+
+			float r = sphere.radius;
+			Vector3 center = sphere.center;
+
+
+			// 次
+			float latNext = lat + kLatEvery;
+			float lonNext = lon + kLonEvery;
+
+			// a
+			Vector3 a{
+				center.x + r * cosf(lat) * cosf(lon),
+				center.y + r * sinf(lat),
+				center.z + r * cosf(lat) * sinf(lon)
+			};
+
+			// b（経度方向）
+			Vector3 b{
+				center.x + r * cosf(lat) * cosf(lonNext),
+				center.y + r * sinf(lat),
+				center.z + r * cosf(lat) * sinf(lonNext)
+			};
+
+			// c（緯度方向）
+			Vector3 c{
+				center.x + r * cosf(latNext) * cosf(lon),
+				center.y + r * sinf(latNext),
+				center.z + r * cosf(latNext) * sinf(lon)
+			};
+			//.. らしいです
+
+			//	ab,bcで線を引く
+			AddLine(a, b, color);
+			AddLine(b, c, color);
+		}
+	};
+}
+
+
+//　簡単な座標軸を描画 
+void DebugLine::DrawAxis(const Vector3& position, float axisLength) {
+
+	// X軸：赤
+	AddLine(
+		{ position.x - axisLength, position.y, position.z },
+		{ position.x + axisLength, position.y, position.z },
+		{ 1.0f, 0.0f, 0.0f, 1.0f }
+	);
+
+	// Y軸：緑
+	AddLine(
+		{ position.x, position.y - axisLength, position.z },
+		{ position.x, position.y + axisLength, position.z },
+		{ 0.0f, 1.0f, 0.0f, 1.0f }
+	);
+
+	// Z軸：青
+	AddLine(
+		{ position.x, position.y, position.z - axisLength },
+		{ position.x, position.y, position.z + axisLength },
+		{ 0.0f, 0.0f, 1.0f, 1.0f }
+	);
+	
+}
+
 
 void DebugLine::Render() {
 	Clear();

@@ -66,7 +66,7 @@ void Scene::Update(Input* gamepad){
 
 			if (ImGui::Button("Delete"))
 			{
-				LightingManager::GetInstance()->GetLightSets().dLight->RemoveLight(i);
+				LightingManager::GetInstance()->GetLightSets().dLight->Remove(i);
 			}
 
 			ImGui::PopID();
@@ -137,7 +137,7 @@ void Scene::Update(Input* gamepad){
 
 			if (ImGui::Button("Delete"))
 			{
-				LightingManager::GetInstance()->GetLightSets().sLight->RemoveLight(i);
+				LightingManager::GetInstance()->GetLightSets().sLight->Remove(i);
 			}
 
 			ImGui::PopID();
@@ -186,7 +186,7 @@ void Scene::Update(Input* gamepad){
 
 			if (ImGui::Button("Delete"))
 			{
-				LightingManager::GetInstance()->GetLightSets().pLight->RemoveLight(i);
+				LightingManager::GetInstance()->GetLightSets().pLight->Remove(i);
 			}
 
 			ImGui::PopID();

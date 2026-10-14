@@ -22,11 +22,11 @@ PixelShaderOutput main(VertexShaderOutput input)
     
     float4 texColor = gTexture.Sample(gSampler, input.texcoord);
     
-    float depth = gTexture.Sample(gSampler, input.texcoord).r;
-    output.color = float4(depth, depth, depth, 1.0f);
+    //float depth = gTexture.Sample(gSampler, input.texcoord).r;
+    //output.color = float4(depth, depth, depth, 1.0f);
     
     // 色を乗算
-  //  output.color = material.color * texColor;
+    output.color = material.color * texColor;
     
     return output;
 }

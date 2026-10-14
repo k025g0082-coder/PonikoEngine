@@ -5,6 +5,7 @@
 #include "Matrix.h"
 
 #include "AABB.h"
+#include "Sphere.h"
 
 #include "Camera.h"
 
@@ -33,6 +34,20 @@ public:
 
 	// AABB描画(SceneのDraw内限定)
 	static void DrawAABB(const AABB& aabb, const Vector4& color);
+
+
+	/// <summary>
+	/// 球描画(SceneのDraw内限定)
+	/// </summary>
+	/// <param name="sphere">球</param>
+	/// <param name="color">球の色</param>
+	/// <param name="subdivision">分割数</param>
+	
+	static void DrawSphere(const Sphere& sphere, const Vector4& color,const int subdivision = 20);
+
+
+	//　簡単な座標軸を描画 
+	static void DrawAxis(const Vector3& Position, float axisLength = 1.0f);
 
 
 	void Render();

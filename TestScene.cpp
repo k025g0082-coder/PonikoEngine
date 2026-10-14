@@ -109,7 +109,7 @@ void TestScene::Init() {
 	telopText.Init();
 	telopText.setFont("main");
 
-	ShadowManager::GetInstance()->Register(model);
+	//ShadowManager::GetInstance()->Register(model);
 	//ShadowManager::GetInstance()->Register(fieldModel);
 };
 
@@ -327,7 +327,7 @@ void TestScene::Draw() {
 	comboPositions_[1].UpdateMatrix();
 
 
-	sprite.DrawShadowTexture();
+	//sprite.Draw();
 
 
 	DebugLine::SetCamera(&camera);

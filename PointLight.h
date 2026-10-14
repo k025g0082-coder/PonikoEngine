@@ -31,7 +31,7 @@ struct PointLightParam {
 // １０個まで
 struct PointLightsParam {
 
-	PointLightParam lights[10];
+	PointLightParam lights[30];
 	int count = 0;
 	float padding[3];
 };
@@ -77,7 +77,24 @@ public:
 		return *lightDatas_;
 	}
 
-	void RemoveLight(int i)
+	// ライト削除
+	void RemoveLight(PointLightParam* param)
+	{
+		if (!param || !lightDatas_)
+			return;
+
+		for (int i = 0; i < lightDatas_->count; ++i)
+		{
+			// ポインタが一致するライトを探す
+			if (&lightDatas_->lights[i] == param)
+			{
+				Remove(i);
+				return;
+			}
+		}
+	}
+
+	void Remove(int i)
 	{
 		if (i < 0 || i >= lightDatas_->count)
 			return;

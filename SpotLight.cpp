@@ -9,6 +9,6 @@ void SpotLight::Initialize() {
 	// リソース作成
 	resourceLight = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(SpotLightsParam));
 
-	resourceLight->Map(0, nullptr, reinterpret_cast<void**>(&lightDatas_));
+	resourceLight->Map(0, nullptr, reinterpret_cast<void**>(&lightDataForGPU_));
 
 }

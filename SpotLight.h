@@ -8,6 +8,8 @@ using namespace Microsoft::WRL;
 
 #include "Vector.h"
 
+#include "vector"
+
 /// <summary>
 /// SpotLight 懐中電灯
 /// 
@@ -40,7 +42,7 @@ struct SpotLightParam {
 };
 
 struct SpotLightsParam {
-	SpotLightParam lights[10];
+	SpotLightParam lights[30];
 	int count = 0;
 	float padding[3];
 };
@@ -54,18 +56,18 @@ public:
 
 	// 参照w
 	SpotLightParam* GetLightData(int index) {
-		return &lightDatas_->lights[index];
+		return &lightDataForGPU_->lights[index];
 	};
 
 	// ライト追加 & 参照ゲット
 	SpotLightParam& AddLight(SpotLightParam param) {
 
-		if (lightDatas_->count >= kMaxLight)
-			return lightDatas_->lights[lightDatas_->count - 1];
+		if (lightDataForGPU_->count >= kMaxLight)
+			return lightDataForGPU_->lights[lightDataForGPU_->count - 1];
 
-		lightDatas_->lights[lightDatas_->count] = param;
+		lightDataForGPU_->lights[lightDataForGPU_->count] = param;
 
-		return lightDatas_->lights[lightDatas_->count++];
+		return lightDataForGPU_->lights[lightDataForGPU_->count++];
 
 	}
 
@@ -74,7 +76,7 @@ public:
 	{
 		for (int i = 0; i < kMaxLight; i++) {
 
-			lightDatas_->lights[i] = {};
+			lightDataForGPU_->lights[i] = {};
 		}
 	}
 
@@ -83,28 +85,45 @@ public:
 	// imgui用
 	SpotLightsParam& GetSpotLightsParam()
 	{
-		return *lightDatas_;
+		return *lightDataForGPU_;
 	}
 
-	void RemoveLight(int i)
+	// ライト削除
+	void RemoveLight(SpotLightParam* param)
 	{
-		if (i < 0 || i >= lightDatas_->count)
+		if (!param || !lightDataForGPU_)
+			return;
+
+		for (int i = 0; i < lightDataForGPU_->count; ++i)
+		{
+			// ポインタが一致するライトを探す
+			if (&lightDataForGPU_->lights[i] == param)
+			{
+				Remove(i);
+				return;
+			}
+		}
+	}
+
+	void Remove(int i)
+	{
+		if (i < 0 || i >= lightDataForGPU_->count)
 			return;
 
 		// i番目以降を1つ前に詰める
-		for (int j = i; j < lightDatas_->count - 1; ++j)
+		for (int j = i; j < lightDataForGPU_->count - 1; ++j)
 		{
-			lightDatas_->lights[j] = lightDatas_->lights[j + 1];
+			lightDataForGPU_->lights[j] = lightDataForGPU_->lights[j + 1];
 		}
 
 		// 要素数を減らす
-		--lightDatas_->count;
+		--lightDataForGPU_->count;
 	}
 private:
 	// １０こまで
 	static const int kMaxLight = 10;
 
-	SpotLightsParam* lightDatas_ = nullptr;
+	SpotLightsParam* lightDataForGPU_ = nullptr;
 
 	ComPtr <ID3D12Resource> resourceLight;
 };

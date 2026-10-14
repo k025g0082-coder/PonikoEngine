@@ -9,7 +9,3 @@ struct AABB {
 	// デバッグ用
 	void ImGuiView();
 };
-
-
-// 箱同士AABBの衝突
-bool IsCollision(const AABB& aabb1, const AABB& aabb2);

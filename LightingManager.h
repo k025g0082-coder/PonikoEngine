@@ -22,6 +22,11 @@ public:
 	SpotLightParam& AddLight(SpotLightParam p) { return sLight.AddLight(p); };
 	PointLightParam& AddLight(PointLightParam p) { return pLight.AddLight(p); }
 
+	void RemoveLight(DirectionalLightParam* p) { return dLight.RemoveLight(p); }
+	void RemoveLight(SpotLightParam* p) { return sLight.RemoveLight(p); };
+	void RemoveLight(PointLightParam* p) { return pLight.RemoveLight(p); }
+
+
 	void ResetLight() {
 
 		dLight.ResetLight();

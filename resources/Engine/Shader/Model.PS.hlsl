@@ -20,7 +20,7 @@ struct DirectionalLightParam
 
 struct DirectionalLightsParam
 {
-    DirectionalLightParam lights[10];
+    DirectionalLightParam lights[30];
     int count;
     
     float3 padding;
@@ -42,7 +42,7 @@ struct PointLightParam
 
 struct PointLightsParam
 {
-    PointLightParam lights[10];
+    PointLightParam lights[30];
     int count;
     
     float3 padding;
@@ -70,7 +70,7 @@ struct SpotLightParam
 
 struct SpotLightsParam
 {
-    SpotLightParam lights[10];
+    SpotLightParam lights[30];
     int count;
     
     float3 padding;
