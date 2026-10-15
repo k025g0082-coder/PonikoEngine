@@ -34,7 +34,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -126,20 +126,22 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Debug\resources
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;USE_IMGUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NODEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/ignore:4049 %(AdditionalOptions)</AdditionalOptions>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
-      <AdditionalLibraryDirectories>$(ProjectDir)externals\DirectXTex\Bin\Desktop_2022_Win10\x64\Debug;$(ProjectDir)externals\freeType\build\Debug;$(SolutionDir)externals\effekseer\lib\Effekseer\Debug;$(ProjectDir)externals\assimp\lib\Debug;$(ProjectDir)resources\zlib\lib;$(ProjectDir)resources\zlib\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freetyped.lib;DirectXTex.lib;Effekseerd.lib;zd.lib;assimp-vc145-mtd.lib;$(SolutionDir)externals\effekseer\lib\3rdParty\LLGI\src\Debug\LLGId.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererDX12\Debug\EffekseerRendererDX12d.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererLLGI\Debug\EffekseerRendererLLGId.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererCommon\Debug\EffekseerRendererCommond.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)externals\DirectXTex\Bin\Desktop_2022_Win10\x64\Release;$(ProjectDir)externals\freeType\build\Release;$(SolutionDir)externals\effekseer\lib\Effekseer\Release;$(ProjectDir)externals\assimp\lib\Release;$(ProjectDir)resources\zlib\lib;$(ProjectDir)resources\zlib\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freetype.lib;DirectXTex.lib;Effekseer.lib;zd.lib;assimp-vc145-mt.lib;$(SolutionDir)externals\effekseer\lib\3rdParty\LLGI\src\Release\LLGI.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererDX12\Release\EffekseerRendererDX12.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererLLGI\Release\EffekseerRendererLLGI.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererCommon\Release\EffekseerRendererCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -150,7 +152,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
 
 copy /Y "$(ProjectDir)resources\zlib\bin\zd.dll" "$(OutDir)"
 
-xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Debug\resources\Engine"</Command>
+xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Release\resources\Engine"</Command>
       <Message>exeの確認用にzlibコピーする あとシェーダーをexeのところにコピー</Message>
     </PostBuildEvent>
     <PreBuildEvent>

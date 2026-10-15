@@ -110,8 +110,9 @@ public:
 	}
 
 private:
-	// １０こまで
-	static const int kMaxLight = 10;
+
+	// ３０こまで
+	static const int kMaxLight = 30;
 
 	PointLightsParam* lightDatas_;
 
