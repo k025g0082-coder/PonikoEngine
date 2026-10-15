@@ -126,14 +126,15 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Debug\resources
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NODEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -142,6 +143,8 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Debug\resources
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <AdditionalLibraryDirectories>$(ProjectDir)externals\DirectXTex\Bin\Desktop_2022_Win10\x64\Release;$(ProjectDir)externals\freeType\build\Release;$(SolutionDir)externals\effekseer\lib\Effekseer\Release;$(ProjectDir)externals\assimp\lib\Release;$(ProjectDir)resources\zlib\lib;$(ProjectDir)resources\zlib\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>freetype.lib;DirectXTex.lib;Effekseer.lib;zd.lib;assimp-vc145-mt.lib;$(SolutionDir)externals\effekseer\lib\3rdParty\LLGI\src\Release\LLGI.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererDX12\Release\EffekseerRendererDX12.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererLLGI\Release\EffekseerRendererLLGI.lib;$(SolutionDir)externals\effekseer\lib\EffekseerRendererCommon\Release\EffekseerRendererCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -243,12 +246,18 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AABB.cpp" />
-    <ClCompile Include="Bone.cpp" />
+    <ClCompile Include="Bone.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Coordinate.cpp" />
     <ClCompile Include="DebugLine.cpp" />
-    <ClCompile Include="DirectionalLight.cpp" />
+    <ClCompile Include="DirectionalLight.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="DirectXCommon.cpp" />
     <ClCompile Include="DirectXUtility.cpp" />
     <ClCompile Include="DxcCompiler.cpp" />
@@ -268,21 +277,33 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="ImGuiManager.cpp" />
-    <ClCompile Include="LightingManager.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="LightingManager.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="PipelineStateManager.cpp" />
-    <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="PointLight.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="PonikoEngine.cpp" />
     <ClCompile Include="PostEffectManager.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneComponentLoader.cpp" />
     <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="SoundManager.cpp" />
-    <ClCompile Include="SpotLight.cpp" />
+    <ClCompile Include="SpotLight.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="TestScene.cpp" />
     <ClCompile Include="Text.cpp" />
