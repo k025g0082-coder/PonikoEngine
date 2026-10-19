@@ -13,13 +13,17 @@ void Camera::Initialize() {
 
 void Camera::Update() {
 	
+	if (isEditorMode_)return;
+
 	// 計算
 	UpdateMatrix();
 
 };
 
 void Camera::UpdateMatrix() {
-	
+
+	if (isEditorMode_)return;
+
 	Matrix4x4 worldMatrix = MakeAffineMatrix(worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);
 	
 	viewMatrix = Inverse(worldMatrix);
@@ -29,7 +33,6 @@ void Camera::SetCamera(Camera camera) {
 	viewMatrix = camera.GetViewMatrix();
 	projectionMatrix = camera.GetProjectionMatrix();
 }
-
 
 void Camera::SphericalCameraUpdate(Vector3 targetPos, float offset, float theta, float phi) {
 
@@ -111,4 +114,129 @@ void Camera::SphericalImGuiView() {
 	ImGui::DragFloat("CameraPhi", &spherical.phi, 0.01f);
 #endif
 
+}
+
+Vector2 Camera::WorldToScreen(const Vector3& worldPosition) const {
+
+	// ワールド座標を同次座標にする
+	Vector4 position = {
+		worldPosition.x,
+		worldPosition.y,
+		worldPosition.z,
+		1.0f
+	};
+
+	// ViewProjection行列
+	Matrix4x4 viewProjection =
+		Multiply(viewMatrix, projectionMatrix);
+
+	// クリップ空間へ変換
+	position = Transform(position, viewProjection);
+
+	// カメラの後ろ、または投影できない位置
+	if (position.w <= 0.0f) {
+		return { -1.0f, -1.0f };
+	}
+
+	// 透視除算 → NDC座標
+	float ndcX = position.x / position.w;
+	float ndcY = position.y / position.w;
+
+	// NDC → スクリーン座標
+	Vector2 screenPosition;
+
+	screenPosition.x = (ndcX + 1.0f) * 0.5f * float(WinApp::GetInstance()->GetClientWidth());
+	screenPosition.y = (1.0f - ndcY) * 0.5f * float(WinApp::GetInstance()->GetClientHeight());
+
+	return screenPosition;
+}
+
+Camera::Ray Camera::ScreenPointToRay(float ndcX, float ndcY) {
+
+	// ViewProjectionの逆行列
+	Matrix4x4 viewProjection =
+		Multiply(viewMatrix, projectionMatrix);
+
+	Matrix4x4 inverseViewProjection = Inverse(viewProjection);
+
+	// DirectXのNDC深度範囲は 0～1
+	Vector4 nearPoint = {
+		ndcX, ndcY, 0.0f, 1.0f
+	};
+
+	Vector4 farPoint = {
+		ndcX, ndcY, 1.0f, 1.0f
+	};
+
+	nearPoint = Transform(nearPoint, inverseViewProjection);
+	farPoint = Transform(farPoint, inverseViewProjection);
+
+	// 透視除算
+	Vector3 nearWorld = {
+		nearPoint.x / nearPoint.w,
+		nearPoint.y / nearPoint.w,
+		nearPoint.z / nearPoint.w
+	};
+
+	Vector3 farWorld = {
+		farPoint.x / farPoint.w,
+		farPoint.y / farPoint.w,
+		farPoint.z / farPoint.w
+	};
+
+	Ray ray;
+	ray.origin = nearWorld;
+	ray.direction = Normalize(farWorld - nearWorld);
+
+	return ray;
+}
+
+bool Camera::IntersectRayAABB(
+	const Ray& ray,
+	const AABB& aabb,
+	float& distance)
+{
+	float tMin = 0.0f;
+	float tMax = FLT_MAX;
+
+	const float origin[3] = {
+		ray.origin.x, ray.origin.y, ray.origin.z
+	};
+	const float dir[3] = {
+		ray.direction.x, ray.direction.y, ray.direction.z
+	};
+	const float boxMin[3] = {
+		aabb.min.x, aabb.min.y, aabb.min.z
+	};
+	const float boxMax[3] = {
+		aabb.max.x, aabb.max.y, aabb.max.z
+	};
+
+	for (int i = 0; i < 3; ++i) {
+		if (std::abs(dir[i]) < 1.0e-6f) {
+			// この軸にほぼ平行
+			if (origin[i] < boxMin[i] ||
+				origin[i] > boxMax[i]) {
+				return false;
+			}
+		}
+		else {
+			float t1 = (boxMin[i] - origin[i]) / dir[i];
+			float t2 = (boxMax[i] - origin[i]) / dir[i];
+
+			if (t1 > t2) {
+				std::swap(t1, t2);
+			}
+
+			tMin = (std::max)(tMin, t1);
+			tMax = (std::min)(tMax, t2);
+
+			if (tMin > tMax) {
+				return false;
+			}
+		}
+	}
+
+	distance = tMin;
+	return true;
 }

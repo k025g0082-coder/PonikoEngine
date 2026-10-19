@@ -10,6 +10,7 @@
 #include "AABB.h"
 
 #include <map>
+#include <array>
 
 // シェーダーに転送用
 struct ParticleData {
@@ -55,7 +56,19 @@ struct ParticleModelData {
 
 	// 描画してる数
 	int currentDrawNum = 0;
+
+
+	// ParticleModelData に追加
+	struct BlendRange {
+		uint32_t start = 0;
+		uint32_t count = 0;
+	};
+
+	// 既存の currentDrawNum の近くに
+	std::array<BlendRange, 6> blendRanges{};   // BlendMode の個数に合わせて調整
+
 };
+
 
 /// <summary>
 /// <param name="color"> 色 </param>
@@ -67,6 +80,7 @@ struct ParticleModelData {
 /// <param name="life"> 生存時間 </param>
 /// <param name="isBilliboard"> 常に前向くか（板ポリ用） </param>
 /// <param name="isDilute"> 色を薄くしていくか </param>
+/// <param name="BlendType"> 加算や乗算 ブレンドモード </param>
 /// </summary>
 
 struct ParticleParam {
@@ -98,6 +112,18 @@ struct ParticleParam {
     // 色を薄くしていくか
 	bool isDilute = true;
 
+	// ブレンド設定
+	BlendMode blendMode_ = BlendMode::kBlendModeNone;
+
+	const char* blends[6] =
+	{
+		"None",
+		"Normal",
+		"Add",
+		"Substract",
+		"Multiply",
+		"Screen"
+	};
 
 	// ImGuiデバッグ用
 	void ImGuiView() {
@@ -117,6 +143,12 @@ struct ParticleParam {
 
 			ImGui::Checkbox("Billboard", &isBilliboard);
 			ImGui::Checkbox("Dilute", &isDilute);
+
+			int currentBlend = static_cast<int>(blendMode_);
+
+			if (ImGui::Combo("Blend", &currentBlend, blends, IM_ARRAYSIZE(blends))) {
+				blendMode_ = static_cast<BlendMode>(currentBlend);
+			};
 #endif
 	
 	}
@@ -208,6 +240,8 @@ public:
 	// パーティクル用テキスチャ辞典
 	std::map<std::string, Texture*> particleTextureDatas_;
 
+
+	static D3D12_BLEND_DESC GetBlendDesc(BlendMode mode);
 
 private:
 

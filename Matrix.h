@@ -65,6 +65,9 @@ Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
 /// 逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);
 
+// 転置
+Matrix4x4 Transpose(const Matrix4x4& m);
+
 // vector2同士の距離
 float Distance(const Vector2& a, const Vector2& b);
 
@@ -93,3 +96,6 @@ Vector3 CatmullRomPosition(const std::vector<Vector3>& points, float t);
 Vector3 CatmullSegment(const std::vector<Vector3>& points, int index, float t);
 
 Matrix4x4 MakeRotateMatrix(const Vector4& quaternion);
+
+
+Vector4 Transform(const Vector4& vector, const Matrix4x4& matrix);

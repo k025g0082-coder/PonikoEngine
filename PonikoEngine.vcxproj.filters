@@ -70,6 +70,9 @@
     <Filter Include="Engine\Source\ソース ファイル\Game\Effect">
       <UniqueIdentifier>{2d58d595-5089-4e55-bfb1-a829024b2780}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Source\imGuizmo">
+      <UniqueIdentifier>{629a70f3-4ce2-4a37-b160-1a55ca3a0771}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinApp.cpp">
@@ -121,27 +124,6 @@
       <Filter>Engine\Adapter</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="externals\imgui\imgui.cpp">
-      <Filter>Engine\Source\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_demo.cpp">
-      <Filter>Engine\Source\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_draw.cpp">
-      <Filter>Engine\Source\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp">
-      <Filter>Engine\Source\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
-      <Filter>Engine\Source\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_tables.cpp">
-      <Filter>Engine\Source\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="externals\imgui\imgui_widgets.cpp">
-      <Filter>Engine\Source\imgui</Filter>
-    </ClCompile>
     <ClCompile Include="Bone.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
@@ -217,6 +199,42 @@
     <ClCompile Include="Collision.cpp">
       <Filter>Engine\Source\ソース ファイル\math</Filter>
     </ClCompile>
+    <ClCompile Include="FileDropManager.cpp">
+      <Filter>Engine\Source\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor.cpp">
+      <Filter>Engine\Source\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imGuizmo\GraphEditor.cpp">
+      <Filter>Engine\Source\imGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imGuizmo\ImGuizmo.cpp">
+      <Filter>Engine\Source\imGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imGuizmo\ImSequencer.cpp">
+      <Filter>Engine\Source\imGuizmo</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui.cpp">
+      <Filter>Engine\Source\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_demo.cpp">
+      <Filter>Engine\Source\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_draw.cpp">
+      <Filter>Engine\Source\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_tables.cpp">
+      <Filter>Engine\Source\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_widgets.cpp">
+      <Filter>Engine\Source\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp">
+      <Filter>Engine\Source\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
+      <Filter>Engine\Source\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -236,6 +254,9 @@
     </None>
     <None Include="resources\Engine\Shader\PostEffect.hlsli">
       <Filter>Engine\リソース ファイル</Filter>
+    </None>
+    <None Include="externals\imGuizmo\LICENSE">
+      <Filter>Engine\Source\imGuizmo</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -291,18 +312,6 @@
       <Filter>Engine\Adapter</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imconfig.h">
-      <Filter>Engine\Source\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui.h">
-      <Filter>Engine\Source\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_impl_dx12.h">
-      <Filter>Engine\Source\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_impl_win32.h">
-      <Filter>Engine\Source\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="externals\imgui\imgui_internal.h">
       <Filter>Engine\Source\imgui</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imstb_rectpack.h">
@@ -413,6 +422,33 @@
     <ClInclude Include="Collision.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
+    <ClInclude Include="FileDropManager.h">
+      <Filter>Engine\Source\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor.h">
+      <Filter>Engine\Source\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imGuizmo\GraphEditor.h">
+      <Filter>Engine\Source\imGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imGuizmo\ImGuizmo.h">
+      <Filter>Engine\Source\imGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imGuizmo\ImSequencer.h">
+      <Filter>Engine\Source\imGuizmo</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui.h">
+      <Filter>Engine\Source\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_internal.h">
+      <Filter>Engine\Source\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_impl_dx12.h">
+      <Filter>Engine\Source\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\imgui_impl_win32.h">
+      <Filter>Engine\Source\imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Engine\Shader\Model.PS.hlsl">
@@ -445,16 +481,16 @@
     <FxCompile Include="resources\Engine\Shader\Shadow.VS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="DebugLine.VS.hlsl">
-      <Filter>Engine\リソース ファイル</Filter>
-    </FxCompile>
-    <FxCompile Include="DebugLine.PS.hlsl">
-      <Filter>Engine\リソース ファイル</Filter>
-    </FxCompile>
     <FxCompile Include="resources\Engine\Shader\PostEffect.PS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
     <FxCompile Include="resources\Engine\Shader\PostEffect.VS.hlsl">
+      <Filter>Engine\リソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\Engine\Shader\DebugLine.PS.hlsl">
+      <Filter>Engine\リソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\Engine\Shader\DebugLine.VS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
   </ItemGroup>

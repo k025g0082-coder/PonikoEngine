@@ -1,7 +1,10 @@
 #include "PipelineStateManager.h"
 #include "DirectXCommon.h"
 
+#include "Particle.h"
+
 std::unordered_map<PipelineType, PipelineState> PipelineStateManager::pipelines_;
+ID3D12PipelineState* PipelineStateManager::blendGraphicsPipelineState[(int)BlendMode::Count] = {};
 
 PipelineStateManager* PipelineStateManager::GetInstance() {
 	static PipelineStateManager p;
@@ -741,6 +744,44 @@ void PipelineStateManager::createParticlePipeline() {
 		IID_PPV_ARGS(&state.graphicsPipelineState));
 	assert(SUCCEEDED(hr));
 
+
+	/* ブレンド用に、Graphicパイプラインは６つ生成する　*/
+
+	for (int i = 0; i < (int)BlendMode::Count; i++) {
+
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC desc{};
+
+		// 共通設定
+		desc.pRootSignature = PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Particle).rootSignature;
+		desc.InputLayout = inputLayoutDesc;
+		desc.VS = { vertexShaderBlob->GetBufferPointer(),
+					vertexShaderBlob->GetBufferSize() };
+		desc.PS = { pixelShaderBlob->GetBufferPointer(),
+					pixelShaderBlob->GetBufferSize() };
+
+		desc.RasterizerState = rasterizerDesc;
+
+		desc.NumRenderTargets = 1;
+		desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+		desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		desc.SampleDesc.Count = 1;
+		desc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+
+		desc.DepthStencilState =
+			DirectXCommon::GetInstance()->GetDepthStencilDesc();
+		desc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+		// ブレンドモードだけ変更
+		desc.BlendState = Particle::GetBlendDesc((BlendMode)i);
+
+		// PSO生成
+		HRESULT hr = device_->CreateGraphicsPipelineState(
+			&desc,
+			IID_PPV_ARGS(&blendGraphicsPipelineState[i])
+		);
+
+		assert(SUCCEEDED(hr));
+	}
 }
 
 void PipelineStateManager::createShadowPipeline()

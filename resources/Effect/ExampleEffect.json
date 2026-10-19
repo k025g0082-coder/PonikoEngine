@@ -21,10 +21,36 @@
             "particleTag": "plane",
             "position": [
                 0.0,
-                0.0,
+                3.799999952316284,
                 0.0
             ],
             "textureTag": "texture"
+        },
+        "test": {
+            "num": 9,
+            "param": {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "gravity": 0.0,
+                "isBilliboard": false,
+                "isDilute": true,
+                "life": 20,
+                "scaleAmpMax": 1.0,
+                "scaleAmpMin": 1.0,
+                "speed": 1.0,
+                "speedAmp": 0.0
+            },
+            "particleTag": "plane",
+            "position": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "textureTag": "star04"
         }
     }
 }

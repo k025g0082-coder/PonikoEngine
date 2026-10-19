@@ -25,7 +25,7 @@ void ExampleEffect::Update() {
 		// パーティクル放出
 
 		Effect::EmitParticleCompornent("particle");
-		Effect::EmitParticleCompornent("particle2");
+		Effect::EmitParticleCompornent("test");
 
 		//Effect::EmitParticleCompornent("plane2");
 	}

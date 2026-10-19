@@ -286,6 +286,71 @@ void SceneComponentLoader::LightLoad() {
 }
 
 
+void SceneComponentLoader::SaveGroup(const std::string& groupName) {
+	json& group = jsonData_[groupName];
+
+	// 登録されたsave関数をすべて実行
+	for (auto& [name, property] : properties_[groupName]) {
+		property.save(group);
+	}
+}
+
+// グループ読み込み
+void SceneComponentLoader::LoadGroup(const std::string& groupName) {
+	if (!jsonData_.contains(groupName)) {
+		return;
+	}
+
+	const json& group = jsonData_[groupName];
+
+	// 登録されたload関数をすべて実行
+	for (auto& [name, property] : properties_[groupName]) {
+		property.load(group);
+	}
+}
+
+
+void SceneComponentLoader::Property(const std::string& name, Vector3& value) {
+
+	properties_[currentGroup_][name] = {
+		[this, &value, name](json& group) {
+			group[name] = Vector3ToJson(value);
+		},
+		[&value, name](const json& group) {
+			if (group.contains(name)) {
+				value = JsonToVector3(group.at(name));
+			}
+		}
+	};
+}
+
+void SceneComponentLoader::Property(const std::string& name, WorldTransform& value) {
+
+	properties_[currentGroup_][name] = {
+
+		[this, &value, name](json& group) {
+			group[name] = WorldToJson(value);
+		},
+
+		[this, &value, name](const json& group) {
+
+	if (group.contains(name)) {
+		WorldTransform loaded = JsonToWorld(group.at(name));
+
+		value.translation_ = loaded.translation_;
+		value.rotation_ = loaded.rotation_;
+		value.scale_ = loaded.scale_;
+
+		value.UpdateMatrix();
+	}
+}
+	};
+}
+
+
+
+
+
 void SceneComponentLoader::EffectParticleCompornentSave(std::string tag, ParticleCompornent& param_) {
 
 	auto& data = jsonData_["EffectParticleCompornents"][tag];

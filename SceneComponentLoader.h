@@ -2,6 +2,10 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
+#include <functional>
+#include <unordered_map>
+#include <string>
+
 #include "Effect.h"
 
 #include "Vector.h"
@@ -119,10 +123,48 @@ public:
 	// Effect内のParticleCompornentのセーブ
 	void EffectParticleCompornentSave(std::string tag, ParticleCompornent& param_);
 	void EffectParticleCompornentLoad(std::map<std::string, ParticleCompornent>& particleEmitParams_);
+
+
+	// グループ開始
+	void BeginGroup(const std::string& groupName) {
+		currentGroup_ = groupName;
+	}
+
+	// グループ終了
+	void EndGroup() {
+		currentGroup_.clear();
+	}
+
+	// グループ保存
+	void SaveGroup(const std::string& groupName);
+
+	// グループ読み込み
+	void LoadGroup(const std::string& groupName);
+
+	// プロパティ登録。int,float,bool,stringなど対応できて凄い
+	template<typename T>
+	void Property(const std::string& name, T& value) {
+
+		properties_[currentGroup_][name] = {
+			[&value, name](json& group) {
+				group[name] = value;
+			},
+			[&value, name](const json& group) {
+				if (group.contains(name)) {
+					value = group.at(name).get<T>();
+				}
+			}
+		};
+	}
+
+	// 特殊な型なので、これらはそれぞれオーバーライド
+	void Property(const std::string& name, Vector3& value);
+	void Property(const std::string& name, WorldTransform& value);
+
+
 private:
 
 	json jsonData_;
-
 
 	// WorldTransform->Jsonの形式に変換
 	json WorldToJson(const WorldTransform& world);
@@ -137,5 +179,24 @@ private:
 	// Json <-> TextDatas
 	TextDatas JsonToTextDatas(const json& value);
 	json TextDatasToJson(const TextDatas& data);
+
+
+	struct PropertyData {
+		// JSONに値を書き込む処理を保存
+		std::function<void(json&)> save;
+
+		// JSONから値を読み込む処理を保存
+		std::function<void(const json&)> load;
+	};
+
+	std::string currentGroup_;
+
+	// タグー＞登録されてるタグのラムダ式の関数　というマップ
+	std::unordered_map<
+		std::string,
+		std::unordered_map<std::string, PropertyData>
+	> properties_;
+
+	
 };
 

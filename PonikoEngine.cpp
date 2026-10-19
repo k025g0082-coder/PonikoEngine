@@ -3,6 +3,8 @@
 #include <memory>
 #include <filesystem>
 
+#include "Editor.h"
+
 #include "EffekseerManager.h"
 
 namespace PonikoEngine {
@@ -26,6 +28,11 @@ namespace PonikoEngine {
 			DirectXCommon::GetInstance()->GetDevice().Get(),
 			DirectXCommon::GetInstance()->GetCommandQueue().Get()
 		);
+
+
+		/*　Editor初期化　*/
+		Editor::GetInstance()->Initialize();
+
 
 		// ポストエフェクトの初期化
 		PostEffectManager::GetInstance()->Initialize();
@@ -69,8 +76,11 @@ namespace PonikoEngine {
 
 		// 更新
 		ImGuiManager::GetInstance()->Begin();
-
-			/*　ここに更新処理　*/
+			
+			/*　Editor更新処理　*/
+			Editor::GetInstance()->Update();
+			
+			/*　Game更新処理　*/
 			Game::GetInstance()->Update();
 
 			Input::GetInstance()->Update();
@@ -98,7 +108,11 @@ namespace PonikoEngine {
 
 
 			PostEffectManager::GetInstance()->BeginScene();
+				
+				/*　Editor描画処理　*/
+				Editor::GetInstance()->Draw();
 
+				/*　Game更新処理　*/
 				Game::GetInstance()->Draw();
 
 				// パーティクル

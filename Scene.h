@@ -1,19 +1,9 @@
 #pragma once
 
 #include "Input.h"
-
-#include "Model.h"
-
-#include "DirectionalLight.h"
-#include "SpotLight.h"
-#include "PointLight.h"
+#include "Camera.h"
 
 class Scene {
-
-private:
-	static Scene* instance;
-	static Scene* nextInstance;
-	static bool isChanging;
 
 public:
 	/// <summary>
@@ -44,11 +34,22 @@ public:
 	static void ProcessChange();
 
 	static Scene* getInstance() { return instance; }
+
 	static void setInstance(Scene* d) {
 		instance = d;
 		instance->Init();
 	}
 
-	std::vector<Model*> models;
+	/* ゲーム内で使うメインカメラを登録する。 */
+	static void SetSceneCamera(Camera* camera) {
+		camera_ = camera;
+	}
+	static Camera* GetSceneCamera() { return camera_; }
 
+private:
+	static Scene* instance;
+	static Scene* nextInstance;
+	static bool isChanging;
+
+	static Camera* camera_;
 };

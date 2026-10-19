@@ -1,6 +1,8 @@
 #include "WinApp.h"
 #include "ImGuiManager.h"
 
+#include "FileDropManager.h"
+
 #include "Input.h"
 
 // imguiで必要奴
@@ -49,6 +51,27 @@ LRESULT CALLBACK WinApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		case WM_RBUTTONUP:
 			Input::GetInstance()->SetRightButton(false);
 			break;
+
+		/* ウインドウにドロップされたファイルのパスをゲット */
+		case WM_DROPFILES: {
+			HDROP drop = reinterpret_cast<HDROP>(wParam);
+
+			UINT count = DragQueryFileW(drop, 0xFFFFFFFF, nullptr, 0);
+
+			for (UINT i = 0; i < count; ++i) {
+				wchar_t path[MAX_PATH];
+
+				DragQueryFileW(drop, i, path, MAX_PATH);
+
+				// ファイルパスクラスに追加。
+				FileDropManager::AddFilePath(std::wstring(path));
+
+			}
+
+			DragFinish(drop);
+			return 0;
+		}
+
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;
@@ -101,6 +124,10 @@ void WinApp::Initialize(const wchar_t* title, int32_t clientW, int32_t clientH) 
 
 	// ウインドウ表示
 	ShowWindow(hwnd_, SW_SHOW);
+
+	// ウインドウにファイルのドロップの有効化
+	DragAcceptFiles(hwnd_, TRUE);
+
 
 	if (!hwnd_)
 	{

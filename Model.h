@@ -229,12 +229,12 @@ public:
 	// 標準のWorldTransform
 	WorldTransform& GetWorldTransform() { return worldTransform_; }
 
+	
 	// 設定
 	void SetWorldTransform(const WorldTransform& w)
 	{
 		worldTransform_ = w;
 	}
-
 
 	
 private:

@@ -21,6 +21,12 @@ Particle* Particle::GetInstance() {
 
 void Particle::Initialize() {
 	
+    ID3D12Device* device_ = DirectXCommon::GetDevice().Get();
+
+   
+
+
+    /* 残骸？*/
     
 
     //modelData = modeldata;
@@ -326,6 +332,56 @@ void Particle::RegionParticleTexture(std::string tag, std::string path) {
 
 void Particle::Update() {
 
+    if (camera_ == nullptr) return;
+
+    for (auto& [tag, data] : particleModelDatas_) {
+        // ブレンド範囲をクリア
+        for (auto& r : data.blendRanges) {
+            r.start = 0;
+            r.count = 0;
+        }
+
+        int instanceIndex = 0;
+
+        // ブレンドモードごとに詰める（順番固定）
+        for (int blend = 0; blend < (int)BlendMode::Count; ++blend) {   // BlendMode の数に合わせる
+            data.blendRanges[blend].start = instanceIndex;
+
+            for (uint32_t i = 0; i < kNumMaxInstances; ++i) {
+                if (!emits[i].isActive) continue;
+                if (emits[i].tag != tag) continue;
+                if (static_cast<int>(emits[i].blendType) != blend) continue;
+                if (instanceIndex >= kNumInstance) break;
+
+                // カメラ目線
+                if (emits[i].isBillboard)
+                    emits[i].transform.rotation_ = camera_->GetRotation();
+
+                emits[i].update();
+
+                // 定数バッファに書き込み
+                data.instancingData[instanceIndex].color = emits[i].color;
+                Matrix4x4 wvp = Multiply(
+                    emits[i].transform.matWorld_,
+                    Multiply(camera_->GetViewMatrix(), camera_->GetProjectionMatrix())
+                );
+                data.instancingData[instanceIndex].WVP = wvp;
+                data.instancingData[instanceIndex].World = emits[i].transform.matWorld_;
+                data.instancingData[instanceIndex].textureIndex =
+                    particleTextureDatas_[emits[i].textureTag]->GetSrvIndex();
+
+                instanceIndex++;
+            }
+            data.blendRanges[blend].count = instanceIndex - data.blendRanges[blend].start;
+        }
+
+        data.currentDrawNum = instanceIndex;
+    }
+
+    /* 以前の*/
+    
+    /*
+    
     // カメラ未設定なら帰る
     if (camera_ == nullptr) return;
 
@@ -366,10 +422,67 @@ void Particle::Update() {
         }
         data.currentDrawNum = instanceIndex;
     }
+    */
 }
 
 void Particle::Draw()
 {
+
+    if (camera_ == nullptr) return;
+
+    ID3D12GraphicsCommandList* commandList =
+        DirectXCommon::GetInstance()->GetCommandList().Get();
+
+    commandList->SetGraphicsRootSignature(
+        PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Particle).rootSignature
+    );
+
+    commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    ID3D12DescriptorHeap* heaps[] = {
+        DirectXCommon::GetInstance()->GetSrvHeap().Get()
+    };
+    commandList->SetDescriptorHeaps(1, heaps);
+
+    for (auto& [tag, data] : particleModelDatas_) {
+        if (data.currentDrawNum <= 0) continue;
+
+        commandList->IASetVertexBuffers(0, 1, &data.vertexBufferView);
+        commandList->IASetIndexBuffer(&data.indexBufferView);
+
+        commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+        commandList->SetGraphicsRootDescriptorTable(1, data.instancingSrvHandleGPU);
+        commandList->SetGraphicsRootDescriptorTable(
+            2,
+            DirectXCommon::GetInstance()->GetSrvHeap()->GetGPUDescriptorHandleForHeapStart()
+        );
+
+        // ブレンドモードごとに描画
+        for (int blend = 0; blend < (int)BlendMode::Count; ++blend) {
+
+            const auto& range = data.blendRanges[blend];
+            if (range.count == 0) continue;
+
+            // ここで PSO を切り替え
+            commandList->SetPipelineState(
+                PipelineStateManager::GetInstance()->GetParticleBlendPipelineState(
+                    static_cast<BlendMode>(blend)
+                )
+            );
+
+            commandList->DrawIndexedInstanced(
+                UINT(data.modelData.indices.size()),
+                range.count,          // インスタンス数
+                0,                    // StartIndexLocation
+                0,                    // BaseVertexLocation
+                range.start           // ★ BaseInstance（ここが重要）
+            );
+        }
+    }
+
+    /* 以前の*/
+
+    /*
     // カメラ未設定なら帰る
     if (camera_ == nullptr) return;
 
@@ -378,8 +491,12 @@ void Particle::Draw()
 
     //RootSignatureを設定。PSOに設定しているけど別途設定が必要
     commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Particle).rootSignature);
+
     // PSOを設定
-    commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Particle).graphicsPipelineState);
+    //commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Particle).graphicsPipelineState);
+    // 
+  // ６つのブレンドモードから、PSOを設定
+        commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetParticleBlendPipelineState(BlendMode::kBlendModeMultily));
 
     commandList->IASetPrimitiveTopology(
         D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
@@ -396,6 +513,8 @@ void Particle::Draw()
     {
         if (data.currentDrawNum <= 0)
             continue;
+
+      
 
         commandList->IASetVertexBuffers(
             0, 1, &data.vertexBufferView
@@ -428,7 +547,8 @@ void Particle::Draw()
             0
         );
     }
-}
+    */
+    }
 
 // 生成
 void Particle::MakeNewParticle(std::string tag, std::string textureTag, Vector3 pos, int num, ParticleParam param) {
@@ -490,6 +610,9 @@ void Particle::MakeNewParticle(std::string tag, std::string textureTag, Vector3 
         emits[i].isDilute = param.isDilute;
 
         emits[i].color = param.color;
+
+        emits[i].blendType = param.blendMode_;
+
 
         // なんか１．０ｆでも速すぎるのでこうする
         float speed = param.speed * 0.1f;
@@ -588,6 +711,8 @@ void Particle::MakeNewParticle(std::string tag, std::string textureTag, AABB aab
 
         emits[i].color = param.color;
 
+        emits[i].blendType = param.blendMode_;
+
         // なんか１．０ｆでも速すぎるのでこうする
         float speed = param.speed * 0.1f;
         float speedAmp = param.speedAmp * 0.1f;
@@ -613,6 +738,66 @@ void Particle::MakeNewParticle(std::string tag, std::string textureTag, AABB aab
     }
 
 
+}
+
+
+D3D12_BLEND_DESC Particle::GetBlendDesc(BlendMode mode) {
+
+    D3D12_BLEND_DESC desc{};
+
+    // 全色要素を書き込む
+    desc.RenderTarget[0].RenderTargetWriteMask =
+        D3D12_COLOR_WRITE_ENABLE_ALL;
+
+    auto& rt = desc.RenderTarget[0];
+
+    // 基本設定
+    rt.BlendEnable = TRUE;
+    rt.BlendOp = D3D12_BLEND_OP_ADD;
+    rt.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+
+    rt.SrcBlendAlpha = D3D12_BLEND_ONE;
+    rt.DestBlendAlpha = D3D12_BLEND_ZERO;
+
+    switch (mode) {
+    case BlendMode::kBlendModeNone:
+        rt.BlendEnable = FALSE;
+        break;
+
+    case BlendMode::kBlendModeNormal:
+        rt.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+        rt.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+        break;
+
+    case BlendMode::kBlendModeAdd:
+        rt.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+        rt.DestBlend = D3D12_BLEND_ONE;
+        break;
+    case BlendMode::kBlendModeSubtract:
+        // 減算合成
+        rt.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+        rt.DestBlend = D3D12_BLEND_ONE;
+        rt.BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;
+        break;
+
+    case BlendMode::kBlendModeMultily:
+        // 乗算合成
+        rt.SrcBlend = D3D12_BLEND_ZERO;
+        rt.DestBlend = D3D12_BLEND_SRC_COLOR;
+        rt.BlendOp = D3D12_BLEND_OP_ADD;
+        break;
+
+    case BlendMode::kBlendModeScreen:
+        // スクリーン合成
+        rt.SrcBlend = D3D12_BLEND_ONE;
+        rt.DestBlend = D3D12_BLEND_INV_SRC_COLOR;
+        rt.BlendOp = D3D12_BLEND_OP_ADD;
+        break;
+
+        // ....
+    }
+
+    return desc;
 }
 
 

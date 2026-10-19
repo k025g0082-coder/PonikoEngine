@@ -11,22 +11,35 @@ ImGuiManager* ImGuiManager::GetInstance() {
 // 初期化
 void ImGuiManager::Initialize() {
 
-#ifdef USE_IMGUI
-
 	// ながいからこうした
 	auto* dx = DirectXCommon::GetInstance();
 
 	// IMGUIのおまじない　こういうもんである
+#ifdef USE_IMGUI
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
+
 	ImGui_ImplWin32_Init(WinApp::GetInstance()->GetHWND());
-	ImGui_ImplDX12_Init(dx->GetDevice().Get(),
-		dx->GetSwapChainBufferCount(),
-		dx->GetRtvDescFormat(),
-		dx->GetSrvHeap().Get(),
-		dx->GetSrvHeap()->GetCPUDescriptorHandleForHeapStart(),
-		dx->GetSrvHeap()->GetGPUDescriptorHandleForHeapStart());
+
+	ImGui_ImplDX12_InitInfo initInfo{};
+	initInfo.Device = dx->GetDevice().Get();
+	initInfo.CommandQueue = dx->GetCommandQueue().Get(); // 実際の取得関数名に合わせる
+	initInfo.NumFramesInFlight = dx->GetSwapChainBufferCount();
+	initInfo.RTVFormat = dx->GetRtvDescFormat();
+	initInfo.DSVFormat = DXGI_FORMAT_UNKNOWN;
+	initInfo.SrvDescriptorHeap = dx->GetSrvHeap().Get();
+
+	// 既存のSRVヒープを使う場合の旧方式向け設定
+	initInfo.LegacySingleSrvCpuDescriptor =
+		dx->GetSrvHeap()->GetCPUDescriptorHandleForHeapStart();
+
+	initInfo.LegacySingleSrvGpuDescriptor =
+		dx->GetSrvHeap()->GetGPUDescriptorHandleForHeapStart();
+
+	ImGui_ImplDX12_Init(&initInfo);
+
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->Build();
 

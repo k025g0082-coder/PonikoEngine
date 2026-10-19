@@ -4,6 +4,8 @@
 
 #include "Coordinate.h"
 
+#include "AABB.h"
+
 #include <numbers>
 
 class Camera
@@ -42,6 +44,11 @@ public:
 
 	// 他のカメラの情報をコピーする
 	void SetCamera(Camera camera);
+
+
+	// エディターモードかをセット
+	void SetEditorMode(bool b) { isEditorMode_ = b; }
+
 
 	// farZ(必ずInitialize前に書く)
 	float farZ = 100.0f;
@@ -83,6 +90,25 @@ public:
 	void SphericalImGuiView();
 
 	Spherical& GetSpherical() { return spherical; }
+
+	// ワールド座標 → スクリーン座標
+	Vector2 WorldToScreen(const Vector3& worldPosition) const;
+
+	struct Ray {
+		Vector3 origin;    // レイの始点
+		Vector3 direction; // 正規化した方向
+	};
+
+	// NDC 座標からレイを作る
+	Ray ScreenPointToRay(float ndcX, float ndcY);
+
+	// レイとAABB判定
+	bool IntersectRayAABB(
+		const Camera::Ray& ray,
+		const AABB& aabb,
+		float& distance);
+
+
 private:
 
 	// 初期カメラ位置
@@ -94,6 +120,9 @@ private:
 	// プロジェクション
 	Matrix4x4 projectionMatrix;
 
+
+	// エディターモードか？
+	bool isEditorMode_ = false;
 
 	// 球面座標系よう
 	Spherical spherical	{

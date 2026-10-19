@@ -1,3 +1,4 @@
+#include "Scene.h"
 #include "TestScene.h"
 
 #include "WinApp.h"
@@ -25,11 +26,11 @@ void TestScene::Init() {
 
 	text.Init();
 
-
-	/*text2.Init();
-	text2.setFont("default");*/
-
 	camera.Initialize();
+
+	/* 必）シーンカメラ設定 */
+	Scene::SetSceneCamera(&camera);
+
 
 	PointLightParam pLightParam;
 	SpotLightParam sLightParam;
@@ -78,9 +79,17 @@ void TestScene::Init() {
 		// ライト配置のロード
 		SceneComponentLoader::GetInstance()->LightLoad();
 
-		// カメラの情報を読み込む
+		loder->BeginGroup("Test");
+
+		loder->Property("player", model->GetWorldTransform());
+
+		loder->EndGroup();
+
+		loder->LoadGroup("Test");
+
+		//// カメラの情報を読み込む
 		camera.SetWorldTransform(loder->GetWorldTransformData("camera"));
-		model->SetWorldTransform(loder->GetWorldTransformData("player"));
+		//model->SetWorldTransform(loder->GetWorldTransformData("player"));
 
 		sprite.SetScreenTransform(loder->GetScreenTransformData("sprite"));
 
@@ -109,14 +118,11 @@ void TestScene::Init() {
 	telopText.Init();
 	telopText.setFont("main");
 
-	//ShadowManager::GetInstance()->Register(model);
+	ShadowManager::GetInstance()->Register(model);
 	//ShadowManager::GetInstance()->Register(fieldModel);
 };
 
 void TestScene::Update(Input* input) {
-
-	// 必ず必要
-	Scene::Update(input);
 
 	model->Update();
 
@@ -173,9 +179,10 @@ void TestScene::Update(Input* input) {
 		// 必ず
 		SceneComponentLoader::GetInstance()->ClearJson();
 
-
 		// ライト配置のセーブ
 		SceneComponentLoader::GetInstance()->LightSave();
+
+		loder->SaveGroup("Test");
 
 		loder->SetWorldTransformData("camera", camera.GetWorldTransform());
 		loder->SetWorldTransformData("player",model->GetWorldTransform());

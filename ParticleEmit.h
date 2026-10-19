@@ -1,5 +1,32 @@
 #pragma once
+
+#include <string>
+
 #include "EasingVec.h"
+
+#include "Vector.h"
+#include "WorldTransform.h"
+
+// ブレンドモード
+enum class BlendMode {
+
+	//!くブレンドなし
+	kBlendModeNone,
+	//!く通常αブレンド。デフォルト。 Src * SrcA+Dest *(1-SrcA)
+	kBlendModeNormal,
+	// !< 加算。Src * SrcA+Dest* 1
+	kBlendModeAdd,
+	// !< 減算。Dest * 1- Src * SrcA
+	kBlendModeSubtract,
+	// !< 乗算。Src*0+Dest* Src
+	kBlendModeMultily,
+	// !< スクリーン。Src *(1-Dest)+Dest * 1
+	kBlendModeScreen,
+
+	// カウント用
+	Count,
+
+};
 
 // 粒子
 struct ParticleEmit {
@@ -26,6 +53,8 @@ struct ParticleEmit {
 	EasingVec ease;						// 減速用 
 	EasingVec colorEase;				// 薄くする用 
 	
+	BlendMode blendType = BlendMode::kBlendModeNone;// ブレンドタイプ
+
 	void init() {
 		ease.Reset();
 		ease.Start(EasingVec::EASE_OutSine, life, speed, 0);
