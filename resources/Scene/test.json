@@ -1,0 +1,28 @@
+{
+    "Hierarchy": {
+        "Models": [
+            {
+                "name": "suzanne",
+                "path": "resources/Models/suzanne.obj",
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "translation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "type": 0
+            }
+        ]
+    }
+}

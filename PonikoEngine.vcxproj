@@ -266,6 +266,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="EffeckseerManager.cpp" />
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="EffectManager.cpp" />
+    <ClCompile Include="EffectSequencer.cpp" />
     <ClCompile Include="ExampleEffect.cpp" />
     <ClCompile Include="externals\imGuizmo\GraphEditor.cpp" />
     <ClCompile Include="externals\imGuizmo\ImGuizmo.cpp" />
@@ -348,6 +349,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Editor.h" />
     <ClInclude Include="Effect.h" />
     <ClInclude Include="EffectManager.h" />
+    <ClInclude Include="EffectSequencer.h" />
     <ClInclude Include="EffekseerManager.h" />
     <ClInclude Include="ExampleEffect.h" />
     <ClInclude Include="externals\imGuizmo\GraphEditor.h" />

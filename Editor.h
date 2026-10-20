@@ -5,6 +5,8 @@
 // これ外部ライブラリ
 #include "ImGuizmo.h"
 
+#include "EffectSequencer.h"
+
 #include "DirectionalLight.h"
 #include "SpotLight.h"
 #include "PointLight.h"
@@ -28,17 +30,6 @@ public:
 	// エンジン内のSceneの描画
 	void Draw();
 
-private:
-
-	// エディターモードか
-	bool isEditorMode_ = false;
-
-	// デバッグ用
-	Camera camera_;
-
-
-	// Hierarchyタブ
-	void HierarchyTab(bool& show);
 
 	// タイプ
 	enum class HierarchyType {
@@ -52,11 +43,35 @@ private:
 
 		HierarchyType type_;
 		std::string name_;
+		std::string path_; // モデルなどのあればパス
 
 		// オブジェクトのアドレスのポインタ
 		Type* object = nullptr;
 
 	};
+
+private:
+
+	// エディターモードか
+	bool isEditorMode_ = false;
+
+	// デバッグ用
+	Camera camera_;
+
+
+	// Hierarchyタブ
+	void HierarchyTab(bool& show);
+
+	// シーンのJsonパスで保存
+	void HierarchyLoad(const std::string jsonPath);
+	void HierarchySave(const std::string jsonPath);
+
+	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
+
+
+	// 今読み込んでるシーンのJsonパス
+	std::string currentSceneJsonPath;
+	std::string currentSceneName_;
 
 	// モデル
 	std::vector<Hierarchy<Model>> hierarchyModels_;
@@ -64,12 +79,21 @@ private:
 	// 選択中モデル
 	Model* selectedModel_ = nullptr;
 
+	// との距離
+	float selectedModelLength_ = 0.0f;
+
+	// との球面座標系の色イロ
+	float selectedSphereTheta_;
+	float selectedSpherePhi_;
 
 	//
 	void LightingManagerTab(bool& show);
 
-	// Editor.h
-	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
+	float camDistance = 8.0f;
+	void EffectEditorTimeLine();
+
+	/* タイムラインの */
+	EffectSequencer effectSequencer_;
 
 	Vector3 ExtractScale(const Matrix4x4& m);
 	Vector3 ExtractRotation(const Matrix4x4& m, const Vector3& scale);

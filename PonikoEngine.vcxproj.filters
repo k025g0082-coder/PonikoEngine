@@ -73,6 +73,12 @@
     <Filter Include="Engine\Source\imGuizmo">
       <UniqueIdentifier>{629a70f3-4ce2-4a37-b160-1a55ca3a0771}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Source\ソース ファイル\Editor">
+      <UniqueIdentifier>{c84c713a-7fb1-4376-911c-775ab310db2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Source\ヘッダー ファイル\Editor">
+      <UniqueIdentifier>{2e0c3c30-5903-4210-88ec-5d70143007ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinApp.cpp">
@@ -199,12 +205,6 @@
     <ClCompile Include="Collision.cpp">
       <Filter>Engine\Source\ソース ファイル\math</Filter>
     </ClCompile>
-    <ClCompile Include="FileDropManager.cpp">
-      <Filter>Engine\Source\ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Editor.cpp">
-      <Filter>Engine\Source\ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="externals\imGuizmo\GraphEditor.cpp">
       <Filter>Engine\Source\imGuizmo</Filter>
     </ClCompile>
@@ -234,6 +234,15 @@
     </ClCompile>
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
       <Filter>Engine\Source\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="FileDropManager.cpp">
+      <Filter>Engine\Source\ソース ファイル\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor.cpp">
+      <Filter>Engine\Source\ソース ファイル\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectSequencer.cpp">
+      <Filter>Engine\Source\ソース ファイル\Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -422,12 +431,6 @@
     <ClInclude Include="Collision.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="FileDropManager.h">
-      <Filter>Engine\Source\ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor.h">
-      <Filter>Engine\Source\ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="externals\imGuizmo\GraphEditor.h">
       <Filter>Engine\Source\imGuizmo</Filter>
     </ClInclude>
@@ -448,6 +451,15 @@
     </ClInclude>
     <ClInclude Include="externals\imgui\imgui_impl_win32.h">
       <Filter>Engine\Source\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="FileDropManager.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectSequencer.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

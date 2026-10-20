@@ -49,6 +49,8 @@ void Input::Update() {
 	{
 		state_ = {};
 	}
+
+	mouseWheel_ = 0;
 };
 
 void Input::Finalize() {

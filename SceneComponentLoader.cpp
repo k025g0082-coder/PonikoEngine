@@ -347,7 +347,61 @@ void SceneComponentLoader::Property(const std::string& name, WorldTransform& val
 	};
 }
 
+void SceneComponentLoader::Property(const std::string& name, std::vector<Editor::Hierarchy<Model>>& value) {
 
+	properties_[currentGroup_][name] = {
+
+		// save
+		[this, &value, name](json& group) {
+
+			// 空でも必ず配列として保存
+			group[name] = json::array();
+
+			for (const auto& hierarchy : value) {
+
+				json item;
+
+				item["type"] = hierarchy.type_;
+				item["name"] = hierarchy.name_;
+				item["path"] = hierarchy.path_;
+
+				// モデルのworldTransform
+				item["transform"] = WorldToJson(hierarchy.object->GetWorldTransform());
+
+				group[name].push_back(item);
+
+			}
+		},
+
+		// load
+		[this, &value, name](const json& group) {
+
+			// なかった場合
+			if (!group.contains(name)) {
+				return;
+			}
+
+			for (const auto& item : group.at(name)) {
+
+				Editor::Hierarchy<Model> hierarchy;
+
+				hierarchy.name_ = item.at("name").get<std::string>();
+				hierarchy.path_ = item.at("path").get<std::string>();
+
+				Model* model = Model::CreateOBJ(hierarchy.path_);
+				
+				// worldTransform読み取り・設定
+				model->SetWorldTransform(JsonToWorld(item.at("transform")));
+
+				hierarchy.object = model;
+
+				// リストに追加
+				value.push_back(std::move(hierarchy));
+
+			}
+		}
+	};
+}
 
 
 

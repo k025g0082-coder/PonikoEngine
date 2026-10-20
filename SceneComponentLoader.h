@@ -13,6 +13,10 @@
 #include "WorldTransform.h"
 #include "ScreenTransform.h"
 
+#include "Editor.h"
+
+#include <vector>
+#include "Model.h"
 #include "Text.h"
 
 using json = nlohmann::json;
@@ -160,6 +164,8 @@ public:
 	// 特殊な型なので、これらはそれぞれオーバーライド
 	void Property(const std::string& name, Vector3& value);
 	void Property(const std::string& name, WorldTransform& value);
+
+	void Property(const std::string& name, std::vector<Editor::Hierarchy<Model>> &value);
 
 
 private:

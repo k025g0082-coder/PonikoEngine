@@ -9,7 +9,9 @@
 
 
 #include "ImGuiManager.h"
+
 #include "LightingManager.h"
+#include "SceneComponentLoader.h"
 
 #include "FileDropManager.h"
 
@@ -23,6 +25,8 @@
 #include "Vector.h"
 #include "Matrix.h"
 
+#include <algorithm>
+
 
 Editor* Editor::GetInstance() {
 	static Editor instance;
@@ -31,7 +35,20 @@ Editor* Editor::GetInstance() {
 
 /* エディター初期化 */
 void Editor::Initialize() {
+
 	camera_.Initialize();
+
+	currentSceneJsonPath = "resources/Scene/test.json";
+	HierarchyLoad(currentSceneJsonPath);
+
+	effectSequencer_.mFrameMin = -100;
+	effectSequencer_.mFrameMax = 1000;
+	effectSequencer_.items_.push_back(EffectSequencer::SequenceItem{ 0, 10, 30 });
+	effectSequencer_.items_.push_back(EffectSequencer::SequenceItem{ 1, 20, 30 });
+	effectSequencer_.items_.push_back(EffectSequencer::SequenceItem{ 3, 12, 60 });
+	effectSequencer_.items_.push_back(EffectSequencer::SequenceItem{ 2, 61, 90 });
+	effectSequencer_.items_.push_back(EffectSequencer::SequenceItem{ 4, 90, 99 });
+
 }
 
 /* エディター更新 */
@@ -39,7 +56,7 @@ void Editor::Update()
 {
 
 	// エディターカメラが有効なときだけ移動・反映する
-	if (isEditorMode_ && Scene::GetSceneCamera() != nullptr) {
+	/*if (isEditorMode_ && Scene::GetSceneCamera() != nullptr) {
 
 		float speed = 0.2f;
 		Vector3 move = { 0.0f, 0.0f, 0.0f };
@@ -59,8 +76,15 @@ void Editor::Update()
 		camera_.Update();
 
 		Scene::GetSceneCamera()->SetCamera(camera_);
-	}
-	
+	}*/
+
+	// 球面座標系？
+	//camera_.SphericalCameraUpdate(
+	//	selectedModel_->GetWorldTransform().translation_,
+	//	camDistance,		  // 距離
+	//	0.3f,                 // 上下角
+	//	1.57f                 // 水平角（約90度）
+	//);
 
 	// モデル更新
 	for (int i = 0; i < hierarchyModels_.size(); i++)
@@ -70,6 +94,7 @@ void Editor::Update()
 	
 
 #ifdef USE_IMGUI
+	
 
 	static bool showHierarchy = true;
 	static bool showLighting = true;
@@ -98,6 +123,7 @@ void Editor::Update()
 		!ImGuizmo::IsOver() &&
 		!ImGuizmo::IsUsing()) {
 
+
 		// モデル選択処理
 		float ndcX = (mouse.x / width) * 2.0f - 1.0f;
 		float ndcY = 1.0f - (mouse.y / height) * 2.0f;
@@ -123,13 +149,51 @@ void Editor::Update()
 
 			// モデルのAABBと判定
 			if (camera_.IntersectRayAABB(ray, aabb, distance)) {
+
 				selectedModel_ = model;
+				
+				// 1) カメラを、選択したモデルのワールド座標、注視点とする
+				// 2) カメラのviewMatrixからワールド座標を摘出する
+				// 3) 選択モデルとカメラの距離を計算（ImViewGizmoの引数に必要）
+				// 4) 距離から球面座標系に必要なthita横回転とphi縦を摘出
+				// 5) 球面座標としてカメラのviewにセット、thitaとｐひもImViewGizmoにあげる
+				
+				Vector3 targetPos = model->GetWorldTransform().translation_;
+
+				// 1) View行列からカメラのワールド行列を復元
+				Matrix4x4 cameraWorld = Inverse(camera_.GetViewMatrix());
+
+				// 2) ワールド座標を取り出す
+				Vector3 camPos = {
+					cameraWorld.m[3][0],
+					cameraWorld.m[3][1],
+					cameraWorld.m[3][2]
+				};
+
+				// 3)距離
+				selectedModelLength_ = Distance(camPos, targetPos);
+				
+				// 4) thetaとphi
+				Vector3 offset = camPos - targetPos;
+				selectedSphereTheta_ = std::asin(offset.y / selectedModelLength_);
+				selectedSpherePhi_ = std::atan2(offset.z, offset.x);
+
+				// 5) view更新！！
+				camera_.SphericalCameraUpdate(
+					targetPos,
+					selectedModelLength_,
+					selectedSphereTheta_,
+					selectedSpherePhi_
+				);
+
 				break;
 			}
 		}
 
 	}
 
+	/* エフェクトタイムライン */
+	EffectEditorTimeLine();
 
 	// ImGuizmoのフレーム開始
 	ImGuizmo::BeginFrame();
@@ -146,46 +210,110 @@ void Editor::Update()
 	ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
 	ImGuizmo::SetRect(0.0f, 0.0f, w, h);
 
+	/* カメラ視点の回転 */
+
+	/* ホイール操作 */
+	if (Input::GetInstance()->GetMouseWheel() != 0) {
+		if (selectedModel_) {
+			
+			selectedModelLength_ += static_cast<float>(Input::GetInstance()->GetMouseWheel()) * 0.01f;
+
+			// 近いの遠いの防止
+			selectedModelLength_ = std::clamp(selectedModelLength_, 1.0f, 50.0f);
+
+			// 1) カメラを、選択したモデルのワールド座標、注視点とする
+			// 2) カメラのviewMatrixからワールド座標を摘出する
+			// 3) 選択モデルとカメラの距離を計算（ImViewGizmoの引数に必要）
+			// 4) 距離から球面座標系に必要なthita横回転とphi縦を摘出
+			// 5) 球面座標としてカメラのviewにセット、thitaとｐひもImViewGizmoにあげる
+
+			Vector3 targetPos = selectedModel_->GetWorldTransform().translation_;
+
+			// 1) View行列からカメラのワールド行列を復元
+			Matrix4x4 cameraWorld = Inverse(camera_.GetViewMatrix());
+
+			// 2) ワールド座標を取り出す
+			Vector3 camPos = {
+				cameraWorld.m[3][0],
+				cameraWorld.m[3][1],
+				cameraWorld.m[3][2]
+			};
+
+			// 4) thetaとphi
+			Vector3 offset = camPos - targetPos;
+			selectedSphereTheta_ = std::asin(offset.y / selectedModelLength_);
+			selectedSpherePhi_ = std::atan2(offset.z, offset.x);
+
+			// 5) view更新！！
+			camera_.SphericalCameraUpdate(
+				targetPos,
+				selectedModelLength_,
+				selectedSphereTheta_,
+				selectedSpherePhi_
+			);
 
 
-
-		// 選択中のモデルがあるときだけ操作
-	if (selectedModel_) {
-
-		// 転置なしでそのまま渡す
-		Matrix4x4 viewMat = camera_.GetViewMatrix();
-		Matrix4x4 projMat = camera_.GetProjectionMatrix();
-		Matrix4x4 worldMat = selectedModel_->GetWorldTransform().matWorld_;
-
-		bool isManipulated = ImGuizmo::Manipulate(
-			&viewMat.m[0][0],
-			&projMat.m[0][0],
-			operation_,
-			ImGuizmo::WORLD,
-			&worldMat.m[0][0]
-		);
-
-		if (isManipulated || ImGuizmo::IsUsing()) {
-
-			switch (operation_) {
-			case ImGuizmo::TRANSLATE:
-				selectedModel_->GetWorldTransform().translation_.x = worldMat.m[3][0];
-				selectedModel_->GetWorldTransform().translation_.y = worldMat.m[3][1];
-				selectedModel_->GetWorldTransform().translation_.z = worldMat.m[3][2];
-				break;
-			case ImGuizmo::ROTATE:
-				selectedModel_->GetWorldTransform().rotation_ = ExtractRotation(worldMat, selectedModel_->GetWorldTransform().scale_);
-				break;
-			case ImGuizmo::SCALE:
-				selectedModel_->GetWorldTransform().scale_ = ExtractScale(worldMat);
-				break;
-
-			}
-
-
-			selectedModel_->GetWorldTransform().UpdateMatrix();
 		}
 	}
+
+	// 現在のカメラView行列を取得
+	Matrix4x4 viewMatrix = camera_.GetViewMatrix();
+
+	ImGuizmo::ViewManipulate(
+		&viewMatrix.m[0][0],
+		selectedModelLength_,
+		ImVec2(ImGui::GetIO().DisplaySize.x - 256.0f, 0.0f),
+		ImVec2(256.0f, 256.0f),
+		0x10101010
+	);
+
+	// 変更されたView行列をそのまま反映
+	camera_.SetViewMatrix(viewMatrix);
+
+	
+
+
+	if (isEditorMode_) {
+
+		// 選択中のモデルがあるときだけ操作
+		if (selectedModel_) {
+
+			// 転置なしでそのまま渡す
+			Matrix4x4 viewMat = camera_.GetViewMatrix();
+			Matrix4x4 projMat = camera_.GetProjectionMatrix();
+			Matrix4x4 worldMat = selectedModel_->GetWorldTransform().matWorld_;
+
+			bool isManipulated = ImGuizmo::Manipulate(
+				&viewMat.m[0][0],
+				&projMat.m[0][0],
+				operation_,
+				ImGuizmo::WORLD,
+				&worldMat.m[0][0]
+			);
+
+			if (isManipulated || ImGuizmo::IsUsing()) {
+
+				switch (operation_) {
+				case ImGuizmo::TRANSLATE:
+					selectedModel_->GetWorldTransform().translation_.x = worldMat.m[3][0];
+					selectedModel_->GetWorldTransform().translation_.y = worldMat.m[3][1];
+					selectedModel_->GetWorldTransform().translation_.z = worldMat.m[3][2];
+					break;
+				case ImGuizmo::ROTATE:
+					selectedModel_->GetWorldTransform().rotation_ = ExtractRotation(worldMat, selectedModel_->GetWorldTransform().scale_);
+					break;
+				case ImGuizmo::SCALE:
+					selectedModel_->GetWorldTransform().scale_ = ExtractScale(worldMat);
+					break;
+
+				}
+
+
+				selectedModel_->GetWorldTransform().UpdateMatrix();
+			}
+		}
+	}
+
 	/* メニュー表示 */
 	if (ImGui::BeginMainMenuBar()) {
 	
@@ -201,7 +329,12 @@ void Editor::Update()
 
 		if (ImGui::Checkbox("Editor ", &isEditorMode_)) {
 
-		//	 ON/OFF切り替え
+			// 押された瞬間,メインカメラからviewをコピー
+			if (isEditorMode_) {
+				camera_.SetCamera(*Scene::GetSceneCamera());
+			}
+
+			//	 ON/OFF切り替え
 			Scene::GetSceneCamera()->SetEditorMode(isEditorMode_);
 
 		}
@@ -224,6 +357,10 @@ void Editor::Update()
 			if (ImGui::Button("Scale")) {
 				operation_ = ImGuizmo::SCALE;
 			}
+
+			ImGui::SameLine();
+			ImGui::Text("hoi-ru %d", Input::GetInstance()->GetMouseWheel());
+			ImGui::Text("targetleng %f", selectedModelLength_);
 		}
 
 		ImGui::EndMainMenuBar();
@@ -241,19 +378,32 @@ void Editor::Update()
 
 	//ImGui::End();
 #endif
+
+	// もしデバッグモードであれば、デバッグカメラのviewをメインカメラにコピー
+	if (isEditorMode_ && Scene::GetSceneCamera() != nullptr) {
+		Scene::GetSceneCamera()->SetCamera(camera_);
+	}
 }
 
 // エディター描画
 void Editor::Draw() {
 
-// シーンカメラが設定されてれば
+	// シーンカメラが設定されてれば
 	if (Scene::GetSceneCamera() != nullptr) {
-			
+
+
 		// モデル描画
 		for (int i = 0; i < hierarchyModels_.size(); i++)
 		{
-			hierarchyModels_.at(i).object->Draw(camera_);
+			if (isEditorMode_) {
+				hierarchyModels_.at(i).object->Draw(camera_);
+			}
+			// エディターモードじゃなければ、シーンのカメラで描画する
+			else {
+				hierarchyModels_.at(i).object->Draw(*Scene::GetSceneCamera());
+			}
 		}
+
 	}
 
 	if (isEditorMode_) {
@@ -300,6 +450,7 @@ void Editor::HierarchyTab(bool& show) {
 			Hierarchy<Model> h;
 
 			h.type_ = HierarchyType::kModel; // タイプ
+			h.path_ = relativePath;
 			h.name_ = FileDropManager::GetFileNameWithoutExtension(path);// 表示名 拡張子を抜いたのを設定する
 			h.object = model;				 // Model*
 
@@ -310,15 +461,45 @@ void Editor::HierarchyTab(bool& show) {
 	}
 
 #ifdef USE_IMGUI
+
 	if (ImGui::Begin("Hierarchy", &show)) {
 
-		ImGui::Text("Models:");
+		/* 今開いてるシーン名 */
+		ImGui::Text("SceneName: %s",currentSceneName_);
 
-		// モデル名
+		// ロードボタン
+		if (ImGui::Button("Load")) {
+			HierarchySave(currentSceneJsonPath);
+		}
+
+		// セーブボタン
+		if (ImGui::Button("Save")) {
+			HierarchySave(currentSceneJsonPath);
+		}
+
+		// === モデルたち
+		ImGui::SeparatorText("Models");
+
 		for (int i = 0; i < hierarchyModels_.size(); i++)
 		{
-			ImGui::BulletText("%s", hierarchyModels_.at(i).name_.c_str());
+			if (ImGui::TreeNode(hierarchyModels_.at(i).name_.c_str())) {
+
+				// ここに何か書く
+
+				ImGui::TreePop();
+			}
+
+			ImGui::SameLine(ImGui::GetWindowWidth() - 40.0f);
+
+			// 削除ボタンを右寄りに配置（↑のおかげ
+			if (ImGui::Button("delete")) {
+				hierarchyModels_.erase(hierarchyModels_.begin() + i);
+				break;
+			}
 		}
+
+		// === ライトたち
+		ImGui::SeparatorText("Lights");
 
 	}
 
@@ -511,6 +692,81 @@ void Editor::LightingManagerTab(bool& show) {
 #endif
 }
 
+void Editor::HierarchyLoad(const std::string jsonPath) {
+	// 読込み
+	if (SceneComponentLoader::GetInstance()->Load(jsonPath)) {
+
+		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+
+		// ライト配置のロード
+		SceneComponentLoader::GetInstance()->LightLoad();
+
+		loder->BeginGroup("Hierarchy");
+
+		// ヒエラルキのモデルリスト 登録
+		loder->Property("Models",hierarchyModels_);
+
+		loder->EndGroup();
+
+		loder->LoadGroup("Hierarchy");
+	}
+}
+
+void Editor::HierarchySave(const std::string jsonPath) {
+
+	// ※注　ポインタ
+	SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+
+	json& data = loder->GetJson();
+
+	// 必ず
+	SceneComponentLoader::GetInstance()->ClearJson();
+
+	// ライト配置のセーブ
+	SceneComponentLoader::GetInstance()->LightSave();
+
+	loder->SaveGroup("Hierarchy");
+
+	SceneComponentLoader::GetInstance()->Save(jsonPath);
+}
+
+void Editor::EffectEditorTimeLine()
+{
+
+#ifdef USE_IMGUI
+
+	// グリッド？ヤバ
+	//ImGuizmo::DrawGrid(cameraView, cameraProjection, identityMatrix, 100.f);
+
+	ImGui::Begin("EffectTimeline");
+
+	// let's create the sequencer
+	static int selectedEntry = -1;
+	static int firstFrame = 0;
+	static bool expanded = true;
+	static int currentFrame = 100;
+
+	ImGui::PushItemWidth(130);
+	ImGui::InputInt("Frame Min", &effectSequencer_.mFrameMin);
+	ImGui::SameLine();
+	ImGui::InputInt("Frame ", &currentFrame);
+	ImGui::SameLine();
+	ImGui::InputInt("Frame Max", &effectSequencer_.mFrameMax);
+	ImGui::PopItemWidth();
+	Sequencer(&effectSequencer_, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
+	
+	// add a UI to edit that particular item
+	if (selectedEntry != -1)
+	{
+		const EffectSequencer::SequenceItem& item = effectSequencer_.items_[selectedEntry];
+		ImGui::Text("I am a %s, please edit me", effectSequencer_.GetSequencerItemTypeNames(item.mType));
+		// switch (type) ....
+	}
+
+	ImGui::End();
+
+#endif
+}
 
 Vector3 Editor::ExtractScale(const Matrix4x4& m)
 {

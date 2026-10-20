@@ -7,6 +7,9 @@ void Camera::Initialize() {
 	worldTransform_.translation_.z = startZ;
 	worldTransform_.Initialize();
 
+	// 計算
+	UpdateMatrix();
+
 	// 一旦これ固定で
 	projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(WinApp::GetInstance()->GetClientWidth()) / float(WinApp::GetInstance()->GetClientHeight()), 0.1f, farZ);
 };

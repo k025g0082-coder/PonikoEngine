@@ -4,7 +4,7 @@
             "num": 4,
             "param": {
                 "color": [
-                    1.0,
+                    0.0,
                     1.0,
                     1.0,
                     1.0
@@ -15,7 +15,7 @@
                 "life": 20,
                 "scaleAmpMax": 1.0,
                 "scaleAmpMin": 1.0,
-                "speed": 1.0,
+                "speed": 0.4000000059604645,
                 "speedAmp": 0.0
             },
             "particleTag": "plane",
@@ -41,7 +41,7 @@
                 "life": 20,
                 "scaleAmpMax": 1.0,
                 "scaleAmpMin": 1.0,
-                "speed": 1.0,
+                "speed": 0.15000000596046448,
                 "speedAmp": 0.0
             },
             "particleTag": "plane",
