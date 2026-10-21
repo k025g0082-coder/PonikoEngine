@@ -244,6 +244,12 @@
     <ClCompile Include="EffectSequencer.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor</Filter>
     </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Engine\Source\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneViewport.cpp">
+      <Filter>Engine\Source\ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -460,6 +466,12 @@
     </ClInclude>
     <ClInclude Include="EffectSequencer.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Engine\Source\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneViewport.h">
+      <Filter>Engine\Source\ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

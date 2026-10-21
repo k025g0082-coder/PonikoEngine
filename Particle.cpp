@@ -548,7 +548,7 @@ void Particle::Draw()
         );
     }
     */
-    }
+}
 
 // 生成
 void Particle::MakeNewParticle(std::string tag, std::string textureTag, Vector3 pos, int num, ParticleParam param) {

@@ -55,6 +55,11 @@ public:
 	// パラメータデバッグ用
 	void ImGuiView();
 
+
+	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandleOffscreen() {
+		return rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart();
+	};
+
 private:
 
 	bool firstFrame_ = true;

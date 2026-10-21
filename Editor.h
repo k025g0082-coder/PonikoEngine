@@ -13,6 +13,8 @@
 
 #include "Camera.h"
 
+#include "SceneViewport.h"
+
 #include <string>
 #include <vector>
 
@@ -79,6 +81,7 @@ private:
 	// 選択中モデル
 	Model* selectedModel_ = nullptr;
 
+
 	// との距離
 	float selectedModelLength_ = 0.0f;
 
@@ -86,11 +89,22 @@ private:
 	float selectedSphereTheta_;
 	float selectedSpherePhi_;
 
-	//
+	// 選択中のモデルのView更新
+	void SelectModelUpdateView();
+
+	// 非選択時のカメラ移動
+	void FreeMoveCamera();
+
+
+	//　ライティング用
 	void LightingManagerTab(bool& show);
 
 	float camDistance = 8.0f;
 	void EffectEditorTimeLine();
+
+	/* エフェクト専用のScene部屋 */
+	SceneViewport effectViewport_;
+
 
 	/* タイムラインの */
 	EffectSequencer effectSequencer_;

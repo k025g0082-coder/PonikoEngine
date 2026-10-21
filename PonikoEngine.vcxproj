@@ -302,8 +302,10 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     </ClCompile>
     <ClCompile Include="PonikoEngine.cpp" />
     <ClCompile Include="PostEffectManager.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneComponentLoader.cpp" />
+    <ClCompile Include="SceneViewport.cpp" />
     <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="SpotLight.cpp">
@@ -379,9 +381,11 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="PonikoEngine.h" />
     <ClInclude Include="PostEffectManager.h" />
+    <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneComponentLoader.h" />
+    <ClInclude Include="SceneViewport.h" />
     <ClInclude Include="ScreenTransform.h" />
     <ClInclude Include="ShadowManager.h" />
     <ClInclude Include="SoundManager.h" />

@@ -38,6 +38,10 @@ void Editor::Initialize() {
 
 	camera_.Initialize();
 
+	// エフェクト専用部屋の初期化
+	effectViewport_.Initialize(640,360);
+
+
 	currentSceneJsonPath = "resources/Scene/test.json";
 	HierarchyLoad(currentSceneJsonPath);
 
@@ -55,37 +59,6 @@ void Editor::Initialize() {
 void Editor::Update()
 {
 
-	// エディターカメラが有効なときだけ移動・反映する
-	/*if (isEditorMode_ && Scene::GetSceneCamera() != nullptr) {
-
-		float speed = 0.2f;
-		Vector3 move = { 0.0f, 0.0f, 0.0f };
-
-		if (Input::GetInstance()->PushKey(DIK_W)) move.y += speed;
-		if (Input::GetInstance()->PushKey(DIK_S)) move.y -= speed;
-		if (Input::GetInstance()->PushKey(DIK_A)) move.x -= speed;
-		if (Input::GetInstance()->PushKey(DIK_D)) move.x += speed;
-		if (Input::GetInstance()->PushKey(DIK_Q)) move.z -= speed;
-		if (Input::GetInstance()->PushKey(DIK_E)) move.z += speed;
-
-		auto& transform = camera_.GetWorldTransform();
-		transform.translation_.x += move.x;
-		transform.translation_.y += move.y;
-		transform.translation_.z += move.z;
-
-		camera_.Update();
-
-		Scene::GetSceneCamera()->SetCamera(camera_);
-	}*/
-
-	// 球面座標系？
-	//camera_.SphericalCameraUpdate(
-	//	selectedModel_->GetWorldTransform().translation_,
-	//	camDistance,		  // 距離
-	//	0.3f,                 // 上下角
-	//	1.57f                 // 水平角（約90度）
-	//);
-
 	// モデル更新
 	for (int i = 0; i < hierarchyModels_.size(); i++)
 	{
@@ -94,10 +67,11 @@ void Editor::Update()
 	
 
 #ifdef USE_IMGUI
-	
 
-	static bool showHierarchy = true;
-	static bool showLighting = true;
+	static bool showProperty = false;
+	static bool showHierarchy = false;
+	static bool showLighting = false;
+	static bool showEffectTimeline = false;
 
 
 	ImVec2 scenePos = ImGui::GetCursorScreenPos();
@@ -142,49 +116,23 @@ void Editor::Update()
 
 			Model* model = hierarchyModels_[i].object;
 
-			// 大きさとか作ってないので ひとまず１，１で
+			// だいたいの中心　３ｘ３で
+			float size = 1.5f;
+
 			AABB aabb;
-			aabb.min = Vector3{ -0.5f, -0.5f, -0.5f } + model->GetWorldTransform().translation_;
-			aabb.max = Vector3{ 0.5f,  0.5f,  0.5f } + model->GetWorldTransform().translation_;
+			aabb.min = Vector3{ -size, -size, -size } + model->GetWorldTransform().translation_;
+			aabb.max = Vector3{ size,  size,  size } + model->GetWorldTransform().translation_;
 
 			// モデルのAABBと判定
 			if (camera_.IntersectRayAABB(ray, aabb, distance)) {
 
 				selectedModel_ = model;
-				
-				// 1) カメラを、選択したモデルのワールド座標、注視点とする
-				// 2) カメラのviewMatrixからワールド座標を摘出する
-				// 3) 選択モデルとカメラの距離を計算（ImViewGizmoの引数に必要）
-				// 4) 距離から球面座標系に必要なthita横回転とphi縦を摘出
-				// 5) 球面座標としてカメラのviewにセット、thitaとｐひもImViewGizmoにあげる
-				
-				Vector3 targetPos = model->GetWorldTransform().translation_;
 
-				// 1) View行列からカメラのワールド行列を復元
-				Matrix4x4 cameraWorld = Inverse(camera_.GetViewMatrix());
+				// ビューポートにモデルを追加
+				effectViewport_.AddModel(selectedModel_);
 
-				// 2) ワールド座標を取り出す
-				Vector3 camPos = {
-					cameraWorld.m[3][0],
-					cameraWorld.m[3][1],
-					cameraWorld.m[3][2]
-				};
-
-				// 3)距離
-				selectedModelLength_ = Distance(camPos, targetPos);
-				
-				// 4) thetaとphi
-				Vector3 offset = camPos - targetPos;
-				selectedSphereTheta_ = std::asin(offset.y / selectedModelLength_);
-				selectedSpherePhi_ = std::atan2(offset.z, offset.x);
-
-				// 5) view更新！！
-				camera_.SphericalCameraUpdate(
-					targetPos,
-					selectedModelLength_,
-					selectedSphereTheta_,
-					selectedSpherePhi_
-				);
+				// 選択中のモデルのview更新
+				SelectModelUpdateView();
 
 				break;
 			}
@@ -192,8 +140,8 @@ void Editor::Update()
 
 	}
 
-	/* エフェクトタイムライン */
-	EffectEditorTimeLine();
+	/* エフェクトビューポートの更新 */
+	effectViewport_.Update();
 
 	// ImGuizmoのフレーム開始
 	ImGuizmo::BeginFrame();
@@ -216,16 +164,13 @@ void Editor::Update()
 	if (Input::GetInstance()->GetMouseWheel() != 0) {
 		if (selectedModel_) {
 			
-			selectedModelLength_ += static_cast<float>(Input::GetInstance()->GetMouseWheel()) * 0.01f;
+			selectedModelLength_ += static_cast<float>(Input::GetInstance()->GetMouseWheel()) * 0.075f;
 
 			// 近いの遠いの防止
-			selectedModelLength_ = std::clamp(selectedModelLength_, 1.0f, 50.0f);
-
-			// 1) カメラを、選択したモデルのワールド座標、注視点とする
-			// 2) カメラのviewMatrixからワールド座標を摘出する
-			// 3) 選択モデルとカメラの距離を計算（ImViewGizmoの引数に必要）
-			// 4) 距離から球面座標系に必要なthita横回転とphi縦を摘出
-			// 5) 球面座標としてカメラのviewにセット、thitaとｐひもImViewGizmoにあげる
+			selectedModelLength_ = std::clamp(selectedModelLength_, 10.0f, 100.0f);
+			
+			//  また例の処理
+			//
 
 			Vector3 targetPos = selectedModel_->GetWorldTransform().translation_;
 
@@ -256,21 +201,39 @@ void Editor::Update()
 		}
 	}
 
-	// 現在のカメラView行列を取得
-	Matrix4x4 viewMatrix = camera_.GetViewMatrix();
+	/* ギズモによるカメラ回転 */
+	if (selectedModel_) {
 
-	ImGuizmo::ViewManipulate(
-		&viewMatrix.m[0][0],
-		selectedModelLength_,
-		ImVec2(ImGui::GetIO().DisplaySize.x - 256.0f, 0.0f),
-		ImVec2(256.0f, 256.0f),
-		0x10101010
-	);
+		// 現在のカメラView行列を取得
+		Matrix4x4 viewMatrix = camera_.GetViewMatrix();
 
-	// 変更されたView行列をそのまま反映
-	camera_.SetViewMatrix(viewMatrix);
+		ImGuizmo::ViewManipulate(
+			&viewMatrix.m[0][0],
+			selectedModelLength_,
+			ImVec2(ImGui::GetIO().DisplaySize.x - 256.0f, 0.0f),
+			ImVec2(256.0f, 256.0f),
+			0x10101010
+		);
 
-	
+		// 変更されたView行列をそのまま反映
+		camera_.SetViewMatrix(viewMatrix);
+	}
+	else {
+
+		/* 非選択時は固定値８．０ｆ */
+		Matrix4x4 viewMatrix = camera_.GetViewMatrix();
+
+		ImGuizmo::ViewManipulate(
+			&viewMatrix.m[0][0],
+			8.0f,
+			ImVec2(ImGui::GetIO().DisplaySize.x - 256.0f, 0.0f),
+			ImVec2(256.0f, 256.0f),
+			0x10101010
+		);
+
+		// 変更されたView行列をそのまま反映
+		camera_.SetViewMatrix(viewMatrix);
+	}
 
 
 	if (isEditorMode_) {
@@ -312,6 +275,11 @@ void Editor::Update()
 				selectedModel_->GetWorldTransform().UpdateMatrix();
 			}
 		}
+		else {
+
+			// 非選択時はキーで移動
+			FreeMoveCamera();
+		}
 	}
 
 	/* メニュー表示 */
@@ -319,7 +287,9 @@ void Editor::Update()
 	
 		if (ImGui::BeginMenu("Window")) {
 
+			ImGui::MenuItem("Property", nullptr, &showProperty);
 			ImGui::MenuItem("Hierarchy", nullptr, &showHierarchy);
+			ImGui::MenuItem("EffectTimeline", nullptr, &showEffectTimeline);
 			ImGui::MenuItem("LightingManager", nullptr, &showLighting);
 			ImGui::EndMenu();
 		}
@@ -357,18 +327,51 @@ void Editor::Update()
 			if (ImGui::Button("Scale")) {
 				operation_ = ImGuizmo::SCALE;
 			}
-
-			ImGui::SameLine();
-			ImGui::Text("hoi-ru %d", Input::GetInstance()->GetMouseWheel());
-			ImGui::Text("targetleng %f", selectedModelLength_);
 		}
 
 		ImGui::EndMainMenuBar();
 	}
 
+	// プロパティー
+	if (showProperty) {
+
+		/* 色 */
+		ImGui::PushStyleColor(
+			ImGuiCol_WindowBg,
+			ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
+		);
+
+		ImGui::Begin("Property");
+
+			ImGui::SeparatorText("Properthy");
+
+			/* カメラから位置と回転を入手 */
+			Vector3 cameraPosition;
+			cameraPosition.x = camera_.GetViewMatrix().m[3][0];
+			cameraPosition.y = camera_.GetViewMatrix().m[3][1];
+			cameraPosition.z = camera_.GetViewMatrix().m[3][2];
+
+			Vector3 cameraRotation = ExtractRotation(camera_.GetViewMatrix(), { 1.0f,1.0f,1.0f });
+			ImGui::Text("Camera Transrate x:%3.2f y:%3.2f z:%3.2f ", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+			ImGui::Text("Camera Rotation x:%3.2f y:%3.2f z:%3.2f ", cameraRotation.x, cameraRotation.y, cameraRotation.z);
+			ImGui::Separator();
+			ImGui::Text("hoi-ru %d", Input::GetInstance()->GetMouseWheel());
+			ImGui::Text("targetleng %f", selectedModelLength_);
+
+		ImGui::End();
+
+		// 色の
+		ImGui::PopStyleColor();
+	}
+
 	// ヒエラルキーパネル
 	if (showHierarchy) {
 		HierarchyTab(showHierarchy);
+	}
+
+	/* エフェクトタイムライン */
+	if (showEffectTimeline) {
+		EffectEditorTimeLine();
 	}
 
 	// ライティングパネル
@@ -388,6 +391,10 @@ void Editor::Update()
 // エディター描画
 void Editor::Draw() {
 
+	/* エフェクトビューポートの描画！！！！ */
+	effectViewport_.Draw();
+
+
 	// シーンカメラが設定されてれば
 	if (Scene::GetSceneCamera() != nullptr) {
 
@@ -406,19 +413,23 @@ void Editor::Draw() {
 
 	}
 
-	if (isEditorMode_) {
 
-		if (selectedModel_) {
 
-			AABB aabb;
-			aabb.min = Vector3{ -0.5f, -0.5f, -0.5f } + selectedModel_->GetWorldTransform().translation_;
-			aabb.max = Vector3{ 0.5f,  0.5f,  0.5f } + selectedModel_->GetWorldTransform().translation_;
 
-			// 四角描画
-			DebugLine::DrawAABB(aabb, { 1.0f,0,0,1.0f });
 
-		}
-	}
+	//if (isEditorMode_) {
+
+	//	if (selectedModel_) {
+
+	//		AABB aabb;
+	//		aabb.min = Vector3{ -0.5f, -0.5f, -0.5f } + selectedModel_->GetWorldTransform().translation_;
+	//		aabb.max = Vector3{ 0.5f,  0.5f,  0.5f } + selectedModel_->GetWorldTransform().translation_;
+
+	//		// 四角描画
+	//		DebugLine::DrawAABB(aabb, { 1.0f,0,0,1.0f });
+
+	//	}
+	//}
 
 
 }
@@ -462,15 +473,23 @@ void Editor::HierarchyTab(bool& show) {
 
 #ifdef USE_IMGUI
 
+	/* 色 */
+	ImGui::PushStyleColor(
+		ImGuiCol_WindowBg,
+		ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
+	);
+
 	if (ImGui::Begin("Hierarchy", &show)) {
 
 		/* 今開いてるシーン名 */
-		ImGui::Text("SceneName: %s",currentSceneName_);
+		ImGui::Text("SceneName: %s",currentSceneName_.c_str());
 
 		// ロードボタン
 		if (ImGui::Button("Load")) {
 			HierarchySave(currentSceneJsonPath);
 		}
+
+		ImGui::SameLine();
 
 		// セーブボタン
 		if (ImGui::Button("Save")) {
@@ -489,13 +508,14 @@ void Editor::HierarchyTab(bool& show) {
 				ImGui::TreePop();
 			}
 
-			ImGui::SameLine(ImGui::GetWindowWidth() - 40.0f);
+			ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
 
 			// 削除ボタンを右寄りに配置（↑のおかげ
 			if (ImGui::Button("delete")) {
 				hierarchyModels_.erase(hierarchyModels_.begin() + i);
 				break;
 			}
+			
 		}
 
 		// === ライトたち
@@ -504,11 +524,101 @@ void Editor::HierarchyTab(bool& show) {
 	}
 
 	ImGui::End();
+
+	// 色の
+	ImGui::PopStyleColor();
 #endif
 }
+
+void Editor::SelectModelUpdateView()
+{
+
+	if (selectedModel_ == nullptr){ 
+		return;
+	}
+
+	// 1) カメラを、選択したモデルのワールド座標、注視点とする
+	// 2) カメラのviewMatrixからワールド座標を摘出する
+	// 3) 選択モデルとカメラの距離を計算（ImViewGizmoの引数に必要）
+	// 4) 距離から球面座標系に必要なthita横回転とphi縦を摘出
+	// 5) 球面座標としてカメラのviewにセット、thitaとｐひもImViewGizmoにあげる
+
+	Vector3 targetPos = selectedModel_->GetWorldTransform().translation_;
+
+	// 1) View行列からカメラのワールド行列を復元
+	Matrix4x4 cameraWorld = Inverse(camera_.GetViewMatrix());
+
+	// 2) ワールド座標を取り出す
+	Vector3 camPos = {
+		cameraWorld.m[3][0],
+		cameraWorld.m[3][1],
+		cameraWorld.m[3][2]
+	};
+
+	// 3)距離
+	selectedModelLength_ = Distance(camPos, targetPos);
+
+	// 4) thetaとphi
+	Vector3 offset = camPos - targetPos;
+	selectedSphereTheta_ = std::asin(offset.y / selectedModelLength_);
+	selectedSpherePhi_ = std::atan2(offset.z, offset.x);
+
+	// 5) view更新！！
+	camera_.SphericalCameraUpdate(
+		targetPos,
+		selectedModelLength_,
+		selectedSphereTheta_,
+		selectedSpherePhi_
+	);
+}
+
+void Editor::FreeMoveCamera()
+{
+	/* 移動 */
+	Vector3 move{ 0,0,0 };
+	float speed = 0.2f;
+
+	if (Input::GetInstance()->PushKey(DIK_W)) {
+		move.z += speed;
+	}
+	if (Input::GetInstance()->PushKey(DIK_S)) {
+		move.z += -speed;
+	}
+	if (Input::GetInstance()->PushKey(DIK_D)) {
+		move.x += speed;
+	}
+	if (Input::GetInstance()->PushKey(DIK_A)) {
+		move.x += -speed;
+	}
+	if (Input::GetInstance()->PushKey(DIK_E)) {
+		move.y += speed;
+	}
+	if (Input::GetInstance()->PushKey(DIK_Q)) {
+		move.y -= speed;
+	}
+
+	// View行列からカメラのワールド行列を取得
+	Matrix4x4 cameraWorld = Inverse(camera_.GetViewMatrix());
+
+	// カメラの位置を増減
+	cameraWorld.m[3][0] += move.x;
+	cameraWorld.m[3][1] += move.y;
+	cameraWorld.m[3][2] += move.z;
+
+	// ワールド行列からView行列に戻す
+	camera_.SetViewMatrix(Inverse(cameraWorld));
+
+}
+
 void Editor::LightingManagerTab(bool& show) {
 
 #ifdef USE_IMGUI
+
+	/* 色 */
+	ImGui::PushStyleColor(
+		ImGuiCol_WindowBg,
+		ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
+	);
 
 	ImGui::Begin("Lighting-Manager", &show);
 
@@ -689,6 +799,8 @@ void Editor::LightingManagerTab(bool& show) {
 
 
 	ImGui::End();
+
+	ImGui::PopStyleColor();
 #endif
 }
 
@@ -738,7 +850,19 @@ void Editor::EffectEditorTimeLine()
 	// グリッド？ヤバ
 	//ImGuizmo::DrawGrid(cameraView, cameraProjection, identityMatrix, 100.f);
 
-	ImGui::Begin("EffectTimeline");
+
+	/* 色 */
+	ImGui::PushStyleColor(
+		ImGuiCol_WindowBg,
+		ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
+	);
+
+	ImGui::Begin("EffectView");
+
+	ImGui::Image(
+		(ImTextureID)effectViewport_.GetRenderTarget()->GetSRVHandleGPU().ptr,
+		ImVec2(640.0f, 360.0f)
+	);
 
 	// let's create the sequencer
 	static int selectedEntry = -1;
@@ -765,6 +889,8 @@ void Editor::EffectEditorTimeLine()
 
 	ImGui::End();
 
+	// iro
+	ImGui::PopStyleColor();
 #endif
 }
 
