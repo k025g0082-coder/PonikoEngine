@@ -278,6 +278,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="externals\imgui\misc\cpp\imgui_stdlib.cpp" />
     <ClCompile Include="Fade.cpp" />
     <ClCompile Include="FileDropManager.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -365,6 +366,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="externals\imgui\imstb_rectpack.h" />
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
+    <ClInclude Include="externals\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="Fade.h" />
     <ClInclude Include="FileDropManager.h" />
     <ClInclude Include="Game.h" />

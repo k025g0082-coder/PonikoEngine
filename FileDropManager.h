@@ -31,6 +31,9 @@ public:
 	// ファイルの拡張子抜いたのを返す
 	static std::string GetFileNameWithoutExtension(std::wstring path);
 
+	// wstring <-> string 変換
+	static std::string ToUTF8(const std::wstring& wstr);
+	static std::wstring ToWide(const std::string& str);
 private:
 
 	// 対応表
@@ -40,7 +43,5 @@ private:
 	static std::vector<std::wstring> droppedFilesList_[static_cast<size_t>(FileType::kTypeCount)];
 
 
-	// wstring -> string 変換
-	static std::string ToUTF8(const std::wstring& wstr);
 };
 

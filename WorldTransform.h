@@ -6,7 +6,7 @@
 #include "ImGuiManager.h"
 
 // 3D用
-struct WorldTransform : public Transform {
+struct WorldTransform : public BaseTransform {
 
 	void Initialize() {
 

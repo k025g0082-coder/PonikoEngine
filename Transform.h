@@ -18,7 +18,7 @@ struct TransformationMatrix {
 
 };
 
-struct Transform {
+struct BaseTransform {
 
 	Vector3 scale_ = { 1.0f,1.0f,1.0f };
 	Vector3 rotation_ = { 0.0f,0.0f,0.0f };
@@ -32,7 +32,7 @@ struct Transform {
 
 
 	// 親子の親の方のアドレス
-	Transform* parent_ = nullptr;
+	BaseTransform* parent_ = nullptr;
 
 	const Microsoft::WRL::ComPtr<ID3D12Resource>& GetWvpResource() const { return wvpResource_; }
 

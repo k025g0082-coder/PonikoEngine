@@ -149,6 +149,7 @@ public:
 	template<typename T>
 	void Property(const std::string& name, T& value) {
 
+		/*  　　　現在のグループ名　指定のタグ名　 */
 		properties_[currentGroup_][name] = {
 			[&value, name](json& group) {
 				group[name] = value;
@@ -165,8 +166,12 @@ public:
 	void Property(const std::string& name, Vector3& value);
 	void Property(const std::string& name, WorldTransform& value);
 
-	void Property(const std::string& name, std::vector<Editor::Hierarchy<Model>> &value);
 
+	// モデルの登録
+	void Property(const std::string& name, std::vector<Editor::Hierarchy< Model >> &value);
+
+	//* モデルのIDやパスの登録
+	void Property(const std::string& name, std::vector< Editor::ModelResource >& value);
 
 private:
 
@@ -187,15 +192,25 @@ private:
 	json TextDatasToJson(const TextDatas& data);
 
 
+	/* ラムダ式。 */
+
+	/*
+	
+		properties_[現在のグループ名][指定のタグ名]　で登録されたProperty構造体内のラムダ式の関数を管理している
+
+		要は楽になる便利な仕組みってこと 2026.10.21感想
+
+	*/
+
 	struct PropertyData {
+
 		// JSONに値を書き込む処理を保存
 		std::function<void(json&)> save;
 
 		// JSONから値を読み込む処理を保存
 		std::function<void(const json&)> load;
-	};
 
-	std::string currentGroup_;
+	};
 
 	// タグー＞登録されてるタグのラムダ式の関数　というマップ
 	std::unordered_map<
@@ -203,6 +218,7 @@ private:
 		std::unordered_map<std::string, PropertyData>
 	> properties_;
 
+	std::string currentGroup_;
 	
 };
 

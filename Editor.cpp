@@ -9,6 +9,7 @@
 
 
 #include "ImGuiManager.h"
+#include <misc/cpp/imgui_stdlib.h>
 
 #include "LightingManager.h"
 #include "SceneComponentLoader.h"
@@ -42,7 +43,8 @@ void Editor::Initialize() {
 	effectViewport_.Initialize(640,360);
 
 
-	currentSceneJsonPath = "resources/Scene/test.json";
+	currentSceneJsonPath = "resources/Scene/example.json";
+
 	HierarchyLoad(currentSceneJsonPath);
 
 	effectSequencer_.mFrameMin = -100;
@@ -60,9 +62,20 @@ void Editor::Update()
 {
 
 	// モデル更新
+	for (int i = 0; i < hierarchyModelResouces_.size(); i++)
+	{
+		hierarchyModelResouces_.at(i).model_->Update();
+	}
+
+	// ヒエラルキのWorldTransform更新
 	for (int i = 0; i < hierarchyModels_.size(); i++)
 	{
-		hierarchyModels_.at(i).object->Update();
+		// キャ・・・キャストして更新・・ｗ
+		if (auto* world = dynamic_cast<WorldTransform*>(
+			hierarchyModels_.at(i).transform_.get())) {
+			world->UpdateMatrix();
+		}
+
 	}
 	
 
@@ -72,6 +85,7 @@ void Editor::Update()
 	static bool showHierarchy = false;
 	static bool showLighting = false;
 	static bool showEffectTimeline = false;
+	static bool showAssets = false;
 
 
 	ImVec2 scenePos = ImGui::GetCursorScreenPos();
@@ -108,28 +122,29 @@ void Editor::Update()
 		float distance = 0.0f;
 
 
-		selectedModel_ = nullptr;
+		selectedModelWorldTransform_ = nullptr;
 
 		// すべてのモデル
 		for (int i = 0; i < hierarchyModels_.size(); i++)
 		{
 
-			Model* model = hierarchyModels_[i].object;
+			// ヒエラルキからワールドのポインタ取得！
+			WorldTransform* world = static_cast<WorldTransform*>(hierarchyModels_.at(i).transform_.get());
 
 			// だいたいの中心　３ｘ３で
 			float size = 1.5f;
 
 			AABB aabb;
-			aabb.min = Vector3{ -size, -size, -size } + model->GetWorldTransform().translation_;
-			aabb.max = Vector3{ size,  size,  size } + model->GetWorldTransform().translation_;
+			aabb.min = Vector3{ -size, -size, -size } + world->translation_;
+			aabb.max = Vector3{ size,  size,  size } + world->translation_;
 
 			// モデルのAABBと判定
 			if (camera_.IntersectRayAABB(ray, aabb, distance)) {
 
-				selectedModel_ = model;
+				selectedModelWorldTransform_ = world;
 
 				// ビューポートにモデルを追加
-				effectViewport_.AddModel(selectedModel_);
+				//effectViewport_.AddModel(hierarchyModels_.at(i).object);
 
 				// 選択中のモデルのview更新
 				SelectModelUpdateView();
@@ -149,6 +164,7 @@ void Editor::Update()
 	
 
 	ImGuizmo::Enable(true);
+
 	// 3. カメラの投影モードを設定（透視投影の場合は false）
 	ImGuizmo::SetOrthographic(false);
 
@@ -162,7 +178,7 @@ void Editor::Update()
 
 	/* ホイール操作 */
 	if (Input::GetInstance()->GetMouseWheel() != 0) {
-		if (selectedModel_) {
+		if (selectedModelWorldTransform_) {
 			
 			selectedModelLength_ += static_cast<float>(Input::GetInstance()->GetMouseWheel()) * 0.075f;
 
@@ -172,7 +188,7 @@ void Editor::Update()
 			//  また例の処理
 			//
 
-			Vector3 targetPos = selectedModel_->GetWorldTransform().translation_;
+			Vector3 targetPos = selectedModelWorldTransform_->translation_;
 
 			// 1) View行列からカメラのワールド行列を復元
 			Matrix4x4 cameraWorld = Inverse(camera_.GetViewMatrix());
@@ -202,7 +218,7 @@ void Editor::Update()
 	}
 
 	/* ギズモによるカメラ回転 */
-	if (selectedModel_) {
+	if (selectedModelWorldTransform_) {
 
 		// 現在のカメラView行列を取得
 		Matrix4x4 viewMatrix = camera_.GetViewMatrix();
@@ -239,12 +255,12 @@ void Editor::Update()
 	if (isEditorMode_) {
 
 		// 選択中のモデルがあるときだけ操作
-		if (selectedModel_) {
+		if (selectedModelWorldTransform_) {
 
 			// 転置なしでそのまま渡す
 			Matrix4x4 viewMat = camera_.GetViewMatrix();
 			Matrix4x4 projMat = camera_.GetProjectionMatrix();
-			Matrix4x4 worldMat = selectedModel_->GetWorldTransform().matWorld_;
+			Matrix4x4 worldMat = selectedModelWorldTransform_->matWorld_;
 
 			bool isManipulated = ImGuizmo::Manipulate(
 				&viewMat.m[0][0],
@@ -258,21 +274,21 @@ void Editor::Update()
 
 				switch (operation_) {
 				case ImGuizmo::TRANSLATE:
-					selectedModel_->GetWorldTransform().translation_.x = worldMat.m[3][0];
-					selectedModel_->GetWorldTransform().translation_.y = worldMat.m[3][1];
-					selectedModel_->GetWorldTransform().translation_.z = worldMat.m[3][2];
+					selectedModelWorldTransform_->translation_.x = worldMat.m[3][0];
+					selectedModelWorldTransform_->translation_.y = worldMat.m[3][1];
+					selectedModelWorldTransform_->translation_.z = worldMat.m[3][2];
 					break;
 				case ImGuizmo::ROTATE:
-					selectedModel_->GetWorldTransform().rotation_ = ExtractRotation(worldMat, selectedModel_->GetWorldTransform().scale_);
+					selectedModelWorldTransform_->rotation_ = ExtractRotation(worldMat, selectedModelWorldTransform_->scale_);
 					break;
 				case ImGuizmo::SCALE:
-					selectedModel_->GetWorldTransform().scale_ = ExtractScale(worldMat);
+					selectedModelWorldTransform_->scale_ = ExtractScale(worldMat);
 					break;
 
 				}
 
 
-				selectedModel_->GetWorldTransform().UpdateMatrix();
+				selectedModelWorldTransform_->UpdateMatrix();
 			}
 		}
 		else {
@@ -289,8 +305,10 @@ void Editor::Update()
 
 			ImGui::MenuItem("Property", nullptr, &showProperty);
 			ImGui::MenuItem("Hierarchy", nullptr, &showHierarchy);
+			ImGui::MenuItem("Assets", nullptr, &showAssets);
 			ImGui::MenuItem("EffectTimeline", nullptr, &showEffectTimeline);
 			ImGui::MenuItem("LightingManager", nullptr, &showLighting);
+
 			ImGui::EndMenu();
 		}
 
@@ -387,6 +405,11 @@ void Editor::Update()
 		LightingManagerTab(showLighting);
 	}
 
+	// アセットパネル
+	if (showAssets) {
+		AssetsTab(showAssets);
+	}
+
 	//ImGui::End();
 #endif
 
@@ -406,18 +429,22 @@ void Editor::Draw() {
 	// シーンカメラが設定されてれば
 	if (Scene::GetSceneCamera() != nullptr) {
 
+		/* ヒエラルキーモデルの描画 */
+		for (Editor::Hierarchy<Model>& hierarchy : hierarchyModels_) {
 
-		// モデル描画
-		for (int i = 0; i < hierarchyModels_.size(); i++)
-		{
+			WorldTransform* world = static_cast<WorldTransform*>(hierarchy.transform_.get());
+
+			// マップで登録されたidと連携したモデルで描画
 			if (isEditorMode_) {
-				hierarchyModels_.at(i).object->Draw(camera_);
+				hierarchyModelResourceList_[hierarchy.id_]->Draw(*world, camera_);
 			}
 			// エディターモードじゃなければ、シーンのカメラで描画する
 			else {
-				hierarchyModels_.at(i).object->Draw(*Scene::GetSceneCamera());
+				hierarchyModelResourceList_[hierarchy.id_]->Draw(*world, *Scene::GetSceneCamera());
 			}
+
 		}
+		
 
 	}
 
@@ -427,7 +454,7 @@ void Editor::Draw() {
 
 	//if (isEditorMode_) {
 
-	//	if (selectedModel_) {
+	//	if (electedModelWorldTransform_) {
 
 	//		AABB aabb;
 	//		aabb.min = Vector3{ -0.5f, -0.5f, -0.5f } + selectedModel_->GetWorldTransform().translation_;
@@ -460,20 +487,63 @@ void Editor::HierarchyTab(bool& show) {
 			continue;
 		}
 
+
+		//　モデルのIDの取得（モデルのパス）
+		std::string modelId = relativePath;
+
+		{// モデルの管理情報から、すでに登録されたIDのがあるかvector検索
+			
+			auto it = std::find_if(
+
+				hierarchyModelResouces_.begin(),
+				hierarchyModelResouces_.end(),
+
+				//* ラムダ式 *//
+				// ↓キャプチャ  ↓forのように取り出し
+				[&modelId](const auto& h) {
+					return h.pathId_ == modelId;
+				}
+			);
+
+			//* 見つかった
+			if (it != hierarchyModelResouces_.end()) {
+
+				// 登録せずサヨナラ
+				continue;
+			}
+		}
+
+
 		// モデル生成
 		Model* model = Model::CreateOBJ(relativePath);
 
+
+		// 読み込めた
 		if (model) {
 
-			// ヒエラルキ追加
+			/* モデルの管理情報の登録 */
+			ModelResource resource;
+
+			resource.pathId_ = relativePath;
+			resource.model_ = model;		// モデル登録
+
+			hierarchyModelResouces_.push_back(resource);
+			hierarchyModelResourceList_[resource.pathId_] = resource.model_;
+
+			/* モデルのヒエラルキ追加 */
 			Hierarchy<Model> h;
 
 			h.type_ = HierarchyType::kModel; // タイプ
-			h.path_ = relativePath;
+			h.id_ = resource.pathId_;
 			h.name_ = FileDropManager::GetFileNameWithoutExtension(path);// 表示名 拡張子を抜いたのを設定する
-			h.object = model;				 // Model*
 
-			hierarchyModels_.push_back(h);
+			// WorldTransform初期化
+			h.transform_ = std::make_unique<WorldTransform>();
+			h.transform_->Initialize();
+
+			/* 初期座標とかあったらその都度っここに　今は０，０，０  */
+
+			hierarchyModels_.push_back(std::move(h));
 
 		}
 
@@ -491,10 +561,15 @@ void Editor::HierarchyTab(bool& show) {
 
 		/* 今開いてるシーン名 */
 		ImGui::Text("SceneName: %s",currentSceneName_.c_str());
+		ImGui::SameLine();
+
+
+		ImGui::InputText(" ", &currentSceneJsonPath);
+		
 
 		// ロードボタン
 		if (ImGui::Button("Load")) {
-			HierarchySave(currentSceneJsonPath);
+			// HierarchySave(currentSceneJsonPath);
 		}
 
 		ImGui::SameLine();
@@ -509,8 +584,8 @@ void Editor::HierarchyTab(bool& show) {
 
 		for (int i = 0; i < hierarchyModels_.size(); i++)
 		{
-			if (ImGui::TreeNode(hierarchyModels_.at(i).name_.c_str())) {
-
+	
+			if (ImGui::TreeNode((hierarchyModels_.at(i).name_ + "##" + std::to_string(i)).c_str())) {
 				// ここに何か書く
 
 				ImGui::TreePop();
@@ -518,11 +593,17 @@ void Editor::HierarchyTab(bool& show) {
 
 			ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
 
+
+			ImGui::PushID(i);
 			// 削除ボタンを右寄りに配置（↑のおかげ
 			if (ImGui::Button("delete")) {
+
 				hierarchyModels_.erase(hierarchyModels_.begin() + i);
+				ImGui::PopID();
 				break;
 			}
+			ImGui::PopID();
+
 			
 		}
 
@@ -541,7 +622,7 @@ void Editor::HierarchyTab(bool& show) {
 void Editor::SelectModelUpdateView()
 {
 
-	if (selectedModel_ == nullptr){ 
+	if (selectedModelWorldTransform_ == nullptr){
 		return;
 	}
 
@@ -551,7 +632,7 @@ void Editor::SelectModelUpdateView()
 	// 4) 距離から球面座標系に必要なthita横回転とphi縦を摘出
 	// 5) 球面座標としてカメラのviewにセット、thitaとｐひもImViewGizmoにあげる
 
-	Vector3 targetPos = selectedModel_->GetWorldTransform().translation_;
+	Vector3 targetPos = selectedModelWorldTransform_->translation_;
 
 	// 1) View行列からカメラのワールド行列を復元
 	Matrix4x4 cameraWorld = Inverse(camera_.GetViewMatrix());
@@ -812,7 +893,78 @@ void Editor::LightingManagerTab(bool& show) {
 #endif
 }
 
+void Editor::AssetsTab(bool& show)
+{
+
+#ifdef USE_IMGUI
+
+	/* 色 */
+	ImGui::PushStyleColor(
+		ImGuiCol_WindowBg,
+		ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
+	);
+
+	if (ImGui::Begin("Assets-Manager", &show)){
+
+
+		ImGui::SeparatorText("Models");
+
+		// === モデル
+		for (int i = 0; i < hierarchyModelResouces_.size(); i++)
+		{
+
+			//if (ImGui::TreeNode(hierarchyModelResouces_.at(i).name_.c_str())) {
+			//	// ここに何か書く
+			//	
+			//	ImGui::TreePop();
+			//}
+
+			Editor::ModelResource& resource = hierarchyModelResouces_.at(i);
+
+			ImGui::BulletText(resource.name_.c_str());
+
+			ImGui::SameLine(ImGui::GetWindowWidth() - 60.0f);
+
+
+			ImGui::PushID(i);
+
+			// 選択されたヒエラルキモデルで追加ボタン
+			if (ImGui::Button("Add")) {
+
+				/* モデルのヒエラルキ追加 */
+				Hierarchy<Model> h;
+
+				h.type_ = HierarchyType::kModel; // タイプ
+				h.id_ = resource.pathId_;
+				h.name_ = resource.name_;// 表示名 拡張子を抜いたのを設定する
+
+				// WorldTransform初期化
+				h.transform_ = std::make_unique<WorldTransform>();
+				h.transform_->Initialize();
+
+				/* 初期座標とかあったらその都度っここに　今は０，０，０  */
+
+				hierarchyModels_.push_back(std::move(h));
+
+				ImGui::PopID();
+				break;
+			}
+
+			ImGui::PopID();
+
+
+		}
+
+	}
+
+	ImGui::End();
+
+	ImGui::PopStyleColor();
+#endif
+}
+
 void Editor::HierarchyLoad(const std::string jsonPath) {
+
 	// 読込み
 	if (SceneComponentLoader::GetInstance()->Load(jsonPath)) {
 
@@ -823,13 +975,31 @@ void Editor::HierarchyLoad(const std::string jsonPath) {
 
 		loder->BeginGroup("Hierarchy");
 
-		// ヒエラルキのモデルリスト 登録
-		loder->Property("Models",hierarchyModels_);
+
+		// ヒエラルキのモデルのパスリスト 登録
+		loder->Property("ModelResources", hierarchyModelResouces_);
+
+		// ヒエラルキのモデル情報リスト 登録
+		loder->Property("ModelProperties",hierarchyModels_);
+
 
 		loder->EndGroup();
 
 		loder->LoadGroup("Hierarchy");
 	}
+
+
+	// 読み込んだモデルリソースのモデルを全て生成
+	for (ModelResource& r : hierarchyModelResouces_) {
+
+		r.model_ = Model::CreateOBJ(r.pathId_);
+
+		// モデルのポインタ登録
+		hierarchyModelResourceList_[r.pathId_] = r.model_;
+		r.name_ = FileDropManager::GetFileNameWithoutExtension(FileDropManager::ToWide(r.pathId_));// 表示名 拡張子を抜いたのを設定する
+	}
+
+
 }
 
 void Editor::HierarchySave(const std::string jsonPath) {

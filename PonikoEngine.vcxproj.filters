@@ -79,6 +79,9 @@
     <Filter Include="Engine\Source\ヘッダー ファイル\Editor">
       <UniqueIdentifier>{2e0c3c30-5903-4210-88ec-5d70143007ba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Source\imgui\misc">
+      <UniqueIdentifier>{06b27da6-d2b1-4306-977b-b1b8a6b7c258}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinApp.cpp">
@@ -249,6 +252,9 @@
     </ClCompile>
     <ClCompile Include="SceneViewport.cpp">
       <Filter>Engine\Source\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\imgui\misc\cpp\imgui_stdlib.cpp">
+      <Filter>Engine\Source\imgui\misc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -472,6 +478,9 @@
     </ClInclude>
     <ClInclude Include="SceneViewport.h">
       <Filter>Engine\Source\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\imgui\misc\cpp\imgui_stdlib.h">
+      <Filter>Engine\Source\imgui\misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

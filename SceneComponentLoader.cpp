@@ -363,10 +363,13 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Editor:
 
 				item["type"] = hierarchy.type_;
 				item["name"] = hierarchy.name_;
-				item["path"] = hierarchy.path_;
 
-				// モデルのworldTransform
-				item["transform"] = WorldToJson(hierarchy.object->GetWorldTransform());
+				item["id"] = hierarchy.id_;
+
+				// ヒエラルキのトランスフォーム情報を（強引に）ワールドのにして保存
+				item["transform"] = WorldToJson(
+					*static_cast<WorldTransform*>(hierarchy.transform_.get())
+				);
 
 				group[name].push_back(item);
 
@@ -386,17 +389,61 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Editor:
 				Editor::Hierarchy<Model> hierarchy;
 
 				hierarchy.name_ = item.at("name").get<std::string>();
-				hierarchy.path_ = item.at("path").get<std::string>();
+				hierarchy.id_ = item.at("id").get<std::string>();
 
-				Model* model = Model::CreateOBJ(hierarchy.path_);
+				// ワールドトランスフォーム初期化　makeUniqueで生成！
+				auto world = JsonToWorld(item.at("transform"));
+
+				hierarchy.transform_ =
+					std::make_unique<WorldTransform>(world);
 				
-				// worldTransform読み取り・設定
-				model->SetWorldTransform(JsonToWorld(item.at("transform")));
-
-				hierarchy.object = model;
 
 				// リストに追加
 				value.push_back(std::move(hierarchy));
+
+			}
+		}
+	};
+}
+
+// 
+void SceneComponentLoader::Property(const std::string& name, std::vector<Editor::ModelResource>& value) {
+
+	properties_[currentGroup_][name] = {
+
+		// save
+		[this, &value, name](json& group) {
+
+			// 空でも必ず配列として保存
+			group[name] = json::array();
+
+			for (const auto& resourceProp : value) {
+
+				json item;
+
+				item["pathId"] = resourceProp.pathId_;
+
+				group[name].push_back(item);
+
+			}
+		},
+
+		// load
+		[this, &value, name](const json& group) {
+
+			// なかった場合
+			if (!group.contains(name)) {
+				return;
+			}
+
+			for (const auto& item : group.at(name)) {
+
+				Editor::ModelResource modelResource;
+
+				modelResource.pathId_   = item.at("pathId").get<std::string>();
+
+				// リストに追加
+				value.push_back(std::move(modelResource));
 
 			}
 		}

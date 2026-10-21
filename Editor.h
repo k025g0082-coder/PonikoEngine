@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Model.h"
+#include "Transform.h"
 
 #include "imgui.h"
 
@@ -19,6 +20,9 @@
 
 #include <string>
 #include <vector>
+
+#include <memory>
+#include <unordered_map>
 
 class Editor
 {
@@ -47,10 +51,28 @@ public:
 
 		HierarchyType type_;
 		std::string name_;
-		std::string path_; // モデルなどのあればパス
+		std::string id_;   // IDなどあれば。モデルは↓のと連携する
 
 		// オブジェクトのアドレスのポインタ
 		Type* object = nullptr;
+		
+		// WorldTransform, ScreenTransformクラスの始祖。newしてキャストして使うw
+		std::unique_ptr<BaseTransform> transform_ = nullptr;
+
+	};
+
+
+	/*
+		モデルは管理idと登録されたヒエラルキのモデルとで繋げることにする
+	*/
+
+	//* モデルのパスやidなどのリソース情報
+	struct ModelResource {
+
+		std::string pathId_;     // パスおよびIDの意味を持つ
+
+		Model* model_ = nullptr; // モデルの実体
+		std::string name_;		 // 名前表示用
 
 	};
 
@@ -80,8 +102,15 @@ private:
 	// モデル
 	std::vector<Hierarchy<Model>> hierarchyModels_;
 
-	// 選択中モデル
-	Model* selectedModel_ = nullptr;
+	//* 各モデルのパスやIDをまとめたもの
+	std::vector<ModelResource> hierarchyModelResouces_;
+
+	//* 上のオブジェクトをパス名で登録しておく
+	std::unordered_map<std::string, Model*> hierarchyModelResourceList_;
+
+
+	// 選択中のモデルのワールドトランスフォーム
+	WorldTransform* selectedModelWorldTransform_ = nullptr;
 
 
 	// との距離
@@ -100,6 +129,11 @@ private:
 
 	//　ライティング用
 	void LightingManagerTab(bool& show);
+
+
+	//　アセット一覧用
+	void AssetsTab(bool& show);
+
 
 	float camDistance = 8.0f;
 	void EffectEditorTimeLine();

@@ -4,7 +4,7 @@
 #include "ImGuiManager.h"
 
 // 2Dよう
-struct ScreenTransform : public Transform{
+struct ScreenTransform : public BaseTransform{
 
 	void Initialize() {
 

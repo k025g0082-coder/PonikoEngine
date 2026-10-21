@@ -107,3 +107,25 @@ std::string FileDropManager::ToUTF8(const std::wstring& wstr) {
 
     return result;
 }
+
+std::wstring FileDropManager::ToWide(const std::string& str) {
+    if (str.empty()) {
+        return {};
+    }
+
+    int size = MultiByteToWideChar(
+        CP_UTF8, 0,
+        str.data(), static_cast<int>(str.size()),
+        nullptr, 0
+    );
+
+    std::wstring result(size, L'\0');
+
+    MultiByteToWideChar(
+        CP_UTF8, 0,
+        str.data(), static_cast<int>(str.size()),
+        result.data(), size
+    );
+
+    return result;
+}
