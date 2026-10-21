@@ -2,6 +2,8 @@
 
 #include "Model.h"
 
+#include "imgui.h"
+
 // これ外部ライブラリ
 #include "ImGuizmo.h"
 

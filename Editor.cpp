@@ -345,16 +345,24 @@ void Editor::Update()
 
 			ImGui::SeparatorText("Properthy");
 
+
+			// ワールド座標系に
+			Matrix4x4 viewMatrix = Inverse(camera_.GetViewMatrix());
+
 			/* カメラから位置と回転を入手 */
 			Vector3 cameraPosition;
-			cameraPosition.x = camera_.GetViewMatrix().m[3][0];
-			cameraPosition.y = camera_.GetViewMatrix().m[3][1];
-			cameraPosition.z = camera_.GetViewMatrix().m[3][2];
+			cameraPosition.x = viewMatrix.m[3][0];
+			cameraPosition.y = viewMatrix.m[3][1];
+			cameraPosition.z = viewMatrix.m[3][2];
 
-			Vector3 cameraRotation = ExtractRotation(camera_.GetViewMatrix(), { 1.0f,1.0f,1.0f });
-			ImGui::Text("Camera Transrate x:%3.2f y:%3.2f z:%3.2f ", cameraPosition.x, cameraPosition.y, cameraPosition.z);
-			ImGui::Text("Camera Rotation x:%3.2f y:%3.2f z:%3.2f ", cameraRotation.x, cameraRotation.y, cameraRotation.z);
+			Vector3 cameraRotation = ExtractRotation(viewMatrix, { 1.0f,1.0f,1.0f });
+
+			ImGui::Text("Camera WorldTransrate x:%3.2f y:%3.2f z:%3.2f ", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+			ImGui::Text("Camera WorldRotation x:%3.2f y:%3.2f z:%3.2f ", cameraRotation.x, cameraRotation.y, cameraRotation.z);
+
+
 			ImGui::Separator();
+
 			ImGui::Text("hoi-ru %d", Input::GetInstance()->GetMouseWheel());
 			ImGui::Text("targetleng %f", selectedModelLength_);
 
