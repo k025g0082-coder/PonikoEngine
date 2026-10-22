@@ -85,7 +85,6 @@ public:
 	// シーンのJsonパスで読込
 	void HierarchyLoad(const std::string jsonPath);
 
-
 	/* 読み取り専用 */
 	const std::vector<Hierarchy<Model>>& GetHierarchyModels() const { return hierarchyModels_; }
 	const std::vector<ModelResource>& GetHierarchyModelResources() const { return hierarchyModelResouces_; }
@@ -124,6 +123,10 @@ private:
 
 	//* 上のオブジェクトをパス名で登録しておく
 	std::unordered_map<std::string, Model*> hierarchyModelResourceList_;
+
+
+	// ロード時にクリア
+	void HierarchyClear();
 
 
 	// エディターのグリッド

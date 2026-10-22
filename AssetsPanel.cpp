@@ -11,13 +11,23 @@
 
 
 void AssetsPanel::Initialize()
-{}
+{
+	// エフェクト専用部屋の初期化
+	selectedModelViewport_.Initialize(320, 180);
+}
 
 void AssetsPanel::PanelView(bool& show)
 {
 
+	showView = &show;
+
 	// ウインドウ上にドロップされたモデルを追加
 	AddDropModel();
+
+	if (!selectedHierarchyResource_.pathId_.empty()) {
+		/* エフェクトビューポートの更新 */
+		selectedModelViewport_.Update();
+	}
 
 #ifdef USE_IMGUI
 
@@ -64,7 +74,13 @@ void AssetsPanel::PanelView(bool& show)
 
 			if (ImGui::Button("Select")) {
 
+				// 
 				selectedHierarchyResource_ = resource;
+
+				// ビューポートのモデル選びなおし
+				selectedModelViewport_.ClearModel();
+				selectedModelViewport_.AddModel(resource.model_);
+
 
 				ImGui::PopID();
 				break;
@@ -112,6 +128,14 @@ void AssetsPanel::PanelView(bool& show)
 			ImGui::PopID();
 		}
 
+
+		/* 選択中のモデルのビューポート表示 */
+		ImGui::Image(
+			(ImTextureID)selectedModelViewport_.GetRenderTarget()->GetSRVHandleGPU().ptr,
+			ImVec2(320.0f, 180.0f)
+		);
+
+		selectedModelViewport_.ImGuiView();
 	}
 
 	ImGui::End();
@@ -126,7 +150,12 @@ void AssetsPanel::Update()
 
 void AssetsPanel::Draw()
 {
+	if (!showView) return;
+	if (selectedHierarchyResource_.pathId_.empty()) return;
 
+	/* エフェクトビューポートの描画！！！！ */
+	selectedModelViewport_.Draw();
+	
 }
 
 

@@ -40,9 +40,6 @@ void Editor::Initialize() {
 
 	camera_.Initialize();
 
-	// エフェクト専用部屋の初期化
-	effectViewport_.Initialize(640,360);
-
 	currentSceneJsonPath = "resources/Scene/example.json";
 
 	// 各パネルの初期化
@@ -67,6 +64,10 @@ void Editor::Initialize() {
 void Editor::Update()
 {
 
+	/* 常に更新するパネルの内容 */
+	hierarchyPanel_.Update();
+	assetsPanel_.Update();
+
 #ifdef USE_IMGUI
 
 	static bool showProperty = false;
@@ -74,11 +75,6 @@ void Editor::Update()
 	static bool showLighting = false;
 	static bool showEffectTimeline = false;
 	static bool showAssets = false;
-
-	/* 常に更新するパネルの内容 */
-	hierarchyPanel_.Update();
-	assetsPanel_.Update();
-
 
 	ImVec2 mouse = ImGui::GetMousePos();
 
@@ -247,10 +243,6 @@ void Editor::Update()
 
 	}
 
-
-
-	/* エフェクトビューポートの更新 */
-	effectViewport_.Update();
 
 	// ImGuizmoのフレーム開始
 	ImGuizmo::BeginFrame();
@@ -495,7 +487,7 @@ if (isEditorMode_) {
 
 			// ロードボタン
 			if (ImGui::Button("Load")) {
-				// HierarchySave(currentSceneJsonPath);
+				 hierarchyPanel_.HierarchyLoad(currentSceneJsonPath);
 			}
 
 			ImGui::SameLine();
@@ -613,35 +605,34 @@ if (isEditorMode_) {
 // エディター描画
 void Editor::Draw() {
 
-	/* エフェクトビューポートの描画！！！！ */
-	effectViewport_.Draw();
-
 	if (isEditorMode_) {
 
 		grid.MatrixUpdate();
 
+		assetsPanel_.Draw();
+
 		// 平面描画　傾きはGridの傾きを回転行列として使う
-		DebugLine::DrawPlane(grid.plane_, grid.rotation_ , { 1.0f,0,0,1.0f });
+		DebugLine::DrawPlane(grid.plane_, grid.rotation_, { 1.0f,0,0,1.0f });
 
+		if (selectedModelWorldTransform_) {
+
+			// 選択のAABB
+			WorldTransform* world = selectedModelWorldTransform_;
+
+			// だいたいの中心サイズ
+			float size = 1.0f;
+
+			AABB aabb;
+			aabb.min = Vector3{ -size, -size, -size } + world->translation_;
+			aabb.max = Vector3{ size,  size,  size } + world->translation_;
+
+			DebugLine::DrawAABB(aabb, { 1.0f,0,0,1.0f });
+
+
+			DebugLine::GetInstance()->Draw(camera_);
+		}
 	}
 
-	if (selectedModelWorldTransform_) {
-
-		// 選択のAABB
-		WorldTransform* world = selectedModelWorldTransform_;
-
-		// だいたいの中心サイズ
-		float size = 1.0f;
-
-		AABB aabb;
-		aabb.min = Vector3{ -size, -size, -size } + world->translation_;
-		aabb.max = Vector3{ size,  size,  size } + world->translation_;
-
-		DebugLine::DrawAABB(aabb, { 1.0f,0,0,1.0f});
-
-
-		DebugLine::GetInstance()->Draw(camera_);
-	}
 
 	// シーンカメラが設定されてれば
 	if (Scene::GetSceneCamera() != nullptr) {
@@ -980,11 +971,6 @@ void Editor::EffectEditorTimeLine()
 	);
 
 	ImGui::Begin("EffectView");
-
-	ImGui::Image(
-		(ImTextureID)effectViewport_.GetRenderTarget()->GetSRVHandleGPU().ptr,
-		ImVec2(640.0f, 360.0f)
-	);
 
 	// let's create the sequencer
 	static int selectedEntry = -1;

@@ -263,7 +263,7 @@
       <Filter>Engine\Source\ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="AssetsPanel.cpp">
-      <Filter>Engine\Source\ソース ファイル</Filter>
+      <Filter>Engine\Source\ソース ファイル\Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

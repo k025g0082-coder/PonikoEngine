@@ -22,7 +22,7 @@
 
 // ...
 
-#include "SceneViewport.h"
+
 #include "Matrix.h"
 
 #include "Plane.h"
@@ -134,8 +134,7 @@ private:
 	float camDistance = 8.0f;
 	void EffectEditorTimeLine();
 
-	/* エフェクト専用のScene部屋 */
-	SceneViewport effectViewport_;
+
 
 
 	/* タイムラインの */

@@ -25,10 +25,13 @@ public:
 	void Update();
 	void Draw();
 
+	void ImGuiView();
+
 	/* 使うモデルの追加 */
 	void AddModel(Model* m) {
 		models_.push_back(m);
 	}
+	void ClearModel() { models_.clear(); }
 
 	// uniquePtrはgetでアドレスらしい　便利だね	
 	RenderTarget* GetRenderTarget() { return renderTarget_.get(); }

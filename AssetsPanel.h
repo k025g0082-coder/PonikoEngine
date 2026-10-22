@@ -1,5 +1,7 @@
 #pragma once
+
 #include "HierarchyPanel.h"
+#include "SceneViewport.h"
 
 /* エディタのアセット管理パネル */
 
@@ -25,7 +27,11 @@ private:
 
 	HierarchyPanel* hierarchyPanel_ = nullptr;
 
+	/* 選択しているモデルのview */
+	SceneViewport selectedModelViewport_;
 	
+	
+	bool* showView;
 
 };
 

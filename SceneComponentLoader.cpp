@@ -442,8 +442,19 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<ModelRe
 
 				modelResource.pathId_   = item.at("pathId").get<std::string>();
 
-				// リストに追加
-				value.push_back(std::move(modelResource));
+				// 既に同じIDがあるか検索
+				auto it = std::find_if(
+					value.begin(),
+					value.end(),
+					[&modelResource](const ModelResource& r) {
+						return r.pathId_ == modelResource.pathId_;
+					}
+				);
+				
+				// 無ければ追加
+				if (it == value.end()) {
+					value.push_back(std::move(modelResource));
+				}
 
 			}
 		}

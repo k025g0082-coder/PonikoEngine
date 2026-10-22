@@ -1,6 +1,8 @@
 #include "SceneViewport.h"
 #include "PostEffectManager.h"
 
+#include "ImGuiManager.h"
+
 void SceneViewport::Initialize(uint32_t width, uint32_t height)
 {
 	width_ = width;
@@ -9,7 +11,7 @@ void SceneViewport::Initialize(uint32_t width, uint32_t height)
 	camera_.Initialize();
 
 	// ちょい奥
-	camera_.GetWorldPosition().z = -50.0f;
+	camera_.GetWorldPosition().z = -20.0f;
 
 
 	//* RenderTarget初期化 ユニークポインタではこうやる
@@ -27,6 +29,7 @@ void SceneViewport::Update()
 	}
 
 	camera_.Update();
+
 }
 
 void SceneViewport::Draw()
@@ -58,4 +61,15 @@ void SceneViewport::Draw()
 	// ビューポートも戻す
 	commandList->RSSetViewports(1, &DirectXCommon::GetInstance()->GetViewport());
 	commandList->RSSetScissorRects(1, &DirectXCommon::GetInstance()->GetScissorRect());
+}
+
+void SceneViewport::ImGuiView()
+{
+#ifdef USE_IMGUI
+	
+	ImGui::SeparatorText("ViewPropaty");
+
+	ImGui::DragFloat3("camera Pos", &camera_.GetWorldTransform().translation_.x, 0.1f);
+	ImGui::DragFloat3("camera Rot", &camera_.GetWorldTransform().rotation_.x, 0.1f);
+#endif
 }

@@ -62,7 +62,7 @@ void HierarchyPanel::ViewPanel(bool& show)
 			for (int i = 0; i < hierarchyModels_.size(); i++)
 			{
 				// 選択中のは色変え
-				if (selectedModelIndex_.has_value()) {
+				if (selectedModelIndex_.has_value() && selectedModelIndex_.value() == i) {
 					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
 					    ImGui::BulletText(hierarchyModels_.at(i).name_.c_str());
 					ImGui::PopStyleColor();
@@ -129,9 +129,17 @@ void HierarchyPanel::DeleteHierarchyResouce(int index)
 
 }
 
+void HierarchyPanel::HierarchyClear()
+{
+	hierarchyModels_.clear();
+}
+
 
 
 void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
+
+	/* 前のヒエラルキ画面は初期化 */
+	HierarchyClear();
 
 	// 読込み
 	if (SceneComponentLoader::GetInstance()->Load(jsonPath)) {
