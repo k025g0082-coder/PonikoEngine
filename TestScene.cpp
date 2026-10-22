@@ -1,6 +1,8 @@
 #include "Scene.h"
 #include "TestScene.h"
 
+#include "Editor.h"
+
 #include "WinApp.h"
 #include "ImGuiManager.h"
 
@@ -30,6 +32,9 @@ void TestScene::Init() {
 
 	/* 必）シーンカメラ設定 */
 	Scene::SetSceneCamera(&camera);
+
+	// シーンのモデルなど読込
+	Editor::GetInstance()->HierarchyLoad("resources/Scene/example.json");
 
 
 	PointLightParam pLightParam;

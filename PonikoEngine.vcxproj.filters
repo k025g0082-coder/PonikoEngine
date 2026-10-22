@@ -482,6 +482,9 @@
     <ClInclude Include="externals\imgui\misc\cpp\imgui_stdlib.h">
       <Filter>Engine\Source\imgui\misc</Filter>
     </ClInclude>
+    <ClInclude Include="Plane.h">
+      <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Engine\Shader\Model.PS.hlsl">

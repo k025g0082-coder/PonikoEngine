@@ -154,7 +154,11 @@ Vector2 Camera::WorldToScreen(const Vector3& worldPosition) const {
 	return screenPosition;
 }
 
-Camera::Ray Camera::ScreenPointToRay(float ndcX, float ndcY) {
+Camera::Ray Camera::ScreenPointToRay(Vector2 point, float width, float height) {
+
+	// NDC座標を求める
+	float ndcX = (point.x / width) * 2.0f - 1.0f;
+	float ndcY = 1.0f - (point.y / height) * 2.0f;
 
 	// ViewProjectionの逆行列
 	Matrix4x4 viewProjection =
@@ -242,4 +246,47 @@ bool Camera::IntersectRayAABB(
 
 	distance = tMin;
 	return true;
+}
+
+std::optional<Vector3> Camera::IntersectRayPlane(const Camera::Ray& ray, const Plane& plane)
+{
+	/*
+		
+		レイトレーシング（光線追跡法）
+		直線のベクトル方程式（レイ・放射線の数式）
+
+		P(t) = O + tD
+
+		P(t)　当たった座標
+		O   plane原点
+		t   原点Oからどれだけ進んだか、距離
+		D   Rayの方向。正規化して使う
+
+	*/
+
+	// 平面の法線
+	Vector3 normal = Normalize(plane.normal);
+	Vector3 rayDirection = Normalize(ray.direction);
+
+	// レイの方向と法線の内積
+	float denominator = Dot(rayDirection, normal);
+
+	// 0除算対策
+	if (std::abs(denominator) < 0.0001f) {
+		return std::nullopt;
+	}
+
+	// レイの始点から平面までの距離を求める
+	float t = Dot(
+		plane.point - ray.origin,
+		normal
+	) / denominator;
+
+	// レイの後方に交点がある
+	if (t < 0.0f) {
+		return std::nullopt;
+	}
+
+	/* 公式に則って当たった座標を返す */
+	return ray.origin + t * rayDirection;
 }

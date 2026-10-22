@@ -96,6 +96,28 @@ Matrix4x4 makeScaleMatrix(const Vector3& scale) {
 	return result;
 }
 
+Matrix4x4 MakeRotationMatrix(const Vector3& rotation)
+{
+	// 回転X
+	float cx = cosf(rotation.x);
+	float sx = sinf(rotation.x);
+	Matrix4x4 Rx{ 1, 0, 0, 0, 0, cx, sx, 0, 0, -sx, cx, 0, 0, 0, 0, 1 };
+
+	// 回転Y
+	float cy = cosf(rotation.y);
+	float sy = sinf(rotation.y);
+	Matrix4x4 Ry{ cy, 0, -sy, 0, 0, 1, 0, 0, sy, 0, cy, 0, 0, 0, 0, 1 };
+
+	// 回転Z
+	float cz = cosf(rotation.z);
+	float sz = sinf(rotation.z);
+	Matrix4x4 Rz{ cz, sz, 0, 0, -sz, cz, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+
+	// 合成
+	return Multiply(Rx, Multiply(Ry,Rz));
+
+}
+
 // 3. ベクトルの変換
 Vector3 Transform(const Vector3& point, const Matrix4x4& matrix) {
 

@@ -4,6 +4,7 @@
 #include "Vector.h"
 #include "Matrix.h"
 
+#include "Plane.h"
 #include "AABB.h"
 #include "Sphere.h"
 
@@ -31,10 +32,12 @@ public:
     // 線追加(SceneのDraw内限定)
 	static void AddLine(const Vector3& start, const Vector3& end, const Vector4& color);
 
+	// Plane描画(SceneのDraw内限定)
+	static void DrawPlane(const Plane& aabb, const Vector4& color);
+	static void DrawPlane(const Plane& aabb,const Vector3& rotation, const Vector4& color);
 
 	// AABB描画(SceneのDraw内限定)
 	static void DrawAABB(const AABB& aabb, const Vector4& color);
-
 
 	/// <summary>
 	/// 球描画(SceneのDraw内限定)
@@ -54,6 +57,7 @@ public:
 
 	// 線描画
 	void Draw();
+	void Draw(Camera camera);
 
 	void Clear();
 
@@ -80,5 +84,14 @@ private:
 	Matrix4x4* viewProjectionData_ = nullptr;
 
 	static Camera* camera_;
+
+	// あるベクトルから９０度おるらしい
+	static Vector3 Perpendicular(const Vector3& vector) {
+		if (vector.x != 0.0f || vector.y != 0.0f) {
+			return { -vector.y, vector.x, 0.0f };
+		}
+		return { 0.0f, -vector.z, vector.y };
+	};
+
 };
 

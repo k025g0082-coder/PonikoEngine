@@ -380,6 +380,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Particle.h" />
     <ClInclude Include="ParticleEmit.h" />
     <ClInclude Include="PipelineStateManager.h" />
+    <ClInclude Include="Plane.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="PonikoEngine.h" />
     <ClInclude Include="PostEffectManager.h" />

@@ -17,6 +17,9 @@
 #include "Camera.h"
 
 #include "SceneViewport.h"
+#include "Matrix.h"
+
+#include "Plane.h"
 
 #include <string>
 #include <vector>
@@ -76,6 +79,9 @@ public:
 
 	};
 
+	// シーンのJsonパスで保存
+	void HierarchyLoad(const std::string jsonPath);
+
 private:
 
 	// エディターモードか
@@ -88,8 +94,33 @@ private:
 	// Hierarchyタブ
 	void HierarchyTab(bool& show);
 
-	// シーンのJsonパスで保存
-	void HierarchyLoad(const std::string jsonPath);
+	/* グリッドの設定まとめ */
+	struct ImGuizmoGrid {
+
+		Matrix4x4 worldMatrix = MakeIdentity4x4();
+		float gridSize = 10.0f;
+		static float squareSize;
+		const unsigned int kSubdivision = 1;
+
+		Vector3 translation_;
+		Vector3 rotation_;
+
+		bool isSnap_ = false;
+
+		// 判定用のplane
+		Plane plane_;
+
+		void MatrixUpdate();
+		void ImGuiView();
+
+		// マスの大きさで割ったのを返す
+		static Vector3 snapGrid(Vector3 v);
+
+	};
+
+	ImGuizmoGrid grid;
+
+
 	void HierarchySave(const std::string jsonPath);
 
 	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
@@ -108,9 +139,18 @@ private:
 	//* 上のオブジェクトをパス名で登録しておく
 	std::unordered_map<std::string, Model*> hierarchyModelResourceList_;
 
+	/* モデル選択モード */
+	enum class ModelHierarchyMode {
+		kSelectMode, // 個別にサイズを調整できる
+		kCreateMode, // ドラッグで一気に配置
+	};
+
+	ModelHierarchyMode currentModelHierarchyMode_ = ModelHierarchyMode::kSelectMode;
+
 
 	// 選択中のモデルのワールドトランスフォーム
 	WorldTransform* selectedModelWorldTransform_ = nullptr;
+	Editor::ModelResource selectedHierarchyResource_;
 
 
 	// との距離

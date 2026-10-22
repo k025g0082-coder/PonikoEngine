@@ -5,8 +5,10 @@
 #include "Coordinate.h"
 
 #include "AABB.h"
+#include "Plane.h"
 
 #include <numbers>
+#include <optional>
 
 class Camera
 {
@@ -99,8 +101,8 @@ public:
 		Vector3 direction; // 正規化した方向
 	};
 
-	// NDC 座標からレイを作る
-	Ray ScreenPointToRay(float ndcX, float ndcY);
+	// 縦横の大きさからレイを作る
+	Ray ScreenPointToRay(Vector2 point, float width, float height);
 
 	// レイとAABB判定
 	bool IntersectRayAABB(
@@ -108,6 +110,11 @@ public:
 		const AABB& aabb,
 		float& distance);
 
+	// レイとPlane判定 あたった座標を返す。当たらなかったらstd::nullopt
+	std::optional<Vector3> IntersectRayPlane(
+		const Camera::Ray& ray,
+		const Plane& plane
+	);
 
 private:
 

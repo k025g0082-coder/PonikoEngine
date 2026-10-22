@@ -29,6 +29,8 @@ Matrix4x4 MakeIdentity4x4();
 Matrix4x4 makeTranslationMatrix(const Vector3& translation);
 // 2. 拡大縮小行列
 Matrix4x4 makeScaleMatrix(const Vector3& scale);
+// 3. 回転行列
+Matrix4x4 MakeRotationMatrix(const Vector3& rotation);
 
 // 3. ベクトルの変換
 Vector3 Transform(const Vector3& point, const Matrix4x4& matrix);

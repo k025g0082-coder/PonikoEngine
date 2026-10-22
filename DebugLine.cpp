@@ -58,6 +58,71 @@ void DebugLine::AddLine(const Vector3& start, const Vector3& end, const Vector4&
 	vertices_.push_back({ end, color });
 }
 
+void DebugLine::DrawPlane(const Plane& plane, const Vector4& color) {
+
+
+	// 法線正規化
+	Vector3 normal = Normalize(plane.normal);
+
+	// 平面中心
+	Vector3 center = plane.point;
+
+	// 平面上の2軸を作る
+	Vector3 axis1 = Normalize(Perpendicular(normal));
+	Vector3 axis2 = Normalize(Cross(normal, axis1));
+
+	float halfSize = plane.distance;
+
+	// 四角形4頂点
+	Vector3 vertices[4];
+
+	vertices[0] = (center + Multiply(halfSize, axis1)) + Multiply(halfSize, axis2);
+	vertices[1] = (center + Multiply(-halfSize, axis1)) + Multiply(halfSize, axis2);
+	vertices[2] = (center + Multiply(-halfSize, axis1)) + Multiply(-halfSize, axis2);
+	vertices[3] = (center + Multiply(halfSize, axis1)) + Multiply(-halfSize, axis2);
+
+	// 線描画
+	for (int i = 0; i < 4; i++) {
+		int next = (i + 1) % 4;
+		AddLine(vertices[i], vertices[next], color);
+	}
+
+}
+
+void DebugLine::DrawPlane(const Plane& plane, const Vector3& rotation, const Vector4& color)
+{
+	// 平面の法線
+	Vector3 normal = Normalize(plane.normal);
+
+	// 平面中心
+	Vector3 center = plane.point;
+
+	// グリッドのローカルX軸を回転させる
+	Matrix4x4 rotationMatrix = MakeRotationMatrix(rotation);
+	Vector3 axis1 = Normalize(
+		TransformNormal({ 1.0f, 0.0f, 0.0f }, rotationMatrix)
+	);
+
+	// 法線とX軸から、もう一つの軸を作る
+	Vector3 axis2 = Normalize(Cross(normal, axis1));
+
+	float halfSize = plane.distance;
+
+	// 四角形4頂点
+	Vector3 vertices[4];
+
+	vertices[0] = (center + Multiply(halfSize, axis1)) + Multiply(halfSize, axis2);
+	vertices[1] = (center + Multiply(-halfSize, axis1)) + Multiply(halfSize, axis2);
+	vertices[2] = (center + Multiply(-halfSize, axis1)) + Multiply(-halfSize, axis2);
+	vertices[3] = (center + Multiply(halfSize, axis1)) + Multiply(-halfSize, axis2);
+
+	// 線描画
+	for (int i = 0; i < 4; i++) {
+		int next = (i + 1) % 4;
+		AddLine(vertices[i], vertices[next], color);
+	}
+}
+
 
 void DebugLine::DrawAABB(const AABB& aabb, const Vector4& color) {
 
@@ -76,15 +141,6 @@ void DebugLine::DrawAABB(const AABB& aabb, const Vector4& color) {
 		{ aabb.max.x, aabb.max.y, aabb.max.z }, // 6
 		{ aabb.min.x, aabb.max.y, aabb.max.z }  // 7
 	};
-
-	//// スクリーン変換
-	//Vector3 screen[8];
-
-	//for (int i = 0; i < 8; i++) {
-
-	//	screen[i] = Transform(vertices[i], camera_->GetProjectionMatrix());
-	//	screen[i] = Transform(screen[i], camera_->GetViewMatrix());
-	//}
 
 	// 辺の接続
 	int edges[12][2] = {
@@ -249,6 +305,55 @@ void DebugLine::Draw(){
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);//
 
     // b0 カメラ
+	commandList->SetGraphicsRootConstantBufferView(
+		0,
+		viewProjectionResource_->GetGPUVirtualAddress()
+	);
+
+	commandList->DrawInstanced(
+		static_cast<UINT>(vertices_.size()),
+		1,
+		0,
+		0
+	);
+}
+
+void DebugLine::Draw(Camera camera) {
+
+	if (vertices_.empty()) {
+		return;
+	}
+
+	// 転送用データに書き込む
+	*viewProjectionData_ = Multiply(camera.GetViewMatrix(), camera.GetProjectionMatrix());
+
+	// 範囲を指定してコピー？
+	void* mapped = nullptr;
+
+	D3D12_RANGE readRange{};
+	vertexResource_->Map(
+		0,
+		&readRange,
+		&mapped
+	);
+	memcpy(mapped, vertices_.data(),
+		sizeof(DebugLineVertex) * vertices_.size());
+	vertexResource_->Unmap(0, nullptr);
+
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
+
+	//RootSignatureを設定。PSOに設定しているけど別途設定が必要
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::DebugLine).rootSignature);
+	// PSOを設定
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::DebugLine).graphicsPipelineState);
+
+	// VBVを設定
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView_);
+
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);//
+
+	// b0 カメラ
 	commandList->SetGraphicsRootConstantBufferView(
 		0,
 		viewProjectionResource_->GetGPUVirtualAddress()
