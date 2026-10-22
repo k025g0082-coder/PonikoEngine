@@ -347,7 +347,7 @@ void SceneComponentLoader::Property(const std::string& name, WorldTransform& val
 	};
 }
 
-void SceneComponentLoader::Property(const std::string& name, std::vector<Editor::Hierarchy<Model>>& value) {
+void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarchy<Model>>& value) {
 
 	properties_[currentGroup_][name] = {
 
@@ -386,7 +386,7 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Editor:
 
 			for (const auto& item : group.at(name)) {
 
-				Editor::Hierarchy<Model> hierarchy;
+				Hierarchy<Model> hierarchy;
 
 				hierarchy.name_ = item.at("name").get<std::string>();
 				hierarchy.id_ = item.at("id").get<std::string>();
@@ -407,7 +407,7 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Editor:
 }
 
 // 
-void SceneComponentLoader::Property(const std::string& name, std::vector<Editor::ModelResource>& value) {
+void SceneComponentLoader::Property(const std::string& name, std::vector<ModelResource>& value) {
 
 	properties_[currentGroup_][name] = {
 
@@ -438,7 +438,7 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Editor:
 
 			for (const auto& item : group.at(name)) {
 
-				Editor::ModelResource modelResource;
+				ModelResource modelResource;
 
 				modelResource.pathId_   = item.at("pathId").get<std::string>();
 

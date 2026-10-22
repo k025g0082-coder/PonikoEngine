@@ -5,6 +5,8 @@
 
 #include "Input.h"
 
+bool WinApp::isDropFile = false;
+
 // imguiで必要奴
 #ifdef USE_IMGUI
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -54,21 +56,26 @@ LRESULT CALLBACK WinApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 		/* ウインドウにドロップされたファイルのパスをゲット */
 		case WM_DROPFILES: {
-			HDROP drop = reinterpret_cast<HDROP>(wParam);
 
-			UINT count = DragQueryFileW(drop, 0xFFFFFFFF, nullptr, 0);
+			if (isDropFile) {
 
-			for (UINT i = 0; i < count; ++i) {
-				wchar_t path[MAX_PATH];
+				HDROP drop = reinterpret_cast<HDROP>(wParam);
 
-				DragQueryFileW(drop, i, path, MAX_PATH);
+				UINT count = DragQueryFileW(drop, 0xFFFFFFFF, nullptr, 0);
 
-				// ファイルパスクラスに追加。
-				FileDropManager::AddFilePath(std::wstring(path));
+				for (UINT i = 0; i < count; ++i) {
+					wchar_t path[MAX_PATH];
 
+					DragQueryFileW(drop, i, path, MAX_PATH);
+
+					// ファイルパスクラスに追加。
+					FileDropManager::AddFilePath(std::wstring(path));
+
+				}
+
+				DragFinish(drop);
 			}
 
-			DragFinish(drop);
 			return 0;
 		}
 

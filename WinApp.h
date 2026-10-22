@@ -22,6 +22,13 @@ public:
 	int32_t GetClientWidth() const { return clientWidth; }
 	int32_t GetClientHeight() const { return clientHeight; }
 
+	// ファイルドロップの有効・無効を切り替える
+	void SetDragEnabled(bool enabled)
+	{
+		isDropFile = enabled;
+		DragAcceptFiles(hwnd_, enabled);
+	}
+
 	// メッセージを転送する
 	bool ProcessMessage();
 private:
@@ -38,5 +45,6 @@ private:
 	int32_t clientWidth;
 	int32_t clientHeight;
 
+	static bool isDropFile;
 };
 

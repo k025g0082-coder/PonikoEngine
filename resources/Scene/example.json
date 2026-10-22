@@ -35,36 +35,11 @@
                     ]
                 },
                 "type": -858993460
-            },
-            {
-                "id": "resources/Models/player/player.obj",
-                "name": "suzanne",
-                "transform": {
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "translation": [
-                        -0.9694157242774963,
-                        1.061626672744751,
-                        0.0
-                    ]
-                },
-                "type": -858993460
             }
         ],
         "ModelResources": [
             {
                 "pathId": "resources/Models/suzanne.obj"
-            },
-            {
-                "pathId": "resources/Models/player/player.obj"
             }
         ]
     }

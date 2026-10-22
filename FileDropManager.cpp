@@ -80,7 +80,7 @@ std::vector<std::wstring> FileDropManager::TakeFilePaths(FileType type) {
 // ファイルの拡張子抜いたのを返す
 std::string FileDropManager::GetFileNameWithoutExtension(std::wstring path)
 {
-    static std::filesystem::path filePath(path);
+    std::filesystem::path filePath(path);
 
     // stem()でできるらしい
     return ToUTF8(filePath.stem().wstring());

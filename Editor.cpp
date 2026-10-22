@@ -12,14 +12,11 @@
 #include <misc/cpp/imgui_stdlib.h>
 
 #include "LightingManager.h"
-#include "SceneComponentLoader.h"
-
-#include "FileDropManager.h"
 
 #include "Input.h"
 
-#include "Particle.h"
-#include "EffectManager.h"
+//#include "Particle.h"
+//#include "EffectManager.h"
 
 #include "DebugLine.h"
 
@@ -29,6 +26,8 @@
 #include <algorithm>
 #include <numbers>
 #include <memory>
+#include <format>
+#include <optional>
 
 
 Editor* Editor::GetInstance() {
@@ -44,10 +43,15 @@ void Editor::Initialize() {
 	// エフェクト専用部屋の初期化
 	effectViewport_.Initialize(640,360);
 
-
 	currentSceneJsonPath = "resources/Scene/example.json";
 
-	//HierarchyLoad(currentSceneJsonPath);
+	// 各パネルの初期化
+	hierarchyPanel_.Initialize(currentSceneJsonPath,grid);
+
+	assetsPanel_.Initialize();
+	assetsPanel_.SetHierarchyPanel(hierarchyPanel_);
+
+
 
 	effectSequencer_.mFrameMin = -100;
 	effectSequencer_.mFrameMax = 1000;
@@ -63,24 +67,6 @@ void Editor::Initialize() {
 void Editor::Update()
 {
 
-	// モデル更新
-	for (int i = 0; i < hierarchyModelResouces_.size(); i++)
-	{
-		hierarchyModelResouces_.at(i).model_->Update();
-	}
-
-	// ヒエラルキのWorldTransform更新
-	for (int i = 0; i < hierarchyModels_.size(); i++)
-	{
-		// キャ・・・キャストして更新・・ｗ
-		if (auto* world = dynamic_cast<WorldTransform*>(
-			hierarchyModels_.at(i).transform_.get())) {
-			world->UpdateMatrix();
-		}
-
-	}
-	
-
 #ifdef USE_IMGUI
 
 	static bool showProperty = false;
@@ -89,9 +75,10 @@ void Editor::Update()
 	static bool showEffectTimeline = false;
 	static bool showAssets = false;
 
+	/* 常に更新するパネルの内容 */
+	hierarchyPanel_.Update();
+	assetsPanel_.Update();
 
-	ImVec2 scenePos = ImGui::GetCursorScreenPos();
-	ImVec2 sceneSize = ImGui::GetContentRegionAvail();
 
 	ImVec2 mouse = ImGui::GetMousePos();
 
@@ -111,7 +98,6 @@ void Editor::Update()
 	if (insideScene &&
 		ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
 		!ImGui::GetIO().WantCaptureMouse &&
-		!ImGuizmo::IsOver() &&
 		!ImGuizmo::IsUsing()) {
 
 		// スクリーンの大きさとスクリーン座標からから、レイ生成
@@ -119,6 +105,7 @@ void Editor::Update()
 
 		float distance = 0.0f;
 
+		hierarchyPanel_.SetSelectedHierarchyModelIndex(std::nullopt);
 		selectedModelWorldTransform_ = nullptr;
 
 		//* モード別の処理　*//
@@ -129,11 +116,11 @@ void Editor::Update()
 		case ModelHierarchyMode::kSelectMode:
 
 			// すべてのモデル
-			for (int i = 0; i < hierarchyModels_.size(); i++)
+			for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
 			{
 
 				// ヒエラルキからワールドのポインタ取得！
-				WorldTransform* world = static_cast<WorldTransform*>(hierarchyModels_.at(i).transform_.get());
+				WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i).transform_.get());
 
 				// だいたいの中心
 				float size = 1.0f;
@@ -145,6 +132,7 @@ void Editor::Update()
 				// モデルのAABBと判定
 				if (camera_.IntersectRayAABB(ray, aabb, distance)) {
 
+					hierarchyPanel_.SetSelectedHierarchyModelIndex(i);
 					selectedModelWorldTransform_ = world;
 
 					// ビューポートにモデルを追加
@@ -161,7 +149,7 @@ void Editor::Update()
 		//* 一気に配置モード
 		case ModelHierarchyMode::kCreateMode:
 
-			if (selectedHierarchyResource_.pathId_.empty()) break;
+			if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
 
 			// グリッドのplaneと判定
 			std::optional<Vector3> hit = camera_.IntersectRayPlane(ray, grid.plane_);
@@ -176,8 +164,8 @@ void Editor::Update()
 				Hierarchy<Model> h;
 
 				h.type_ = HierarchyType::kModel; // タイプ
-				h.id_ = selectedHierarchyResource_.pathId_;
-				h.name_ = selectedHierarchyResource_.name_;
+				h.id_ = assetsPanel_.selectedHierarchyResource_.pathId_;
+				h.name_ = assetsPanel_.selectedHierarchyResource_.name_;
 
 				// WorldTransform座標決定
 				h.transform_ = std::make_unique<WorldTransform>();
@@ -191,7 +179,8 @@ void Editor::Update()
 				world->UpdateMatrix();
 
 
-				hierarchyModels_.push_back(std::move(h));
+				/* ヒエラルキ-モデル - 追加 */
+				hierarchyPanel_.AddHierarchyModel(h);
 
 			}
 
@@ -204,7 +193,6 @@ void Editor::Update()
 	if (insideScene &&
 		ImGui::IsMouseClicked(ImGuiMouseButton_Right) &&
 		!ImGui::GetIO().WantCaptureMouse &&
-		!ImGuizmo::IsOver() &&
 		!ImGuizmo::IsUsing()) {
 	
 		// スクリーンの大きさとスクリーン座標からから、レイ生成
@@ -219,7 +207,7 @@ void Editor::Update()
 		//* 配置モード
 		case ModelHierarchyMode::kCreateMode:
 
-			if (selectedHierarchyResource_.pathId_.empty()) break;
+			if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
 
 			// グリッドのplaneと判定
 			std::optional<Vector3> hit = camera_.IntersectRayPlane(ray, grid.plane_);
@@ -228,11 +216,11 @@ void Editor::Update()
 			if (hit.has_value()) {
 
 				// すべてのモデル
-				for (int i = 0; i < hierarchyModels_.size(); i++)
+				for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
 				{
 
 					// ヒエラルキからワールドのポインタ取得！
-					WorldTransform* world = static_cast<WorldTransform*>(hierarchyModels_.at(i).transform_.get());
+					WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i).transform_.get());
 
 					// だいたいの中心
 					float size = 1.0f;
@@ -245,7 +233,7 @@ void Editor::Update()
 					if (camera_.IntersectRayAABB(ray, aabb, distance)) {
 
 						/* 当たったヒエラルキモデルを削除 */
-						hierarchyModels_.erase(hierarchyModels_.begin() + i);
+						hierarchyPanel_.DeleteHierarchyModel(i);
 
 						break;
 					}
@@ -497,7 +485,25 @@ if (isEditorMode_) {
 
 		ImGui::Begin("Property");
 
-			ImGui::SeparatorText("Properthy");
+			/* 今開いてるシーン名 */
+			ImGui::Text("SceneName: %s", currentSceneName_.c_str());
+			ImGui::SameLine();
+
+
+			ImGui::InputText(" ", &currentSceneJsonPath);
+
+
+			// ロードボタン
+			if (ImGui::Button("Load")) {
+				// HierarchySave(currentSceneJsonPath);
+			}
+
+			ImGui::SameLine();
+
+			// セーブボタン
+			if (ImGui::Button("Save")) {
+				hierarchyPanel_.HierarchySave(currentSceneJsonPath);
+			}
 
 
 			// ワールド座標系に
@@ -511,14 +517,63 @@ if (isEditorMode_) {
 
 			Vector3 cameraRotation = ExtractRotation(viewMatrix, { 1.0f,1.0f,1.0f });
 
+			ImGui::Separator();
+
 			ImGui::Text("Camera WorldTransrate x:%3.2f y:%3.2f z:%3.2f ", cameraPosition.x, cameraPosition.y, cameraPosition.z);
 			ImGui::Text("Camera WorldRotation x:%3.2f y:%3.2f z:%3.2f ", cameraRotation.x, cameraRotation.y, cameraRotation.z);
+			
+			// カメラ位置コピー（小癪な・・）
+			if (ImGui::Button("Copy")) {
 
+				// 少数第3位までフォーマット
+				std::string tpos = "Vector3{"+
+					std::format("{:.3f}", cameraPosition.x) + "f," +
+					std::format("{:.3f}", cameraPosition.y) + "f," +
+					std::format("{:.3f}", cameraPosition.z) + "f}";
 
-			ImGui::Separator();
+				std::string trot = "Vector3{" +
+					std::format("{:.3f}", cameraRotation.x) + "f," +
+					std::format("{:.3f}", cameraRotation.y) + "f," +
+					std::format("{:.3f}", cameraRotation.z) + "f}";
+
+				std::string txt = tpos + "\n" + trot;
+
+				ImGui::SetClipboardText(txt.c_str());
+			}
+
 
 			ImGui::Text("hoi-ru %d", Input::GetInstance()->GetMouseWheel());
 			ImGui::Text("targetleng %f", selectedModelLength_);
+
+			ImGui::Separator();
+
+			// === グリッド設定
+			ImGui::SeparatorText("Grid");
+
+			// スナップ状態なら
+			if (grid.isSnap_) {
+
+				// 選択中は色変える
+				if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
+					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
+
+				bool b = ImGui::Button("MapCreateMode");
+
+				if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
+					ImGui::PopStyleColor();
+
+
+				if (b) {
+					// 切り替え
+					currentModelHierarchyMode_ == ModelHierarchyMode::kSelectMode ?
+						currentModelHierarchyMode_ = ModelHierarchyMode::kCreateMode :
+						currentModelHierarchyMode_ = ModelHierarchyMode::kSelectMode;
+
+				}
+			}
+
+		grid.ImGuiView();
+
 
 		ImGui::End();
 
@@ -528,7 +583,7 @@ if (isEditorMode_) {
 
 	// ヒエラルキーパネル
 	if (showHierarchy) {
-		HierarchyTab(showHierarchy);
+		hierarchyPanel_.ViewPanel(showHierarchy);
 	}
 
 	/* エフェクトタイムライン */
@@ -543,7 +598,7 @@ if (isEditorMode_) {
 
 	// アセットパネル
 	if (showAssets) {
-		AssetsTab(showAssets);
+		assetsPanel_.PanelView(showAssets);
 	}
 
 	//ImGui::End();
@@ -592,17 +647,17 @@ void Editor::Draw() {
 	if (Scene::GetSceneCamera() != nullptr) {
 
 		/* ヒエラルキーモデルの描画 */
-		for (Editor::Hierarchy<Model>& hierarchy : hierarchyModels_) {
+		for (const Hierarchy<Model>& hierarchy : hierarchyPanel_.GetHierarchyModels()) {
 
 			WorldTransform* world = static_cast<WorldTransform*>(hierarchy.transform_.get());
 
 			// マップで登録されたidと連携したモデルで描画
 			if (isEditorMode_) {
-				hierarchyModelResourceList_[hierarchy.id_]->Draw(*world, camera_);
+				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy.id_]->Draw(*world, camera_);
 			}
 			// エディターモードじゃなければ、シーンのカメラで描画する
 			else {
-				hierarchyModelResourceList_[hierarchy.id_]->Draw(*world, *Scene::GetSceneCamera());
+				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy.id_]->Draw(*world, *Scene::GetSceneCamera());
 			}
 
 		}
@@ -627,183 +682,6 @@ void Editor::Draw() {
 	//}
 
 
-}
-
-//
-void Editor::HierarchyTab(bool& show) {
-
-	// 新しくドロップされたパスを取得
-	auto paths =
-		FileDropManager::TakeFilePaths(FileType::kModel);
-
-	for (const auto& path : paths) {
-
-		// 絶対パス → resources/ 以下の相対パス
-		std::string relativePath =
-			FileDropManager::GetRelativePath(path);
-
-		// 相対パスが取得できなければスキップ
-		if (relativePath.empty()) {
-			continue;
-		}
-
-
-		//　モデルのIDの取得（モデルのパス）
-		std::string modelId = relativePath;
-
-		{// モデルの管理情報から、すでに登録されたIDのがあるかvector検索
-			
-			auto it = std::find_if(
-
-				hierarchyModelResouces_.begin(),
-				hierarchyModelResouces_.end(),
-
-				//* ラムダ式 *//
-				// ↓キャプチャ  ↓forのように取り出し
-				[&modelId](const auto& h) {
-					return h.pathId_ == modelId;
-				}
-			);
-
-			//* 見つかった
-			if (it != hierarchyModelResouces_.end()) {
-
-				// 登録せずサヨナラ
-				continue;
-			}
-		}
-
-
-		// モデル生成
-		Model* model = Model::CreateOBJ(relativePath);
-
-
-		// 読み込めた
-		if (model) {
-
-			/* モデルの管理情報の登録 */
-			ModelResource resource;
-
-			resource.pathId_ = relativePath;
-			resource.model_ = model;		// モデル登録
-
-			hierarchyModelResouces_.push_back(resource);
-			hierarchyModelResourceList_[resource.pathId_] = resource.model_;
-
-			/* モデルのヒエラルキ追加 */
-			Hierarchy<Model> h;
-
-			h.type_ = HierarchyType::kModel; // タイプ
-			h.id_ = resource.pathId_;
-			h.name_ = FileDropManager::GetFileNameWithoutExtension(path);// 表示名 拡張子を抜いたのを設定する
-
-			// WorldTransform初期化
-			h.transform_ = std::make_unique<WorldTransform>();
-			h.transform_->Initialize();
-
-			/* 初期座標とかあったらその都度っここに　今は０，０，０  */
-
-			hierarchyModels_.push_back(std::move(h));
-
-		}
-
-	}
-
-#ifdef USE_IMGUI
-
-	/* 色 */
-	ImGui::PushStyleColor(
-		ImGuiCol_WindowBg,
-		ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
-	);
-
-	if (ImGui::Begin("Hierarchy", &show)) {
-
-		/* 今開いてるシーン名 */
-		ImGui::Text("SceneName: %s",currentSceneName_.c_str());
-		ImGui::SameLine();
-
-
-		ImGui::InputText(" ", &currentSceneJsonPath);
-		
-
-		// ロードボタン
-		if (ImGui::Button("Load")) {
-			// HierarchySave(currentSceneJsonPath);
-		}
-
-		ImGui::SameLine();
-
-		// セーブボタン
-		if (ImGui::Button("Save")) {
-			HierarchySave(currentSceneJsonPath);
-		}
-
-		// === ヒエラルキー
-		ImGui::SeparatorText("Hierarchys");
-
-		// モデル一覧
-		if (ImGui::TreeNode("Models")) {
-
-			for (int i = 0; i < hierarchyModels_.size(); i++)
-			{
-	
-				ImGui::BulletText(hierarchyModels_.at(i).name_.c_str());
-
-				ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
-
-				ImGui::PushID(i);
-
-				// 削除ボタンを右寄りに配置（↑のおかげ
-				if (ImGui::Button("delete")) {
-
-					hierarchyModels_.erase(hierarchyModels_.begin() + i);
-					ImGui::PopID();
-					break;
-				}
-				ImGui::PopID();
-
-			
-			}
-
-		ImGui::TreePop();
-		}
-
-		// === グリッド設定
-		ImGui::SeparatorText("Grid");
-
-		// スナップ状態なら
-		if (grid.isSnap_) {
-
-			// 選択中は色変える
-			if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
-				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
-
-			bool b = ImGui::Button("MapCreateMode");
-
-			if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
-				ImGui::PopStyleColor();
-
-
-			if (b) {
-				// 切り替え
-				currentModelHierarchyMode_ == ModelHierarchyMode::kSelectMode ?
-					currentModelHierarchyMode_ = ModelHierarchyMode::kCreateMode :
-					currentModelHierarchyMode_ = ModelHierarchyMode::kSelectMode;
-				
-			}
-
-			
-		}
-
-		grid.ImGuiView();
-	}
-
-	ImGui::End();
-
-	// 色の
-	ImGui::PopStyleColor();
-#endif
 }
 
 void Editor::SelectModelUpdateView()
@@ -1083,169 +961,16 @@ void Editor::LightingManagerTab(bool& show) {
 void Editor::AssetsTab(bool& show)
 {
 
-#ifdef USE_IMGUI
-
-	/* 色 */
-	ImGui::PushStyleColor(
-		ImGuiCol_WindowBg,
-		ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
-	);
-
-	if (ImGui::Begin("Assets-Manager", &show)){
-
-
-		ImGui::SeparatorText("Models");
-
-		// === モデル
-		for (int i = 0; i < hierarchyModelResouces_.size(); i++)
-		{
-
-			//if (ImGui::TreeNode(hierarchyModelResouces_.at(i).name_.c_str())) {
-			//	// ここに何か書く
-			//	
-			//	ImGui::TreePop();
-			//}
-
-			Editor::ModelResource& resource = hierarchyModelResouces_.at(i);
-
-			/* 選択中は色変え */
-			if (selectedHierarchyResource_.pathId_ == hierarchyModelResouces_.at(i).pathId_) {
-				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
-				ImGui::BulletText(resource.name_.c_str());
-				ImGui::PopStyleColor();
-			}
-			else {
-				ImGui::BulletText(resource.name_.c_str());
-			}
-			
-
-			ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
-
-			ImGui::PushID(i);
-
-			if (ImGui::Button("Select")) {
-
-				selectedHierarchyResource_ = hierarchyModelResouces_.at(i);
-
-				ImGui::PopID();
-				break;
-			}
-			ImGui::PopID();
-
-			ImGui::SameLine();
-
-			ImGui::PushID(i);
-
-			// 選択されたヒエラルキモデルで追加ボタン
-			if (ImGui::Button("Add")) {
-
-				/* モデルのヒエラルキ追加 */
-				Hierarchy<Model> h;
-
-				h.type_ = HierarchyType::kModel; // タイプ
-				h.id_ = resource.pathId_;
-				h.name_ = resource.name_;// 表示名 拡張子を抜いたのを設定する
-
-				// WorldTransform初期化
-				h.transform_ = std::make_unique<WorldTransform>();
-				h.transform_->Initialize();
-
-				/* 初期座標とかあったらその都度っここに　今は０，０，０  */
-
-				hierarchyModels_.push_back(std::move(h));
-
-				ImGui::PopID();
-				break;
-			}
-
-			ImGui::PopID();
-
-
-		}
-
-	}
-
-	ImGui::End();
-
-	ImGui::PopStyleColor();
-#endif
 }
 
-void Editor::HierarchyLoad(const std::string jsonPath) {
 
-	// 読込み
-	if (SceneComponentLoader::GetInstance()->Load(jsonPath)) {
-
-		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
-
-		// ライト配置のロード
-		SceneComponentLoader::GetInstance()->LightLoad();
-
-		/* ヒエラルキー */
-		loder->BeginGroup("Grid");
-
-		loder->Property("translation", grid.translation_);
-		loder->Property("rotation", grid.rotation_);
-		loder->Property("isSnap", grid.isSnap_);
-
-		loder->EndGroup();
-		loder->LoadGroup("Grid");
-
-
-		/* ヒエラルキー */
-		loder->BeginGroup("Hierarchy");
-
-
-		// ヒエラルキのモデルのパスリスト 登録
-		loder->Property("ModelResources", hierarchyModelResouces_);
-
-		// ヒエラルキのモデル情報リスト 登録
-		loder->Property("ModelProperties",hierarchyModels_);
-
-
-		loder->EndGroup();
-		loder->LoadGroup("Hierarchy");
-	}
-
-
-	// 読み込んだモデルリソースのモデルを全て生成
-	for (ModelResource& r : hierarchyModelResouces_) {
-
-		r.model_ = Model::CreateOBJ(r.pathId_);
-
-		// モデルのポインタ登録
-		hierarchyModelResourceList_[r.pathId_] = r.model_;
-		r.name_ = FileDropManager::GetFileNameWithoutExtension(FileDropManager::ToWide(r.pathId_));// 表示名 拡張子を抜いたのを設定する
-	}
-
-
-}
-
-void Editor::HierarchySave(const std::string jsonPath) {
-
-	// ※注　ポインタ
-	SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
-
-	json& data = loder->GetJson();
-
-	// 必ず
-	SceneComponentLoader::GetInstance()->ClearJson();
-
-	// ライト配置のセーブ
-	SceneComponentLoader::GetInstance()->LightSave();
-
-	loder->SaveGroup("Grid");
-	loder->SaveGroup("Hierarchy");
-
-	SceneComponentLoader::GetInstance()->Save(jsonPath);
-}
 
 void Editor::EffectEditorTimeLine()
 {
 
 #ifdef USE_IMGUI
 
-	
+
 
 
 	/* 色 */
@@ -1275,7 +1000,7 @@ void Editor::EffectEditorTimeLine()
 	ImGui::InputInt("Frame Max", &effectSequencer_.mFrameMax);
 	ImGui::PopItemWidth();
 	Sequencer(&effectSequencer_, &currentFrame, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME);
-	
+
 	// add a UI to edit that particular item
 	if (selectedEntry != -1)
 	{
@@ -1290,6 +1015,7 @@ void Editor::EffectEditorTimeLine()
 	ImGui::PopStyleColor();
 #endif
 }
+
 
 Vector3 Editor::ExtractScale(const Matrix4x4& m)
 {
@@ -1348,10 +1074,10 @@ Vector3 Editor::ExtractRotation(const Matrix4x4& m, const Vector3& scale)
 }
 
 
-float Editor::ImGuizmoGrid::squareSize = 1.0f;
+float ImGuizmoGrid::squareSize = 1.0f;
 
 
-void Editor::ImGuizmoGrid::MatrixUpdate()
+void ImGuizmoGrid::MatrixUpdate()
 {
 	// 初期状態の法線（水平な平面の上方向）
 	Vector3 normal = { 0.0f, 1.0f, 0.0f };
@@ -1372,7 +1098,7 @@ void Editor::ImGuizmoGrid::MatrixUpdate()
 	worldMatrix = MakeAffineMatrix({1.0f,1.0f,1.0f}, rotation_, translation_);
 }
 
-void Editor::ImGuizmoGrid::ImGuiView()
+void ImGuizmoGrid::ImGuiView()
 {
 #ifdef USE_IMGUI
 
@@ -1405,7 +1131,7 @@ void Editor::ImGuizmoGrid::ImGuiView()
 #endif
 }
 
-Vector3  Editor::ImGuizmoGrid::snapGrid(Vector3 v){
+Vector3  ImGuizmoGrid::snapGrid(Vector3 v){
 
 	Vector3 result;
 

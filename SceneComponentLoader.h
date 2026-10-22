@@ -13,7 +13,7 @@
 #include "WorldTransform.h"
 #include "ScreenTransform.h"
 
-#include "Editor.h"
+#include "HierarchyPanel.h"
 
 #include <vector>
 #include "Model.h"
@@ -168,10 +168,10 @@ public:
 
 
 	// モデルの登録
-	void Property(const std::string& name, std::vector<Editor::Hierarchy< Model >> &value);
+	void Property(const std::string& name, std::vector<Hierarchy< Model >> &value);
 
 	//* モデルのIDやパスの登録
-	void Property(const std::string& name, std::vector< Editor::ModelResource >& value);
+	void Property(const std::string& name, std::vector< ModelResource >& value);
 
 private:
 

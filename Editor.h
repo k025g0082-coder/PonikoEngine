@@ -16,6 +16,12 @@
 
 #include "Camera.h"
 
+// 各パネル
+#include "HierarchyPanel.h"
+#include "AssetsPanel.h"
+
+// ...
+
 #include "SceneViewport.h"
 #include "Matrix.h"
 
@@ -26,6 +32,33 @@
 
 #include <memory>
 #include <unordered_map>
+
+
+/* グリッドの設定まとめ */
+class ImGuizmoGrid {
+
+public:
+	Matrix4x4 worldMatrix = MakeIdentity4x4();
+	float gridSize = 10.0f;
+	static float squareSize;
+	const unsigned int kSubdivision = 1;
+
+	Vector3 translation_;
+	Vector3 rotation_;
+
+	bool isSnap_ = false;
+
+	// 判定用のplane
+	Plane plane_;
+
+	void MatrixUpdate();
+	void ImGuiView();
+
+	// マスの大きさで割ったのを返す
+	static Vector3 snapGrid(Vector3 v);
+
+};
+
 
 class Editor
 {
@@ -42,45 +75,11 @@ public:
 	void Draw();
 
 
-	// タイプ
-	enum class HierarchyType {
-		kModel
+	/* モデル選択モード */
+	enum class ModelHierarchyMode {
+		kSelectMode, // 個別にサイズを調整できる
+		kCreateMode, // ドラッグで一気に配置
 	};
-
-	template <typename Type>
-
-	/* Hierarchy */
-	struct Hierarchy {
-
-		HierarchyType type_;
-		std::string name_;
-		std::string id_;   // IDなどあれば。モデルは↓のと連携する
-
-		// オブジェクトのアドレスのポインタ
-		Type* object = nullptr;
-		
-		// WorldTransform, ScreenTransformクラスの始祖。newしてキャストして使うw
-		std::unique_ptr<BaseTransform> transform_ = nullptr;
-
-	};
-
-
-	/*
-		モデルは管理idと登録されたヒエラルキのモデルとで繋げることにする
-	*/
-
-	//* モデルのパスやidなどのリソース情報
-	struct ModelResource {
-
-		std::string pathId_;     // パスおよびIDの意味を持つ
-
-		Model* model_ = nullptr; // モデルの実体
-		std::string name_;		 // 名前表示用
-
-	};
-
-	// シーンのJsonパスで保存
-	void HierarchyLoad(const std::string jsonPath);
 
 private:
 
@@ -90,68 +89,25 @@ private:
 	// デバッグ用
 	Camera camera_;
 
-
-	// Hierarchyタブ
-	void HierarchyTab(bool& show);
-
-	/* グリッドの設定まとめ */
-	struct ImGuizmoGrid {
-
-		Matrix4x4 worldMatrix = MakeIdentity4x4();
-		float gridSize = 10.0f;
-		static float squareSize;
-		const unsigned int kSubdivision = 1;
-
-		Vector3 translation_;
-		Vector3 rotation_;
-
-		bool isSnap_ = false;
-
-		// 判定用のplane
-		Plane plane_;
-
-		void MatrixUpdate();
-		void ImGuiView();
-
-		// マスの大きさで割ったのを返す
-		static Vector3 snapGrid(Vector3 v);
-
-	};
+	/* 各パネル */
+	HierarchyPanel hierarchyPanel_;
+	AssetsPanel assetsPanel_;
 
 	ImGuizmoGrid grid;
-
-
-	void HierarchySave(const std::string jsonPath);
-
+	
+	//* モデルSRT操作モード
 	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
-
 
 	// 今読み込んでるシーンのJsonパス
 	std::string currentSceneJsonPath;
 	std::string currentSceneName_;
 
-	// モデル
-	std::vector<Hierarchy<Model>> hierarchyModels_;
-
-	//* 各モデルのパスやIDをまとめたもの
-	std::vector<ModelResource> hierarchyModelResouces_;
-
-	//* 上のオブジェクトをパス名で登録しておく
-	std::unordered_map<std::string, Model*> hierarchyModelResourceList_;
-
-	/* モデル選択モード */
-	enum class ModelHierarchyMode {
-		kSelectMode, // 個別にサイズを調整できる
-		kCreateMode, // ドラッグで一気に配置
-	};
 
 	ModelHierarchyMode currentModelHierarchyMode_ = ModelHierarchyMode::kSelectMode;
 
 
 	// 選択中のモデルのワールドトランスフォーム
 	WorldTransform* selectedModelWorldTransform_ = nullptr;
-	Editor::ModelResource selectedHierarchyResource_;
-
 
 	// との距離
 	float selectedModelLength_ = 0.0f;
