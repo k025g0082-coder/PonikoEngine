@@ -290,7 +290,7 @@ void TestScene::Draw() {
 	
 	//text.drawString("test", {(float)testCombo ,(float)testCombo}, Text::TextAnchor::Center);
 
-	text2.drawString("textTest", TextAnchor::LeftTop);
+	//text2.drawString("textTest", TextAnchor::LeftTop);
 
 
 	// telop

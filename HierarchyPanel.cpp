@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <memory>
 
-void HierarchyPanel::Initialize(const std::string jsonPath, ImGuizmoGrid& g)
+void HierarchyPanel::Initialize(const std::string jsonPath, Grid& g)
 {	
 	grid = &g;
 
@@ -152,8 +152,16 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 		/* ヒエラルキー */
 		loder->BeginGroup("Grid");
 
+		loder->Property("gridWidth", grid->gridWidth_);
+		loder->Property("gridHeight", grid->gridHeight_);
+		loder->Property("gridDepth", grid->gridDepth_);
+
+		loder->Property("vertical", grid->vertical_);
+		loder->Property("horizontal", grid->horizontal_);
+
 		loder->Property("translation", grid->translation_);
 		loder->Property("rotation", grid->rotation_);
+
 		loder->Property("isSnap", grid->isSnap_);
 
 		loder->EndGroup();
@@ -174,7 +182,7 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 		loder->EndGroup();
 		loder->LoadGroup("Hierarchy");
 	}
-
+	grid->Update();
 
 	// 読み込んだモデルリソースのモデルを全て生成
 	for (ModelResource& r : hierarchyModelResouces_) {

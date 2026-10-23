@@ -35,23 +35,37 @@
 
 
 /* グリッドの設定まとめ */
-class ImGuizmoGrid {
+class Grid {
 
 public:
-	Matrix4x4 worldMatrix = MakeIdentity4x4();
-	float gridSize = 10.0f;
-	static float squareSize;
-	const unsigned int kSubdivision = 1;
+
+	Matrix4x4 rotationMatrix = MakeIdentity4x4();
+
+	static float gridWidth_;
+	static float gridHeight_;
+
+	//　？？
+	static float gridDepth_;
+
+
+	// 縦
+	int vertical_   = 10;
+
+	// 横
+	int horizontal_ = 10;
+
 
 	Vector3 translation_;
 	Vector3 rotation_;
 
 	bool isSnap_ = false;
 
-	// 判定用のplane
-	Plane plane_;
+	// 判定用のplane(縦横)
+	PlaneArea plane_;
 
-	void MatrixUpdate();
+	void Update();
+	void AddLine();
+
 	void ImGuiView();
 
 	// マスの大きさで割ったのを返す
@@ -103,7 +117,7 @@ private:
 	static HierarchyPanel hierarchyPanel_;
 	AssetsPanel assetsPanel_;
 
-	static ImGuizmoGrid grid;
+	static Grid grid;
 	
 	//* モデルSRT操作モード
 	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
@@ -155,5 +169,10 @@ private:
 
 	// カワイイスイッチ
 	bool ToggleSwitch(const char* label, bool* value);
+
+	void SaveIniFileToVector3(Vector3 v, const char* janre, const char* tag);
+	void LoadIniFileToVector3(Vector3& v, const char* janre, const char* tag);
+
+	bool ini = false;
 };
 

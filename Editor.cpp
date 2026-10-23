@@ -33,7 +33,7 @@
 #include <optional>
 
 HierarchyPanel Editor::hierarchyPanel_;
-ImGuizmoGrid Editor::grid;
+Grid Editor::grid;
 
 
 Editor* Editor::GetInstance() {
@@ -94,6 +94,22 @@ void Editor::Update()
 		LoadScene(relativePath);
 		currentSceneJsonPath = relativePath;
 	}
+
+
+	// 起動時にGameでSceneカメラ設定終わってからEditorModeのカメラせっていしたかたったのでこんなんなりました
+	if (!ini) {
+
+		if (isEditorMode_ && Scene::GetSceneCamera()) {
+
+			//* isEditor切り替えたときと一緒 *///
+			WinApp::GetInstance()->SetDragEnabled(true);
+
+			Scene::GetSceneCamera()->SetEditorMode(true);
+
+			ini = true;
+		}
+		
+	};
 
 
 	/* 常に更新するパネルの内容 */
@@ -382,13 +398,13 @@ void Editor::Update()
 			if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
 
 			// グリッドのplaneと判定
-			std::optional<Vector3> hit = camera_.IntersectRayPlane(ray, grid.plane_);
+			std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
 			
 			// 当たったら
 			if (hit.has_value()) {
 
 				// マスの大きさで割ったのを設定する
-				Vector3 sub =  ImGuizmoGrid::snapGrid(hit.value());
+				Vector3 sub =  Grid::snapGrid(hit.value());
 
 				///* モデルのヒエラルキ追加 */
 				Hierarchy<Model> h;
@@ -440,7 +456,7 @@ void Editor::Update()
 			if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
 
 			// グリッドのplaneと判定
-			std::optional<Vector3> hit = camera_.IntersectRayPlane(ray, grid.plane_);
+			std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
 
 			// 当たったら
 			if (hit.has_value()) {
@@ -493,23 +509,8 @@ void Editor::Update()
 
 	ImGuizmo::SetRect(0.0f, 0.0f, w, h);
 
-if (isEditorMode_) {
 
-		// グリッド？ヤバ
-		ImGuizmo::DrawGridCustom(
-			&camera_.GetViewMatrix().m[0][0],
-			&camera_.GetProjectionMatrix().m[0][0],
-			&grid.worldMatrix.m[0][0],
-			grid.gridSize,
-			grid.squareSize,
-			grid.kSubdivision
-		);
-
-
-		//DebugLine::GetInstance()->Draw(camera_);
-	}
-
-	ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
+	//ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
 
 	/*カメラ視点の回転 */
 
@@ -616,7 +617,7 @@ if (isEditorMode_) {
 					worldMat.m[3][2],
 				};
 
-				selectedModelWorldTransform_->translation_ = ImGuizmoGrid::snapGrid(translation);
+				selectedModelWorldTransform_->translation_ = Grid::snapGrid(translation);
 
 			}
 
@@ -659,12 +660,9 @@ void Editor::Draw() {
 
 	if (isEditorMode_) {
 
-		grid.MatrixUpdate();
+		grid.Update();
 
 		assetsPanel_.Draw();
-
-		// 平面描画　傾きはGridの傾きを回転行列として使う
-		DebugLine::DrawPlane(grid.plane_, grid.rotation_, { 1.0f,0,0,1.0f });
 
 		if (selectedModelWorldTransform_) {
 
@@ -680,9 +678,12 @@ void Editor::Draw() {
 
 			DebugLine::DrawAABB(aabb, { 1.0f,0,0,1.0f });
 
-
-			DebugLine::GetInstance()->Draw(camera_);
 		}
+
+		// グリッドの線追加
+		grid.AddLine();
+
+		DebugLine::GetInstance()->Draw(camera_);
 	}
 
 
@@ -732,39 +733,6 @@ void Editor::LoadScene(std::string path)
 	hierarchyPanel_.Initialize(path, grid);
 }
 
-void Editor::SaveIniFile()
-{
-	/* iniファイルの書き込み */
-
-	// 最後に触ったJsonパス
-	WritePrivateProfileStringA(
-		"Editor",
-		"LastJsonPath",
-		currentSceneJsonPath.c_str(),
-		".\\PonikoEngine.ini"
-	);
-
-}
-void Editor::LoadIniFile()
-{
-
-	/* iniファイルの読込 */
-
-	char buffer[MAX_PATH]{};
-
-	GetPrivateProfileStringA(
-		"Editor",
-		"LastJsonPath",
-		"",
-		buffer,
-		MAX_PATH,
-		".\\PonikoEngine.ini"
-	);
-
-	// 現在のシーンのパスに設定
-	currentSceneJsonPath = buffer;
-
-}
 
 void Editor::SelectModelUpdateView()
 {
@@ -812,7 +780,7 @@ void Editor::FreeMoveCamera()
 {
 	/* 移動 */
 	Vector3 move{ 0,0,0 };
-	float speed = 0.2f;
+	float speed = 0.4f;
 
 	if (Input::GetInstance()->PushKey(DIK_W)) {
 		move.z += speed;
@@ -1150,57 +1118,140 @@ Vector3 Editor::ExtractRotation(const Matrix4x4& m, const Vector3& scale)
 	return { rx, ry, rz };
 }
 
+float Grid::gridWidth_  = 1.0f;
+float Grid::gridHeight_ = 1.0f;
+float Grid::gridDepth_  = 0.1f;
 
-float ImGuizmoGrid::squareSize = 1.0f;
-
-
-void ImGuizmoGrid::MatrixUpdate()
+void Grid::Update()
 {
+
+	// オイラー角->回転行列->ベクトル変換
+	rotationMatrix = MakeRotationMatrix(rotation_);
+
+
 	// 初期状態の法線（水平な平面の上方向）
 	Vector3 normal = { 0.0f, 1.0f, 0.0f };
 
-	// オイラー角->回転行列->ベクトル変換
-	Matrix4x4 rotationMatrix = MakeRotationMatrix(rotation_);
+
+	// 判定用のplaneもグリッドに同期させる
+
+	plane_.width = gridWidth_ *  static_cast<float>(horizontal_);
+	plane_.height = gridHeight_ * static_cast<float>(vertical_);
+
+
+	// グリッドの中心（ローカル座標）
+	Vector3 localCenter = {
+		gridWidth_ * horizontal_ * 0.5f,
+		0.0f,
+		gridHeight_ * vertical_ * 0.5f
+	};
+
+	// 回転させてワールド座標へ
+	plane_.point =
+		TransformNormal(localCenter, rotationMatrix) + translation_;
 
 	// 法線を回転させる
 	plane_.normal = Normalize(
 		TransformNormal(normal, rotationMatrix)
 	);
 
-	//* 判定用の平面の法線はグリッドと同じにする
-	plane_.distance = gridSize;
-	plane_.point = translation_;
 
-	// SRT合成
-	worldMatrix = MakeAffineMatrix({1.0f,1.0f,1.0f}, rotation_, translation_);
+	plane_.width = gridWidth_ * static_cast<float>(horizontal_);
+	plane_.height = gridHeight_ * static_cast<float>(vertical_);
+
 }
 
-void ImGuizmoGrid::ImGuiView()
+void Grid::AddLine()
+{
+	
+	if (!isSnap_) return;
+
+	/* 升目描画 */
+		const Vector4 color = { 0.0f, 1.0f, 0.0f, 1.0f };
+
+		Vector3 offset = {
+			0.0f,
+			0.0f,
+			0.0f
+		};
+
+		// ローカル座標からワールド座標へ変換するラムÐ式
+		auto TransformGridPoint = [&](const Vector3& point) {
+
+			Vector3 local = point + offset;
+
+			// ローカル座標を回転させる
+			return TransformNormal(local, rotationMatrix) + translation_;
+			};
+
+		// X方向の線
+		for (int x = 0; x <= horizontal_; ++x) {
+			float posX = x * gridWidth_;
+
+			Vector3 start = { posX, 0.0f, 0.0f };
+			Vector3 end = { posX, 0.0f, vertical_ * gridHeight_ };
+
+			DebugLine::AddLine(
+				TransformGridPoint(start),
+				TransformGridPoint(end),
+				color
+			);
+		}
+
+		// Z方向の線
+		for (int z = 0; z <= vertical_; ++z) {
+			float posZ = z * gridHeight_;
+
+			Vector3 start = { 0.0f, 0.0f, posZ };
+			Vector3 end = { horizontal_ * gridWidth_, 0.0f, posZ };
+
+			DebugLine::AddLine(
+				TransformGridPoint(start),
+				TransformGridPoint(end),
+				color
+			);
+		}
+
+		// 判定用-平面描画　傾きはGridの傾きを回転行列として使う
+		DebugLine::DrawPlane(plane_, rotation_, { 1.0f,0,0,1.0f });
+
+
+}
+
+void Grid::ImGuiView()
 {
 #ifdef USE_IMGUI
 
-	ImGui::DragFloat("Grid Size", &gridSize, 0.1f, 1.0f, 5000.0f);
-	ImGui::DragFloat("Grid SquareSize", &squareSize, 1.0f, 1.0f,100.0f);
+	ImGui::DragInt("Grid-Vertical", &vertical_,1,1,500);
+	ImGui::DragInt("Grid-Horizontal", &horizontal_,1,1,500);
+
+	ImGui::DragFloat("Grid-width", &gridWidth_, 0.1f, 1.0f, 500.0f);
+	ImGui::DragFloat("Grid-height", &gridHeight_, 0.1f, 1.0f, 500.0f);
+
 	ImGui::DragFloat3("Grid Translation", &translation_.x, 0.1f);
+	ImGui::DragFloat3("plane point", &plane_.point.x, 0.1f);
 	ImGui::Separator();
 
-	//ImGui::DragFloat3("Plane pos", &plane_.point.x, 0.1f, 1.0f, 5000.0f);
-	//ImGui::DragFloat3("Plane normal", &plane_.normal.x, 0.1f, 1.0f, 5000.0f);
-
-	
 	ImGui::Checkbox("isSnap", &isSnap_);
 
 	ImGui::SeparatorText("RotateGrid");
 
 	if (ImGui::Button("x")) {
-		rotation_.x += std::numbers::pi_v<float> / 2.0f;
+		rotation_.x -= std::numbers::pi_v<float> / 2.0f;
 	}
 
 	ImGui::SameLine();
 
 	// 横に
 	if (ImGui::Button("y")) {
-		rotation_.y += std::numbers::pi_v<float> / 2.0f;
+		rotation_.y -= std::numbers::pi_v<float> / 2.0f;
+	}
+
+	ImGui::SameLine();
+
+	// 横に
+	if (ImGui::Button("z")) {
+		rotation_.z -= std::numbers::pi_v<float> / 2.0f;
 	}
 
 	ImGui::SameLine();
@@ -1208,51 +1259,208 @@ void ImGuizmoGrid::ImGuiView()
 #endif
 }
 
-Vector3  ImGuizmoGrid::snapGrid(Vector3 v){
+Vector3  Grid::snapGrid(Vector3 v){
 
 	Vector3 result;
 
-	result.x = std::floor(v.x / squareSize) * squareSize + squareSize / 2.0f;
-	result.y = std::floor(v.y / squareSize) * squareSize + squareSize / 2.0f;
-	result.z = std::floor(v.z / squareSize) * squareSize + squareSize / 2.0f;
+	result.x = std::floor(v.x / gridWidth_) * gridWidth_ + gridWidth_ / 2.0f;
+	result.y = std::floor(v.y / gridHeight_) * gridHeight_ + gridHeight_ / 2.0f;
+	result.z = std::floor(v.z / gridDepth_) * gridDepth_ + gridDepth_ / 2.0f;
 
 	// マスの大きさで割って配置
 	return result;
 
 }
-
 bool Editor::ToggleSwitch(const char* label, bool* value)
 {
 	ImVec2 p = ImGui::GetCursorScreenPos();
-	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
 
 	float height = ImGui::GetFrameHeight() - 0.2f;
 	float width = height * 2.0f;
-	float radius = height * 0.50f;
+	float radius = height * 0.5f;
 
 	ImGui::InvisibleButton(label, ImVec2(width, height));
-	if (ImGui::IsItemClicked())
-		*value = !*value;
 
-	float t = *value ? 1.0f : 0.0f;
+	// クリックした瞬間に状態を切り替える
+	bool clicked = ImGui::IsItemClicked();
 
-	ImGuiContext& g = *GImGui;
-	float ANIM_SPEED = 0.2f;
-
-	if (g.LastActiveId == g.CurrentWindow->GetID(label))// && g.LastActiveIdTimer < ANIM_SPEED)
+	if (clicked)
 	{
-		float t_anim = ImSaturate(g.LastActiveIdTimer / ANIM_SPEED);
-		t = *value ? (t_anim) : (1.0f - t_anim);
+		*value = !*value;
 	}
-	
-	ImU32 col_bg;
-	if (ImGui::IsItemHovered())
-		col_bg = ImGui::GetColorU32(ImLerp(ImVec4(0.78f, 0.78f, 0.78f, 1.0f), ImVec4(0.64f, 0.83f, 0.34f, 1.0f), t));
-	else
-		col_bg = ImGui::GetColorU32(ImLerp(ImVec4(0.85f, 0.85f, 0.85f, 1.0f), ImVec4(0.56f, 0.83f, 0.26f, 1.0f), t));
 
-	draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), col_bg, height * 0.5f);
-	draw_list->AddCircleFilled(ImVec2(p.x + radius + t * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
+	///* アニメーションの進行度を保存しとく　これによりうんたら
+	ImGuiStorage* storage = ImGui::GetStateStorage();
+	ImGuiID id = ImGui::GetID(label);
 
-	return *value;
+	float t = storage->GetFloat(id, *value ? 1.0f : 0.0f);
+	float target = *value ? 1.0f : 0.0f;
+
+	// 徐々に目標値へ近づける
+	float speed = 10.0f;
+	t = ImLerp(t, target, ImGui::GetIO().DeltaTime * speed);
+
+	// 目標値に十分近づいたら固定
+	if (std::abs(t - target) < 0.001f)
+	{
+		t = target;
+	}
+
+	storage->SetFloat(id, t);
+
+	// 背景色
+	ImVec4 offColor = ImGui::IsItemHovered()
+		? ImVec4(0.78f, 0.78f, 0.78f, 1.0f)
+		: ImVec4(0.85f, 0.85f, 0.85f, 1.0f);
+
+	ImVec4 onColor = ImGui::IsItemHovered()
+		? ImVec4(0.64f, 0.83f, 0.34f, 1.0f)
+		: ImVec4(0.56f, 0.83f, 0.26f, 1.0f);
+
+	ImU32 bgColor = ImGui::GetColorU32(
+		ImLerp(offColor, onColor, t)
+	);
+
+	drawList->AddRectFilled(
+		p,
+		ImVec2(p.x + width, p.y + height),
+		bgColor,
+		height * 0.5f
+	);
+
+	// つまみ
+	drawList->AddCircleFilled(
+		ImVec2(
+			p.x + radius + t * (width - radius * 2.0f),
+			p.y + radius
+		),
+		radius - 1.5f,
+		IM_COL32(255, 255, 255, 255)
+	);
+
+	/* 押した瞬間を返す */
+	return clicked;
+}
+
+
+void Editor::SaveIniFile()
+{
+	/* iniファイルの書き込み */
+
+	// isEditorMode
+	WritePrivateProfileStringA(
+		"Editor",
+		"isEditorMode",
+		isEditorMode_ ? "true" : "false",
+		".\\PonikoEngine.ini"
+	);
+
+	// 最後に触ったJsonパス
+	WritePrivateProfileStringA(
+		"Editor",
+		"LastJsonPath",
+		currentSceneJsonPath.c_str(),
+		".\\PonikoEngine.ini"
+	);
+
+	//* View行列からカメラのワールド行列を復元
+	Matrix4x4 cameraWorld = Inverse(camera_.GetViewMatrix());
+
+	// 位置設定
+	camera_.GetWorldTransform().translation_ = {
+		cameraWorld.m[3][0],
+		cameraWorld.m[3][1],
+		cameraWorld.m[3][2],
+	};
+	camera_.GetWorldTransform().rotation_ = ExtractRotation(cameraWorld,{1.0f,1.0f,1.0f});
+
+	// カメラの位置情報
+	SaveIniFileToVector3(camera_.GetWorldTransform().translation_, "DebugCamera", "translation");
+	SaveIniFileToVector3(camera_.GetWorldTransform().rotation_, "DebugCamera", "rotation");
+
+}
+void Editor::LoadIniFile()
+{
+
+	/* iniファイルの読込 */
+
+	char buffer[MAX_PATH]{};
+
+	// true / false読込
+	GetPrivateProfileStringA(
+		"Editor",
+		"IsEditorMode",
+		"false",
+		buffer,
+		sizeof(buffer),
+		".\\PonikoEngine.ini"
+	);
+
+	isEditorMode_ = (strcmp(buffer, "true") == 0);
+
+
+	GetPrivateProfileStringA(
+		"Editor",
+		"LastJsonPath",
+		"",
+		buffer,
+		MAX_PATH,
+		".\\PonikoEngine.ini"
+	);
+
+	// 現在のシーンのパスに設定
+	currentSceneJsonPath = buffer;
+
+	Vector3 translation;
+	Vector3 rotation;
+
+	// カメラの位置情報
+	LoadIniFileToVector3(translation, "DebugCamera", "translation");
+	LoadIniFileToVector3(rotation, "DebugCamera", "rotation");
+
+	// viewにして再設定
+	Matrix4x4 world = MakeAffineMatrix({ 1.0f,1.0f,1.0f }, rotation, translation);
+	camera_.SetViewMatrix(Inverse(world));
+}
+
+// Vector3書き込み
+void Editor::SaveIniFileToVector3(Vector3 v, const char* janre, const char* tag) {
+
+	// 文字列に変換
+	char buffer[256];
+
+	// 位置
+	sprintf_s(
+		buffer, sizeof(buffer),
+		"%f,%f,%f",
+		v.x, v.y, v.z
+	);
+	WritePrivateProfileStringA(
+		janre, tag, buffer, ".\\PonikoEngine.ini"
+	);
+}
+
+// Vector3読込み
+void Editor::LoadIniFileToVector3(Vector3& v, const char* janre, const char* tag){
+
+	char buffer[256]{};
+
+GetPrivateProfileStringA(
+	janre,
+	tag,
+	"0,0,0",
+	buffer,
+	sizeof(buffer),
+	".\\PonikoEngine.ini"
+);
+
+sscanf_s(
+	buffer,
+	"%f,%f,%f",
+	&v.x,
+	&v.y,
+	&v.z
+);
+
 }

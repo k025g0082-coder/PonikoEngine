@@ -123,6 +123,45 @@ void DebugLine::DrawPlane(const Plane& plane, const Vector3& rotation, const Vec
 	}
 }
 
+void DebugLine::DrawPlane(const PlaneArea& planeArea, const Vector3& rotation, const Vector4& color)
+{
+
+	// 平面の法線
+	Vector3 normal = Normalize(planeArea.normal);
+
+	// 平面中心
+	Vector3 center = planeArea.point;
+
+	// グリッドのローカルX軸を回転させる
+	Matrix4x4 rotationMatrix = MakeRotationMatrix(rotation);
+	Vector3 axis1 = Normalize(
+		TransformNormal({ 1.0f, 0.0f, 0.0f }, rotationMatrix)
+	);
+
+	// 法線とX軸から、もう一つの軸を作る
+	Vector3 axis2 = Normalize(Cross(normal, axis1));
+
+	float width = planeArea.width;
+	float height = planeArea.height;
+
+	// 四角形4頂点
+	Vector3 vertices[4];
+
+	float halfWidth = planeArea.width * 0.5f;
+	float halfHeight = planeArea.height * 0.5f;
+
+	vertices[0] = center + Multiply(halfWidth, axis1) + Multiply(halfHeight, axis2);
+	vertices[1] = center + Multiply(-halfWidth, axis1) + Multiply(halfHeight, axis2);
+	vertices[2] = center + Multiply(-halfWidth, axis1) + Multiply(-halfHeight, axis2);
+	vertices[3] = center + Multiply(halfWidth, axis1) + Multiply(-halfHeight, axis2);
+
+	// 線描画
+	for (int i = 0; i < 4; i++) {
+		int next = (i + 1) % 4;
+		AddLine(vertices[i], vertices[next], color);
+	}
+}
+
 
 void DebugLine::DrawAABB(const AABB& aabb, const Vector4& color) {
 

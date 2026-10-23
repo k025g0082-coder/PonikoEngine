@@ -53,13 +53,13 @@ struct ModelResource {
 
 };
 
-class ImGuizmoGrid;
+class Grid;
 
 class HierarchyPanel
 {
 public:
 
-	void Initialize(const std::string jsonPath ,ImGuizmoGrid& g);
+	void Initialize(const std::string jsonPath ,Grid& g);
 
 	// 常に更新
 	void Update();
@@ -130,7 +130,7 @@ private:
 
 
 	// エディターのグリッド
-	ImGuizmoGrid* grid = nullptr;
+	Grid* grid = nullptr;
 
 };
 

@@ -141,8 +141,8 @@ void WinApp::Initialize(const wchar_t* title, int32_t clientW, int32_t clientH) 
 	// ウインドウ表示
 	ShowWindow(hwnd_, SW_SHOW);
 
-	// ウインドウにファイルのドロップの有効化
-	DragAcceptFiles(hwnd_, TRUE);
+	// ウインドウにファイルのドロップは一旦無効
+	DragAcceptFiles(hwnd_, FALSE);
 
 
 	if (!hwnd_)

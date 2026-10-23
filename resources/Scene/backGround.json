@@ -1,4 +1,51 @@
 {
-    "Grid": null,
-    "Hierarchy": null
+    "Grid": {
+        "gridDepth": 0.10000000149011612,
+        "gridHeight": 1.0,
+        "gridWidth": 1.0,
+        "horizontal": 10,
+        "isSnap": false,
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "translation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "vertical": 10
+    },
+    "Hierarchy": {
+        "ModelProperties": [
+            {
+                "id": "resources/Models/player/player.obj",
+                "name": "player",
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "translation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "type": 0
+            }
+        ],
+        "ModelResources": [
+            {
+                "pathId": "resources/Models/player/player.obj"
+            }
+        ]
+    }
 }

@@ -115,7 +115,10 @@ public:
 		const Camera::Ray& ray,
 		const Plane& plane
 	);
-
+	std::optional<Vector3> IntersectRayPlaneArea(
+		const Camera::Ray& ray,
+		const PlaneArea& planeArea
+	);
 private:
 
 	// 初期カメラ位置

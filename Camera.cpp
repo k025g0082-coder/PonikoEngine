@@ -10,6 +10,9 @@ void Camera::Initialize() {
 	// 計算
 	UpdateMatrix();
 
+	// なるべく大きい値にしとく
+	farZ = 1000.0f;
+
 	// 一旦これ固定で
 	projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(WinApp::GetInstance()->GetClientWidth()) / float(WinApp::GetInstance()->GetClientHeight()), 0.1f, farZ);
 };
@@ -289,4 +292,61 @@ std::optional<Vector3> Camera::IntersectRayPlane(const Camera::Ray& ray, const P
 
 	/* 公式に則って当たった座標を返す */
 	return ray.origin + t * rayDirection;
+}
+
+std::optional<Vector3> Camera::IntersectRayPlaneArea(const Camera::Ray& ray, const PlaneArea& planeArea)
+{
+	/*
+	
+		当たった座標から２軸を投影して範囲内ならあたった判定らしい
+
+	*/
+	// 平面の法線
+	Vector3 normal = Normalize(planeArea.normal);
+	Vector3 rayDirection = Normalize(ray.direction);
+
+	// レイの方向と法線の内積
+	float denominator = Dot(rayDirection, normal);
+
+	// 0除算対策
+	if (std::abs(denominator) < 0.0001f) {
+		return std::nullopt;
+	}
+
+	// レイの始点から平面までの距離を求める
+	float t = Dot(
+		planeArea.point - ray.origin,
+		normal
+	) / denominator;
+
+	// レイの後方に交点がある
+	if (t < 0.0f) {
+		return std::nullopt;
+	}
+
+	// 交点
+	Vector3 hitPoint = ray.origin + t * rayDirection;
+
+
+	// 平面中心から交点へのベクトル
+	Vector3 offset = hitPoint - planeArea.point;
+
+	// ２軸
+	Vector3 axis1 = Normalize(Cross(
+		Vector3{ 0.0f, 0.0f, 1.0f },
+		normal
+	));
+	Vector3 axis2 = Normalize(Cross(normal, axis1));
+
+	// 平面の横・縦方向に投影
+	float x = Dot(offset, axis1);
+	float y = Dot(offset, axis2);
+
+	// 範囲外なら交差なし
+	if (std::abs(x) > planeArea.width * 0.5f ||
+		std::abs(y) > planeArea.height * 0.5f) {
+		return std::nullopt;
+	}
+
+	return hitPoint;
 }

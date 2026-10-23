@@ -36,6 +36,9 @@ public:
 	static void DrawPlane(const Plane& aabb, const Vector4& color);
 	static void DrawPlane(const Plane& aabb,const Vector3& rotation, const Vector4& color);
 
+	static void DrawPlane(const PlaneArea& planeArea,const Vector3& rotation, const Vector4& color);
+
+
 	// AABB描画(SceneのDraw内限定)
 	static void DrawAABB(const AABB& aabb, const Vector4& color);
 
