@@ -109,12 +109,12 @@ namespace PonikoEngine {
 
 			PostEffectManager::GetInstance()->BeginScene();
 
-
+		/*　Editor描画処理　*/
+				Editor::GetInstance()->Draw();
 				/*　Game更新処理　*/
 				Game::GetInstance()->Draw();
 
-				/*　Editor描画処理　*/
-				Editor::GetInstance()->Draw();
+		
 
 				// パーティクル
 				Particle::GetInstance()->Draw();

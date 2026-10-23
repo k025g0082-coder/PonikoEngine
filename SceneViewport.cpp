@@ -39,9 +39,12 @@ void SceneViewport::Draw()
 	renderTarget_->BeginRender();
 
 	// モデル描画。
-	for (Model* model : models_) {
-		model->Draw(camera_);
-	}
+	// 
+	//  20261023 なせかこれをDrawするとDrawの際にモデルが超白くなるバグ？あったのでOFFに
+	// 
+	//for (Model* model : models_) {
+	//	model->Draw(camera_);
+	//}
 
 	/* 描画終了. バリアーを元のPIXELSHADEＲに遷移させる */
 	renderTarget_->EndRender();

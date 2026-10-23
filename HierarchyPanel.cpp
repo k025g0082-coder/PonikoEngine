@@ -184,10 +184,14 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 	}
 	grid->Update();
 
+
 	// 読み込んだモデルリソースのモデルを全て生成
 	for (ModelResource& r : hierarchyModelResouces_) {
 
 		r.model_ = Model::CreateOBJ(r.pathId_);
+		
+		/* ライティングはデフォルトでON */
+		r.model_->SetLightSets();
 
 		// モデルのポインタ登録
 		hierarchyModelResourceList_[r.pathId_] = r.model_;

@@ -404,8 +404,28 @@ void Editor::Update()
 			if (hit.has_value()) {
 
 				// マスの大きさで割ったのを設定する
-				Vector3 sub =  Grid::snapGrid(hit.value());
+				Vector3 subPosition = Grid::snapGrid(hit.value());
 
+				bool break_ = false;
+
+				//* もしすでに同じ座標にあるヒエラルキーがある場合、配置せず引き返す（重複する配置の対策）
+				for (const Hierarchy<Model>& model : hierarchyPanel_.GetHierarchyModels()) {
+
+					/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
+					if (model.id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+						continue;
+
+					if (
+						subPosition.x == model.transform_.get()->translation_.x &&
+						subPosition.y == model.transform_.get()->translation_.y &&
+						subPosition.z == model.transform_.get()->translation_.z) {
+						break_ = true;
+						break;
+					}
+				}
+
+				if (break_) break;// breakの場合ここで
+			
 				///* モデルのヒエラルキ追加 */
 				Hierarchy<Model> h;
 
@@ -417,7 +437,7 @@ void Editor::Update()
 				h.transform_ = std::make_unique<WorldTransform>();
 
 				h.transform_->Initialize();
-				h.transform_->translation_ = { sub.x,sub.y,sub.z };
+				h.transform_->translation_ = { subPosition.x,subPosition.y,subPosition.z };
 
 				WorldTransform* world = static_cast<WorldTransform*>(h.transform_.get());
 				
@@ -464,6 +484,10 @@ void Editor::Update()
 				// すべてのモデル
 				for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
 				{
+					
+					/* 選択中以外の、アセット以外のIDのヒエラルキーは選択しない */
+					if (hierarchyPanel_.GetHierarchyModels().at(i).id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+						continue;
 
 					// ヒエラルキからワールドのポインタ取得！
 					WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i).transform_.get());
@@ -1227,6 +1251,7 @@ void Grid::ImGuiView()
 
 	ImGui::DragFloat("Grid-width", &gridWidth_, 0.1f, 1.0f, 500.0f);
 	ImGui::DragFloat("Grid-height", &gridHeight_, 0.1f, 1.0f, 500.0f);
+	ImGui::DragFloat("Grid-Depth", &gridDepth_, 0.1f, 1.0f, 500.0f);
 
 	ImGui::DragFloat3("Grid Translation", &translation_.x, 0.1f);
 	ImGui::DragFloat3("plane point", &plane_.point.x, 0.1f);

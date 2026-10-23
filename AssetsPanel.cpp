@@ -21,9 +21,6 @@ void AssetsPanel::PanelView(bool& show)
 
 	showView = &show;
 
-	// ウインドウ上にドロップされたモデルを追加
-	AddDropModel();
-
 	if (!selectedHierarchyResource_.pathId_.empty()) {
 		/* エフェクトビューポートの更新 */
 		selectedModelViewport_.Update();
@@ -46,26 +43,25 @@ void AssetsPanel::PanelView(bool& show)
 		for (int i = 0; i < hierarchyPanel_->GetHierarchyModelResources().size(); i++)
 		{
 
-			//if (ImGui::TreeNode(hierarchyModelResouces_.at(i).name_.c_str())) {
-			//	// ここに何か書く
-			//	
-			//	ImGui::TreePop();
-			//}
+
 
 			const ModelResource& resource = hierarchyPanel_->GetHierarchyModelResources().at(i);
 
-
-
 			/* 選択中は色変え */
-			if (selectedHierarchyResource_.pathId_ == resource.pathId_) {
+			if (selectedHierarchyResource_.pathId_ == resource.pathId_) 
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
-				ImGui::BulletText(resource.name_.c_str());
-				ImGui::PopStyleColor();
-			}
-			else {
-				ImGui::BulletText(resource.name_.c_str());
+
+			if (ImGui::TreeNode(resource.name_.c_str())) {
+
+				// ここに何か書く
+
+				
+				ImGui::TreePop();
 			}
 
+
+			if (selectedHierarchyResource_.pathId_ == resource.pathId_)
+				ImGui::PopStyleColor();
 
 			ImGui::SameLine(ImGui::GetWindowWidth() - 135.0f);
 
@@ -146,7 +142,10 @@ void AssetsPanel::PanelView(bool& show)
 }
 
 void AssetsPanel::Update()
-{}
+{
+	// ウインドウ上にドロップされたモデルを追加
+	AddDropModel();
+}
 
 void AssetsPanel::Draw()
 {
@@ -216,6 +215,10 @@ void AssetsPanel::AddDropModel()
 
 			resource.pathId_ = relativePath;
 			resource.model_ = model;		// モデル登録
+
+			//*  デフォルトでライトセット  *//
+			resource.model_->SetLightSets();
+
 			resource.name_ = FileDropManager::GetFileNameWithoutExtension(path);// 表示名 拡張子を抜いたのを設定する
 
 			// モデルリソース追加
@@ -235,6 +238,7 @@ void AssetsPanel::AddDropModel()
 			/* 初期座標とかあったらその都度っここに　今は０，０，０  */
 
 			hierarchyPanel_->AddHierarchyModel(h);
+
 
 		}
 

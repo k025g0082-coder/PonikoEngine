@@ -82,9 +82,6 @@
     <Filter Include="Engine\Source\imgui\misc">
       <UniqueIdentifier>{06b27da6-d2b1-4306-977b-b1b8a6b7c258}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Source\ヘッダー ファイル\Editor\Hierarchy">
-      <UniqueIdentifier>{1e4753ca-c761-484c-bded-8f2d0ae24d08}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinApp.cpp">
@@ -259,10 +256,10 @@
     <ClCompile Include="externals\imgui\misc\cpp\imgui_stdlib.cpp">
       <Filter>Engine\Source\imgui\misc</Filter>
     </ClCompile>
-    <ClCompile Include="HierarchyPanel.cpp">
-      <Filter>Engine\Source\ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="AssetsPanel.cpp">
+      <Filter>Engine\Source\ソース ファイル\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="HierarchyPanel.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor</Filter>
     </ClCompile>
   </ItemGroup>
@@ -401,9 +398,6 @@
     <ClInclude Include="LightingManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Engine\Source\ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="SceneComponentLoader.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
@@ -494,11 +488,14 @@
     <ClInclude Include="Plane.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="HierarchyPanel.h">
-      <Filter>Engine\Source\ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="AssetsPanel.h">
-      <Filter>Engine\Source\ヘッダー ファイル</Filter>
+      <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="HierarchyPanel.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
