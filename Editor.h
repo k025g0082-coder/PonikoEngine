@@ -142,5 +142,8 @@ private:
 
 	Vector3 ExtractScale(const Matrix4x4& m);
 	Vector3 ExtractRotation(const Matrix4x4& m, const Vector3& scale);
+
+	// カワイイスイッチ
+	bool ToggleSwitch(const char* label, bool* value);
 };
 

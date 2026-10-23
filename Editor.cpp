@@ -10,6 +10,7 @@
 
 #include "ImGuiManager.h"
 #include <misc/cpp/imgui_stdlib.h>
+#include <imgui_internal.h>
 
 #include "LightingManager.h"
 
@@ -75,6 +76,201 @@ void Editor::Update()
 	static bool showLighting = false;
 	static bool showEffectTimeline = false;
 	static bool showAssets = false;
+
+
+
+
+	/* メニュー表示 */
+	if (ImGui::BeginMainMenuBar()) {
+
+		if (ImGui::BeginMenu("Window")) {
+
+			ImGui::MenuItem("Property", nullptr, &showProperty);
+			ImGui::MenuItem("Hierarchy", nullptr, &showHierarchy);
+			ImGui::MenuItem("Assets", nullptr, &showAssets);
+			ImGui::MenuItem("EffectTimeline", nullptr, &showEffectTimeline);
+			ImGui::MenuItem("LightingManager", nullptr, &showLighting);
+
+			ImGui::EndMenu();
+		}
+
+		// Window の横に配置
+		ImGui::SameLine(60.0f);
+		ImGui::Text("DebugMode:");
+		ImGui::SameLine();
+		/* エディターモード起動 */
+		if (ToggleSwitch("Editor ", &isEditorMode_)) {
+
+			// 押された瞬間,メインカメラからviewをコピー
+			if (isEditorMode_) {
+				camera_.SetCamera(*Scene::GetSceneCamera());
+			}
+
+			//	 ON/OFF切り替え
+			Scene::GetSceneCamera()->SetEditorMode(isEditorMode_);
+
+		}
+		ImGui::SameLine(200.0f);
+
+		if (isEditorMode_) {
+
+			if (ImGui::Button("Translate")) {
+				operation_ = ImGuizmo::TRANSLATE;
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Rotate")) {
+				operation_ = ImGuizmo::ROTATE;
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Scale")) {
+				operation_ = ImGuizmo::SCALE;
+			}
+		}
+
+		ImGui::EndMainMenuBar();
+	}
+
+	// プロパティー
+	if (showProperty) {
+
+		/* 色 */
+		ImGui::PushStyleColor(
+			ImGuiCol_WindowBg,
+			ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
+		);
+
+		ImGui::Begin("Property",&showProperty);
+
+		/* 今開いてるシーン名 */
+		ImGui::Text("SceneName: %s", currentSceneName_.c_str());
+		ImGui::SameLine();
+
+
+		ImGui::InputText(" ", &currentSceneJsonPath);
+
+
+		// ロードボタン
+		if (ImGui::Button("Load")) {
+			hierarchyPanel_.HierarchyLoad(currentSceneJsonPath);
+		}
+
+		ImGui::SameLine();
+
+		// セーブボタン
+		if (ImGui::Button("Save")) {
+			hierarchyPanel_.HierarchySave(currentSceneJsonPath);
+		}
+
+
+		// ワールド座標系に
+		Matrix4x4 viewMatrix = Inverse(camera_.GetViewMatrix());
+
+		/* カメラから位置と回転を入手 */
+		Vector3 cameraPosition;
+		cameraPosition.x = viewMatrix.m[3][0];
+		cameraPosition.y = viewMatrix.m[3][1];
+		cameraPosition.z = viewMatrix.m[3][2];
+
+		Vector3 cameraRotation = ExtractRotation(viewMatrix, { 1.0f,1.0f,1.0f });
+
+		ImGui::Separator();
+
+		ImGui::Text("Camera WorldTransrate x:%3.2f y:%3.2f z:%3.2f ", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		ImGui::Text("Camera WorldRotation x:%3.2f y:%3.2f z:%3.2f ", cameraRotation.x, cameraRotation.y, cameraRotation.z);
+
+		// カメラ位置コピー（小癪な・・）
+		if (ImGui::Button("Copy")) {
+
+			// 少数第3位までフォーマット
+			std::string tpos = "Vector3{" +
+				std::format("{:.3f}", cameraPosition.x) + "f," +
+				std::format("{:.3f}", cameraPosition.y) + "f," +
+				std::format("{:.3f}", cameraPosition.z) + "f}";
+
+			std::string trot = "Vector3{" +
+				std::format("{:.3f}", cameraRotation.x) + "f," +
+				std::format("{:.3f}", cameraRotation.y) + "f," +
+				std::format("{:.3f}", cameraRotation.z) + "f}";
+
+			std::string txt = tpos + "\n" + trot;
+
+			ImGui::SetClipboardText(txt.c_str());
+		}
+
+
+		ImGui::Text("hoi-ru %d", Input::GetInstance()->GetMouseWheel());
+		ImGui::Text("targetleng %f", selectedModelLength_);
+
+		ImGui::Separator();
+
+		// === グリッド設定
+		ImGui::SeparatorText("Grid");
+
+		// スナップ状態なら
+		if (grid.isSnap_) {
+
+			// 選択中は色変える
+			if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
+				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
+
+			bool b = ImGui::Button("MapCreateMode");
+
+			if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
+				ImGui::PopStyleColor();
+
+
+			if (b) {
+				// 切り替え
+				currentModelHierarchyMode_ == ModelHierarchyMode::kSelectMode ?
+					currentModelHierarchyMode_ = ModelHierarchyMode::kCreateMode :
+					currentModelHierarchyMode_ = ModelHierarchyMode::kSelectMode;
+
+			}
+		}
+
+		grid.ImGuiView();
+
+
+		ImGui::End();
+
+		// 色の
+		ImGui::PopStyleColor();
+	}
+
+	/* 各パネルはEditormodeがONの場合表示させる */
+
+	if (isEditorMode_) {
+
+		// ヒエラルキーパネル
+		if (showHierarchy) {
+			hierarchyPanel_.ViewPanel(showHierarchy);
+		}
+
+		/* エフェクトタイムライン */
+		if (showEffectTimeline) {
+			EffectEditorTimeLine();
+		}
+
+		// ライティングパネル
+		if (showLighting) {
+			LightingManagerTab(showLighting);
+		}
+
+		// アセットパネル
+		if (showAssets) {
+			assetsPanel_.PanelView(showAssets);
+		}
+	}
+
+#endif
+
+	//*
+	if (!isEditorMode_) return;
+
 
 	ImVec2 mouse = ImGui::GetMousePos();
 
@@ -413,188 +609,6 @@ if (isEditorMode_) {
 			FreeMoveCamera();
 		}
 	}
-
-	/* メニュー表示 */
-	if (ImGui::BeginMainMenuBar()) {
-	
-		if (ImGui::BeginMenu("Window")) {
-
-			ImGui::MenuItem("Property", nullptr, &showProperty);
-			ImGui::MenuItem("Hierarchy", nullptr, &showHierarchy);
-			ImGui::MenuItem("Assets", nullptr, &showAssets);
-			ImGui::MenuItem("EffectTimeline", nullptr, &showEffectTimeline);
-			ImGui::MenuItem("LightingManager", nullptr, &showLighting);
-
-			ImGui::EndMenu();
-		}
-
-		// Window の横に配置
-		ImGui::SameLine(60.0f);
-
-		if (ImGui::Checkbox("Editor ", &isEditorMode_)) {
-
-			// 押された瞬間,メインカメラからviewをコピー
-			if (isEditorMode_) {
-				camera_.SetCamera(*Scene::GetSceneCamera());
-			}
-
-			//	 ON/OFF切り替え
-			Scene::GetSceneCamera()->SetEditorMode(isEditorMode_);
-
-		}
-		ImGui::SameLine(200.0f);
-
-		if (isEditorMode_) {
-
-			if (ImGui::Button("Translate")) {
-				operation_ = ImGuizmo::TRANSLATE;
-			}
-
-			ImGui::SameLine();
-
-			if (ImGui::Button("Rotate")) {
-				operation_ = ImGuizmo::ROTATE;
-			}
-
-			ImGui::SameLine();
-
-			if (ImGui::Button("Scale")) {
-				operation_ = ImGuizmo::SCALE;
-			}
-		}
-
-		ImGui::EndMainMenuBar();
-	}
-
-	// プロパティー
-	if (showProperty) {
-
-		/* 色 */
-		ImGui::PushStyleColor(
-			ImGuiCol_WindowBg,
-			ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
-		);
-
-		ImGui::Begin("Property");
-
-			/* 今開いてるシーン名 */
-			ImGui::Text("SceneName: %s", currentSceneName_.c_str());
-			ImGui::SameLine();
-
-
-			ImGui::InputText(" ", &currentSceneJsonPath);
-
-
-			// ロードボタン
-			if (ImGui::Button("Load")) {
-				 hierarchyPanel_.HierarchyLoad(currentSceneJsonPath);
-			}
-
-			ImGui::SameLine();
-
-			// セーブボタン
-			if (ImGui::Button("Save")) {
-				hierarchyPanel_.HierarchySave(currentSceneJsonPath);
-			}
-
-
-			// ワールド座標系に
-			Matrix4x4 viewMatrix = Inverse(camera_.GetViewMatrix());
-
-			/* カメラから位置と回転を入手 */
-			Vector3 cameraPosition;
-			cameraPosition.x = viewMatrix.m[3][0];
-			cameraPosition.y = viewMatrix.m[3][1];
-			cameraPosition.z = viewMatrix.m[3][2];
-
-			Vector3 cameraRotation = ExtractRotation(viewMatrix, { 1.0f,1.0f,1.0f });
-
-			ImGui::Separator();
-
-			ImGui::Text("Camera WorldTransrate x:%3.2f y:%3.2f z:%3.2f ", cameraPosition.x, cameraPosition.y, cameraPosition.z);
-			ImGui::Text("Camera WorldRotation x:%3.2f y:%3.2f z:%3.2f ", cameraRotation.x, cameraRotation.y, cameraRotation.z);
-			
-			// カメラ位置コピー（小癪な・・）
-			if (ImGui::Button("Copy")) {
-
-				// 少数第3位までフォーマット
-				std::string tpos = "Vector3{"+
-					std::format("{:.3f}", cameraPosition.x) + "f," +
-					std::format("{:.3f}", cameraPosition.y) + "f," +
-					std::format("{:.3f}", cameraPosition.z) + "f}";
-
-				std::string trot = "Vector3{" +
-					std::format("{:.3f}", cameraRotation.x) + "f," +
-					std::format("{:.3f}", cameraRotation.y) + "f," +
-					std::format("{:.3f}", cameraRotation.z) + "f}";
-
-				std::string txt = tpos + "\n" + trot;
-
-				ImGui::SetClipboardText(txt.c_str());
-			}
-
-
-			ImGui::Text("hoi-ru %d", Input::GetInstance()->GetMouseWheel());
-			ImGui::Text("targetleng %f", selectedModelLength_);
-
-			ImGui::Separator();
-
-			// === グリッド設定
-			ImGui::SeparatorText("Grid");
-
-			// スナップ状態なら
-			if (grid.isSnap_) {
-
-				// 選択中は色変える
-				if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
-					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
-
-				bool b = ImGui::Button("MapCreateMode");
-
-				if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
-					ImGui::PopStyleColor();
-
-
-				if (b) {
-					// 切り替え
-					currentModelHierarchyMode_ == ModelHierarchyMode::kSelectMode ?
-						currentModelHierarchyMode_ = ModelHierarchyMode::kCreateMode :
-						currentModelHierarchyMode_ = ModelHierarchyMode::kSelectMode;
-
-				}
-			}
-
-		grid.ImGuiView();
-
-
-		ImGui::End();
-
-		// 色の
-		ImGui::PopStyleColor();
-	}
-
-	// ヒエラルキーパネル
-	if (showHierarchy) {
-		hierarchyPanel_.ViewPanel(showHierarchy);
-	}
-
-	/* エフェクトタイムライン */
-	if (showEffectTimeline) {
-		EffectEditorTimeLine();
-	}
-
-	// ライティングパネル
-	if (showLighting) {
-		LightingManagerTab(showLighting);
-	}
-
-	// アセットパネル
-	if (showAssets) {
-		assetsPanel_.PanelView(showAssets);
-	}
-
-	//ImGui::End();
-#endif
 
 	// もしデバッグモードであれば、デバッグカメラのviewをメインカメラにコピー
 	if (isEditorMode_ && Scene::GetSceneCamera() != nullptr) {
@@ -1128,4 +1142,40 @@ Vector3  ImGuizmoGrid::snapGrid(Vector3 v){
 	// マスの大きさで割って配置
 	return result;
 
+}
+
+bool Editor::ToggleSwitch(const char* label, bool* value)
+{
+	ImVec2 p = ImGui::GetCursorScreenPos();
+	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+	float height = ImGui::GetFrameHeight() - 0.2f;
+	float width = height * 2.0f;
+	float radius = height * 0.50f;
+
+	ImGui::InvisibleButton(label, ImVec2(width, height));
+	if (ImGui::IsItemClicked())
+		*value = !*value;
+
+	float t = *value ? 1.0f : 0.0f;
+
+	ImGuiContext& g = *GImGui;
+	float ANIM_SPEED = 0.2f;
+
+	if (g.LastActiveId == g.CurrentWindow->GetID(label))// && g.LastActiveIdTimer < ANIM_SPEED)
+	{
+		float t_anim = ImSaturate(g.LastActiveIdTimer / ANIM_SPEED);
+		t = *value ? (t_anim) : (1.0f - t_anim);
+	}
+	
+	ImU32 col_bg;
+	if (ImGui::IsItemHovered())
+		col_bg = ImGui::GetColorU32(ImLerp(ImVec4(0.78f, 0.78f, 0.78f, 1.0f), ImVec4(0.64f, 0.83f, 0.34f, 1.0f), t));
+	else
+		col_bg = ImGui::GetColorU32(ImLerp(ImVec4(0.85f, 0.85f, 0.85f, 1.0f), ImVec4(0.56f, 0.83f, 0.26f, 1.0f), t));
+
+	draw_list->AddRectFilled(p, ImVec2(p.x + width, p.y + height), col_bg, height * 0.5f);
+	draw_list->AddCircleFilled(ImVec2(p.x + radius + t * (width - radius * 2.0f), p.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
+
+	return *value;
 }
