@@ -74,6 +74,16 @@ public:
 	// エンジン内のSceneの描画
 	void Draw();
 
+	/// <summary>
+	/// 特定のシーンを読み込む
+	/// </summary>
+	/// <param name="path">シーンの相対パス。例 resources/scene/OOXX.json</param>
+	static void LoadScene(std::string path);
+
+
+	// エンジン閉じる際の設定
+	void SaveIniFile();
+	void LoadIniFile();
 
 	/* モデル選択モード */
 	enum class ModelHierarchyMode {
@@ -90,10 +100,10 @@ private:
 	Camera camera_;
 
 	/* 各パネル */
-	HierarchyPanel hierarchyPanel_;
+	static HierarchyPanel hierarchyPanel_;
 	AssetsPanel assetsPanel_;
 
-	ImGuizmoGrid grid;
+	static ImGuizmoGrid grid;
 	
 	//* モデルSRT操作モード
 	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;

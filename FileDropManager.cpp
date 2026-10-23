@@ -7,7 +7,9 @@
 // 各拡張子とその対応タイプ
 std::unordered_map<std::wstring, FileType> FileDropManager::typeToExtension_ = {
     { L".obj", FileType::kModel },
+    { L".json", FileType::kJson },
 };
+
 std::vector<std::wstring> FileDropManager::droppedFilesList_[static_cast<size_t>(FileType::kTypeCount)]{};
 
 void FileDropManager::AddFilePath(std::wstring path) {

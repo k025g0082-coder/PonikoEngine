@@ -5,6 +5,8 @@
 
 #include "Input.h"
 
+#include "Editor.h"
+
 bool WinApp::isDropFile = false;
 
 // imguiで必要奴
@@ -56,6 +58,8 @@ LRESULT CALLBACK WinApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 		/* ウインドウにドロップされたファイルのパスをゲット */
 		case WM_DROPFILES: {
+			
+			DragAcceptFiles(hWnd, isDropFile);
 
 			if (isDropFile) {
 
@@ -78,7 +82,12 @@ LRESULT CALLBACK WinApp::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 			return 0;
 		}
-
+		
+		case WM_CLOSE:
+		{
+			// ウインドウが閉じられた際に実行
+			Editor::GetInstance()->SaveIniFile();
+		}
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;

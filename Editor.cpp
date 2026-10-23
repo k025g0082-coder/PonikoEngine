@@ -19,6 +19,8 @@
 //#include "Particle.h"
 //#include "EffectManager.h"
 
+#include "FileDropManager.h"
+
 #include "DebugLine.h"
 
 #include "Vector.h"
@@ -29,6 +31,9 @@
 #include <memory>
 #include <format>
 #include <optional>
+
+HierarchyPanel Editor::hierarchyPanel_;
+ImGuizmoGrid Editor::grid;
 
 
 Editor* Editor::GetInstance() {
@@ -41,7 +46,10 @@ void Editor::Initialize() {
 
 	camera_.Initialize();
 
-	currentSceneJsonPath = "resources/Scene/example.json";
+	
+	// エディタの設定読込
+	LoadIniFile();
+
 
 	// 各パネルの初期化
 	hierarchyPanel_.Initialize(currentSceneJsonPath,grid);
@@ -65,9 +73,33 @@ void Editor::Initialize() {
 void Editor::Update()
 {
 
+	// 新しくドロップされたシーンのJsonパスを取得
+	auto paths =
+		FileDropManager::TakeFilePaths(FileType::kJson);
+
+	for (const auto& path : paths) {
+
+		// 絶対パス → resources/ 以下の相対パス
+		std::string relativePath =
+			FileDropManager::GetRelativePath(path);
+
+		// 相対パスが取得できなければスキップ
+		if (relativePath.empty()) {
+			continue;
+		}
+
+		/* 
+			ここにエフェクト用のjsonだかを識別する何かをいつかかく
+		*/
+		LoadScene(relativePath);
+		currentSceneJsonPath = relativePath;
+	}
+
+
 	/* 常に更新するパネルの内容 */
 	hierarchyPanel_.Update();
 	assetsPanel_.Update();
+
 
 #ifdef USE_IMGUI
 
@@ -76,9 +108,6 @@ void Editor::Update()
 	static bool showLighting = false;
 	static bool showEffectTimeline = false;
 	static bool showAssets = false;
-
-
-
 
 	/* メニュー表示 */
 	if (ImGui::BeginMainMenuBar()) {
@@ -98,12 +127,21 @@ void Editor::Update()
 		ImGui::SameLine(60.0f);
 		ImGui::Text("DebugMode:");
 		ImGui::SameLine();
+
 		/* エディターモード起動 */
 		if (ToggleSwitch("Editor ", &isEditorMode_)) {
 
 			// 押された瞬間,メインカメラからviewをコピー
 			if (isEditorMode_) {
+				
+				////* ドロップ有効に
+				WinApp::GetInstance()->SetDragEnabled(true);
+
 				camera_.SetCamera(*Scene::GetSceneCamera());
+			}
+			else {
+				////* ドロップ無効に
+				WinApp::GetInstance()->SetDragEnabled(false);
 			}
 
 			//	 ON/OFF切り替え
@@ -686,6 +724,45 @@ void Editor::Draw() {
 	//	}
 	//}
 
+
+}
+
+void Editor::LoadScene(std::string path)
+{
+	hierarchyPanel_.Initialize(path, grid);
+}
+
+void Editor::SaveIniFile()
+{
+	/* iniファイルの書き込み */
+
+	// 最後に触ったJsonパス
+	WritePrivateProfileStringA(
+		"Editor",
+		"LastJsonPath",
+		currentSceneJsonPath.c_str(),
+		".\\PonikoEngine.ini"
+	);
+
+}
+void Editor::LoadIniFile()
+{
+
+	/* iniファイルの読込 */
+
+	char buffer[MAX_PATH]{};
+
+	GetPrivateProfileStringA(
+		"Editor",
+		"LastJsonPath",
+		"",
+		buffer,
+		MAX_PATH,
+		".\\PonikoEngine.ini"
+	);
+
+	// 現在のシーンのパスに設定
+	currentSceneJsonPath = buffer;
 
 }
 

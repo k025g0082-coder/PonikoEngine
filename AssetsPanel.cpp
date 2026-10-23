@@ -162,11 +162,6 @@ void AssetsPanel::Draw()
 void AssetsPanel::AddDropModel()
 {
 
-	
-	//* ドロップ有効に
-	WinApp::GetInstance()->SetDragEnabled(true);
-
-
 	// 新しくドロップされたパスを取得
 	auto paths =
 		FileDropManager::TakeFilePaths(FileType::kModel);
@@ -245,6 +240,4 @@ void AssetsPanel::AddDropModel()
 
 	}
 
-	////* ドロップ無効に
-	//WinApp::GetInstance()->SetDragEnabled(false);
 }

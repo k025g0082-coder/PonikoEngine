@@ -50,9 +50,9 @@ void HierarchyPanel::ViewPanel(bool& show)
 		ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
 	);
 
-	if (ImGui::Begin("Hierarchy",&show)) {
+	if (ImGui::Begin("Hierarchy", &show)) {
 
-		
+
 		// === ヒエラルキー
 		ImGui::SeparatorText("Hierarchys");
 
@@ -64,7 +64,7 @@ void HierarchyPanel::ViewPanel(bool& show)
 				// 選択中のは色変え
 				if (selectedModelIndex_.has_value() && selectedModelIndex_.value() == i) {
 					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
-					    ImGui::BulletText(hierarchyModels_.at(i).name_.c_str());
+					ImGui::BulletText(hierarchyModels_.at(i).name_.c_str());
 					ImGui::PopStyleColor();
 				}
 				else {
@@ -90,7 +90,7 @@ void HierarchyPanel::ViewPanel(bool& show)
 
 			ImGui::TreePop();
 		}
-
+	}
 
 	ImGui::End();
 
@@ -99,8 +99,6 @@ void HierarchyPanel::ViewPanel(bool& show)
 #endif
 }
 
-
-}
 void HierarchyPanel::Draw()
 {
 }
@@ -137,6 +135,8 @@ void HierarchyPanel::HierarchyClear()
 
 
 void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
+
+	if (jsonPath.empty()) return;
 
 	/* 前のヒエラルキ画面は初期化 */
 	HierarchyClear();
@@ -190,6 +190,8 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 }
 
 void HierarchyPanel::HierarchySave(const std::string jsonPath) {
+
+	if (jsonPath.empty()) return;
 
 	// ※注　ポインタ
 	SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
