@@ -19,6 +19,10 @@
 #include "Model.h"
 #include "Text.h"
 
+#include "Particle.h"
+#include "LightingManager.h"
+
+
 using json = nlohmann::json;
 
 
@@ -165,6 +169,14 @@ public:
 	// 特殊な型なので、これらはそれぞれオーバーライド
 	void Property(const std::string& name, Vector3& value);
 	void Property(const std::string& name, WorldTransform& value);
+
+	// パーティクル
+	void Property(const std::string& name, ParticleParam& value);
+
+	// ライト
+	void Property(const std::string& name, PointLightParam& value);
+	void Property(const std::string& name, SpotLightParam& value);
+	//void Property(const std::string& name, DirectionalLightParam& value);
 
 
 	// モデルの登録

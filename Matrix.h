@@ -14,6 +14,20 @@ Vector4 Lerp(const Vector4& a, const Vector4& b, float t);
 
 float LerpAngle(float a, float b, float t);
 
+// なめらかな補間
+float Smoothstep(float a, float b, float t);
+
+
+// targetがvalueにゆっくり追従 (線形補完
+float  Follow(float value, float target, float speed, float deltaTime);
+
+// targetがvalueにゆっくり追従 (線形補完
+Vector2 Follow(Vector2 value, Vector2 target, float speed, float deltaTime);
+
+// targetがvalueにゆっくり追従(線形補完
+Vector3 Follow(Vector3 value, Vector3 target, float speed, float deltaTime);
+
+
     // 行列の計算とか
 Matrix4x4 Multiply(const Matrix4x4& a, const Matrix4x4& b);
 
@@ -47,6 +61,7 @@ Vector2 Add(const Vector2& v1, const Vector2& v2);
 
 // 引き算
 Vector3 Subtract(const Vector3& v1, const Vector3& v2);
+Vector2 Subtract(const Vector2& v1, const Vector2& v2);
 
 // 　スカラー倍
 Vector3 Multiply(const Vector3& v, float scalar);
@@ -55,9 +70,17 @@ Vector3 Multiply(const Vector3& v, float scalar);
 float Dot(const Vector3& v1, const Vector3& v2);
 // 長さ
 float Length(const Vector3& v);
+
+
+// 正規化
+float Normalize(float value, float min, float max);
+
 // 正規化
 Vector3 Normalize(const Vector3& v);
+
+// 正規化
 Vector4 Normalize(const Vector4& v);
+
 
 Vector3 Cross(const Vector3& v1, const Vector3& v2);
 

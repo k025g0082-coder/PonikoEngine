@@ -199,17 +199,22 @@ public:
 	//}
 
 	// アニメ番号変更
-	void ChangeAnimeIndex(int index) {
+	void ChangeAnimeIndex(int index,bool isloop = true) {
 		
 		if (index < modelData.animations.size()) {
 			animationIndex_ = index;
 			animationTime_ = 0;
+			isLoop_ = isloop;
 		};
 	}
 
 	// アニメ一時停止か
 	void AnimationStop() { isAnimation_ = false; }
 	void AnimationPlay() { isAnimation_ = true; }
+
+	// 再生中か
+	bool IsAnimation() { return isAnimation_; }
+
 
 	// ループ設定
 	void SetAnimationLoop(bool b) { isLoop_ = b; }

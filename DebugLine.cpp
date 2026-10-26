@@ -52,10 +52,13 @@ void DebugLine::Initialize() {
 	*viewProjectionData_ = MakeIdentity4x4();
 }
 
-// 線追加
+// 線追加(デバッグのみ
 void DebugLine::AddLine(const Vector3& start, const Vector3& end, const Vector4& color){
+
+#ifdef _DEBUG
 	vertices_.push_back({ start, color });
 	vertices_.push_back({ end, color });
+#endif
 }
 
 void DebugLine::DrawPlane(const Plane& plane, const Vector4& color) {
@@ -313,6 +316,10 @@ void DebugLine::Draw(){
 	if (vertices_.empty()) {
 		return;
 	}
+
+	if (camera_ == nullptr)
+		return;
+
 
 	// 転送用データに書き込む
 	*viewProjectionData_ = Multiply(camera_->GetViewMatrix(), camera_->GetProjectionMatrix());

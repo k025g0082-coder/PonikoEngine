@@ -21,6 +21,8 @@ void EasingVec::Start(int t, float total, Vector2 start, Vector2 end) {
 
 	isEasing = true;
 
+	isFinished = false;
+
 	startPosVec2 = start;
 	endPosVec2 = end;
 

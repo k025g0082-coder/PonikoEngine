@@ -26,6 +26,8 @@
 #include "Vector.h"
 #include "Matrix.h"
 
+#include "Timer.h"
+
 #include <algorithm>
 #include <numbers>
 #include <memory>
@@ -183,7 +185,55 @@ void Editor::Update()
 			if (ImGui::Button("Scale")) {
 				operation_ = ImGuizmo::SCALE;
 			}
+
+			if (selectedModelWorldTransform_) {
+
+				// もしヒエラルキ移動ボタン押されたら
+				if (operation_ == ImGuizmo::TRANSLATE) {
+					ImGui::SameLine();
+					ImGui::Text("Translate:");
+					ImGui::SameLine();
+					ImGui::SetNextItemWidth(200.0f);
+					ImGui::DragFloat3(" ", &selectedModelWorldTransform_->translation_.x, 0.1f);
+				}
+				// もしヒエラルキ回転ボタン押されたら
+				if (operation_ == ImGuizmo::ROTATE) {
+					ImGui::SameLine();
+					ImGui::Text("Rotate:");
+					ImGui::SameLine();
+					ImGui::SetNextItemWidth(200.0f);
+					ImGui::DragFloat3(" ", &selectedModelWorldTransform_->rotation_.x, 0.1f);
+
+					ImGui::SameLine();
+					if (ImGui::Button("x")) {
+						selectedModelWorldTransform_->rotation_.x -= std::numbers::pi_v<float> / 4.0f;
+						selectedModelWorldTransform_->UpdateMatrix();
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("y")) {
+						selectedModelWorldTransform_->rotation_.y -= std::numbers::pi_v<float> / 4.0f;
+						selectedModelWorldTransform_->UpdateMatrix();
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("z")) {
+						selectedModelWorldTransform_->rotation_.z -= std::numbers::pi_v<float> / 4.0f;
+						selectedModelWorldTransform_->UpdateMatrix();
+					}
+				}
+					// もしヒエラルキ拡大ボタン押されたら
+					if (operation_ == ImGuizmo::SCALE) {
+						ImGui::SameLine();
+						ImGui::Text("Scale:");
+						ImGui::SameLine();
+						ImGui::SetNextItemWidth(200.0f);
+						ImGui::DragFloat3(" ", &selectedModelWorldTransform_->scale_.x, 0.1f);
+					}
+					
+
+				
+			}
 		}
+		
 
 		ImGui::EndMainMenuBar();
 	}
@@ -256,8 +306,10 @@ void Editor::Update()
 		}
 
 
-		ImGui::Text("hoi-ru %d", Input::GetInstance()->GetMouseWheel());
-		ImGui::Text("targetleng %f", selectedModelLength_);
+
+
+		
+		
 
 		ImGui::Separator();
 
@@ -288,6 +340,8 @@ void Editor::Update()
 
 		grid.ImGuiView();
 
+		ImGui::ColorEdit4("tuuti backcol", &notification_.backCol_.x);
+		ImGui::ColorEdit4("tuuti textcol", &notification_.textCol_.x);
 
 		ImGui::End();
 
@@ -325,6 +379,24 @@ void Editor::Update()
 	//*
 	if (!isEditorMode_) return;
 
+#ifdef USE_IMGUI
+
+	if (selectedModelWorldTransform_) {
+
+		// ペースト
+		if (Input::GetInstance()->TriggerKey(DIK_V)) {
+
+			selectedModelWorldTransform_ = hierarchyPanel_.PasteHierarchyModel();
+
+			// コピー処理が成功したタイミングで呼ぶ
+			notification_.PopText("Model Pasted!!",ImVec2(170.0f,30.0f));
+		}
+
+	}
+
+	// 通知のビョーガ
+	notification_.Draw();
+
 
 	ImVec2 mouse = ImGui::GetMousePos();
 
@@ -340,153 +412,43 @@ void Editor::Update()
 		mouse.y >= 0.0f &&
 		mouse.y <= height;
 
-	/* ImGuiの枠にかさならないよう左クリックを押された際の処理 */
+	/* ImGuiの枠にかさならない */
 	if (insideScene &&
-		ImGui::IsMouseClicked(ImGuiMouseButton_Left) &&
 		!ImGui::GetIO().WantCaptureMouse &&
 		!ImGuizmo::IsUsing()) {
 
-		// スクリーンの大きさとスクリーン座標からから、レイ生成
-		Camera::Ray ray = camera_.ScreenPointToRay( Vector2{ mouse.x,mouse.y },width,height );
-
-		float distance = 0.0f;
-
-		hierarchyPanel_.SetSelectedHierarchyModelIndex(std::nullopt);
-		selectedModelWorldTransform_ = nullptr;
-
-		//* モード別の処理　*//
-		switch (currentModelHierarchyMode_) {
+		/* 左クリックを押された際の処理 */
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 
 
-		//* 選択モード
-		case ModelHierarchyMode::kSelectMode:
+			// スクリーンの大きさとスクリーン座標からから、レイ生成
+			Camera::Ray ray = camera_.ScreenPointToRay(Vector2{ mouse.x,mouse.y }, width, height);
 
-			// すべてのモデル
-			for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
-			{
+			float distance = 0.0f;
 
-				// ヒエラルキからワールドのポインタ取得！
-				WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i).transform_.get());
+			hierarchyPanel_.SetSelectedHierarchyModelIndex(std::nullopt);
+			selectedModelWorldTransform_ = nullptr;
 
-				// だいたいの中心
-				float size = 1.0f;
-
-				AABB aabb;
-				aabb.min = Vector3{ -size, -size, -size } + world->translation_;
-				aabb.max = Vector3{ size,  size,  size } + world->translation_;
-
-				// モデルのAABBと判定
-				if (camera_.IntersectRayAABB(ray, aabb, distance)) {
-
-					hierarchyPanel_.SetSelectedHierarchyModelIndex(i);
-					selectedModelWorldTransform_ = world;
-
-					// ビューポートにモデルを追加
-					//effectViewport_.AddModel(hierarchyModels_.at(i).object);
-
-					// 選択中のモデルのview更新
-					SelectModelUpdateView();
-
-					break;
-				}
-			}
-			break;
-
-		//* 一気に配置モード
-		case ModelHierarchyMode::kCreateMode:
-
-			if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
-
-			// グリッドのplaneと判定
-			std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
-			
-			// 当たったら
-			if (hit.has_value()) {
-
-				// マスの大きさで割ったのを設定する
-				Vector3 subPosition = Grid::snapGrid(hit.value());
-
-				bool break_ = false;
-
-				//* もしすでに同じ座標にあるヒエラルキーがある場合、配置せず引き返す（重複する配置の対策）
-				for (const Hierarchy<Model>& model : hierarchyPanel_.GetHierarchyModels()) {
-
-					/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
-					if (model.id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
-						continue;
-
-					if (
-						subPosition.x == model.transform_.get()->translation_.x &&
-						subPosition.y == model.transform_.get()->translation_.y &&
-						subPosition.z == model.transform_.get()->translation_.z) {
-						break_ = true;
-						break;
-					}
-				}
-
-				if (break_) break;// breakの場合ここで
-			
-				///* モデルのヒエラルキ追加 */
-				Hierarchy<Model> h;
-
-				h.type_ = HierarchyType::kModel; // タイプ
-				h.id_ = assetsPanel_.selectedHierarchyResource_.pathId_;
-				h.name_ = assetsPanel_.selectedHierarchyResource_.name_;
-
-				// WorldTransform座標決定
-				h.transform_ = std::make_unique<WorldTransform>();
-
-				h.transform_->Initialize();
-				h.transform_->translation_ = { subPosition.x,subPosition.y,subPosition.z };
-
-				WorldTransform* world = static_cast<WorldTransform*>(h.transform_.get());
-				
-				// 位置更新
-				world->UpdateMatrix();
+			//* モード別の処理　*//
+			switch (currentModelHierarchyMode_) {
 
 
-				/* ヒエラルキ-モデル - 追加 */
-				hierarchyPanel_.AddHierarchyModel(h);
-
-			}
-
-			break;
-
-		}
-	}
-
-	/* ImGuiの枠にかさならないよう右クリックを押された際の処理 */
-	if (insideScene &&
-		ImGui::IsMouseClicked(ImGuiMouseButton_Right) &&
-		!ImGui::GetIO().WantCaptureMouse &&
-		!ImGuizmo::IsUsing()) {
-	
-		// スクリーンの大きさとスクリーン座標からから、レイ生成
-		Camera::Ray ray = camera_.ScreenPointToRay(Vector2{ mouse.x,mouse.y }, width, height);
-
-		float distance = 0.0f;
-
-
-		//* モード別の処理　*//
-		switch (currentModelHierarchyMode_) {
-
-		//* 配置モード
-		case ModelHierarchyMode::kCreateMode:
-
-			if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
-
-			// グリッドのplaneと判定
-			std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
-
-			// 当たったら
-			if (hit.has_value()) {
+			//* 選択モード
+			case ModelHierarchyMode::kSelectMode:
 
 				// すべてのモデル
 				for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
 				{
-					
-					/* 選択中以外の、アセット以外のIDのヒエラルキーは選択しない */
-					if (hierarchyPanel_.GetHierarchyModels().at(i).id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+					// もし選択中のモデルアセットがあった場合
+					if (!assetsPanel_.selectedHierarchyResource_.pathId_.empty()) {
+
+						/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
+						if (hierarchyPanel_.GetHierarchyModels().at(i).id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+							continue;
+					}
+
+					// 非表示なら選択もスキップ
+					if (!hierarchyPanel_.GetHierarchyModels().at(i).isView_)
 						continue;
 
 					// ヒエラルキからワールドのポインタ取得！
@@ -502,20 +464,156 @@ void Editor::Update()
 					// モデルのAABBと判定
 					if (camera_.IntersectRayAABB(ray, aabb, distance)) {
 
-						/* 当たったヒエラルキモデルを削除 */
-						hierarchyPanel_.DeleteHierarchyModel(i);
+						hierarchyPanel_.SetSelectedHierarchyModelIndex(i);
+						selectedModelWorldTransform_ = world;
+
+						// ビューポートにモデルを追加
+						//effectViewport_.AddModel(hierarchyModels_.at(i).object);
+
+						// 選択中のモデルのview更新
+						SelectModelUpdateView();
 
 						break;
 					}
 				}
+				break;
+
+				//* 一気に配置モード
+			case ModelHierarchyMode::kCreateMode:
+
+				if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
+
+				// グリッドのplaneと判定
+				std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
+
+				// 当たったら
+				if (hit.has_value()) {
+
+					// マスの大きさで割ったのを設定する
+					Vector3 subPosition = Grid::snapGrid(hit.value());
+
+					bool break_ = false;
+
+					//* もしすでに同じ座標にあるヒエラルキーがある場合、配置せず引き返す（重複する配置の対策）
+					for (const Hierarchy<Model>& model : hierarchyPanel_.GetHierarchyModels()) {
+
+						/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
+						if (model.id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+							continue;
+
+						if (
+							subPosition.x == model.transform_.get()->translation_.x &&
+							subPosition.y == model.transform_.get()->translation_.y &&
+							subPosition.z == model.transform_.get()->translation_.z) {
+							break_ = true;
+							break;
+						}
+					}
+
+					if (break_) break;// breakの場合ここで
+
+					///* モデルのヒエラルキ追加 */
+					Hierarchy<Model> h;
+
+					h.type_ = HierarchyType::kModel; // タイプ
+					h.id_ = assetsPanel_.selectedHierarchyResource_.pathId_;
+					h.name_ = assetsPanel_.selectedHierarchyResource_.name_;
+
+					// WorldTransform座標決定
+					h.transform_ = std::make_unique<WorldTransform>();
+
+					h.transform_->Initialize();
+					h.transform_->translation_ = { subPosition.x,subPosition.y,subPosition.z };
+
+					WorldTransform* world = static_cast<WorldTransform*>(h.transform_.get());
+					
+					h.isView_ = true;
+
+					// 位置更新
+					world->UpdateMatrix();
+
+
+					/* ヒエラルキ-モデル - 追加 */
+					hierarchyPanel_.AddHierarchyModel(h);
+
+				}
+
+				break;
+
 			}
-
-			break;
-
 		}
 
 
+		/* ImGuiの枠にかさならないよう右クリックを押された際の処理 */
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+
+
+			// スクリーンの大きさとスクリーン座標からから、レイ生成
+			Camera::Ray ray = camera_.ScreenPointToRay(Vector2{ mouse.x,mouse.y }, width, height);
+
+			float distance = 0.0f;
+
+
+			//* モード別の処理　*//
+			switch (currentModelHierarchyMode_) {
+
+			//* 選択モード
+			case ModelHierarchyMode::kSelectMode:
+
+				if (!selectedModelWorldTransform_) break;
+
+				hierarchyPanel_.DeleteHierarchyModel();
+				selectedModelWorldTransform_ = nullptr;
+
+				break;
+			//* 配置モード
+			case ModelHierarchyMode::kCreateMode:
+
+				if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
+
+				// グリッドのplaneと判定
+				std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
+
+				// 当たったら
+				if (hit.has_value()) {
+
+					// すべてのモデル
+					for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
+					{
+					
+						/* 選択中以外の、アセット以外のIDのヒエラルキーは選択しない */
+						if (hierarchyPanel_.GetHierarchyModels().at(i).id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+							continue;
+
+						// ヒエラルキからワールドのポインタ取得！
+						WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i).transform_.get());
+
+						// だいたいの中心
+						float size = 1.0f;
+
+						AABB aabb;
+						aabb.min = Vector3{ -size, -size, -size } + world->translation_;
+						aabb.max = Vector3{ size,  size,  size } + world->translation_;
+
+						// モデルのAABBと判定
+						if (camera_.IntersectRayAABB(ray, aabb, distance)) {
+
+							/* 当たったヒエラルキモデルを削除 */
+							hierarchyPanel_.DeleteHierarchyModel(i);
+
+							break;
+						}
+					}
+				}
+
+				break;
+
+			}
+
+		}
+
 	}
+
 
 
 	// ImGuizmoのフレーム開始
@@ -672,6 +770,7 @@ void Editor::Update()
 			FreeMoveCamera();
 		}
 	}
+#endif
 
 	// もしデバッグモードであれば、デバッグカメラのviewをメインカメラにコピー
 	if (isEditorMode_ && Scene::GetSceneCamera() != nullptr) {
@@ -716,6 +815,9 @@ void Editor::Draw() {
 
 		/* ヒエラルキーモデルの描画 */
 		for (const Hierarchy<Model>& hierarchy : hierarchyPanel_.GetHierarchyModels()) {
+
+			// 非表示なら描画スキップ
+			if (!hierarchy.isView_) continue;
 
 			WorldTransform* world = static_cast<WorldTransform*>(hierarchy.transform_.get());
 
@@ -1144,7 +1246,7 @@ Vector3 Editor::ExtractRotation(const Matrix4x4& m, const Vector3& scale)
 
 float Grid::gridWidth_  = 1.0f;
 float Grid::gridHeight_ = 1.0f;
-float Grid::gridDepth_  = 0.1f;
+float Grid::gridDepth_  = 1.0f;
 
 void Grid::Update()
 {
@@ -1170,9 +1272,20 @@ void Grid::Update()
 		gridHeight_ * vertical_ * 0.5f
 	};
 
+	Vector3 offset;
+	//if (isCenter_) {
+
+	//		offset = {
+	//			-gridWidth_ / 2.0f,
+	//			-gridHeight_ / 2.0f,
+	//			0
+	//		};
+
+	//}
+
 	// 回転させてワールド座標へ
-	plane_.point =
-		TransformNormal(localCenter, rotationMatrix) + translation_;
+		plane_.point =
+			TransformNormal(localCenter, rotationMatrix) + (translation_ + offset);
 
 	// 法線を回転させる
 	plane_.normal = Normalize(
@@ -1193,11 +1306,19 @@ void Grid::AddLine()
 	/* 升目描画 */
 		const Vector4 color = { 0.0f, 1.0f, 0.0f, 1.0f };
 
+		
 		Vector3 offset = {
 			0.0f,
 			0.0f,
 			0.0f
 		};
+		//if (isCenter_) {
+		//	offset = {
+		//		-gridWidth_ / 2.0f,
+		//		
+		//		0,-gridHeight_ / 2.0f,
+		//	};
+		//}
 
 		// ローカル座標からワールド座標へ変換するラムÐ式
 		auto TransformGridPoint = [&](const Vector3& point) {
@@ -1258,6 +1379,7 @@ void Grid::ImGuiView()
 	ImGui::Separator();
 
 	ImGui::Checkbox("isSnap", &isSnap_);
+	ImGui::Checkbox("isCenter", &isCenter_);
 
 	ImGui::SeparatorText("RotateGrid");
 
@@ -1283,14 +1405,27 @@ void Grid::ImGuiView()
 
 #endif
 }
+Vector3  Grid::translation_ = {0,0,0};
+bool Grid::isCenter_ = false;
 
-Vector3  Grid::snapGrid(Vector3 v){
+Vector3  Grid::snapGrid(Vector3 v) {
 
 	Vector3 result;
+	Vector3 offset;
 
-	result.x = std::floor(v.x / gridWidth_) * gridWidth_ + gridWidth_ / 2.0f;
+	if (isCenter_) {
+		offset = {
+			-gridWidth_ / 2.0f,
+			-gridHeight_ / 2.0f,
+			-gridHeight_ / 2.0f
+		};
+	};
+
+	result.x = std::floor(v.x / gridWidth_) * gridWidth_ + gridWidth_ / 2.0f,
 	result.y = std::floor(v.y / gridHeight_) * gridHeight_ + gridHeight_ / 2.0f;
 	result.z = std::floor(v.z / gridDepth_) * gridDepth_ + gridDepth_ / 2.0f;
+
+	result = result + offset;
 
 	// マスの大きさで割って配置
 	return result;
@@ -1389,6 +1524,14 @@ void Editor::SaveIniFile()
 		".\\PonikoEngine.ini"
 	);
 
+	// isCenter(Grid)
+	WritePrivateProfileStringA(
+		"Editor",
+		"isGridCenter",
+		grid.isCenter_ ? "true" : "false",
+		".\\PonikoEngine.ini"
+	);
+
 	//* View行列からカメラのワールド行列を復元
 	Matrix4x4 cameraWorld = Inverse(camera_.GetViewMatrix());
 
@@ -1436,6 +1579,20 @@ void Editor::LoadIniFile()
 
 	// 現在のシーンのパスに設定
 	currentSceneJsonPath = buffer;
+
+
+	// true / false読込
+	GetPrivateProfileStringA(
+		"Editor",
+		"isGridCenter",
+		"false",
+		buffer,
+		sizeof(buffer),
+		".\\PonikoEngine.ini"
+	);
+
+	grid.isCenter_ = (strcmp(buffer, "true") == 0);
+
 
 	Vector3 translation;
 	Vector3 rotation;
@@ -1488,4 +1645,94 @@ sscanf_s(
 	&v.z
 );
 
+}
+
+void Editor::DrawNotification(const char* text)
+{
+
+
+}
+
+void Editor::Notification::PopText(const char* t, ImVec2 s)
+{
+
+	text = t;
+	size = s;
+	endSize_.x = s.x;
+
+	isPop_ = true;
+
+	ease.Reset();
+	ease.Start(EasingVec::EASE_InOutExpo, easeTime * 60.0f, 0, endSize_.y);
+}
+
+// ここら辺ゴミコードすぎワロタ
+void Editor::Notification::Draw()
+{
+	if (!isPop_) return;
+
+	ease.Step();
+	size.y = ease.getEasingNum();
+
+	timer_ += Timer::GetDeltaTime() * 60.0f;
+
+	// フェードアウト開始
+	if (timer_ >= easeEndTime * 60.0f - easeTime * 60.0f) {
+		isClose = true;
+		ease.Reset();
+		ease.Start(EasingVec::EASE_OutBack, easeTime* 60.0f, endSize_.y, 0);
+	}
+	
+	// 終了
+	if (timer_ >= easeEndTime* 60.0f) {
+
+		isPop_ = false;
+		timer_ = 0;
+		size.y = 0;
+		ease.Reset();
+
+	}
+
+	/*
+		↑ｇｍ
+					( ᓀ‸ᓂ)
+		↓ネ申
+	*/
+
+	ImDrawList* drawList = ImGui::GetForegroundDrawList();
+
+	// 画面サイズ
+	ImVec2 displaySize = ImGui::GetIO().DisplaySize;
+
+	// 通知サイズ・位置
+	ImVec2 min = {
+		(displaySize.x - size.x) * 0.5f,
+		(displaySize.y - size.y) * 0.2f
+	};
+	ImVec2 max = {
+		min.x + size.x,
+		min.y + size.y
+	};
+
+	// 角丸の背景
+	drawList->AddRectFilled(
+		min,
+		max,
+		ImGui::GetColorU32(backCol_),
+		12.0f
+	);
+
+	// 文字
+	ImVec2 textSize = ImGui::CalcTextSize(text);
+
+	ImVec2 textPos = {
+		min.x + (size.x - textSize.x) * 0.5f,
+		min.y + (size.y - textSize.y) * 0.2f + 6.1f
+	};
+
+	drawList->AddText(
+		textPos,
+		ImGui::GetColorU32(textCol_),
+		text
+	);
 }

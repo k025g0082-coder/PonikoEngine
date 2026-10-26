@@ -43,13 +43,18 @@ void AssetsPanel::PanelView(bool& show)
 		for (int i = 0; i < hierarchyPanel_->GetHierarchyModelResources().size(); i++)
 		{
 
-
-
 			const ModelResource& resource = hierarchyPanel_->GetHierarchyModelResources().at(i);
+
+			int alpha = 255;
+
+			//// ひひょうじは薄く
+			//if (!selectedHierarchyResource_.isView_) {
+			//	alpha = 100;
+			//}
 
 			/* 選択中は色変え */
 			if (selectedHierarchyResource_.pathId_ == resource.pathId_) 
-				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
+				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, alpha));
 
 			if (ImGui::TreeNode(resource.name_.c_str())) {
 
@@ -63,11 +68,38 @@ void AssetsPanel::PanelView(bool& show)
 			if (selectedHierarchyResource_.pathId_ == resource.pathId_)
 				ImGui::PopStyleColor();
 
+			ImGui::SameLine(ImGui::GetWindowWidth() - 190.0f);
+
+			/* 見えるか */
+			ImGui::PushID(i);
+
+			if (!resource.isView_) {
+				if (ImGui::Button("ON")) {
+
+					// 紐づけられたモデルの表示非表示切り替え
+					hierarchyPanel_->ChangeHierarchyModelView(true, i);
+
+					ImGui::PopID();
+					break;
+				}
+			}
+			else {
+				if (ImGui::Button("OFF")) {
+
+					// 紐づけられたモデルの表示非表示切り替え
+					hierarchyPanel_->ChangeHierarchyModelView(false, i);
+
+					ImGui::PopID();
+					break;
+				}
+			}
+			ImGui::PopID();
+
 			ImGui::SameLine(ImGui::GetWindowWidth() - 135.0f);
+
 
 			/* モデルのリソース選択 */
 			ImGui::PushID(i);
-
 			if (ImGui::Button("Select")) {
 
 				// 
@@ -99,6 +131,8 @@ void AssetsPanel::PanelView(bool& show)
 				// WorldTransform初期化
 				h.transform_ = std::make_unique<WorldTransform>();
 				h.transform_->Initialize();
+
+				h.isView_ = true;
 
 				/* ヒエラルキ追加 */
 				hierarchyPanel_->AddHierarchyModel(h);
@@ -221,6 +255,20 @@ void AssetsPanel::AddDropModel()
 
 			resource.name_ = FileDropManager::GetFileNameWithoutExtension(path);// 表示名 拡張子を抜いたのを設定する
 
+			resource.isView_ = true;
+			
+			/* すでに同じ名前があったら */
+			int count = 2;
+			for (const ModelResource& r : hierarchyPanel_->GetHierarchyModelResources()) {
+
+				if (r.name_ == resource.name_) {
+
+					resource.name_ = r.name_ + "_" + std::to_string(count);
+					count++;
+
+				}
+			}
+
 			// モデルリソース追加
 			hierarchyPanel_->AddModelResource(resource);
 
@@ -230,6 +278,8 @@ void AssetsPanel::AddDropModel()
 			h.type_ = HierarchyType::kModel; // タイプ
 			h.id_ = resource.pathId_;
 			h.name_ = resource.name_;
+
+			h.isView_ = true;
 
 			// WorldTransform初期化
 			h.transform_ = std::make_unique<WorldTransform>();

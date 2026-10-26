@@ -16,7 +16,9 @@ public:
 	void Step();
 	void Reset();
 	float getEasingTime();
-	float getTime() { return time; };
+
+	// 経過時間 
+	float getTime() { return easingTime; };
 
 	float getEasingNum();
 
@@ -24,6 +26,8 @@ public:
 	Vector3 getEasingVec3();
 
 	bool getIsEasing() { return isEasing; };
+
+	// イージングがおわったか
 	bool getIsFinished() { return isFinished; };
 
 	enum easingType {

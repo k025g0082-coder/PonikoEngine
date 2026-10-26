@@ -1,12 +1,12 @@
 {
     "Grid": {
-        "gridDepth": 0.10000000149011612,
+        "gridDepth": 1.0,
         "gridHeight": 1.0,
         "gridWidth": 1.0,
         "horizontal": 10,
-        "isSnap": false,
+        "isSnap": true,
         "rotation": [
-            0.0,
+            -7.853981971740723,
             0.0,
             0.0
         ],
@@ -34,6 +34,28 @@
                         1.0
                     ],
                     "translation": [
+                        7.0,
+                        5.0,
+                        0.0
+                    ]
+                },
+                "type": -858993460
+            },
+            {
+                "id": "resources/Models/suzanne.obj",
+                "name": "suzanne",
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "translation": [
                         0.0,
                         0.0,
                         0.0
@@ -44,7 +66,12 @@
         ],
         "ModelResources": [
             {
+                "isView": true,
                 "pathId": "resources/Models/player/player.obj"
+            },
+            {
+                "isView": false,
+                "pathId": "resources/Models/suzanne.obj"
             }
         ]
     }

@@ -35,6 +35,9 @@ struct Hierarchy {
 	// WorldTransform, ScreenTransformクラスの始祖。newしてキャストして使うw
 	std::unique_ptr<BaseTransform> transform_ = nullptr;
 
+	// 見えるか
+	bool isView_ = false;
+
 };
 
 /*
@@ -50,6 +53,8 @@ struct ModelResource {
 
 	Model* model_ = nullptr; // モデルの実体
 	std::string name_;		 // 名前表示用
+
+	bool isView_ = true;	 // 表示非表示
 
 };
 
@@ -96,7 +101,16 @@ public:
 	void AddHierarchyModel(Hierarchy<Model>& h) { hierarchyModels_.push_back(std::move(h)); }
 
 	// ヒエラルキー - モデル削除
+	void DeleteHierarchyModel() { 
+		hierarchyModels_.erase(hierarchyModels_.begin() + selectedModelIndex_.value()); 
+		selectedModelIndex_ = std::nullopt;
+	}
+
 	void DeleteHierarchyModel(int index) { hierarchyModels_.erase(hierarchyModels_.begin() + index); }
+
+
+	// ヒエラルキー - モデルのペースト ペーストされたヒエラルキモデルのワールドのポインタを返す
+	WorldTransform* PasteHierarchyModel();
 
 
 	// モデルリソース - 追加
@@ -108,6 +122,10 @@ public:
 
 	// アセット削除（ここに描くなAssetPanelにかけ）
 	void DeleteHierarchyResouce(int index);
+
+
+	// モデル　表示非表示切り替え
+	void ChangeHierarchyModelView(bool b, int index);
 
 private:
 

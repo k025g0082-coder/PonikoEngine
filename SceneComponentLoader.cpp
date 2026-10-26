@@ -347,6 +347,201 @@ void SceneComponentLoader::Property(const std::string& name, WorldTransform& val
 	};
 }
 
+// パーティクル用設定
+void SceneComponentLoader::Property(
+	const std::string& name,
+	ParticleParam& value)
+{
+	properties_[currentGroup_][name] = {
+
+		// 保存
+		[this, &value, name](json& group) {
+			json data;
+
+			data["color"] = {
+				value.color.x,
+				value.color.y,
+				value.color.z,
+				value.color.w
+			};
+
+			data["speed"] = value.speed;
+			data["speedAmp"] = value.speedAmp;
+			data["gravity"] = value.gravity;
+			data["scaleAmpMin"] = value.scaleAmpMin;
+			data["scaleAmpMax"] = value.scaleAmpMax;
+			data["life"] = value.life;
+			data["isBilliboard"] = value.isBilliboard;
+			data["isDilute"] = value.isDilute;
+			data["blendMode"] = static_cast<int>(value.blendMode_);
+
+			group[name] = data;
+		},
+
+		// 読み込み
+		[&value, name](const json& group) {
+			if (!group.contains(name)) {
+				return;
+			}
+
+			const json& data = group.at(name);
+
+			if (data.contains("color") &&
+				data["color"].is_array() &&
+				data["color"].size() >= 4) {
+				value.color = {
+					data["color"][0].get<float>(),
+					data["color"][1].get<float>(),
+					data["color"][2].get<float>(),
+					data["color"][3].get<float>()
+				};
+			}
+
+			if (data.contains("speed"))
+				value.speed = data["speed"].get<float>();
+
+			if (data.contains("speedAmp"))
+				value.speedAmp = data["speedAmp"].get<float>();
+
+			if (data.contains("gravity"))
+				value.gravity = data["gravity"].get<float>();
+
+			if (data.contains("scaleAmpMin"))
+				value.scaleAmpMin = data["scaleAmpMin"].get<float>();
+
+			if (data.contains("scaleAmpMax"))
+				value.scaleAmpMax = data["scaleAmpMax"].get<float>();
+
+			if (data.contains("life"))
+				value.life = data["life"].get<int>();
+
+			if (data.contains("isBilliboard"))
+				value.isBilliboard = data["isBilliboard"].get<bool>();
+
+			if (data.contains("isDilute"))
+				value.isDilute = data["isDilute"].get<bool>();
+
+			if (data.contains("blendMode")) {
+				value.blendMode_ =
+					static_cast<BlendMode>(
+						data["blendMode"].get<int>());
+			}
+		}
+	};
+}
+
+
+/* ライツ */
+void SceneComponentLoader::Property(const std::string & name, PointLightParam & value)
+{
+	// 保存
+	properties_[currentGroup_][name] = {
+
+		// 保存
+		[this, &value, name](json& group) {
+
+			json data;
+
+			data["color"] = Vector4ToJson(value.color);
+			data["position"] = Vector3ToJson(value.position);
+			data["itensity"] = value.intensity;
+			data["radius"] = value.radius;
+
+			group[name] = data;
+		},
+
+		// 読み込み
+		[&value, name](const json& group) {
+
+			if (!group.contains(name)) {
+				return;
+			}
+			const json& data = group.at(name);
+
+			if (data.contains("color"))
+				value.color = JsonToVector4(data["color"]);
+
+			if (data.contains("position"))
+				value.position = JsonToVector3(data["position"]);
+
+			if (data.contains("itensity"))
+				value.intensity = data["itensity"].get<float>();
+
+			if (data.contains("radius"))
+				value.radius = data["radius"].get<float>();
+
+		}
+	};
+
+
+}
+
+/* スポットライト */
+void SceneComponentLoader::Property(
+	const std::string& name,
+	SpotLightParam& value)
+{
+	properties_[currentGroup_][name] = {
+
+		// 保存
+		[this, &value, name](json& group) {
+
+			json data;
+
+			data["color"] = Vector4ToJson(value.color);
+			data["position"] = Vector3ToJson(value.position);
+			data["intensity"] = value.intensity;
+			data["direction"] = Vector3ToJson(value.direction);
+
+			data["innerAngle"] = value.innerAngle;
+			data["outerAngle"] = value.outerAngle;
+
+			data["distance"] = value.distance;
+			data["falloff"] = value.falloff;
+
+			group[name] = data;
+		},
+
+		// 読み込み
+		[&value, name](const json& group) {
+
+			if (!group.contains(name)) {
+				return;
+			}
+
+			const json& data = group.at(name);
+
+			if (data.contains("color"))
+				value.color = JsonToVector4(data["color"]);
+
+			if (data.contains("position"))
+				value.position = JsonToVector3(data["position"]);
+
+			if (data.contains("intensity"))
+				value.intensity = data["intensity"].get<float>();
+
+			if (data.contains("direction"))
+				value.direction = JsonToVector3(data["direction"]);
+
+			if (data.contains("innerAngle"))
+				value.innerAngle = data["innerAngle"].get<float>();
+
+			if (data.contains("outerAngle"))
+				value.outerAngle = data["outerAngle"].get<float>();
+
+			if (data.contains("distance"))
+				value.distance = data["distance"].get<float>();
+
+			if (data.contains("falloff"))
+				value.falloff = data["falloff"].get<float>();
+		}
+	};
+}
+
+//void SceneComponentLoader::Property(const std::string & name, DirectionalLightParam & value)
+//{}
+
+
 void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarchy<Model>>& value) {
 
 	properties_[currentGroup_][name] = {
@@ -422,6 +617,7 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<ModelRe
 				json item;
 
 				item["pathId"] = resourceProp.pathId_;
+				item["isView"] = resourceProp.isView_;
 
 				group[name].push_back(item);
 
@@ -442,6 +638,13 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<ModelRe
 
 				modelResource.pathId_   = item.at("pathId").get<std::string>();
 
+				if (item.contains("isView")) {
+					modelResource.isView_ = item.at("isView").get<bool>();
+				}
+				else {
+					modelResource.isView_ = true;
+				}
+
 				// 既に同じIDがあるか検索
 				auto it = std::find_if(
 					value.begin(),
@@ -457,6 +660,7 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<ModelRe
 				}
 
 			}
+			
 		}
 	};
 }

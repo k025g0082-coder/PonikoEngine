@@ -125,6 +125,8 @@ struct ParticleParam {
 		"Screen"
 	};
 
+	float elapsedTime_ = 0.0f; // 一定間隔用
+
 	// ImGuiデバッグ用
 	void ImGuiView() {
 
