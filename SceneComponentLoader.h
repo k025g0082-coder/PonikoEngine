@@ -126,7 +126,10 @@ public:
 	void LightSave();
 
 	//こっちのシングルトンのほうのjsonDataは消えても、クラスの方のメンバの方のは消えないので中身をcleanしたいときに使う関数
-	void ClearJson() { jsonData_.clear(); }
+	void ClearJson() { 
+		jsonData_.clear();
+		jsonGroupNames_.clear();
+	}
 
 	// Effect内のParticleCompornentのセーブ
 	void EffectParticleCompornentSave(std::string tag, ParticleCompornent& param_);
@@ -135,7 +138,12 @@ public:
 
 	// グループ開始
 	void BeginGroup(const std::string& groupName) {
+
 		currentGroup_ = groupName;
+
+		// グループ名登録
+		jsonGroupNames_.push_back(groupName);
+	
 	}
 
 	// グループ終了
@@ -169,6 +177,9 @@ public:
 	// 特殊な型なので、これらはそれぞれオーバーライド
 	void Property(const std::string& name, Vector3& value);
 	void Property(const std::string& name, WorldTransform& value);
+	void Property(const std::string& name, ScreenTransform& value);
+	void Property(const std::string& name, Text& value);
+
 
 	// パーティクル
 	void Property(const std::string& name, ParticleParam& value);
@@ -185,9 +196,19 @@ public:
 	//* モデルのIDやパスの登録
 	void Property(const std::string& name, std::vector< ModelResource >& value);
 
+
+
+	// Property内で設定したもののImGUIセーブボタン配置
+	void SetImGuiSaveButton(std::string jsonPath);
+
+
 private:
 
 	json jsonData_;
+
+	// グループの名前を記録
+	std::vector<std::string> jsonGroupNames_;
+
 
 	// WorldTransform->Jsonの形式に変換
 	json WorldToJson(const WorldTransform& world);
@@ -224,12 +245,28 @@ private:
 
 	};
 
-	// タグー＞登録されてるタグのラムダ式の関数　というマップ
-	std::unordered_map<
-		std::string,
-		std::unordered_map<std::string, PropertyData>
-	> properties_;
+	/*　Jsonのデータと各グループに紐づけられた名前のロード・セーブ関数　*/
+	struct JsonData
+	{
+		json jsonData_;
 
+		// タグー＞登録されてるタグのラムダ式の関数　というマップ
+		std::unordered_map<
+			std::string,
+			std::unordered_map<std::string, PropertyData>
+		> properties_;
+
+	};
+
+	// .Jsonのファイルパス名から上の情報を得る
+	std::unordered_map<std::string, JsonData> JsonDatas_;
+
+	
+	/* 今開いているJsonのパス */
+	std::string currentJsonPath_;
+
+
+	//
 	std::string currentGroup_;
 	
 };

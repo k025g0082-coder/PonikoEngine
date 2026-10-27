@@ -361,10 +361,10 @@ void Model::UpdateAnimation() {
 		/*modelData.bones[boneIndex].localMatrix = modelData.bones[boneIndex].localBindMatrix;*/
 
 		Bone bone = modelData.bones[boneIndex];
-		DirectXUtility::Log("%f %f %f\n",
-			bone.localBindMatrix.a4,
-			bone.localBindMatrix.b4,
-			bone.localBindMatrix.c4);
+		//DirectXUtility::Log("%f %f %f\n",
+		//	bone.localBindMatrix.a4,
+		//	bone.localBindMatrix.b4,
+		//	bone.localBindMatrix.c4);
 	}
 
 	// 親子関係を基に計算する

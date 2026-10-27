@@ -7,17 +7,24 @@
 
 void Fade::Initialize() {
 
-	sprite.Initialize("resources/black100x100.png");
-	sprite.SetSize(
+	blackSprite.Initialize("resources/black100x100.png");
+	blackSprite.SetSize(
 		WinApp::GetInstance()->GetClientWidth(),
 		WinApp::GetInstance()->GetClientHeight());
-	sprite.SetPos({ 0.0f, 0.0f, 0.0f });
+	blackSprite.SetPos({ 0.0f, 0.0f, 0.0f });
+
+	whiteSprite.Initialize("resources/white100x100.png");
+	whiteSprite.SetSize(
+		WinApp::GetInstance()->GetClientWidth(),
+		WinApp::GetInstance()->GetClientHeight());
+	whiteSprite.SetPos({ 0.0f, 0.0f, 0.0f });
 
 };
 
 void Fade::Update() {
 
-	sprite.UpdateScreenTransform();
+	blackSprite.UpdateScreenTransform();
+	whiteSprite.UpdateScreenTransform();
 
 	// フェード状態による分岐
 	switch (status_) {
@@ -38,7 +45,8 @@ void Fade::Update() {
 
 		}
 		// 0.0fから1.0fの間で、経過時間がフェード継続時間に近づくほどアルファ値を大きくする
-		sprite.SetColorRGBA(Vector4(0, 0, 0, 1.0f - std::clamp(counter_ / duration_, 0.0f, 1.0f)));
+		blackSprite.SetColorRGBA(Vector4(0, 0, 0, 1.0f - std::clamp(counter_ / duration_, 0.0f, 1.0f)));
+		whiteSprite.SetColorRGBA(Vector4(1.0f, 1.0f, 1.0f, 1.0f - std::clamp(counter_ / duration_, 0.0f, 1.0f)));
 		
 		break;
 
@@ -55,7 +63,8 @@ void Fade::Update() {
 
 		}
 		// 0.0fから1.0fの間で、経過時間がフェード継続時間に近づくほどアルファ値を大きくする
-		sprite.SetColorRGBA(Vector4(0, 0, 0, std::clamp(counter_ / duration_, 0.0f, 1.0f)));
+		blackSprite.SetColorRGBA(Vector4(0, 0, 0, std::clamp(counter_ / duration_, 0.0f, 1.0f)));
+		whiteSprite.SetColorRGBA(Vector4(1.0f, 1.0f, 1.0f, std::clamp(counter_ / duration_, 0.0f, 1.0f)));
 
 		
 		break;
@@ -67,15 +76,21 @@ void Fade::Draw() {
 		return;
 	}
 
-	sprite.Draw();
-
+	// 色によって変え
+	if (fadeColor == FadeColor::kBlack) {
+		blackSprite.Draw();
+	}
+	else {
+		whiteSprite.Draw();
+	}
 };
 
-void Fade::Start(Status status, float duration) { 
+void Fade::Start(Status status, float duration, FadeColor color) {
 
 	isFading_ = true;
 
 	status_ = status;
+	fadeColor = color;
 	duration_ = duration;
 	counter_ = 0.0f;
 }

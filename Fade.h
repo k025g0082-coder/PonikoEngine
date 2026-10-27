@@ -7,6 +7,8 @@ public:
 	void Update();
 	void Draw();
 
+
+
 	// フェードの状態
 	enum class Status {
 		None, // フェードなし
@@ -15,8 +17,18 @@ public:
 	};
 	Status status_ = Status::None;
 
+
+	// 色
+	enum class FadeColor {
+		None,
+		kBlack,
+		kWhite,
+	};
+	FadeColor fadeColor = FadeColor::None;
+
+
 	// フェード開始
-	void Start(Status status, float dration);
+	void Start(Status status, float dration,FadeColor color = FadeColor::kBlack);
 	void Stop();
 
 	// 再生ちゅうか
@@ -26,7 +38,8 @@ public:
 	bool IsFinished() const;
 
 private:
-	Sprite sprite;
+	Sprite blackSprite;
+	Sprite whiteSprite;
 
 	float duration_ = 0.0f; // 計測時間
 	float counter_ = 0.0f;  // 経過時間カウンター

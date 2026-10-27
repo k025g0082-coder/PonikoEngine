@@ -1,6 +1,7 @@
 #include "SceneComponentLoader.h"
 
 #include "LightingManager.h"
+#include "ImGuiManager.h"
 
 SceneComponentLoader* SceneComponentLoader::GetInstance() {
 	static SceneComponentLoader instance;
@@ -9,6 +10,9 @@ SceneComponentLoader* SceneComponentLoader::GetInstance() {
 
 bool SceneComponentLoader::Load(const std::string& filePath)
 {
+	// 以前のJsonの内容のをクリア
+	///ClearJson();
+
 	std::ifstream file(filePath);
 
 	if (!file.is_open()) {
@@ -21,6 +25,8 @@ bool SceneComponentLoader::Load(const std::string& filePath)
 	catch (const json::parse_error&) {
 		return false;
 	}
+
+
 
 	return true;
 }
@@ -287,16 +293,19 @@ void SceneComponentLoader::LightLoad() {
 
 
 void SceneComponentLoader::SaveGroup(const std::string& groupName) {
+	
 	json& group = jsonData_[groupName];
 
 	// 登録されたsave関数をすべて実行
-	for (auto& [name, property] : properties_[groupName]) {
+	for (auto& [name, property] : JsonDatas_[currentJsonPath_].properties_[groupName]) {
 		property.save(group);
 	}
 }
 
 // グループ読み込み
 void SceneComponentLoader::LoadGroup(const std::string& groupName) {
+
+
 	if (!jsonData_.contains(groupName)) {
 		return;
 	}
@@ -304,7 +313,7 @@ void SceneComponentLoader::LoadGroup(const std::string& groupName) {
 	const json& group = jsonData_[groupName];
 
 	// 登録されたload関数をすべて実行
-	for (auto& [name, property] : properties_[groupName]) {
+	for (auto& [name, property] : JsonDatas_[currentJsonPath_].properties_[groupName]) {
 		property.load(group);
 	}
 }
@@ -312,7 +321,7 @@ void SceneComponentLoader::LoadGroup(const std::string& groupName) {
 
 void SceneComponentLoader::Property(const std::string& name, Vector3& value) {
 
-	properties_[currentGroup_][name] = {
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
 		[this, &value, name](json& group) {
 			group[name] = Vector3ToJson(value);
 		},
@@ -326,7 +335,7 @@ void SceneComponentLoader::Property(const std::string& name, Vector3& value) {
 
 void SceneComponentLoader::Property(const std::string& name, WorldTransform& value) {
 
-	properties_[currentGroup_][name] = {
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
 
 		[this, &value, name](json& group) {
 			group[name] = WorldToJson(value);
@@ -347,12 +356,80 @@ void SceneComponentLoader::Property(const std::string& name, WorldTransform& val
 	};
 }
 
+void SceneComponentLoader::Property(const std::string& name, ScreenTransform& value)
+{
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
+
+	[this, &value, name](json& group) {
+		group[name] = {
+			{ "scale",  Vector3ToJson(value.scale_) },
+			{ "rotation", Vector3ToJson(value.rotation_) },
+			{ "translation",Vector3ToJson(value.translation_) }
+		};
+	},
+
+	[this, &value, name](const json& group) {
+
+		if (group.contains(name)) {
+
+			ScreenTransform screen;
+			screen.Initialize();
+
+			screen.scale_ = JsonToVector3(group[name]["scale"]);
+			screen.rotation_ = JsonToVector3(group[name]["rotation"]);
+			screen.translation_ = JsonToVector3(group[name]["translation"]);
+
+			screen.UpdateMatrix();
+
+			// 代入？出来てる？
+			value = screen;
+		}
+	}
+	};
+}
+
+void SceneComponentLoader::Property(const std::string& name, Text& value)
+{
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
+
+	// セーブ
+	[this, &value, name](json& group) {
+		group[name] = TextDatasToJson(value.GetTextDatas());
+	},
+
+	// 読み取り
+	[this, &value, name](const json& group) {
+
+		if (group.contains(name)) {
+
+			value.setFont("default");
+			value.SetFontSize(20);
+			}
+
+			TextDatas data = JsonToTextDatas(group[name]);
+
+			value.SetTextDatas(data);
+
+			value.setFont(data.fontName);
+		}
+	};
+}
+
+
+// === テキスト用
+void LoadTextData(std::string tag, Text* text) {
+
+	
+
+}
+
+
 // パーティクル用設定
 void SceneComponentLoader::Property(
 	const std::string& name,
 	ParticleParam& value)
 {
-	properties_[currentGroup_][name] = {
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
 
 		// 保存
 		[this, &value, name](json& group) {
@@ -435,7 +512,7 @@ void SceneComponentLoader::Property(
 void SceneComponentLoader::Property(const std::string & name, PointLightParam & value)
 {
 	// 保存
-	properties_[currentGroup_][name] = {
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
 
 		// 保存
 		[this, &value, name](json& group) {
@@ -481,7 +558,7 @@ void SceneComponentLoader::Property(
 	const std::string& name,
 	SpotLightParam& value)
 {
-	properties_[currentGroup_][name] = {
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
 
 		// 保存
 		[this, &value, name](json& group) {
@@ -544,7 +621,7 @@ void SceneComponentLoader::Property(
 
 void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarchy<Model>>& value) {
 
-	properties_[currentGroup_][name] = {
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
 
 		// save
 		[this, &value, name](json& group) {
@@ -604,7 +681,7 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarc
 // 
 void SceneComponentLoader::Property(const std::string& name, std::vector<ModelResource>& value) {
 
-	properties_[currentGroup_][name] = {
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
 
 		// save
 		[this, &value, name](json& group) {
@@ -663,6 +740,31 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<ModelRe
 			
 		}
 	};
+}
+
+bool SceneComponentLoader::SwitchJson(std::string jsonPath)
+{
+
+	if (JsonDatas_.contains(currentJsonPath_))
+
+	return false;
+}
+
+void SceneComponentLoader::SetImGuiSaveButton(std::string jsonPath)
+{
+	// もしそのファイルパス名なかったら
+	if (!JsonDatas_.contains(jsonPath)) return;
+
+#ifdef USE_IMGUI
+	if (ImGui::Button("Save")) {
+
+		// 登録したGroupを一括でセーブ
+		for (std::string groupName : jsonGroupNames_) {
+			SaveGroup(groupName);
+		}
+	}
+	
+#endif
 }
 
 

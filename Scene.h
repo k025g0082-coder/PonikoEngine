@@ -42,6 +42,7 @@ public:
 
 	/* ゲーム内で使うメインカメラを登録する。 */
 	static void SetSceneCamera(Camera* camera) {
+
 		camera_ = camera;
 	}
 	static Camera* GetSceneCamera() { return camera_; }

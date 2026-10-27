@@ -438,16 +438,16 @@ void ModelLoader::LoadAnimation(const aiScene* scene, ModelData* modelData) {
                 };
 
 
-                DirectXUtility::Log(
-                    "%s", channel->mNodeName.C_Str());
-                DirectXUtility::Log(
-                    "key rot = %f %f %f %f\n",
+                //DirectXUtility::Log(
+                //    "%s", channel->mNodeName.C_Str());
+                //DirectXUtility::Log(
+                //    "key rot = %f %f %f %f\n",
               
-                    key.mValue.x,
+       /*             key.mValue.x,
                     key.mValue.y,
                     key.mValue.z,
                     key.mValue.w
-                );
+                );*/
 
                 nodeAnim.rotations.push_back(pos);
             }

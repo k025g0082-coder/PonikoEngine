@@ -36,7 +36,7 @@
 
 HierarchyPanel Editor::hierarchyPanel_;
 Grid Editor::grid;
-
+std::string Editor::currentSceneJsonPath;
 
 Editor* Editor::GetInstance() {
 	static Editor instance;
@@ -856,6 +856,9 @@ void Editor::Draw() {
 
 void Editor::LoadScene(std::string path)
 {
+
+	currentSceneJsonPath = path;
+
 	hierarchyPanel_.Initialize(path, grid);
 }
 

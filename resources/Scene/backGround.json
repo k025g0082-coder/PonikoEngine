@@ -3,10 +3,10 @@
         "gridDepth": 1.0,
         "gridHeight": 1.0,
         "gridWidth": 1.0,
-        "horizontal": 10,
-        "isSnap": true,
+        "horizontal": 16,
+        "isSnap": false,
         "rotation": [
-            -7.853981971740723,
+            0.0,
             0.0,
             0.0
         ],
@@ -18,61 +18,7 @@
         "vertical": 10
     },
     "Hierarchy": {
-        "ModelProperties": [
-            {
-                "id": "resources/Models/player/player.obj",
-                "name": "player",
-                "transform": {
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "translation": [
-                        7.0,
-                        5.0,
-                        0.0
-                    ]
-                },
-                "type": -858993460
-            },
-            {
-                "id": "resources/Models/suzanne.obj",
-                "name": "suzanne",
-                "transform": {
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "translation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ]
-                },
-                "type": 0
-            }
-        ],
-        "ModelResources": [
-            {
-                "isView": true,
-                "pathId": "resources/Models/player/player.obj"
-            },
-            {
-                "isView": false,
-                "pathId": "resources/Models/suzanne.obj"
-            }
-        ]
+        "ModelProperties": [],
+        "ModelResources": []
     }
 }

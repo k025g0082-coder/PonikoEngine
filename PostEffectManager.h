@@ -55,6 +55,9 @@ public:
 	// パラメータデバッグ用
 	void ImGuiView();
 
+	//　ポストエフェクトデータの参照
+	PostEffectParam& GetPostEffectParam() { return *postEffectData; }
+
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandleOffscreen() {
 		return rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart();

@@ -92,7 +92,7 @@ public:
 	void Draw();
 
 	/// <summary>
-	/// 特定のシーンを読み込む
+	/// 特定のシーンのヒエラルキー情報を読み込む
 	/// </summary>
 	/// <param name="path">シーンの相対パス。例 resources/scene/OOXX.json</param>
 	static void LoadScene(std::string path);
@@ -126,7 +126,7 @@ private:
 	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
 
 	// 今読み込んでるシーンのJsonパス
-	std::string currentSceneJsonPath;
+	static std::string currentSceneJsonPath;
 	std::string currentSceneName_;
 
 

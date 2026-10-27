@@ -24,6 +24,9 @@
 #include "DebugLine.h"
 
 
+#include "Game.h"
+
+
 void TestScene::Init() {
 
 	text.Init();
@@ -32,6 +35,8 @@ void TestScene::Init() {
 
 	/* 必）シーンカメラ設定 */
 	Scene::SetSceneCamera(&camera);
+
+	Game::GetFade().Start(Fade::Status::FadeIn, 1.0f, Fade::FadeColor::kWhite);
 
 
 	PointLightParam pLightParam;
