@@ -24,7 +24,8 @@ IDxcBlob* DxcCompiler::CompileShader(
 	const wchar_t* profile,		  // compileするprofile
 	IDxcUtils* dxcUtils,		  // 初期化で生成する３つ
 	IDxcCompiler3* dxcCompiler,
-	IDxcIncludeHandler* includeHandler
+	IDxcIncludeHandler* includeHandler,
+	const wchar_t* entryPoint
 ) {
 	OutputDebugStringW(profile);
 	OutputDebugStringW(L"\n");
@@ -46,7 +47,7 @@ IDxcBlob* DxcCompiler::CompileShader(
 
 	//--- 2. Compileする
 	LPCWSTR arguments[] = {
-		L"-E", L"main", // entry pointを指定
+		L"-E", entryPoint, // entry pointを指定
 		L"-T", profile, // profileを指定
 		L"-Zi",			// デバッグ情報を生成
 		L"-Qembed_debug", // デバッグ情報をシェーダバイナリに埋め込む

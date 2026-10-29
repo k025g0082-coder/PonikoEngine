@@ -23,7 +23,8 @@ public:
 		const wchar_t* profile,		  // compileするprofile
 		IDxcUtils* dxcUtils,		  // 初期化で生成する３つ
 		IDxcCompiler3* dxcCompiler,
-		IDxcIncludeHandler* includeHandler
+		IDxcIncludeHandler* includeHandler,
+		const wchar_t* entryPoint = L"main"// エントリーポイント
 	);
 
 	// 初期化、兼Dxcの初期化

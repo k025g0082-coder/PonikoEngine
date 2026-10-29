@@ -20,7 +20,13 @@ enum class PipelineType {
 
 	DebugLine,
 
-	PostEffect
+	PostEffect,
+
+	/* ブルーム */
+	SceneBloom,
+	SceneBlur,
+	SceneComposite,
+
 
 };
 
@@ -83,6 +89,11 @@ private:
 
 	void createPostEffectPipeline();
 
+	//void createSceneBloomPipeline();
+
+	// ポストエフェクトの
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC postEffectDesc{};
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	// bufferResourceを作る関数
 	ID3D12Resource* CreateBufferResource(
 		ID3D12Device* device, // デバイス

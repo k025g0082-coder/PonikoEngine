@@ -20,6 +20,10 @@ public:
 	void Draw();
 
 private:
+	PointLightParam* p_ = nullptr;;
+	SpotLightParam* s_ = nullptr;
+	DirectionalLightParam* d_ = nullptr;
+
 
 	Sprite sprite;
 	Sprite combo;

@@ -955,17 +955,28 @@ void Editor::LightingManagerTab(bool& show) {
 
 	ImGui::Begin("Lighting-Manager", &show);
 
+
+	/*
+		シーン固定の光源を登録する
+	*/
+
 	if (ImGui::Button("Add_DirectionalLight")) {
+
 		DirectionalLightParam param;
-		LightingManager::GetInstance()->AddLight(param);
+		LightingManager::GetInstance()->AddLight(param,true);
+
 	}
 	if (ImGui::Button("Add_SpotLight")) {
+
 		SpotLightParam param;
-		LightingManager::GetInstance()->AddLight(param);
+		LightingManager::GetInstance()->AddLight(param,true);
+
 	}
 	if (ImGui::Button("Add_PointLight")) {
+
 		PointLightParam param;
-		LightingManager::GetInstance()->AddLight(param);
+		LightingManager::GetInstance()->AddLight(param,true);
+
 	}
 
 
@@ -975,9 +986,22 @@ void Editor::LightingManagerTab(bool& show) {
 		// 一覧表示
 		auto& param = LightingManager::GetInstance()->GetLightSets().dLight->GetDirectionalLightsParam();
 
+		
+
 		for (int i = 0; i < param.count; i++)
 		{
 			ImGui::PushID(i);
+
+			// シーンの固定の光源か否か
+			bool isSceneLight = LightingManager::GetInstance()->GetIsSceneLight(&param.lights[i]);
+
+			// もし違うなら表示しない
+			//if (!isSceneLight) continue;
+
+
+			std::string t = std::string("isSceneLight: ") + (isSceneLight ? "true" : "false");
+			ImGui::Text("%s", t.c_str());
+
 
 			ImGui::DragFloat3(
 				"Direction",
@@ -1019,6 +1043,16 @@ void Editor::LightingManagerTab(bool& show) {
 		for (int i = 0; i < param.count; i++)
 		{
 			ImGui::PushID(i);
+
+			// シーンの固定の光源か否か
+			bool isSceneLight = LightingManager::GetInstance()->GetIsSceneLight(&param.lights[i]);
+
+			// もし違うなら表示しない
+			//if (!isSceneLight) continue;
+
+			std::string t = std::string("isSceneLight: ") + (isSceneLight ? "true" : "false");
+			ImGui::Text("%s", t.c_str());
+
 
 			ImGui::ColorPicker4(
 				"Color",
@@ -1090,6 +1124,15 @@ void Editor::LightingManagerTab(bool& show) {
 		for (int i = 0; i < param.count; i++)
 		{
 			ImGui::PushID(i);
+
+			// シーンの固定の光源か否か
+			bool isSceneLight = LightingManager::GetInstance()->GetIsSceneLight(&param.lights[i]);
+
+			// もし違うなら表示しない
+			//if (!isSceneLight) continue;
+			std::string t = std::string("isSceneLight: ") + (isSceneLight ? "true" : "false");
+			ImGui::Text("%s", t.c_str());
+
 
 			ImGui::ColorPicker4(
 				"Color",

@@ -18,9 +18,9 @@ public:
 
 	void Initialize();
 
-	DirectionalLightParam& AddLight(DirectionalLightParam p) { return dLight.AddLight(p); }
-	SpotLightParam& AddLight(SpotLightParam p) { return sLight.AddLight(p); };
-	PointLightParam& AddLight(PointLightParam p) { return pLight.AddLight(p); }
+	DirectionalLightParam& AddLight(DirectionalLightParam p,bool isSceneLight = false) { return dLight.AddLight(p,isSceneLight); }
+	SpotLightParam& AddLight(SpotLightParam p,bool isSceneLight = false) { return sLight.AddLight(p,isSceneLight); };
+	PointLightParam& AddLight(PointLightParam p,bool isSceneLight = false) { return pLight.AddLight(p,isSceneLight); }
 
 	void RemoveLight(DirectionalLightParam* p) { return dLight.RemoveLight(p); }
 	void RemoveLight(SpotLightParam* p) { return sLight.RemoveLight(p); };
@@ -34,6 +34,11 @@ public:
 		pLight.ResetLight();
 	}
 	
+	bool GetIsSceneLight(DirectionalLightParam* d) { return dLight.GetIsSceneLight(d); }
+	bool GetIsSceneLight(SpotLightParam* s) { return sLight.GetIsSceneLight(s); }
+	bool GetIsSceneLight(PointLightParam* p) { return pLight.GetIsSceneLight(p); }
+
+
 	LightSets GetLightSets() {
 		return LightSets{ &dLight,&sLight, &pLight };
 	}

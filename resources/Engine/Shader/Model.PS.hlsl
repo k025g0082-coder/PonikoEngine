@@ -42,7 +42,7 @@ struct PointLightParam
 
 struct PointLightsParam
 {
-    PointLightParam lights[30];
+    PointLightParam lights[100];
     int count;
     
     float3 padding;

@@ -108,6 +108,20 @@ void DirectXCommon::CreateAdapter() {
 /*=== Deviceの作成 === */
 void DirectXCommon::CreateDevice() {
 
+#ifdef _DEBUG
+	// デバッグレイヤーを有効化（PSO作成失敗時の詳細エラーがOutputに出る）
+	Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
+		debugController->EnableDebugLayer();
+		// 必要ならさらに詳細を出す場合
+		// Microsoft::WRL::ComPtr<ID3D12Debug1> debugController1;
+		// if (SUCCEEDED(debugController.As(&debugController1))) {
+		//     debugController1->SetEnableGPUBasedValidation(TRUE);
+		// }
+	}
+#endif
+
+
 	// 機能レベルとログ用の文字列
 	D3D_FEATURE_LEVEL featureLevels[] = {
 		D3D_FEATURE_LEVEL_12_2,

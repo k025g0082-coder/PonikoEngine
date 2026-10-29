@@ -29,11 +29,6 @@ namespace PonikoEngine {
 			DirectXCommon::GetInstance()->GetCommandQueue().Get()
 		);
 
-
-		/*　Editor初期化　*/
-		Editor::GetInstance()->Initialize();
-
-
 		// ポストエフェクトの初期化
 		PostEffectManager::GetInstance()->Initialize();
 
@@ -63,6 +58,11 @@ namespace PonikoEngine {
 
 		// タイマー
 		Timer::GetInstance()->Initialize();
+
+
+		/*　Editor初期化　*/
+		Editor::GetInstance()->Initialize();
+
 
 	};
 

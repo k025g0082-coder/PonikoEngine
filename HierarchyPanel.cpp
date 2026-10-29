@@ -269,18 +269,16 @@ void HierarchyPanel::HierarchySave(const std::string jsonPath) {
 	if (jsonPath.empty()) return;
 
 	// ※注　ポインタ
-	SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+	auto loder = SceneComponentLoader::GetInstance();
 
-	json& data = loder->GetJson();
+	if (loder->SaveSwitchJson(jsonPath)) {
 
-	// 必ず
-	SceneComponentLoader::GetInstance()->ClearJson();
+		// ライト配置のセーブ
+		SceneComponentLoader::GetInstance()->LightSave();
 
-	// ライト配置のセーブ
-	SceneComponentLoader::GetInstance()->LightSave();
+		loder->SaveGroup("Grid");
+		loder->SaveGroup("Hierarchy");
 
-	loder->SaveGroup("Grid");
-	loder->SaveGroup("Hierarchy");
-
-	SceneComponentLoader::GetInstance()->Save(jsonPath);
+		SceneComponentLoader::GetInstance()->Save(jsonPath);
+	}
 }

@@ -10,8 +10,11 @@ SceneComponentLoader* SceneComponentLoader::GetInstance() {
 
 bool SceneComponentLoader::Load(const std::string& filePath)
 {
-	// 以前のJsonの内容のをクリア
-	///ClearJson();
+	/* すでに読み込んでいる場合は成功としてReturn */
+	if (JsonDatas_.contains(filePath)) {
+		currentJsonPath_ = filePath;
+		return true;
+	}
 
 	std::ifstream file(filePath);
 
@@ -20,9 +23,15 @@ bool SceneComponentLoader::Load(const std::string& filePath)
 	}
 
 	try {
-		file >> jsonData_;
+
+		file >> JsonDatas_[filePath].jsonData_;
+
+		// 現在開いているJsonパス
+		currentJsonPath_ = filePath;
+
 	}
 	catch (const json::parse_error&) {
+		JsonDatas_.erase(filePath); // 読み込み失敗時はマップから削除
 		return false;
 	}
 
@@ -34,6 +43,10 @@ bool SceneComponentLoader::Load(const std::string& filePath)
 
 bool SceneComponentLoader::Save(const std::string& filePath)
 {
+	/* もしSwitchJson関数で括ってなかったら、Return */
+	if (currentJsonPath_ != filePath)
+		return false;
+
 	// 親ディレクトリを自動生成
 	std::filesystem::path path(filePath);
 	std::filesystem::create_directories(path.parent_path());
@@ -44,131 +57,186 @@ bool SceneComponentLoader::Save(const std::string& filePath)
 		return false;
 	}
 
-	file << jsonData_.dump(4);
+	// 登録したGroupを一括でセーブ
+	for (std::string groupName : JsonDatas_[currentJsonPath_].jsonGroupNames_) {
+		SaveGroup(groupName);
+	}
+
+	file << JsonDatas_[filePath].jsonData_.dump(4);
 
 	return true;
 }
 
 // ライトをセーブ
 void SceneComponentLoader::LightSave() {
-	if (jsonData_.empty()) {
-		return;
-	}
-
-	// こっちのシングルトンのほうのjsonは消えてもクラスの方のメンバの方のは消えないのでcleanしちゃう
-	jsonData_.clear();
 	
+	// 今開いてるJsonを参照
+	json& jsonData_ = JsonDatas_[currentJsonPath_].jsonData_;
+	
+
 	// ===DirectionalLight
 	auto& param = LightingManager::GetInstance()->GetLightSets().dLight->GetDirectionalLightsParam();
 
-	jsonData_["DirectionalLights"]["count"] = param.count;
+
+	/*
+		シーンの固定ライト数を数える。
+		で、見つかったらライトだけsaveIndexをつかって前詰めで登録している
+	*/
+
+	int saveIndex = 0;
 
 	for (int i = 0; i < param.count; ++i) {
 
 		auto& light = param.lights[i];
 
-		jsonData_["DirectionalLights"]["lights"][i]["color"] = {
+		// シーンの固定の光源か否か
+		bool isSceneLight = LightingManager::GetInstance()->GetIsSceneLight(&light);
+
+		// もしシーン固定の光源じゃないならセーブしない
+		if (!isSceneLight) continue;
+
+
+
+		jsonData_["DirectionalLights"]["lights"][saveIndex]["color"] = {
 		 light.color.x,
 		 light.color.y,
 		 light.color.z,
 		 light.color.w
 		};
 
-		jsonData_["DirectionalLights"]["lights"][i]["direction"] = {
+		jsonData_["DirectionalLights"]["lights"][saveIndex]["direction"] = {
 			light.direction.x,
 			light.direction.y,
 			light.direction.z
 		};
 
-		jsonData_["DirectionalLights"]["lights"][i]["intensity"] =
+		jsonData_["DirectionalLights"]["lights"][saveIndex]["intensity"] =
 			light.intensity;
+
+		/* 加算 */
+		++saveIndex;
 	}
 
+	/* 見つかった固定ライトの分だけ */
+	jsonData_["DirectionalLights"]["count"] = saveIndex;
+	saveIndex = 0;
 
 	// === PointLight
 	auto& pParam = LightingManager::GetInstance()->GetLightSets().pLight->GetPointLightsParam();
 
-	jsonData_["PointLights"]["count"] = pParam.count;
 
 	for (int i = 0; i < pParam.count; ++i) {
 
 		auto& light = pParam.lights[i];
 
-		jsonData_["PointLights"]["lights"][i]["color"] = {
+
+		// シーンの固定の光源か否か
+		bool isSceneLight = LightingManager::GetInstance()->GetIsSceneLight(&light);
+
+		// もしシーン固定の光源じゃないならセーブしない
+		if (!isSceneLight) continue;
+
+
+		jsonData_["PointLights"]["lights"][saveIndex]["color"] = {
 			light.color.x,
 			light.color.y,
 			light.color.z,
 			light.color.w
 		};
 
-		jsonData_["PointLights"]["lights"][i]["position"] = {
+		jsonData_["PointLights"]["lights"][saveIndex]["position"] = {
 			light.position.x,
 			light.position.y,
 			light.position.z
 		};
 
-		jsonData_["PointLights"]["lights"][i]["intensity"] =
+		jsonData_["PointLights"]["lights"][saveIndex]["intensity"] =
 			light.intensity;
 
-		jsonData_["PointLights"]["lights"][i]["radius"] =
+		jsonData_["PointLights"]["lights"][saveIndex]["radius"] =
 			light.radius;
+
+		// 加算
+		++saveIndex;
 	}
+
+
+	/* 見つかった固定ライトの分だけ */
+	jsonData_["PointLights"]["count"] = saveIndex;
+	saveIndex = 0;
 
 
 	// === SpotLight
 	auto& sParam = LightingManager::GetInstance()->GetLightSets().sLight->GetSpotLightsParam();
 
-	jsonData_["SpotLights"]["count"] = sParam.count;
 
 	for (int i = 0; i < sParam.count; ++i) {
 
+		// シーンの固定の光源か否か
+		bool isSceneLight = LightingManager::GetInstance()->GetIsSceneLight(&sParam.lights[i]);
+
+		// もしシーン固定の光源じゃないならセーブしない
+		if (!isSceneLight) continue;
+
+
 		auto& light = sParam.lights[i];
 
-		jsonData_["SpotLights"]["lights"][i]["color"] = {
+		jsonData_["SpotLights"]["lights"][saveIndex]["color"] = {
 			light.color.x,
 			light.color.y,
 			light.color.z,
 			light.color.w
 		};
 
-		jsonData_["SpotLights"]["lights"][i]["position"] = {
+		jsonData_["SpotLights"]["lights"][saveIndex]["position"] = {
 			light.position.x,
 			light.position.y,
 			light.position.z
 		};
 
-		jsonData_["SpotLights"]["lights"][i]["intensity"] =
+		jsonData_["SpotLights"]["lights"][saveIndex]["intensity"] =
 			light.intensity;
 
-		jsonData_["SpotLights"]["lights"][i]["direction"] = {
+		jsonData_["SpotLights"]["lights"][saveIndex]["direction"] = {
 			light.direction.x,
 			light.direction.y,
 			light.direction.z
 		};
 
-		jsonData_["SpotLights"]["lights"][i]["innerAngle"] =
+		jsonData_["SpotLights"]["lights"][saveIndex]["innerAngle"] =
 			light.innerAngle;
 
-		jsonData_["SpotLights"]["lights"][i]["outerAngle"] =
+		jsonData_["SpotLights"]["lights"][saveIndex]["outerAngle"] =
 			light.outerAngle;
 
-		jsonData_["SpotLights"]["lights"][i]["distance"] =
+		jsonData_["SpotLights"]["lights"][saveIndex]["distance"] =
 			light.distance;
 
-		jsonData_["SpotLights"]["lights"][i]["falloff"] =
+		jsonData_["SpotLights"]["lights"][saveIndex]["falloff"] =
 			light.falloff;
+
+		// かさん
+		++saveIndex;
 	}
+
+	/* 見つかった分だけ */
+	jsonData_["SpotLights"]["count"] = saveIndex;
+	saveIndex = 0;
 }
 
 // ライトをロード
 void SceneComponentLoader::LightLoad() {
-	if (jsonData_.empty()) {
-		return;
-	}
+
+	// 今開いてるJsonを参照
+	json& jsonData_ = JsonDatas_[currentJsonPath_].jsonData_;
+
 
 	// === DirectionalLight
 	auto& dParam =
 		LightingManager::GetInstance()->GetLightSets().dLight->GetDirectionalLightsParam();
+
+
+
 
 	if (jsonData_.contains("DirectionalLights")) {
 
@@ -177,6 +245,10 @@ void SceneComponentLoader::LightLoad() {
 		dParam.count = data.value("count", 0);
 
 		for (int i = 0; i < dParam.count; ++i) {
+
+			// 固定の光源として読み込む
+			LightingManager::GetInstance()->GetLightSets().dLight->SetIsSceneLight(i, true);
+
 
 			auto& light = dParam.lights[i];
 			auto& json = data["lights"][i];
@@ -215,6 +287,10 @@ void SceneComponentLoader::LightLoad() {
 
 		for (int i = 0; i < pParam.count; ++i) {
 
+			// 固定の光源として読み込む
+			LightingManager::GetInstance()->GetLightSets().pLight->SetIsSceneLight(i, true);
+
+
 			auto& light = pParam.lights[i];
 			auto& json = data["lights"][i];
 
@@ -252,6 +328,10 @@ void SceneComponentLoader::LightLoad() {
 		sParam.count = data.value("count", 0);
 
 		for (int i = 0; i < sParam.count; ++i) {
+
+			// 固定の光源として読み込む
+			LightingManager::GetInstance()->GetLightSets().sLight->SetIsSceneLight(i, true);
+
 
 			auto& light = sParam.lights[i];
 			auto& json = data["lights"][i];
@@ -294,7 +374,8 @@ void SceneComponentLoader::LightLoad() {
 
 void SceneComponentLoader::SaveGroup(const std::string& groupName) {
 	
-	json& group = jsonData_[groupName];
+	/* 今開いているJsonのグループ */
+	json& group = GetCurrentJson()[groupName];
 
 	// 登録されたsave関数をすべて実行
 	for (auto& [name, property] : JsonDatas_[currentJsonPath_].properties_[groupName]) {
@@ -305,12 +386,12 @@ void SceneComponentLoader::SaveGroup(const std::string& groupName) {
 // グループ読み込み
 void SceneComponentLoader::LoadGroup(const std::string& groupName) {
 
-
-	if (!jsonData_.contains(groupName)) {
+	if (!GetCurrentJson().contains(groupName)) {
 		return;
 	}
 
-	const json& group = jsonData_[groupName];
+	/* 今開いているJsonのグループ */
+	const json& group = GetCurrentJson()[groupName];
 
 	// 登録されたload関数をすべて実行
 	for (auto& [name, property] : JsonDatas_[currentJsonPath_].properties_[groupName]) {
@@ -372,17 +453,12 @@ void SceneComponentLoader::Property(const std::string& name, ScreenTransform& va
 
 		if (group.contains(name)) {
 
-			ScreenTransform screen;
-			screen.Initialize();
+			value.scale_ = JsonToVector3(group[name]["scale"]);
+			value.rotation_ = JsonToVector3(group[name]["rotation"]);
+			value.translation_ = JsonToVector3(group[name]["translation"]);
 
-			screen.scale_ = JsonToVector3(group[name]["scale"]);
-			screen.rotation_ = JsonToVector3(group[name]["rotation"]);
-			screen.translation_ = JsonToVector3(group[name]["translation"]);
+			value.UpdateMatrix();
 
-			screen.UpdateMatrix();
-
-			// 代入？出来てる？
-			value = screen;
 		}
 	}
 	};
@@ -742,12 +818,15 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<ModelRe
 	};
 }
 
-bool SceneComponentLoader::SwitchJson(std::string jsonPath)
+bool SceneComponentLoader::SaveSwitchJson(std::string jsonPath)
 {
 
-	if (JsonDatas_.contains(currentJsonPath_))
+	if (!JsonDatas_.contains(jsonPath)) return false;
 
-	return false;
+	// 切り替え
+	currentJsonPath_ = jsonPath;
+
+	return true;
 }
 
 void SceneComponentLoader::SetImGuiSaveButton(std::string jsonPath)
@@ -758,10 +837,16 @@ void SceneComponentLoader::SetImGuiSaveButton(std::string jsonPath)
 #ifdef USE_IMGUI
 	if (ImGui::Button("Save")) {
 
-		// 登録したGroupを一括でセーブ
-		for (std::string groupName : jsonGroupNames_) {
-			SaveGroup(groupName);
+		/* json切り替え */
+		if (SaveSwitchJson(jsonPath)) {
+
+			// 登録したGroupを一括でセーブ
+			for (std::string groupName : JsonDatas_[jsonPath].jsonGroupNames_) {
+				SaveGroup(groupName);
+			}
 		}
+		ImGui::SameLine();
+		ImGui::Text("saved!");
 	}
 	
 #endif
@@ -770,6 +855,10 @@ void SceneComponentLoader::SetImGuiSaveButton(std::string jsonPath)
 
 
 void SceneComponentLoader::EffectParticleCompornentSave(std::string tag, ParticleCompornent& param_) {
+
+	// 今開いてるJsonを参照
+	json& jsonData_ = GetCurrentJson();
+
 
 	auto& data = jsonData_["EffectParticleCompornents"][tag];
 
@@ -804,15 +893,12 @@ void SceneComponentLoader::EffectParticleCompornentLoad(
 
 	std::map<std::string, ParticleCompornent>& particleEmitParams_)
 {
-	if (jsonData_.empty()) {
+	// もし存在しないならreturn
+	if (!GetCurrentJson().contains("EffectParticleCompornents")) {
 		return;
 	}
 
-	if (!jsonData_.contains("EffectParticleCompornents")) {
-		return;
-	}
-
-	for (auto& [tag, data] : jsonData_["EffectParticleCompornents"].items()) {
+	for (auto& [tag, data] : GetCurrentJson()["EffectParticleCompornents"].items()) {
 
 		ParticleCompornent& param = particleEmitParams_[tag];
 
@@ -845,6 +931,31 @@ void SceneComponentLoader::EffectParticleCompornentLoad(
 		param.param_.isBilliboard = data["param"]["isBilliboard"];
 		param.param_.isDilute = data["param"]["isDilute"];
 	}
+}
+
+void SceneComponentLoader::BeginGroup(const std::string& groupName)
+{
+	currentGroup_ = groupName;
+
+	if (currentJsonPath_.empty())return;
+
+	/* 既に同じグループ名がないか検索 */
+	auto it = std::find_if(
+		JsonDatas_[currentJsonPath_].jsonGroupNames_.begin(),
+		JsonDatas_[currentJsonPath_].jsonGroupNames_.end(),
+		[&groupName](const std::string& s) {
+			// find_ifの条件。trueにあったイテレータを返す
+			return groupName == s;
+		}
+	);
+
+	// 見つかった
+	if (it != JsonDatas_[currentJsonPath_].jsonGroupNames_.end()) return;
+
+
+	// グループ名登録
+	JsonDatas_[currentJsonPath_].jsonGroupNames_.push_back(groupName);
+	
 }
 
 

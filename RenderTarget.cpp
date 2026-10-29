@@ -89,6 +89,7 @@ void RenderTarget::Initialize(int32_t width, int32_t height) {
 	scissorRect.top = 0;
 	scissorRect.bottom = height;
 
+	firstFrame_ = true; // 初回フラグをリセット
 }
 
 void RenderTarget::BeginRender()
@@ -117,6 +118,7 @@ void RenderTarget::BeginRender()
 
 		commandList->ResourceBarrier(1, &barrier);
 	}
+	firstFrame_ = false;
 
 	// オフスクリーンRTVに切り替え
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandleOffscreen = rtvHeap_->GetCPUDescriptorHandleForHeapStart();
@@ -125,7 +127,7 @@ void RenderTarget::BeginRender()
 	commandList->OMSetRenderTargets(1, &rtvHandleOffscreen, FALSE, &dsvHandle);
 
 	// クリア
-	float clearColor[] = { 0.1f, 0.25f, 0.5f,1.0f };// 青色。RGBAの順
+	float clearColor[] = { 0.0f, 0.0f, 0.0f,0.0f };// 黒色で初期化
 	commandList->ClearRenderTargetView(rtvHandleOffscreen, clearColor, 0, nullptr);
 
 	// 画面の深さ？

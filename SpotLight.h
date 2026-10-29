@@ -60,12 +60,17 @@ public:
 	};
 
 	// ライト追加 & 参照ゲット
-	SpotLightParam& AddLight(SpotLightParam param) {
+	SpotLightParam& AddLight(SpotLightParam param,bool isScenelight = false) {
 
 		if (lightDataForGPU_->count >= kMaxLight)
 			return lightDataForGPU_->lights[lightDataForGPU_->count - 1];
 
 		lightDataForGPU_->lights[lightDataForGPU_->count] = param;
+
+		// シーンライトか否か
+		isSceneLight_[lightDataForGPU_->count] = isScenelight;
+
+
 
 		return lightDataForGPU_->lights[lightDataForGPU_->count++];
 
@@ -114,14 +119,59 @@ public:
 		for (int j = i; j < lightDataForGPU_->count - 1; ++j)
 		{
 			lightDataForGPU_->lights[j] = lightDataForGPU_->lights[j + 1];
+			isSceneLight_[j] = isSceneLight_[j + 1];
 		}
+
 
 		// 要素数を減らす
 		--lightDataForGPU_->count;
+
+		// 最後の要素を初期化
+		lightDataForGPU_->lights[lightDataForGPU_->count] = {};
+		isSceneLight_[lightDataForGPU_->count] = false;
+
 	}
+
+	// アドレスからインデックス番号検索
+	int ToIndex(SpotLightParam* param) {
+
+		for (int i = 0; i < lightDataForGPU_->count; ++i)
+		{
+			// ポインタが一致するライトを探す
+			if (&lightDataForGPU_->lights[i] == param)
+			{
+				return i;
+			}
+		}
+
+		// 見つからない
+		return -1;
+	}
+	// シーンライトかを返す
+	bool GetIsSceneLight(SpotLightParam* param) {
+
+		if (ToIndex(param) != -1) {
+			return isSceneLight_[ToIndex(param)];
+		}
+		else {
+			return false;
+		}
+
+	}
+	void SetIsSceneLight(int index, bool b) {
+
+		if (index != -1 && index < kMaxLight) {
+			isSceneLight_[index] = b;
+		}
+	}
+
 private:
 	// ３０こまで
 	static const int kMaxLight = 30;
+
+	/* シーン内の固定の光源かを記録する */
+	bool isSceneLight_[kMaxLight]{};
+
 
 	SpotLightsParam* lightDataForGPU_ = nullptr;
 

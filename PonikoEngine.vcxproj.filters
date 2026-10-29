@@ -541,6 +541,9 @@
     <FxCompile Include="resources\Engine\Shader\DebugLine.VS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
+    <FxCompile Include="resources\Engine\Shader\SceneBloom.PS.hlsl">
+      <Filter>Engine\リソース ファイル</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt">

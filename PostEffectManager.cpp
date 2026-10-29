@@ -123,7 +123,28 @@ void PostEffectManager::Initialize() {
 	device_->CreateShaderResourceView(offscreenRenderTarget, &srvDescOff, offscreenSRVHandleCPU);
 
 
+	//*  BloomのRenderTarget初期化  *//
+	blurRenderTarget_.Initialize(WinApp::GetInstance()->GetClientWidth() / 2 , WinApp::GetInstance()->GetClientHeight());
+	bloomRenderTarget_.Initialize(WinApp::GetInstance()->GetClientWidth() , WinApp::GetInstance()->GetClientHeight());
 
+
+	// 定数バッファの登録
+	bloomParamResource = DirectXUtility::CreateBufferResource(device_, sizeof(BloomParam));
+
+	bloomParamResource->Map(
+		0,
+		nullptr,
+		reinterpret_cast<void**>(&bloomParamData_)
+	);
+
+	// 初期値
+	bloomParamData_->bloomIntensity = 0.8f;
+	bloomParamData_->bloomSoftness = 0.4f;
+	bloomParamData_->bloomThreshold = 0.1f;
+	bloomParamData_->blurTexelSize = 2.0f;
+
+
+	
 	// ポストエフェクト
 	postEffectResource = DirectXUtility::CreateBufferResource(device_, sizeof(PostEffectParam));
 
@@ -218,65 +239,27 @@ void PostEffectManager::ApplyScene() {
 		commandList->ResourceBarrier(1, &barrier);
 
 
+		/* 
+			ブラー処理 
 
+			1) 明るいところを摘出
+			2) 明るいところをぼかす
+			3) 最終的なBuckBufferへの描画。
+		　    　backBufferを描画先にして、blurと既存のポストエフェクト効果を掛け合わせたのを描画
 
-		// ★バックバッファを RENDER_TARGET に（安全のため入れる）
-		UINT backBufferIndex = DirectXCommon::GetInstance()->GetSwapChain()->GetCurrentBackBufferIndex();
-		barrier.Transition.pResource = DirectXCommon::GetInstance()->GetBackBuffer(backBufferIndex).Get(); // 適切な取得関数に合わせて
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		commandList->ResourceBarrier(1, &barrier);
+		*/
 
+		// 1) 明るいところを摘出
+		DrawBloomExtract();
 
+		// 2) 明るいところをぼかす
+		DrawBloomBlur();
 
+		// 3) 最終的なBuckBufferへの描画。
+		//    backBufferを描画先にして、blurと既存のポストエフェクト効果を掛け合わせたのを描画
 
-		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle =
-			DirectXCommon::GetInstance()->GetBackBufferRTV(backBufferIndex);
+		DrawCompositeToBackBuffer();
 
-		commandList->OMSetRenderTargets(
-			1,
-			&rtvHandle,
-			FALSE,
-			nullptr);
-
-
-		// ポストエフェクト用のViewport / Scissorを設定
-		commandList->RSSetViewports(
-			1,
-			&DirectXCommon::GetInstance()->GetViewport()
-		);
-
-		commandList->RSSetScissorRects(
-			1,
-			&DirectXCommon::GetInstance()->GetScissorRect()
-		);
-
-
-		// RootSignatureを設定。
-		commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).rootSignature);
-		
-		// PSOを設定
-		commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).graphicsPipelineState);
-
-		ID3D12DescriptorHeap* descriptorHeaps[] = {
-		DirectXCommon::GetSrvHeap().Get()
-		};
-
-		commandList->SetDescriptorHeaps(1, descriptorHeaps);
-
-
-		commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-
-		// ポストエフェクト　テキスチャ
-		commandList->SetGraphicsRootDescriptorTable(0, offscreenSRVHandleGPU);
-
-		// ポストエフェクト　パラメータ値
-		commandList->SetGraphicsRootConstantBufferView(1, postEffectResource->GetGPUVirtualAddress());
-
-		commandList->DrawInstanced(6, 1, 0, 0);
-	
 }
 
 void PostEffectManager::ImGuiView() {
@@ -284,6 +267,9 @@ void PostEffectManager::ImGuiView() {
 #ifdef USE_IMGUI
 
 	ImGui::Begin("PostEffectManager");
+
+	/* メイン */
+	ImGui::SeparatorText("Effect");
 
 	ImGui::SliderFloat("blurPower", &postEffectData->blurPower, 0.0f, 10.0f);
 	ImGui::SliderFloat("vtWavePower", &postEffectData->vtWavePower, 0.0f, 1.0f);
@@ -297,9 +283,221 @@ void PostEffectManager::ImGuiView() {
 	ImGui::SliderFloat("scanLine", &postEffectData->scanLine, 0.0f, 1.0f);
 	ImGui::SliderFloat("fishLens", &postEffectData->fishLens, 0.0f, 1.0f);
 
+	/* ブルーム */
+	ImGui::SeparatorText("Bloom");
+
+	ImGui::DragFloat(
+		"BloomThreshold",
+		&bloomParamData_->bloomThreshold,
+		0.01f,0.0f, 0.5f
+	);
+
+	ImGui::SliderFloat(
+		"BloomIntensity",
+		&bloomParamData_->bloomIntensity,
+		0.0f, 30.0f
+	);
+
+	ImGui::SliderFloat(
+		"BloomSoftness",
+		&bloomParamData_->bloomSoftness,
+		0.0f, 30.0f
+	);
+
+	ImGui::SliderFloat(
+		"BlurTexelSize",
+		&bloomParamData_->blurTexelSize,
+		0.0f, 30.0f
+	);
+
 
 	ImGui::End();
 
 #endif
 
+}
+
+
+void PostEffectManager::DrawBloomExtract()
+{
+
+	/* オフスクリーンのテキスチャから、明るいを抽出. */
+
+	// BeginRender・・・　PixelShaderからRenderTargetの遷移。描画先のOMSetRenderTargets()の設定。（描き込み先の設定）画面の初期化
+	// EndRender・・・　  RenderTargetからPixelShaderへの遷移。
+
+
+	//
+	bloomRenderTarget_.BeginRender();
+
+	{
+		ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
+
+		// ポストエフェクト用のViewport / Scissorを設定
+		commandList->RSSetViewports(
+			1,
+			&DirectXCommon::GetInstance()->GetViewport()
+		);
+
+		commandList->RSSetScissorRects(
+			1,
+			&DirectXCommon::GetInstance()->GetScissorRect()
+		);
+
+
+		/* SceneBloom の Rootsignatureと、パイプラインの設定 */
+		commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBloom).rootSignature);
+		commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBloom).graphicsPipelineState);
+
+		ID3D12DescriptorHeap* descriptorHeaps[] = {
+		DirectXCommon::GetSrvHeap().Get()
+		};
+
+		commandList->SetDescriptorHeaps(1, descriptorHeaps);
+
+
+		commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+		// 読込：オフスクリーンのテキスチャ
+		commandList->SetGraphicsRootDescriptorTable(0, offscreenSRVHandleGPU);
+
+		// ブルーム　パラメータ値
+		commandList->SetGraphicsRootConstantBufferView(3, bloomParamResource->GetGPUVirtualAddress());
+
+		// 描画
+		commandList->DrawInstanced(6, 1, 0, 0);
+
+	}
+
+	//
+	bloomRenderTarget_.EndRender();
+
+
+}
+
+void PostEffectManager::DrawBloomBlur()
+{
+	/* その取り出した明るさをぼかす. */
+
+	// BeginRender・・・　PixelShaderからRenderTargetの遷移。描画先のOMSetRenderTargets()の設定。（描き込み先の設定）画面の初期化
+	// EndRender・・・　  RenderTargetからPixelShaderへの遷移。
+
+
+	//
+	blurRenderTarget_.BeginRender();
+
+	{
+		ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
+
+		// ポストエフェクト用のViewport / Scissorを設定
+		commandList->RSSetViewports(
+			1,
+			&DirectXCommon::GetInstance()->GetViewport()
+		);
+
+		commandList->RSSetScissorRects(
+			1,
+			&DirectXCommon::GetInstance()->GetScissorRect()
+		);
+
+
+		/* SceneBloom の Rootsignatureと、パイプラインの設定 */
+		commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBlur).rootSignature);
+		commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBlur).graphicsPipelineState);
+
+		ID3D12DescriptorHeap* descriptorHeaps[] = {
+		DirectXCommon::GetSrvHeap().Get()
+		};
+
+		commandList->SetDescriptorHeaps(1, descriptorHeaps);
+
+
+		commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+
+		// 読込：さっきの取り出した明るさのテキスチャ
+		commandList->SetGraphicsRootDescriptorTable(0, bloomRenderTarget_.GetSRVHandleGPU());
+
+		// ブルーム　パラメータ値
+		commandList->SetGraphicsRootConstantBufferView(3, bloomParamResource->GetGPUVirtualAddress());
+
+		// 描画
+		commandList->DrawInstanced(6, 1, 0, 0);
+
+	}
+
+	//
+	blurRenderTarget_.EndRender();
+}
+
+
+void PostEffectManager::DrawCompositeToBackBuffer()
+{
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
+
+	// ★バックバッファを RENDER_TARGET に（安全のため入れる）
+	UINT backBufferIndex = DirectXCommon::GetInstance()->GetSwapChain()->GetCurrentBackBufferIndex();
+	offscreenTransitionBarrier_.Transition.pResource = DirectXCommon::GetInstance()->GetBackBuffer(backBufferIndex).Get(); // 適切な取得関数に合わせて
+	offscreenTransitionBarrier_.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	offscreenTransitionBarrier_.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	commandList->ResourceBarrier(1, &offscreenTransitionBarrier_);
+
+
+	/* 描画先はBackBuffer */
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle =
+		DirectXCommon::GetInstance()->GetBackBufferRTV(backBufferIndex);
+
+	commandList->OMSetRenderTargets(
+		1,
+		&rtvHandle,
+		FALSE,
+		nullptr);
+
+	//// ★修正 3: バックバッファのクリア（必要に応じて）
+	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	//commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+
+	// ポストエフェクト用のViewport / Scissorを設定
+	commandList->RSSetViewports(
+		1,
+		&DirectXCommon::GetInstance()->GetViewport()
+	);
+
+	commandList->RSSetScissorRects(
+		1,
+		&DirectXCommon::GetInstance()->GetScissorRect()
+	);
+
+
+	// RootSignatureを設定。
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).rootSignature);
+
+	// PSOを設定
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).graphicsPipelineState);
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = {
+	DirectXCommon::GetSrvHeap().Get()
+	};
+
+	commandList->SetDescriptorHeaps(1, descriptorHeaps);
+
+
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	/* 合成 */
+	commandList->SetGraphicsRootDescriptorTable(0, offscreenSRVHandleGPU);
+	commandList->SetGraphicsRootDescriptorTable(1, blurRenderTarget_.GetSRVHandleGPU());
+
+
+	//// ポストエフェクト　パラメータ値
+	commandList->SetGraphicsRootConstantBufferView(2, postEffectResource->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(3, bloomParamResource->GetGPUVirtualAddress());
+
+	commandList->DrawInstanced(6, 1, 0, 0);
 }

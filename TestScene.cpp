@@ -29,7 +29,19 @@
 
 void TestScene::Init() {
 
+	//PointLightParam p;
+	//SpotLightParam s;
+	//DirectionalLightParam d;
+
+
+	//p_ = &LightingManager::GetInstance()->AddLight(p);
+	//s_ = &LightingManager::GetInstance()->AddLight(s);
+	//d_ = &LightingManager::GetInstance()->AddLight(d);
+
+	//d_->intensity = 100.0f;
+
 	text.Init();
+	text2.Init();
 
 	camera.Initialize();
 
@@ -48,7 +60,7 @@ void TestScene::Init() {
 	//SoundManager::GetInstance()->Play("bgm",1.0f,95.0f);
 
 
-	lightAddress = &LightingManager::GetInstance()->AddLight(dLightParam);
+	//lightAddress = &LightingManager::GetInstance()->AddLight(dLightParam);
 
 
 //	model = Model::CreateOBJ("resources/Models/player/player.fbx");
@@ -84,23 +96,20 @@ void TestScene::Init() {
 		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
 		
 		// ライト配置のロード
-		SceneComponentLoader::GetInstance()->LightLoad();
+	//	SceneComponentLoader::GetInstance()->LightLoad();
 
-		loder->BeginGroup("Test");
+		/* 各読み込む */
+		loder->BeginGroup("Properties");
 
 		loder->Property("player", model->GetWorldTransform());
+		loder->Property("camera", camera.GetWorldTransform());
+		loder->Property("sprite", sprite.GetScreenTransform());
+		loder->Property("text", text2);
 
 		loder->EndGroup();
 
-		loder->LoadGroup("Test");
+		loder->LoadGroup("Properties");
 
-		//// カメラの情報を読み込む
-		camera.SetWorldTransform(loder->GetWorldTransformData("camera"));
-		//model->SetWorldTransform(loder->GetWorldTransformData("player"));
-
-		sprite.SetScreenTransform(loder->GetScreenTransformData("sprite"));
-
-		loder->LoadTextData("text", &text2);
 
 	}
 	
@@ -176,30 +185,30 @@ void TestScene::Update(Input* input) {
 
 	sprite.GetScreenTransform().ImGuiView("sprite");
 
-	if (ImGui::Button("Save")) {
+	//if (ImGui::Button("Save")) {
 
-		// ※注　ポインタ
-		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+	//	// ※注　ポインタ
+	//	auto loder = SceneComponentLoader::GetInstance();
 
-		json& data = loder->GetJson();
+	//	/* セーブ前のJson切り替え */
+	//	if (loder->SaveSwitchJson("resources/Scene/TestScene.json")) {
 
-		// 必ず
-		SceneComponentLoader::GetInstance()->ClearJson();
+	//		// ライト配置のセーブ
+	//		SceneComponentLoader::GetInstance()->LightSave();
 
-		// ライト配置のセーブ
-		SceneComponentLoader::GetInstance()->LightSave();
+	//		loder->SaveGroup("Properties");
 
-		loder->SaveGroup("Test");
+	//		//loder->SetWorldTransformData("camera", camera.GetWorldTransform());
+	//		//loder->SetWorldTransformData("player", model->GetWorldTransform());
+	//		//loder->SetScreenTransformData("sprite", sprite.GetScreenTransform());
 
-		loder->SetWorldTransformData("camera", camera.GetWorldTransform());
-		loder->SetWorldTransformData("player",model->GetWorldTransform());
-		loder->SetScreenTransformData("sprite", sprite.GetScreenTransform());
-		
-		loder->SaveTextData("text", &text2);
+	//		//loder->SaveTextData("text", &text2);
 
-		SceneComponentLoader::GetInstance()->Save("resources/Scene/TestScene.json");
+	//		SceneComponentLoader::GetInstance()->Save("resources/Scene/TestScene.json");
+	//	}
+	//}
 
-	}
+	SceneComponentLoader::GetInstance()->SetImGuiSaveButton("resources/Scene/TestScene.json");
 
 	if (ImGui::Button("Effect")) {
 
@@ -295,7 +304,7 @@ void TestScene::Draw() {
 	
 	//text.drawString("test", {(float)testCombo ,(float)testCombo}, Text::TextAnchor::Center);
 
-	//text2.drawString("textTest", TextAnchor::LeftTop);
+	text2.drawString("textTest", TextAnchor::LeftTop);
 
 
 	// telop

@@ -37,6 +37,10 @@ void PipelineStateManager::Initialize(ID3D12Device* device){
 	
 	// ポストエフェクト
 	createPostEffectPipeline();
+
+	// Bloomの
+	//createSceneBloomPipeline();
+
 }
 
 void PipelineStateManager::createSpritePipeline() {
@@ -160,10 +164,8 @@ void PipelineStateManager::createSpritePipeline() {
 	//三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;;
 
-	//Shaderをコンパイルする
 	IDxcBlob* vertexShaderBlob = dxcCompiler_.CompileShader(L"resources/Engine/Shader/Sprite.VS.hlsl",
 		L"vs_6_0", dxcCompiler_.GetIDxcUtils(), dxcCompiler_.GetDxcCompiler(), dxcCompiler_.GetIncludeHandler());
-	assert(vertexShaderBlob != nullptr);
 
 	IDxcBlob* pixelShaderBlob = dxcCompiler_.CompileShader(L"resources/Engine/Shader/Sprite.PS.hlsl",
 		L"ps_6_0", dxcCompiler_.GetIDxcUtils(), dxcCompiler_.GetDxcCompiler(), dxcCompiler_.GetIncludeHandler());
@@ -1143,30 +1145,59 @@ void PipelineStateManager::createPostEffectPipeline() {
 
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	descriptorRange[0].BaseShaderRegister = 0; // 3
-	descriptorRange[0].NumDescriptors = 1; // 15
+	descriptorRange[0].NumDescriptors = 1;
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRV5
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offset0
 
+	D3D12_DESCRIPTOR_RANGE descriptorRangeBloom = {};
+	descriptorRangeBloom.RangeType =
+		D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRangeBloom.NumDescriptors = 1;
+	descriptorRangeBloom.BaseShaderRegister = 1; // t1
+	descriptorRangeBloom.RegisterSpace = 0;
+	descriptorRangeBloom.OffsetInDescriptorsFromTableStart =
+		D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	// RootParameterの設定(追加時は随時長さを足す↓
-	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	// RootParameterの設定
+	D3D12_ROOT_PARAMETER rootParameters[4] = {};
 
-	// t0 s0 offscreenの、textureのデータ
+	// t0：シーン画像
 	rootParameters[0].ParameterType =
 		D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[0].ShaderVisibility =
 		D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[0].DescriptorTable.pDescriptorRanges =
 		descriptorRange;
-	rootParameters[0].DescriptorTable.NumDescriptorRanges = 1; 
+	rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
 
-	// b1 ポストエフェクトパラメータ情報
-	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	rootParameters[1].Descriptor.ShaderRegister = 1; // b1
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	// t1：Bloom画像
+	rootParameters[1].ParameterType =
+		D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[1].ShaderVisibility =
+		D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[1].DescriptorTable.pDescriptorRanges =
+		&descriptorRangeBloom;
+	rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
 
-descriptionRootSignature.pParameters = rootParameters;
+	// b1：ポストエフェクトパラメータ
+	rootParameters[2].ParameterType =
+		D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[2].Descriptor.ShaderRegister = 1;
+	rootParameters[2].ShaderVisibility =
+		D3D12_SHADER_VISIBILITY_PIXEL;
+
+	// b2：Bloomパラメータ
+	rootParameters[3].ParameterType =
+		D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[3].Descriptor.ShaderRegister = 2;
+	rootParameters[3].ShaderVisibility =
+		D3D12_SHADER_VISIBILITY_PIXEL;
+
+	descriptionRootSignature.pParameters = rootParameters;
 	descriptionRootSignature.NumParameters = _countof(rootParameters);
+
+
 
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -1178,7 +1209,6 @@ descriptionRootSignature.pParameters = rootParameters;
 	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
 
@@ -1240,7 +1270,9 @@ descriptionRootSignature.pParameters = rootParameters;
 		dxcCompiler_.GetIDxcUtils(), dxcCompiler_.GetDxcCompiler(), dxcCompiler_.GetIncludeHandler());
 
 	// ポストエフェクトの
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC postEffectDesc{};
+//	D3D12_GRAPHICS_PIPELINE_STATE_DESC postEffectDesc{};
+
+
 	postEffectDesc.pRootSignature = rootSignature; // RootSignature
 	postEffectDesc.InputLayout = inputLayoutDesc; // InputLayout
 	postEffectDesc.VS = { postEffectVSBlob->GetBufferPointer(),
@@ -1262,11 +1294,93 @@ descriptionRootSignature.pParameters = rootParameters;
 	postEffectDesc.DepthStencilState.DepthEnable = false;
 	postEffectDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
 
-	state.rootSignature = rootSignature;	
+	state.rootSignature = rootSignature;
 
 	hr = device_->CreateGraphicsPipelineState(
 		&postEffectDesc,
 		IID_PPV_ARGS(&state.graphicsPipelineState)
+	);
+
+	//}
+	// ... なんかうえのDescをコピーしてもnumの値がNullになってたりしてウザかったのでつないどきました★
+
+	///* ブルーム設定 3つのパイプらいｎの生成 */
+	//void PipelineStateManager::createSceneBloomPipeline()
+	//{
+
+
+	// RootSignatureはポストエフェクト用のを使いまわす。(フルスクリーンの設定とかある)
+	// 引数もテキスチャとCBV一個で共通なので
+
+	pipelines_[PipelineType::SceneBloom].rootSignature = pipelines_[PipelineType::PostEffect].rootSignature;
+	pipelines_[PipelineType::SceneBlur].rootSignature = pipelines_[PipelineType::PostEffect].rootSignature;
+
+	// Shaderをコンパイルする
+	const std::wstring bloomMainPath = L"resources/Engine/Shader/SceneBloom.PS.hlsl";
+
+	/* 各 */
+	IDxcBlob* sceneBloomBlob;
+	IDxcBlob* sceneBlurBlob;
+
+	sceneBloomBlob = dxcCompiler_.CompileShader(
+		bloomMainPath,
+		L"ps_6_0",
+		dxcCompiler_.GetIDxcUtils(),
+		dxcCompiler_.GetDxcCompiler(),
+		dxcCompiler_.GetIncludeHandler(),
+		L"SceneBloom"
+	);
+
+	assert(sceneBloomBlob != nullptr);
+
+
+	sceneBlurBlob = dxcCompiler_.CompileShader(
+		bloomMainPath,
+		L"ps_6_0",
+		dxcCompiler_.GetIDxcUtils(),
+		dxcCompiler_.GetDxcCompiler(),
+		dxcCompiler_.GetIncludeHandler(),
+		L"SceneBlur"
+	);
+
+	assert(sceneBlurBlob != nullptr);
+
+
+	/* それぞれのデスク ポストエフェクト用のデスクをコピー */
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC sceneBloomDesc = postEffectDesc;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC sceneBlurDesc = postEffectDesc;
+
+
+	/* 読み込んだシェーダー部分だけ切り替える */
+	sceneBloomDesc.PS = {
+		sceneBloomBlob->GetBufferPointer(),
+		sceneBloomBlob->GetBufferSize()
+	};
+	sceneBlurDesc.PS = {
+		sceneBlurBlob->GetBufferPointer(),
+		sceneBlurBlob->GetBufferSize()
+	};
+
+	assert(sceneBloomDesc.InputLayout.pInputElementDescs != nullptr);
+	assert(sceneBloomDesc.InputLayout.NumElements > 0);
+
+	for (UINT i = 0; i < sceneBloomDesc.InputLayout.NumElements; ++i) {
+		assert(sceneBloomDesc.InputLayout.pInputElementDescs[i].SemanticName != nullptr);
+	}
+	// 各PSOを作成
+	hr = device_->CreateGraphicsPipelineState(
+		&sceneBloomDesc,
+		IID_PPV_ARGS(&pipelines_[PipelineType::SceneBloom].graphicsPipelineState)
+	);
+
+	if (FAILED(hr)) {
+		// デバッグレイヤーを有効にしていると Output ウィンドウに詳細が出る
+		assert(false && "SceneBloom PSO creation failed");
+	}
+
+	device_->CreateGraphicsPipelineState(
+		&sceneBlurDesc,
+		IID_PPV_ARGS(&pipelines_[PipelineType::SceneBlur].graphicsPipelineState)
 	);
 
 }

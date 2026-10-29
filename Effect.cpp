@@ -76,20 +76,22 @@ void Effect::ImGuiViewParticleCompornent() {
 
 	// === セーブボタン
 	if (ImGui::Button("Save")) {
+		
+		std::string jsonName = "resources/Effect/" + effectName + ".json";
 
-		// ※注　ポインタ
-		json& data = SceneComponentLoader::GetInstance()->GetJson();
+		auto loder = SceneComponentLoader::GetInstance();
 
-		// 必ず
-		SceneComponentLoader::GetInstance()->ClearJson();
 
 		// エフェクト内の使うパーティクルの情報のを全部セーブ
-		for (auto& [tag, parametor_] : particleEmitParams_) {
-			SceneComponentLoader::GetInstance()->EffectParticleCompornentSave(tag, parametor_);
-		}
+		if (loder->SaveSwitchJson(jsonName)) {
 
-		SceneComponentLoader::GetInstance()->Save("resources/Effect/" + effectName + ".json");
+			for (auto& [tag, parametor_] : particleEmitParams_) {
+				SceneComponentLoader::GetInstance()->EffectParticleCompornentSave(tag, parametor_);
+			}
 
+			SceneComponentLoader::GetInstance()->Save(jsonName);
+
+		};
 	}
 
 	ImGui::SameLine(ImGui::GetWindowWidth() - 80.0f);

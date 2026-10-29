@@ -47,10 +47,6 @@ public:
 	// JSONセーブ
 	bool Save(const std::string& filePath);
 
-	// JSON取得 直接
-	json& GetJson(){
-		return jsonData_;
-	}
 
 	// ワールドトランスフォーム読み取り
 	WorldTransform GetWorldTransformData(std::string tag) {
@@ -60,11 +56,11 @@ public:
 		world.UpdateMatrix();
 
 		// もし存在しなかったら
-		if (!jsonData_.contains(tag)) {
+		if (!JsonDatas_[currentJsonPath_].jsonData_.contains(tag)) {
 			return world;
 		}
 
-		return JsonToWorld(jsonData_[tag]);
+		return JsonToWorld(JsonDatas_[currentJsonPath_].jsonData_[tag]);
 	}
 
 // スクリーントランスフォーム読み取り
@@ -75,23 +71,23 @@ public:
 		screen.UpdateMatrix();
 
 		// もし存在しなかったら
-		if (!jsonData_.contains(tag)) {
+		if (!JsonDatas_[currentJsonPath_].jsonData_.contains(tag)) {
 			return screen;
 		}
 
-		return JsonToScreen(jsonData_[tag]);
+		return JsonToScreen(JsonDatas_[currentJsonPath_].jsonData_[tag]);
 	}
 
 	// ワールドトランスフォーム書き込み
 	void SetWorldTransformData(std::string tag, WorldTransform world) {
 
-			jsonData_[tag] = WorldToJson(world);
+		JsonDatas_[currentJsonPath_].jsonData_[tag] = WorldToJson(world);
 
 	};
 	// スクリーントランスフォーム書き込み
 	void SetScreenTransformData(std::string tag, ScreenTransform screen) {
 
-			jsonData_[tag] = ScreenToJson(screen);
+		JsonDatas_[currentJsonPath_].jsonData_[tag] = ScreenToJson(screen);
 
 	};
 
@@ -103,10 +99,10 @@ public:
 		text->SetFontSize(20);
 
 		// もし存在しなかったら
-		if (!jsonData_.contains(tag)) {
+		if (!JsonDatas_[currentJsonPath_].jsonData_.contains(tag)) {
 			return;
 		}
-		TextDatas data = JsonToTextDatas(jsonData_[tag]);
+		TextDatas data = JsonToTextDatas(JsonDatas_[currentJsonPath_].jsonData_[tag]);
 
 		text->SetTextDatas(data);
 
@@ -115,7 +111,7 @@ public:
 	}
 
 	void SaveTextData(std::string tag, Text* text) {
-		jsonData_[tag] = TextDatasToJson(text->GetTextDatas());
+		JsonDatas_[currentJsonPath_].jsonData_[tag] = TextDatasToJson(text->GetTextDatas());
 	}
 
 
@@ -125,26 +121,13 @@ public:
 	// LightingManagerからライトをセーブ
 	void LightSave();
 
-	//こっちのシングルトンのほうのjsonDataは消えても、クラスの方のメンバの方のは消えないので中身をcleanしたいときに使う関数
-	void ClearJson() { 
-		jsonData_.clear();
-		jsonGroupNames_.clear();
-	}
-
 	// Effect内のParticleCompornentのセーブ
 	void EffectParticleCompornentSave(std::string tag, ParticleCompornent& param_);
 	void EffectParticleCompornentLoad(std::map<std::string, ParticleCompornent>& particleEmitParams_);
 
 
 	// グループ開始
-	void BeginGroup(const std::string& groupName) {
-
-		currentGroup_ = groupName;
-
-		// グループ名登録
-		jsonGroupNames_.push_back(groupName);
-	
-	}
+	void BeginGroup(const std::string& groupName);
 
 	// グループ終了
 	void EndGroup() {
@@ -161,8 +144,8 @@ public:
 	template<typename T>
 	void Property(const std::string& name, T& value) {
 
-		/*  　　　現在のグループ名　指定のタグ名　 */
-		properties_[currentGroup_][name] = {
+		/* 現在開いているJson				現在のグループ名　指定のタグ名　 */
+		JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
 			[&value, name](json& group) {
 				group[name] = value;
 			},
@@ -196,7 +179,12 @@ public:
 	//* モデルのIDやパスの登録
 	void Property(const std::string& name, std::vector< ModelResource >& value);
 
-
+	/// <summary>
+	/// セーブ前のJsonデータの切り替え
+	/// </summary>
+	/// <param name="jsonPath">jsonのファイルパス</param>
+	/// <returns></returns>
+	bool SaveSwitchJson(std::string jsonPath);
 
 	// Property内で設定したもののImGUIセーブボタン配置
 	void SetImGuiSaveButton(std::string jsonPath);
@@ -204,10 +192,9 @@ public:
 
 private:
 
-	json jsonData_;
+	//json jsonData_;
 
-	// グループの名前を記録
-	std::vector<std::string> jsonGroupNames_;
+	
 
 
 	// WorldTransform->Jsonの形式に変換
@@ -256,12 +243,17 @@ private:
 			std::unordered_map<std::string, PropertyData>
 		> properties_;
 
+		// グループの名前を記録
+		std::vector<std::string> jsonGroupNames_;
+
 	};
 
 	// .Jsonのファイルパス名から上の情報を得る
 	std::unordered_map<std::string, JsonData> JsonDatas_;
 
+	json& GetCurrentJson() { return JsonDatas_[currentJsonPath_].jsonData_; }
 	
+
 	/* 今開いているJsonのパス */
 	std::string currentJsonPath_;
 
