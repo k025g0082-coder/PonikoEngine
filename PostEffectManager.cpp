@@ -313,7 +313,7 @@ void PostEffectManager::ImGuiView() {
 	ImGui::SliderFloat(
 		"BloomIntensity",
 		&bloomParamData_->bloomIntensity,
-		0.0f, 30.0f
+		0.0f, 100.0f
 	);
 
 	ImGui::SliderFloat(
@@ -581,6 +581,8 @@ void PostEffectManager::DrawDownSample()
 
 			// 描画
 			commandList->SetGraphicsRootDescriptorTable(0, srvHandle);
+			commandList->SetGraphicsRootConstantBufferView(1, bloomParamResource->GetGPUVirtualAddress());
+
 			commandList->DrawInstanced(6, 1, 0, 0);
 
 		blurRenderTargets_[i].EndRender();
@@ -626,6 +628,7 @@ void PostEffectManager::DrawUpSample()
 		destination->BeginRender(false);
 
 		commandList->SetGraphicsRootDescriptorTable(0, srvHandle);
+		commandList->SetGraphicsRootConstantBufferView(1, bloomParamResource->GetGPUVirtualAddress());
 
 		commandList->DrawInstanced(6, 1, 0, 0);
 

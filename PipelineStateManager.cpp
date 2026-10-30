@@ -1593,7 +1593,7 @@ void PipelineStateManager::createModelBlurPipeline()
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRV5
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offset0
 
-	D3D12_ROOT_PARAMETER rootParameters[1] = {};
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
 
 	// PS - Texture t0
 	rootParameters[0].ParameterType =
@@ -1607,8 +1607,14 @@ void PipelineStateManager::createModelBlurPipeline()
 
 	rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
 
+	// PS - CBV b1
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[1].Descriptor.ShaderRegister = 1; // b1
+	rootParameters[1].Descriptor.RegisterSpace = 0;
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
 	descriptionRootSignature.pParameters = rootParameters;
-	descriptionRootSignature.NumParameters = 1;
+	descriptionRootSignature.NumParameters = 2;//
 
 
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
@@ -1718,8 +1724,8 @@ void PipelineStateManager::createModelBlurPipeline()
 	graphicsPipelineStateDesc.DepthStencilState.StencilEnable = FALSE;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
 
-	//実際に生成
-	hr = device_->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
+
+ 	hr = device_->CreateGraphicsPipelineState(&graphicsPipelineStateDesc,
 		IID_PPV_ARGS(&downSampleState.graphicsPipelineState));
 	assert(SUCCEEDED(hr));
 
