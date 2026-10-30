@@ -289,9 +289,9 @@ void TestScene::Draw() {
 	};
 
 	//model->Draw(camera);f
-	model->Draw(world,camera);
 
-fieldModel->Draw(world,camera);
+	model->Draw(world,camera);
+	fieldModel->Draw(world,camera);
 
 	// 複数テスト用
 	//sprite.Draw(spworld1);

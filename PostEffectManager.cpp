@@ -514,7 +514,7 @@ void PostEffectManager::InitializeBlur()
 	*/
 
 	/*　段階数 */
-	kBloomLevel = 5;
+	kBloomLevel = 4;
 
 	/* 
 		1280x720
