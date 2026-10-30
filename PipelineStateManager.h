@@ -24,9 +24,14 @@ enum class PipelineType {
 
 	/* ブルーム */
 	SceneBloom,
-	SceneBlur,
+
+	/* ブラー ピラミッド方式のため２つ用意 */
+	SceneBlurDownSample,
+	SceneBlurUpSample,
+
 	SceneComposite,
 
+	ModelBloom,
 
 };
 
@@ -89,7 +94,8 @@ private:
 
 	void createPostEffectPipeline();
 
-	//void createSceneBloomPipeline();
+	void createModelBloomPipeline();
+	void createModelBlurPipeline();
 
 	// ポストエフェクトの
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC postEffectDesc{};

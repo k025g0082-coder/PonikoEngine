@@ -23,10 +23,14 @@ public:
 	/// </summary>
 	/// <param name="width">横幅</param>
 	/// <param name="height">縦幅</param>
-	void Initialize(int32_t width,int32_t height);
+	/// <param name="viewResolution">画面の解像度の倍率（低いほど低負荷）</param>
+	void Initialize(int32_t width,int32_t height, float viewResolution = 1.0f);
 
-	// 描画開始。描画先のRTVの切り替えとPIXELSHADER->RENDER_TARGET のバリアーの遷移
-	void BeginRender();
+	/// <summary>
+	/// 描画開始。描画先のRTVの切り替えとPIXELSHADER->RENDER_TARGET のバリアーの遷移
+	/// </summary>
+	/// <param name="clear">画面をクリアするか</param>
+	void BeginRender(bool clear = true);
 
 	//  描画終了。RENDER_TARGET->PIXELSHADER のバリアーの遷移で元に戻す
 	void EndRender();
@@ -39,8 +43,22 @@ public:
 	// ビューポート
 	D3D12_VIEWPORT viewport;
 
+
+	int32_t baseWidth_;
+	int32_t baseHeight_;
+
+
+	int32_t width_;
+	int32_t height_;
+
+
+	// 解像度変更
+	void ChangeViewResolution(float value_);
+
+
 	// シザー矩形
 	D3D12_RECT scissorRect;
+
 
 private:
 

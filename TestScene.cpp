@@ -82,6 +82,8 @@ void TestScene::Init() {
 
 	// LightingManagerで設定した空間のにモデルをセット
 	model->SetLightSets();
+
+
 	fieldModel->SetLightSets();
 
 	sprite.Initialize("resources/Engine/uvChecker.png");
@@ -101,7 +103,7 @@ void TestScene::Init() {
 		/* 各読み込む */
 		loder->BeginGroup("Properties");
 
-		loder->Property("player", model->GetWorldTransform());
+		loder->Property("player", world);
 		loder->Property("camera", camera.GetWorldTransform());
 		loder->Property("sprite", sprite.GetScreenTransform());
 		loder->Property("text", text2);
@@ -116,6 +118,11 @@ void TestScene::Init() {
 	sheldModel->SetLightSets();
 
 	world.Initialize();
+
+	/* モデル光らせ登録 - Worldも必要になるので同時に */
+	PostEffectManager::GetInstance()->AddBloomModel(model,&world);
+	//PostEffectManager::GetInstance()->AddBloomModel(fieldModel, &world);
+
 
 	Text::RegisterFont("main", "resources/Fonts/DenkiChip.ttf", 32, 32);
 	text.setFont("main");
@@ -179,7 +186,11 @@ void TestScene::Update(Input* input) {
 	
 	camera.GetWorldTransform().ImGuiView("camera");
 
-	model->GetWorldTransform().ImGuiView("player");
+
+	world.ImGuiView("player");
+	//model->GetWorldTransform().ImGuiView("player");
+
+
 	fieldModel->GetWorldTransform().ImGuiView("field");
 	//world.ImGuiView("player");
 
@@ -277,10 +288,10 @@ void TestScene::Draw() {
 
 	};
 
-	model->Draw(camera);
-	//model->Draw(world,camera);
+	//model->Draw(camera);f
+	model->Draw(world,camera);
 
-	fieldModel->Draw(world,camera);
+fieldModel->Draw(world,camera);
 
 	// 複数テスト用
 	//sprite.Draw(spworld1);

@@ -16,6 +16,8 @@
 
 #include "Timer.h"
 
+#include "PostEffectManager.h"
+
 #include <fstream>
 #include <sstream>
 Model* Model::Clone() const
@@ -508,6 +510,14 @@ void Model::UpdateAnimation() {
 
 }
 
+
+void Model::SetBloomToWorldTransform(WorldTransform* worldTransform)
+{
+	// ブルームとＷｏｒｌｄのアドレス登録
+	PostEffectManager::GetInstance()->AddBloomModel(this, worldTransform);
+}
+
+
 // 再帰でグローバル行列を計算する関数
 void Model::CalculateGlobalMatrices(int boneIndex, const aiMatrix4x4& parentGlobal)
 {
@@ -846,5 +856,55 @@ void Model::DrawShadow(Matrix4x4 lightView_, Matrix4x4 lightProjection_) {
 	// WVPをb0に設定
 	commandList->SetGraphicsRootConstantBufferView(0, worldTransform_.GetWvpResource()->GetGPUVirtualAddress());
 
+	commandList->DrawIndexedInstanced(static_cast<UINT>(modelData.indices.size()), 1, 0, 0, 0);
+}
+
+void Model::DrawBloom(WorldTransform& world,Camera camera, ID3D12Resource* bloomParamResource)
+{
+	Matrix4x4 worldViewProjectionMatrix = Multiply(world.matWorld_, Multiply(camera.GetViewMatrix(), camera.GetProjectionMatrix()));
+
+	world.mvpData_->World = world.matWorld_;
+	world.mvpData_->WVP = worldViewProjectionMatrix;
+
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
+
+	ID3D12DescriptorHeap* heaps[] = {
+		DirectXCommon::GetInstance()->GetSrvHeap().Get(),
+	};
+
+	commandList->SetDescriptorHeaps(1, heaps);
+
+	/* SceneBloom の Rootsignatureと、パイプラインの設定 */
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::ModelBloom).rootSignature);
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::ModelBloom).graphicsPipelineState);
+	
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+	commandList->IASetIndexBuffer(&indexBufferView);
+
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	
+	commandList->SetGraphicsRootDescriptorTable(1, texture->GetTextureSrvHandleGPU());
+
+	// ブルーム　パラメータ値
+	commandList->SetGraphicsRootConstantBufferView(2, bloomParamResource->GetGPUVirtualAddress());
+
+	commandList->SetGraphicsRootConstantBufferView(3, world.GetWvpResource()->GetGPUVirtualAddress());
+
+	// もしアニメがあったら
+	if (modelData.isSkinning) {
+		commandList->SetGraphicsRootConstantBufferView(
+			4,
+			skinningResource_->GetGPUVirtualAddress());
+	}
+
+	// アニメ有り無し
+	commandList->SetGraphicsRootConstantBufferView(5, skinningParamResource_->GetGPUVirtualAddress());
+
+
+
+	// 描画
 	commandList->DrawIndexedInstanced(static_cast<UINT>(modelData.indices.size()), 1, 0, 0, 0);
 }

@@ -285,6 +285,9 @@
     <None Include="externals\imGuizmo\LICENSE">
       <Filter>Engine\Source\imGuizmo</Filter>
     </None>
+    <None Include="ModelBloom.hlsli">
+      <Filter>Engine\リソース ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WinApp.h">
@@ -542,6 +545,12 @@
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
     <FxCompile Include="resources\Engine\Shader\SceneBloom.PS.hlsl">
+      <Filter>Engine\リソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\Engine\Shader\ModelBloom.PS.hlsl">
+      <Filter>Engine\リソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\Engine\Shader\ModelBloom.VS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
   </ItemGroup>

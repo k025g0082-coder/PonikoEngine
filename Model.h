@@ -18,6 +18,7 @@
 #include "Animation.h"
 
 #include <string>
+#include <d3d12.h>
 
 // モデルの頂点データ。要はVS.hlslに送るレイアウト
 struct ModelVertexData {
@@ -94,6 +95,11 @@ public:
 
 	// 指定された光源のおち影の描画をする
 	void DrawShadow(Matrix4x4 lightView_, Matrix4x4 lightProjection);
+
+	// ブルーム対象だけの描画
+	void DrawBloom(WorldTransform& world,Camera camera, ID3D12Resource* bloomParamResource);
+
+	
 
 	// アニメ更新
 	void UpdateAnimation();
@@ -241,6 +247,9 @@ public:
 		worldTransform_ = w;
 	}
 
+
+	/* ブルーム設定とそれに使うWorldの登録 */
+	void SetBloomToWorldTransform(WorldTransform* worldTransform);
 	
 private:
 
@@ -269,6 +278,7 @@ private:
 	bool isAnimation_ = true;
 	
 	bool isLoop_ = true;
+
 
 	std::vector<Matrix4x4> boneMatrices_;
 

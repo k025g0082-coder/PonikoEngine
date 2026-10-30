@@ -4,7 +4,12 @@
 #include "Vector.h"
 #include "Matrix.h"
 
+#include <wrl/client.h>
+
 #include "RenderTarget.h"
+
+#include "Model.h"
+#include <vector>
 
 struct VertexData {
 	Vector4 position;
@@ -71,10 +76,18 @@ public:
 	PostEffectParam& GetPostEffectParam() { return *postEffectData; }
 	BloomParam& GetBloomParam() { return *bloomParamData_; }
 
-
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandleOffscreen() {
 		return rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart();
 	};
+
+
+	/* Bloomさせるモデルを追加 */
+	void AddBloomModel(Model* model, WorldTransform* worldTransform) {
+
+		// 対象モデルのワールド座標を追加
+		bloomModelPropaties_[model].push_back(worldTransform);
+
+	}
 
 private:
 
@@ -97,7 +110,6 @@ private:
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};//	
 
 
-
 	/* 明るい部分の取り出し */
 	void DrawBloomExtract();
 
@@ -110,15 +122,38 @@ private:
 
 	/* Bloom用のRenderTarget */
 	RenderTarget bloomRenderTarget_;      // 明るい部分の算出結果
-	RenderTarget blurRenderTarget_;       // ぼかすための
+
+
+
+	/* Blurピラミッドを採用　そのリスト */
+	std::vector<RenderTarget> blurRenderTargets_;
+
+	// 分割数
+	uint32_t kBloomLevel;
+
+	// Blurの初期化
+	void InitializeBlur();
+
+	// Up / Downのサンプル描画
+	void DrawDownSample();
+	void DrawUpSample();
+
+
+	const float kBloomResolution_ = 0.5f;  // Bloomの解像度（低い程低解像度）
+
+
+	/* bloom対象のモデルー＞それに紐づけられたワールド座標のリスト。 みたいな感じで管理  */
+	std::unordered_map < Model*, std::vector<WorldTransform*> > bloomModelPropaties_;
+
+
 
 	// 定数バッファ
 	BloomParam* bloomParamData_ = nullptr;
-	ID3D12Resource* bloomParamResource = nullptr;
 
+	Microsoft::WRL::ComPtr <ID3D12Resource> bloomParamResource = nullptr;
 
 	// ポストエフェクト用のシーン描画のRenderTarget
-	ID3D12Resource* offscreenRenderTarget = nullptr;
+	Microsoft::WRL::ComPtr <ID3D12Resource> offscreenRenderTarget = nullptr;
 
 
 	ID3D12DescriptorHeap* rtvHeapOffscreen = nullptr;  // オフスクリーン用RTV

@@ -10,6 +10,8 @@
 
 #include "timer.h"
 
+#include "Scene.h"
+
 #include <format>
 
 // （安心安定の）シングルトン
@@ -91,7 +93,7 @@ void PostEffectManager::Initialize() {
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDescOff{};
 	rtvDescOff.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	rtvDescOff.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-	device_->CreateRenderTargetView(offscreenRenderTarget, &rtvDescOff, rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart());
+	device_->CreateRenderTargetView(offscreenRenderTarget.Get(), &rtvDescOff, rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart());
 
 
 	UINT index = DirectXCommon::GetInstance()->GetAllocateSrv();
@@ -120,12 +122,15 @@ void PostEffectManager::Initialize() {
 	srvDescOff.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDescOff.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDescOff.Texture2D.MipLevels = 1;
-	device_->CreateShaderResourceView(offscreenRenderTarget, &srvDescOff, offscreenSRVHandleCPU);
+	device_->CreateShaderResourceView(offscreenRenderTarget.Get(), &srvDescOff, offscreenSRVHandleCPU);
 
 
 	//*  BloomのRenderTarget初期化  *//
-	blurRenderTarget_.Initialize(WinApp::GetInstance()->GetClientWidth() / 2 , WinApp::GetInstance()->GetClientHeight());
-	bloomRenderTarget_.Initialize(WinApp::GetInstance()->GetClientWidth() , WinApp::GetInstance()->GetClientHeight());
+
+	/* 解像度は２分の一。bloom合成時に元に戻す */
+
+	//blurRenderTarget_.Initialize(WinApp::GetInstance()->GetClientWidth(), WinApp::GetInstance()->GetClientHeight(), kBloomResolution_);
+	bloomRenderTarget_.Initialize(WinApp::GetInstance()->GetClientWidth(), WinApp::GetInstance()->GetClientHeight(), kBloomResolution_);
 
 
 	// 定数バッファの登録
@@ -171,6 +176,9 @@ void PostEffectManager::Initialize() {
 	postEffectData->scanLine = 0.0f;
 	postEffectData->fishLens = 0.0f;
 
+	/* blur初期化 */
+	InitializeBlur();
+	
 
 	OutputDebugStringA(std::format(
 		"offscreenSRVHandleGPU.ptr = 0x{:X}\n",
@@ -192,7 +200,7 @@ void PostEffectManager::BeginScene() {
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
 		barrier.Transition.pResource =
-			offscreenRenderTarget;
+			offscreenRenderTarget.Get();
 
 		barrier.Transition.StateBefore =
 			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
@@ -233,7 +241,7 @@ void PostEffectManager::ApplyScene() {
 		D3D12_RESOURCE_BARRIER barrier = {};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = offscreenRenderTarget;
+		barrier.Transition.pResource = offscreenRenderTarget.Get();
 		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		commandList->ResourceBarrier(1, &barrier);
@@ -249,15 +257,25 @@ void PostEffectManager::ApplyScene() {
 
 		*/
 
+		// 0.5)* 解像度を2/1に
+		bloomRenderTarget_.ChangeViewResolution(kBloomResolution_);
+		//blurRenderTarget_.ChangeViewResolution(kBloomResolution_);
+
 		// 1) 明るいところを摘出
 		DrawBloomExtract();
 
 		// 2) 明るいところをぼかす
-		DrawBloomBlur();
+		//DrawBloomBlur();
+		DrawDownSample();
+		DrawUpSample();
+
+
+		// 2.5)* 解像度を戻の解像度に戻す
+		bloomRenderTarget_.ChangeViewResolution(1.0f);
+
 
 		// 3) 最終的なBuckBufferへの描画。
 		//    backBufferを描画先にして、blurと既存のポストエフェクト効果を掛け合わせたのを描画
-
 		DrawCompositeToBackBuffer();
 
 }
@@ -320,10 +338,10 @@ void PostEffectManager::ImGuiView() {
 
 void PostEffectManager::DrawBloomExtract()
 {
-
+	
 	/* オフスクリーンのテキスチャから、明るいを抽出. */
 
-	// BeginRender・・・　PixelShaderからRenderTargetの遷移。描画先のOMSetRenderTargets()の設定。（描き込み先の設定）画面の初期化
+	// BeginRender・・・　PixelShaderからRenderTargetの遷移。描画先のOMSetRenderTargets()の設定。（描き込み先の設定）画面の初期化。viewPortの設定
 	// EndRender・・・　  RenderTargetからPixelShaderへの遷移。
 
 
@@ -333,41 +351,37 @@ void PostEffectManager::DrawBloomExtract()
 	{
 		ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
 
-		// ポストエフェクト用のViewport / Scissorを設定
-		commandList->RSSetViewports(
-			1,
-			&DirectXCommon::GetInstance()->GetViewport()
-		);
+		// モデル描画。　登録されたモデルに紐づいたワールド座標で
+		for (auto& [model, worldTransforms] : bloomModelPropaties_) {
 
-		commandList->RSSetScissorRects(
-			1,
-			&DirectXCommon::GetInstance()->GetScissorRect()
-		);
-
+			for (WorldTransform* world : worldTransforms) {
+				model->DrawBloom(*world, *Scene::GetSceneCamera(), bloomParamResource.Get());
+			}
+		}
 
 		/* SceneBloom の Rootsignatureと、パイプラインの設定 */
-		commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBloom).rootSignature);
-		commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBloom).graphicsPipelineState);
+		//commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBloom).rootSignature);
+		//commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBloom).graphicsPipelineState);
 
-		ID3D12DescriptorHeap* descriptorHeaps[] = {
-		DirectXCommon::GetSrvHeap().Get()
-		};
+		//ID3D12DescriptorHeap* descriptorHeaps[] = {
+		//DirectXCommon::GetSrvHeap().Get()
+		//};
 
-		commandList->SetDescriptorHeaps(1, descriptorHeaps);
-
-
-		commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		//commandList->SetDescriptorHeaps(1, descriptorHeaps);
 
 
-		// 読込：オフスクリーンのテキスチャ
-		commandList->SetGraphicsRootDescriptorTable(0, offscreenSRVHandleGPU);
+		//commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
+		//commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		// ブルーム　パラメータ値
-		commandList->SetGraphicsRootConstantBufferView(3, bloomParamResource->GetGPUVirtualAddress());
 
-		// 描画
-		commandList->DrawInstanced(6, 1, 0, 0);
+		//// 読込：オフスクリーンのテキスチャ
+		//commandList->SetGraphicsRootDescriptorTable(0, offscreenSRVHandleGPU);
+
+		//// ブルーム　パラメータ値
+		//commandList->SetGraphicsRootConstantBufferView(3, bloomParamResource->GetGPUVirtualAddress());
+
+		//// 描画
+		//commandList->DrawInstanced(6, 1, 0, 0);
 
 	}
 
@@ -381,56 +395,47 @@ void PostEffectManager::DrawBloomBlur()
 {
 	/* その取り出した明るさをぼかす. */
 
-	// BeginRender・・・　PixelShaderからRenderTargetの遷移。描画先のOMSetRenderTargets()の設定。（描き込み先の設定）画面の初期化
+	// BeginRender・・・　PixelShaderからRenderTargetの遷移。描画先のOMSetRenderTargets()の設定。（描き込み先の設定）画面の初期化。viewPortの設定
 	// EndRender・・・　  RenderTargetからPixelShaderへの遷移。
 
 
 	//
-	blurRenderTarget_.BeginRender();
+	//blurRenderTarget_.BeginRender();
 
-	{
-		ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
-
-		// ポストエフェクト用のViewport / Scissorを設定
-		commandList->RSSetViewports(
-			1,
-			&DirectXCommon::GetInstance()->GetViewport()
-		);
-
-		commandList->RSSetScissorRects(
-			1,
-			&DirectXCommon::GetInstance()->GetScissorRect()
-		);
+	//{
 
 
-		/* SceneBloom の Rootsignatureと、パイプラインの設定 */
-		commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBlur).rootSignature);
-		commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBlur).graphicsPipelineState);
+	//	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
 
-		ID3D12DescriptorHeap* descriptorHeaps[] = {
-		DirectXCommon::GetSrvHeap().Get()
-		};
+	//	/* SceneBloom の Rootsignatureと、パイプラインの設定 */
+	//	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBlurDownSample).rootSignature);
+	//	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBlurDownSample).graphicsPipelineState);
 
-		commandList->SetDescriptorHeaps(1, descriptorHeaps);
+	//	ID3D12DescriptorHeap* descriptorHeaps[] = {
+	//	DirectXCommon::GetSrvHeap().Get()
+	//	};
 
-
-		commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
-		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 
 
-		// 読込：さっきの取り出した明るさのテキスチャ
-		commandList->SetGraphicsRootDescriptorTable(0, bloomRenderTarget_.GetSRVHandleGPU());
+	//	commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
+	//	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		// ブルーム　パラメータ値
-		commandList->SetGraphicsRootConstantBufferView(3, bloomParamResource->GetGPUVirtualAddress());
 
-		// 描画
-		commandList->DrawInstanced(6, 1, 0, 0);
+	//	// 読込：さっきの取り出した明るさのテキスチャ
+	//	commandList->SetGraphicsRootDescriptorTable(0, bloomRenderTarget_.GetSRVHandleGPU());
 
-	}
+	//	// ブルーム　パラメータ値
+	//	commandList->SetGraphicsRootConstantBufferView(2, bloomParamResource->GetGPUVirtualAddress());
 
-	//
-	blurRenderTarget_.EndRender();
+	//	// 描画
+	//	commandList->DrawInstanced(6, 1, 0, 0);
+
+	//	
+
+	//	
+	//}
+	//blurRenderTarget_.EndRender();
 }
 
 
@@ -492,7 +497,7 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 
 	/* 合成 */
 	commandList->SetGraphicsRootDescriptorTable(0, offscreenSRVHandleGPU);
-	commandList->SetGraphicsRootDescriptorTable(1, blurRenderTarget_.GetSRVHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(1, blurRenderTargets_.back().GetSRVHandleGPU());
 
 
 	//// ポストエフェクト　パラメータ値
@@ -500,4 +505,130 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 	commandList->SetGraphicsRootConstantBufferView(3, bloomParamResource->GetGPUVirtualAddress());
 
 	commandList->DrawInstanced(6, 1, 0, 0);
+}
+
+void PostEffectManager::InitializeBlur()
+{
+	/*
+		ピラミッド方式のを使用
+	*/
+
+	/*　段階数 */
+	kBloomLevel = 5;
+
+	/* 
+		1280x720
+		640,360
+		320,180.. とどんどん解像度をさげる
+	*/
+
+
+	blurRenderTargets_.resize(kBloomLevel);
+
+	uint32_t width = WinApp::GetInstance()->GetClientWidth() / 2;
+	uint32_t height = WinApp::GetInstance()->GetClientHeight() / 2;
+
+	for (uint32_t i = 0; i < kBloomLevel; ++i)
+	{
+		blurRenderTargets_[i].Initialize(width, height);
+
+		// どんどん割る
+		width /= 2;
+		height /= 2;
+	}
+}
+
+void PostEffectManager::DrawDownSample()
+{
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
+
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBlurDownSample).rootSignature);
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBlurDownSample).graphicsPipelineState);
+
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
+	commandList->IASetPrimitiveTopology(
+		D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+	);
+
+	/* Blurピラミッドを採用 */
+
+	/*
+		1280x720
+		640x360
+		320x180... と徐々に下げて描画していく
+	*/
+
+	for (uint32_t i = 0; i < blurRenderTargets_.size(); ++i)
+	{
+		// 入力SRV
+		D3D12_GPU_DESCRIPTOR_HANDLE srvHandle{};
+
+		if (i == 0)
+		{
+			// 最初はBloom抽出RT
+			srvHandle = bloomRenderTarget_.GetSRVHandleGPU();
+		}
+		else
+		{
+			// i = 1~ なのでひとつ前の解像度のRT
+			srvHandle = blurRenderTargets_[i - 1].GetSRVHandleGPU();
+		}
+
+
+		// 描画先RT
+		blurRenderTargets_[i].BeginRender();
+
+			// 描画
+			commandList->SetGraphicsRootDescriptorTable(0, srvHandle);
+			commandList->DrawInstanced(6, 1, 0, 0);
+
+		blurRenderTargets_[i].EndRender();
+
+	}
+}
+
+/*
+	320x180
+	640x360
+	1280x720.. とブレンドの加算を加えながら描画
+*/
+void PostEffectManager::DrawUpSample()
+{
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
+
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBlurUpSample).rootSignature);
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBlurUpSample).graphicsPipelineState);
+
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
+	commandList->IASetPrimitiveTopology(
+		D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+	);
+
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
+	commandList->IASetPrimitiveTopology(
+		D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+	);
+
+	// 小さい解像度から大きい解像度へ
+	for (int32_t i = static_cast<int32_t>(blurRenderTargets_.size()) - 1;
+		i > 0; --i)
+	{
+		// 入力：ひとつ小さいRT
+		D3D12_GPU_DESCRIPTOR_HANDLE srvHandle =
+			blurRenderTargets_[i].GetSRVHandleGPU();
+
+		// 出力：ひとつ大きいRT
+		RenderTarget* destination = &blurRenderTargets_[i - 1];
+
+		// 加算描画開始 - 画面クリアはしない。どんどん上に重ねていく必要があるから
+		destination->BeginRender(false);
+
+		commandList->SetGraphicsRootDescriptorTable(0, srvHandle);
+
+		commandList->DrawInstanced(6, 1, 0, 0);
+
+		destination->EndRender();
+	}
 }

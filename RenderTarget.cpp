@@ -5,7 +5,15 @@
 #include "WinApp.h"
 #include "DirectXUtility.h"
 
-void RenderTarget::Initialize(int32_t width, int32_t height) {
+void RenderTarget::Initialize(int32_t width, int32_t height, float viewResolution) {
+
+	// 元の
+	baseWidth_ = width;
+	baseHeight_ = height;
+
+	// 解像度計算
+	width_ = static_cast<int32_t>(static_cast<float>(width) * viewResolution);
+	height_ = static_cast<int32_t>(static_cast<float>(height) * viewResolution);
 
 	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
 
@@ -15,8 +23,8 @@ void RenderTarget::Initialize(int32_t width, int32_t height) {
 	// テクスチャ作成
 	D3D12_RESOURCE_DESC rtvDescOffscreen{};
 	rtvDescOffscreen.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	rtvDescOffscreen.Width = width;
-	rtvDescOffscreen.Height = height;
+	rtvDescOffscreen.Width = width_;
+	rtvDescOffscreen.Height = height_;
 	rtvDescOffscreen.DepthOrArraySize = 1;
 	rtvDescOffscreen.MipLevels = 1;
 	rtvDescOffscreen.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
@@ -75,8 +83,8 @@ void RenderTarget::Initialize(int32_t width, int32_t height) {
 	device_->CreateShaderResourceView(renderTarget_.Get(), &srvDescOff, srvHandleCPU_);
 
 	//　ビューポートの設定  設定された大きさで生成
-	viewport.Width = static_cast<FLOAT>(width);
-	viewport.Height = static_cast<FLOAT>(height);
+	viewport.Width = static_cast<FLOAT>(width_);
+	viewport.Height = static_cast<FLOAT>(height_);
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
 	viewport.MinDepth = 0.0f;
@@ -85,14 +93,14 @@ void RenderTarget::Initialize(int32_t width, int32_t height) {
 	//基本的にビューポートと同じ矩形が構成されるようにする
 	scissorRect.left = 0;
 
-	scissorRect.right = width;
+	scissorRect.right = width_;
 	scissorRect.top = 0;
-	scissorRect.bottom = height;
+	scissorRect.bottom = height_;
 
 	firstFrame_ = true; // 初回フラグをリセット
 }
 
-void RenderTarget::BeginRender()
+void RenderTarget::BeginRender(bool clear)
 {
 
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
@@ -126,9 +134,11 @@ void RenderTarget::BeginRender()
 
 	commandList->OMSetRenderTargets(1, &rtvHandleOffscreen, FALSE, &dsvHandle);
 
-	// クリア
-	float clearColor[] = { 0.0f, 0.0f, 0.0f,0.0f };// 黒色で初期化
-	commandList->ClearRenderTargetView(rtvHandleOffscreen, clearColor, 0, nullptr);
+	if (clear) {
+		// クリア
+		float clearColor[] = { 0.0f, 0.0f, 0.0f,0.0f };// 黒色で初期化
+		commandList->ClearRenderTargetView(rtvHandleOffscreen, clearColor, 0, nullptr);
+	}
 
 	// 画面の深さ？
 	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
@@ -161,3 +171,20 @@ void RenderTarget::EndRender()
 	//	nullptr);
 	//
 }
+
+void RenderTarget::ChangeViewResolution(float value_)
+{
+	
+	// 元の解像度と掛けて 計算
+	width_= static_cast<uint32_t>(static_cast<float>(baseWidth_) * value_);
+	height_ = static_cast<uint32_t>(static_cast<float>(baseHeight_) * value_);
+
+	/* ビューポートも帰る */
+	viewport.Width = static_cast<float>(width_);
+	viewport.Height = static_cast<float>(height_);
+
+	// 矩形も
+	scissorRect.right = static_cast<LONG>(width_);
+	scissorRect.bottom = static_cast<LONG>(height_);
+}
+
