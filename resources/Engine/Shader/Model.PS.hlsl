@@ -91,6 +91,7 @@ float CalculateShadow(float4 lightPosition)
     // 透視除算（ライト視点のNDC座標）
     float3 proj = lightPosition.xyz / lightPosition.w;
 
+    
     // NDC座標をUV座標に変換
     float2 shadowUV;
     shadowUV.x = proj.x * 0.5f + 0.5f;
@@ -105,7 +106,7 @@ float CalculateShadow(float4 lightPosition)
     }
 
     // 深度比較用のバイアス
-    float depth = proj.z - 0.001f;
+    float depth = proj.z + 0.001f;
 
     // シャドウマップの深度と比較
     return shadowMap.SampleCmpLevelZero(
@@ -121,49 +122,45 @@ PixelShaderOutput main(VertexShaderOutput input) {
     
     PixelShaderOutput output;
     
-//    float3 proj = input.lightPosition.xyz / input.lightPosition.w;
-//    float2 uv;
-//    uv.x = proj.x * 0.5f + 0.5f;
-//    uv.y = -proj.y * 0.5f + 0.5f;
-
-//// 範囲外は青
-//    if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1 ||
-//    proj.z < 0 || proj.z > 1)
-//    {
-//        output.color = float4(0, 0, 1, 1);
-//        return output;
-//    }
-
-//    float mapDepth = shadowMap.Sample(gSampler, uv).r;
-//    output.color = float4(mapDepth, mapDepth, mapDepth, 1);
-//    return output;
     
     
+    float3 proj = input.lightPosition.xyz / input.lightPosition.w;
+    float2 uv;
+    uv.x = proj.x * 0.5f + 0.5f;
+    uv.y = -proj.y * 0.5f + 0.5f;
     
-    //float3 proj = input.lightPosition.xyz / input.lightPosition.w;
+    float currentDepth = proj.z; // 光源からこのピクセルまでの距離
 
-    //// 範囲外は赤で分かるようにする
-    //if (proj.x < -1.0f || proj.x > 1.0f ||
-    //    proj.y < -1.0f || proj.y > 1.0f ||
-    //    proj.z < 0.0f || proj.z > 1.0f)
+    // 2. シャドウマップと比較サンプラーを使って影の減衰率を計算
+    // (currentDepth が マップの深度より大きければ 0.0、小さければ 1.0 が返る)
+    float shadowFactor = shadowMap.SampleCmpLevelZero(
+        shadowSampler, uv, currentDepth);
+    
+    
+    //// 3. ライティングにシャドウの係数を掛け合わせる
+    float color = lerp(0.05f, 1.0f, shadowFactor);
+    output.color = float4(color, color, color, 1.0f);
+    return output;
+    
+    //if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f ||
+    //proj.z < 0.0f || proj.z > 1.0f)
     //{
-    //    output.color = float4(1.0f, 0.0f, 0.0f, 1.0f); // 範囲外 = 赤
+    //    output.color = float4(0.0f, 0.0f, 1.0f, 1.0f); // 範囲外 = 青
     //    return output;
     //}
 
-    //// 深度を白黒で表示（近いほど白、遠いほど黒）
-    //float depth = proj.z;
-    //output.color = float4(depth, depth, depth, 1.0f);
-    //return output;
+// 通常のSamplerで深度を見る（ComparisonSamplerではない）
+    float mapDepth = shadowMap.Sample(gSampler, uv).r;
+    output.color = float4(mapDepth, mapDepth, mapDepth, 1.0f);
+    return output;
+    
     
     
     float4 uvTransform = mul(float4(input.texcoord, 0.0f, 1.0f), material.uvTransform);
-    float2 uv = uvTransform.xy;
+    //float2 uv = uvTransform.xy;
     
     float4 textureColor = texture0.Sample(gSampler, uv);
    
-    
-    float shadow = CalculateShadow(input.lightPosition);
 
     // 影判定だけを表示
     //output.color = float4(shadow, shadow, shadow, 1.0f);
@@ -188,7 +185,9 @@ PixelShaderOutput main(VertexShaderOutput input) {
     // =========================
     // Directional Light
     // =========================
-     
+        
+        float3 directionalLighting = float3(0.0f, 0.0f, 0.0f);
+        
         for (int i = 0; i < directionalLights.count; i++)
         {
                 float NdotL = dot(
@@ -199,12 +198,19 @@ PixelShaderOutput main(VertexShaderOutput input) {
                 float directionalCos =
             pow(saturate(NdotL * 0.5f + 0.5f), 2.0f);
 
-                lighting +=
+                directionalLighting +=
             directionalLights.lights[i].color.rgb *
             directionalCos *
             directionalLights.lights[i].intensity;
         }
+        
+        // 影を計算
+        float shadow = CalculateShadow(input.lightPosition);
+        float shadowFactor = lerp(0.05f, 1.0f, shadow);
 
+        // Directional だけに影を掛ける
+        lighting += directionalLighting * shadowFactor;
+        
     // =========================
     // Point Light
     // =========================
@@ -269,16 +275,12 @@ PixelShaderOutput main(VertexShaderOutput input) {
         //material.color *
         //textureColor *
         //float4(lighting, 1.0f);
-        
-        float shadow = CalculateShadow(input.lightPosition);
 
-        // 影なら暗くする
-        float shadowFactor = lerp(0.05f, 1.0f, shadow);
 
-        output.color =
-         material.color * textureColor *
-         float4(lighting * shadowFactor, 1.0f);
-        
+        //output.color =
+        // material.color * textureColor *
+        // float4(lighting * shadowFactor, 1.0f);
+        output.color = material.color * textureColor * float4(lighting, 1.0f);
     }
     else
     {

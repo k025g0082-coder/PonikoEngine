@@ -181,18 +181,13 @@ void ShadowManager::Initialize()
             shadowMapSrvHeap_->GetCPUDescriptorHandleForHeapStart()
         );
 
-        // ライトの位置(例
-        lightPosition = {
-            0.0f,
-            1.0f,
-            0.0f
-        };
+        // 真下に落とすためのライト初期値
+        lightPosition = { 0.0f, 50.0f, 0.0f };  // 上空 50 の位置
+        lightDirection = { 0.0f, -1.0f, 0.0f }; // 真下を向く
 
-        lightDirection = {
-        0.0f,
-        -1.0f,
-        1.0f
-        };
+        shadowRange = 30.0f; // プレイヤー周囲 30 単位をカバー
+        lightNear = 1.0f;
+        lightFar = 100.0f;
 }
 
 void ShadowManager::Register(Model* model) {
@@ -257,8 +252,8 @@ void ShadowManager::RenderShadowMap() {
     viewport.TopLeftY = 0.0f;
     viewport.Width = 2048.0f;
     viewport.Height = 2048.0f;
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
+    viewport.MinDepth = -3.0f;
+    viewport.MaxDepth = 3.0f;
 
     D3D12_RECT scissorRect{
         0, 0, 2048, 2048
@@ -280,15 +275,11 @@ void ShadowManager::RenderShadowMap() {
         lightPosition,
         lightTarget
     );
-
-    // ライトの正射影行列
+  
     lightProjection_ = MakeOrthographicMatrix(
-        -1.0f,
-        1.0f,
-        1.0f,
-        -1.0f,
-        1.0f,
-        100.0f
+        -shadowRange, shadowRange,  // left, top
+        shadowRange, -shadowRange, // right, bottom
+        lightNear, lightFar                // near, far
     );
 
     // ④ 登録されたモデルを全部描画
@@ -311,32 +302,45 @@ void ShadowManager::RenderShadowMap() {
     commandList->ResourceBarrier(1, &barrierToSRV);
 }
 
-// ライトのView行列を作る
+
 Matrix4x4 ShadowManager::MakeLightViewMatrix(
     const Vector3& eye,
     const Vector3& target)
 {
+    // Z軸 (Forward): eye から target への方向
+    Vector3 zAxis = Normalize(Subtract(target, eye));
 
-    Vector3 forward = Normalize(target - eye);
-
-    // forward がほぼ上下方向のときは別の up を使う
-    Vector3 worldUp = { 0.0f, 1.0f, 0.0f };
-    Vector3 right = Cross(worldUp, forward);
-
-    // forward と worldUp がほぼ平行なら別の up
-    if (Length(right) < 0.001f) {
-        worldUp = { 0.0f, 0.0f, 1.0f };
-        right = Cross(worldUp, forward);
+    // 真下・真上を向いているかの判定
+    Vector3 worldUp = { 0.0f, 0.0f, 1.0f }; // 真下を向く時は Z 軸(+Z)を仮のUpにする
+    if (std::abs(zAxis.y) < 0.999f) {
+        worldUp = { 0.0f, 1.0f, 0.0f };     // 斜めの時は通常の Y 軸(+Y)をUpにする
     }
-    right = Normalize(right);
-    Vector3 up = Normalize(Cross(forward, right));
 
-    Matrix4x4 lightWorldMatrix{ {
-        { right.x,   right.y,   right.z,   0.0f },
-        { up.x,      up.y,      up.z,      0.0f },
-        { forward.x, forward.y, forward.z, 0.0f },
-        { eye.x,     eye.y,     eye.z,     1.0f },
-    } };
+    // X軸 (Right)
+    Vector3 xAxis = Normalize(Cross(worldUp, zAxis));
+    // Y軸 (Up)
+    Vector3 yAxis = Cross(zAxis, xAxis);
 
-    return Inverse(lightWorldMatrix);
+    Matrix4x4 viewMatrix;
+    viewMatrix.m[0][0] = xAxis.x;
+    viewMatrix.m[1][0] = xAxis.y;
+    viewMatrix.m[2][0] = xAxis.z;
+    viewMatrix.m[3][0] = -Dot(xAxis, eye);
+
+    viewMatrix.m[0][1] = yAxis.x;
+    viewMatrix.m[1][1] = yAxis.y;
+    viewMatrix.m[2][1] = yAxis.z;
+    viewMatrix.m[3][1] = -Dot(yAxis, eye);
+
+    viewMatrix.m[0][2] = zAxis.x;
+    viewMatrix.m[1][2] = zAxis.y;
+    viewMatrix.m[2][2] = zAxis.z;
+    viewMatrix.m[3][2] = -Dot(zAxis, eye);
+
+    viewMatrix.m[0][3] = 0.0f;
+    viewMatrix.m[1][3] = 0.0f;
+    viewMatrix.m[2][3] = 0.0f;
+    viewMatrix.m[3][3] = 1.0f;
+
+    return viewMatrix;
 }

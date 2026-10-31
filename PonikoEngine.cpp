@@ -114,8 +114,6 @@ namespace PonikoEngine {
 				/*　Game更新処理　*/
 				Game::GetInstance()->Draw();
 
-		
-
 				// パーティクル
 				Particle::GetInstance()->Draw();
 

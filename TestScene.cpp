@@ -65,6 +65,7 @@ void TestScene::Init() {
 
 //	model = Model::CreateOBJ("resources/Models/player/player.fbx");
 	model = Model::CreateOBJ("resources/Models/cube/cube.obj");
+	model2 = Model::CreateOBJ("resources/Models/field/field.obj");
 
 
 	//model->SetAnimationSpeed(0.5f);
@@ -72,7 +73,7 @@ void TestScene::Init() {
 
 	sheldModel = Model::CreateOBJ("resources/Models/sheld/sheld.obj");
 
-	fieldModel = Model::CreateOBJ("resources/Models/field/field.obj");
+	fieldModel = Model::CreateOBJ("resources/Models/cube/cube.obj");
 
 	cubeModel = Model::CreateOBJ("resources/Engine/plane.obj");
 
@@ -82,6 +83,7 @@ void TestScene::Init() {
 
 	// LightingManagerで設定した空間のにモデルをセット
 	model->SetLightSets();
+	model2->SetLightSets();
 
 
 	fieldModel->SetLightSets();
@@ -142,12 +144,14 @@ void TestScene::Init() {
 	telopText.setFont("main");
 
 	ShadowManager::GetInstance()->Register(model);
+	//ShadowManager::GetInstance()->Register(model2);
 	//ShadowManager::GetInstance()->Register(fieldModel);
 };
 
 void TestScene::Update(Input* input) {
 
 	model->Update();
+	model2->Update();
 
 	cubeModel->Update();
 	fieldModel->Update();
@@ -167,7 +171,7 @@ void TestScene::Update(Input* input) {
 	backWorld1.scale_ = { 2.0f,2.0f,2.0f };
 	backWorld1.rotation_.y += 0.01f;
 
-	backWorld2.rotation_.y += 0.02f;
+	//backWorld2.rotation_.y += 0.02f;
 
 	backWorld1.UpdateMatrix();
 	backWorld2.UpdateMatrix();
@@ -187,8 +191,9 @@ void TestScene::Update(Input* input) {
 	camera.GetWorldTransform().ImGuiView("camera");
 
 
-	world.ImGuiView("player");
-	//model->GetWorldTransform().ImGuiView("player");
+	//world.ImGuiView("player");
+	model->GetWorldTransform().ImGuiView("player");
+	model2->GetWorldTransform().ImGuiView("player2");
 
 
 	fieldModel->GetWorldTransform().ImGuiView("field");
@@ -257,6 +262,11 @@ void TestScene::Update(Input* input) {
 
 	ImGui::DragFloat3("LightShadowPosition", &ShadowManager::GetInstance()->lightPosition.x, 1.0f);
 	ImGui::DragFloat3("LightShadowDirection", &ShadowManager::GetInstance()->lightDirection.x, 1.0f);
+	ImGui::DragFloat("LightShadowNear", &ShadowManager::GetInstance()->lightNear, 1.0f);
+	ImGui::DragFloat("LightShadowFar", &ShadowManager::GetInstance()->lightFar, 0.1f);
+	if (ImGui::DragFloat("LightShadowShadowRange ", &ShadowManager::GetInstance()->shadowRange, 0.1f)) {
+		ShadowManager::GetInstance()->UpdateShadow();
+	}
 #endif
 
 	// ポストエフェクトお試し
@@ -290,8 +300,9 @@ void TestScene::Draw() {
 
 	//model->Draw(camera);f
 
-	model->Draw(world,camera);
-	fieldModel->Draw(world,camera);
+	model->Draw(camera);
+	model2->Draw(camera);
+	fieldModel->Draw(backWorld2,camera);
 
 	// 複数テスト用
 	//sprite.Draw(spworld1);

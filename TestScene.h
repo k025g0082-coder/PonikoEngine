@@ -29,6 +29,7 @@ private:
 	Sprite combo;
 
 	Model* model = nullptr;
+	Model* model2 = nullptr;
 	Model* fieldModel = nullptr;
 	Model* cubeModel = nullptr;
 

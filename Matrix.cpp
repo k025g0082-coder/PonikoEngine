@@ -435,12 +435,22 @@ Matrix4x4 MakeOrthographicMatrix(
 	Matrix4x4 result{};
 
 	result.m[0][0] = 2.0f / (right - left);
+	result.m[1][1] = 2.0f / (top - bottom); // ※ 引数順（left, top, right, bottom）に合わせる
+	result.m[2][2] = 1.0f / (farClip - nearClip);
+
+	result.m[3][0] = (left + right) / (left - right);
+	result.m[3][1] = (top + bottom) / (bottom - top);
+	result.m[3][2] = nearClip / (nearClip - farClip);
+	result.m[3][3] = 1.0f;
+
+
+	/*result.m[0][0] = 2.0f / (right - left);
 	result.m[1][1] = 2.0f / (top - bottom);
 	result.m[2][2] = 1.0f / (farClip - nearClip);
 	result.m[3][0] = (left + right) / (left - right);
 	result.m[3][1] = (top + bottom) / (bottom - top);
 	result.m[3][2] = nearClip / (nearClip - farClip);
-	result.m[3][3] = 1.0f;
+	result.m[3][3] = 1.0f;*/
 
 	return result;
 }

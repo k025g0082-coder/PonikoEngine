@@ -115,10 +115,10 @@ VeltexShaderOutput main(VertexShaderInput input)
         mul(localPosition, gTransformationMatrix.World).xyz;
     
     float4 worldPosition =
-    mul(localPosition, gTransformationMatrix.World);// 上のと一緒じゃね
+    mul(localPosition, gTransformationMatrix.WVP);// 上のと一緒じゃね
 
     output.lightPosition =
-    mul(worldPosition, gShadowTransform.lightWVP);
+        mul(worldPosition, gShadowTransform.lightWVP);
 
     return output;
 }

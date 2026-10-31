@@ -51,6 +51,7 @@ private:
 
     // SRVのディスクリプタサイズ
     UINT srvDescriptorSize_ = 0;
+
 public:
 
     // ライトの位置(例
@@ -58,6 +59,9 @@ public:
 
     Vector3 lightDirection;
 
+    float shadowRange = 1.0f; // シーンの大きさに応じて調整
+    float lightNear = 1.0f; // シーンの大きさに応じて調整
+    float lightFar = 100.0f; // シーンの大きさに応じて調整
 
     // シングルトン
     static ShadowManager* GetInstance();
@@ -83,6 +87,28 @@ public:
 
     Matrix4x4 GetLightWVP() const {
         return Multiply(lightView_, lightProjection_);
+    }
+
+    void UpdateShadow() {
+
+        // 正規化
+        Vector3 direction = Normalize(lightDirection);
+
+        // ライトが見る方向の目標地点
+        Vector3 lightTarget = Add(lightPosition, direction);
+
+        // ライトのView行列
+        lightView_ = MakeLightViewMatrix(
+            lightPosition,
+            lightTarget
+        );
+
+        lightProjection_ = MakeOrthographicMatrix(
+            -shadowRange, shadowRange,  // left, top
+            shadowRange, -shadowRange, // right, bottom
+            lightNear, lightFar                // near, far
+        );
+
     }
 };
 

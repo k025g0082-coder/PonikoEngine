@@ -13,8 +13,11 @@ void Camera::Initialize() {
 	// なるべく大きい値にしとく
 	farZ = 1000.0f;
 
+	// 45度をラジアンに変換して指定する場合の例
+	float fovAngleY = 45.0f * (3.14159265f / 180.0f); // 約 0.785 rad
+
 	// 一旦これ固定で
-	projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(WinApp::GetInstance()->GetClientWidth()) / float(WinApp::GetInstance()->GetClientHeight()), 0.1f, farZ);
+	projectionMatrix = MakePerspectiveFovMatrix(fovAngleY, float(WinApp::GetInstance()->GetClientWidth()) / float(WinApp::GetInstance()->GetClientHeight()), 0.1f, farZ);
 };
 
 void Camera::Update() {
