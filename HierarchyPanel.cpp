@@ -508,7 +508,9 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 	
 	// 読み込んだレイヤーに、モデルのアドレス追加
 	for (std::unique_ptr<Hierarchy<Model>>& model : hierarchyModels_) {
+
 		hierarchyModelToLayer_[model->layerName_].push_back(model.get());
+
 	}
 
 	// 読み込んだモデルリソースのモデルを全て生成
@@ -528,6 +530,13 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 
 		/* 読み込んだ表示非表示の切り替え */
 		ChangeHierarchyModelView(r.isView_,i);
+	}
+
+
+	//
+	for (int i = 0; i < hierarchyLayers_.size(); i++) {
+
+		ChangeHierarchyModelLayer(hierarchyLayers_.at(i).isView_, hierarchyLayers_.at(i).layerName_);
 	}
 
 }

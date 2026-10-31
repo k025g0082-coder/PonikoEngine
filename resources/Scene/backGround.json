@@ -60,137 +60,14 @@
                 "name": "main"
             },
             {
-                "isView": true,
-                "name": "a"
-            },
-            {
-                "isView": true,
-                "name": "aa"
-            },
-            {
-                "isView": true,
-                "name": "asss"
+                "isView": false,
+                "name": "d"
             }
         ],
         "ModelProperties": [
             {
                 "id": "resources/Models/suzanne.obj",
-                "layerName": "main",
-                "name": "suzanne",
-                "transform": {
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "translation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ]
-                },
-                "type": 0
-            },
-            {
-                "id": "resources/Models/bunny.obj",
-                "layerName": "main",
-                "name": "bunny",
-                "transform": {
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "translation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ]
-                },
-                "type": 0
-            },
-            {
-                "id": "resources/Models/bunny.obj",
-                "layerName": "a",
-                "name": "bunny",
-                "transform": {
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "translation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ]
-                },
-                "type": 0
-            },
-            {
-                "id": "resources/Models/suzanne.obj",
-                "layerName": "a",
-                "name": "suzanne",
-                "transform": {
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "translation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ]
-                },
-                "type": 0
-            },
-            {
-                "id": "resources/Models/suzanne.obj",
-                "layerName": "a",
-                "name": "suzanne",
-                "transform": {
-                    "rotation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ],
-                    "scale": [
-                        1.0,
-                        1.0,
-                        1.0
-                    ],
-                    "translation": [
-                        0.0,
-                        0.0,
-                        0.0
-                    ]
-                },
-                "type": 0
-            },
-            {
-                "id": "resources/Models/suzanne.obj",
-                "layerName": "a",
+                "layerName": "d",
                 "name": "suzanne",
                 "transform": {
                     "rotation": [
