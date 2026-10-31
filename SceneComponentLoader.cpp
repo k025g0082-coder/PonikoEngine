@@ -695,7 +695,7 @@ void SceneComponentLoader::Property(
 //{}
 
 
-void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarchy<Model>>& value) {
+void SceneComponentLoader::Property(const std::string& name, std::vector<std::unique_ptr<Hierarchy< Model >>> &value) {
 
 	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
 
@@ -709,19 +709,20 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarc
 
 				json item;
 
-				item["type"] = hierarchy.type_;
-				item["name"] = hierarchy.name_;
+				item["type"] = hierarchy->type_;
+				item["name"] = hierarchy->name_;
+				item["layerName"] = hierarchy->layerName_;
 
-				item["id"] = hierarchy.id_;
+				item["id"] = hierarchy->id_;
 
 				// ヒエラルキのトランスフォーム情報を（強引に）ワールドのにして保存
 				item["transform"] = WorldToJson(
-					*static_cast<WorldTransform*>(hierarchy.transform_.get())
+					*static_cast<WorldTransform*>(hierarchy->transform_.get())
 				);
 
 				// シーン内のカスタム設定。空じゃなけりゃ保存
-				if (!hierarchy.json_.empty()) {
-					item["propaties"] = hierarchy.json_;
+				if (!hierarchy->json_.empty()) {
+					item["propaties"] = hierarchy->json_;
 				}
 
 
@@ -740,20 +741,22 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarc
 
 			for (const auto& item : group.at(name)) {
 
-				Hierarchy<Model> hierarchy;
+				auto hierarchy = std::make_unique<Hierarchy<Model>>();
 
-				hierarchy.name_ = item.at("name").get<std::string>();
-				hierarchy.id_ = item.at("id").get<std::string>();
+				hierarchy->name_ = item.at("name").get<std::string>();
+				hierarchy->layerName_ = item.at("layerName").get<std::string>();
+
+				hierarchy->id_ = item.at("id").get<std::string>();
 
 				// ワールドトランスフォーム初期化　makeUniqueで生成！
 				auto world = JsonToWorld(item.at("transform"));
 
-				hierarchy.transform_ =
+				hierarchy->transform_ =
 					std::make_unique<WorldTransform>(world);
 				
 				//
 				if (item.contains("propaties")) {
-					hierarchy.json_ = item.at("propaties");
+					hierarchy->json_ = item.at("propaties");
 				}
 
 				// リストに追加
@@ -763,6 +766,50 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarc
 		}
 	};
 }
+
+void SceneComponentLoader::Property(const std::string& name, std::vector<HierarchyLayer>& value) {
+
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
+
+		// save
+		[this, &value, name](json& group) {
+
+			// 空でも必ず配列として保存
+			group[name] = json::array();
+
+			for (const auto& layer : value) {
+
+				json item;
+
+				item["name"] = layer.layerName_;
+				item["isView"] = layer.isView_;
+
+				group[name].push_back(item);
+			}
+		},
+
+		// load
+		[this, &value, name](const json& group) {
+
+			// なかった場合
+			if (!group.contains(name)) {
+				return;
+			}
+
+			for (const auto& item : group.at(name)) {
+
+				HierarchyLayer layer;
+
+				layer.layerName_ = item.at("name").get<std::string>();
+				layer.isView_    = item.at("isView").get<bool>();
+
+				value.push_back(layer);
+			}
+		}
+
+	};
+}
+
 
 // 
 void SceneComponentLoader::Property(const std::string& name, std::vector<ModelResource>& value) {

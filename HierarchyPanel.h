@@ -29,7 +29,10 @@ template <typename Type>
 struct Hierarchy {
 
 	HierarchyType type_;
+	
 	std::string name_;
+	std::string layerName_; // 属してるレイヤーの名前
+
 	std::string id_;   // IDなどあれば。モデルは↓のと連携する
 
 	
@@ -69,6 +72,14 @@ struct ModelResource {
 
 };
 
+struct HierarchyLayer {
+
+	std::string layerName_;
+
+	bool isView_ = true;
+
+};
+
 class Grid;
 
 class HierarchyPanel
@@ -103,25 +114,33 @@ public:
 
 
 	/* 読み取り専用 */
-	const std::vector<Hierarchy<Model>>& GetHierarchyModels() const { return hierarchyModels_; }
+	const std::vector<std::unique_ptr<Hierarchy<Model>>>& GetHierarchyModels() const { return hierarchyModels_; }
 	const std::vector<ModelResource>& GetHierarchyModelResources() const { return hierarchyModelResouces_; }
 
 	// GameObjectセッター
-	void SetHierarchyModels(int index, GameObject* obj) { hierarchyModels_.at(index).gameObject_ = obj; }
+	//void SetHierarchyModels(int index, GameObject* obj) { hierarchyModels_.at(index).get()->gameObject_ = obj; }
 	
 
 	std::unordered_map<std::string, Model*>& GethierarchyModelResourceList() { return hierarchyModelResourceList_; }
 
-	// ヒエラルキー - モデル追加
-	void AddHierarchyModel(Hierarchy<Model>& h) { hierarchyModels_.push_back(std::move(h)); }
+	/* レイヤー */
+	std::vector<HierarchyLayer> hierarchyLayers_;
+
+
+	/* レイヤー名->属しているモデルヒエラルキーのアドレス群 */
+	std::unordered_map<
+		std::string,
+		std::vector<Hierarchy<Model>*>> hierarchyModelToLayer_;
+
+
+	// ヒエラルキー - モデル追加. レイヤー名とヒエラルキ
+	void AddHierarchyModel(std::string layerName, Hierarchy<Model>& h);
 
 	// ヒエラルキー - モデル削除
-	void DeleteHierarchyModel() { 
-		hierarchyModels_.erase(hierarchyModels_.begin() + selectedModelIndex_.value()); 
-		selectedModelIndex_ = std::nullopt;
-	}
+	void DeleteHierarchyModel(int index = -1);
 
-	void DeleteHierarchyModel(int index) { hierarchyModels_.erase(hierarchyModels_.begin() + index); }
+	// レイヤーとそれに紐づいたヒエラルキの削除 - (モデルしか対応してない)
+	void DeleteHierarchyLayer(const std::string& layerName);
 
 
 	// ヒエラルキー - モデルのペースト ペーストされたヒエラルキモデルのワールドのポインタを返す
@@ -138,24 +157,29 @@ public:
 	// アセット削除（ここに描くなAssetPanelにかけ）
 	void DeleteHierarchyResouce(int index);
 
-
 	// モデル　表示非表示切り替え
 	void ChangeHierarchyModelView(bool b, int index);
+	void ChangeHierarchyModelLayer(bool b, std::string layerName);
+
+	// いま選択されてるレイヤー
+	std::string GetSelectedCurrentLayer() { return selectedCurrentLayer_; }
 
 private:
 
 	// 選択中のヒエラルキモデル番号
 	std::optional<int> selectedModelIndex_;
 
-
 	// モデル
-	std::vector<Hierarchy<Model>> hierarchyModels_;
+	std::vector<std::unique_ptr<Hierarchy<Model>>> hierarchyModels_;
 
 	//* 各モデルのパスやIDをまとめたもの
 	std::vector<ModelResource> hierarchyModelResouces_;
 
+
 	//* 上のオブジェクトをパス名で登録しておく
 	std::unordered_map<std::string, Model*> hierarchyModelResourceList_;
+
+	std::string selectedCurrentLayer_;// 現在選択されているレイヤー
 
 
 	// ロード時にクリア

@@ -1,0 +1,105 @@
+{
+    "DirectionalLights": {
+        "count": 1,
+        "lights": [
+            {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    -1.0,
+                    0.0
+                ],
+                "intensity": 1.0
+            },
+            {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    -1.0,
+                    0.0
+                ],
+                "intensity": 16.899999618530273
+            }
+        ]
+    },
+    "Grid": {
+        "gridDepth": 1.0,
+        "gridHeight": 1.0,
+        "gridWidth": 1.0,
+        "horizontal": 1,
+        "isSnap": false,
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "translation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "vertical": 10
+    },
+    "Hierarchy": {
+        "ModelProperties": [],
+        "ModelResources": []
+    },
+    "PointLights": {
+        "count": 0,
+        "lights": [
+            {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "intensity": 1.0,
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "radius": 10.0
+            }
+        ]
+    },
+    "SpotLights": {
+        "count": 0,
+        "lights": [
+            {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    -1.0,
+                    0.0
+                ],
+                "distance": 50.0,
+                "falloff": 1.0,
+                "innerAngle": 15.0,
+                "intensity": 1.0,
+                "outerAngle": 30.0,
+                "position": [
+                    0.0,
+                    5.0,
+                    0.0
+                ]
+            }
+        ]
+    }
+}

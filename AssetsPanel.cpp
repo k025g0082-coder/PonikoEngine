@@ -47,11 +47,6 @@ void AssetsPanel::PanelView(bool& show)
 
 			int alpha = 255;
 
-			//// ひひょうじは薄く
-			//if (!selectedHierarchyResource_.isView_) {
-			//	alpha = 100;
-			//}
-
 			/* 選択中は色変え */
 			if (selectedHierarchyResource_.pathId_ == resource.pathId_) 
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, alpha));
@@ -127,6 +122,7 @@ void AssetsPanel::PanelView(bool& show)
 				h.type_ = HierarchyType::kModel; // タイプ
 				h.id_ = resource.pathId_;
 				h.name_ = resource.name_;// 表示名 拡張子を抜いたのを設定する
+				h.layerName_ = hierarchyPanel_->GetSelectedCurrentLayer();
 
 				// WorldTransform初期化
 				h.transform_ = std::make_unique<WorldTransform>();
@@ -135,7 +131,7 @@ void AssetsPanel::PanelView(bool& show)
 				h.isView_ = true;
 
 				/* ヒエラルキ追加 */
-				hierarchyPanel_->AddHierarchyModel(h);
+				hierarchyPanel_->AddHierarchyModel(hierarchyPanel_->GetSelectedCurrentLayer(), h);
 
 				ImGui::PopID();
 				break;
@@ -278,6 +274,7 @@ void AssetsPanel::AddDropModel()
 			h.type_ = HierarchyType::kModel; // タイプ
 			h.id_ = resource.pathId_;
 			h.name_ = resource.name_;
+			h.layerName_ = hierarchyPanel_->GetSelectedCurrentLayer();
 
 			h.isView_ = true;
 
@@ -287,7 +284,7 @@ void AssetsPanel::AddDropModel()
 
 			/* 初期座標とかあったらその都度っここに　今は０，０，０  */
 
-			hierarchyPanel_->AddHierarchyModel(h);
+			hierarchyPanel_->AddHierarchyModel(hierarchyPanel_->GetSelectedCurrentLayer(), h);
 
 
 		}

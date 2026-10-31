@@ -174,10 +174,14 @@ public:
 
 
 	// モデルの登録
-	void Property(const std::string& name, std::vector<Hierarchy< Model >> &value);
+	void Property(const std::string& name, std::vector<std::unique_ptr<Hierarchy< Model >>> &value);
 
 	//* モデルのIDやパスの登録
 	void Property(const std::string& name, std::vector< ModelResource >& value);
+
+	// レイヤー設定
+	void Property(const std::string& name, std::vector< HierarchyLayer >& value);
+
 
 	/// <summary>
 	/// セーブ前のJsonデータの切り替え

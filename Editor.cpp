@@ -443,16 +443,16 @@ void Editor::Update()
 					if (!assetsPanel_.selectedHierarchyResource_.pathId_.empty()) {
 
 						/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
-						if (hierarchyPanel_.GetHierarchyModels().at(i).id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+						if (hierarchyPanel_.GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
 							continue;
 					}
 
 					// 非表示なら選択もスキップ
-					if (!hierarchyPanel_.GetHierarchyModels().at(i).isView_)
+					if (!hierarchyPanel_.GetHierarchyModels().at(i)->isView_)
 						continue;
 
 					// ヒエラルキからワールドのポインタ取得！
-					WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i).transform_.get());
+					WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
 
 					// だいたいの中心
 					float size = 1.0f;
@@ -495,16 +495,16 @@ void Editor::Update()
 					bool break_ = false;
 
 					//* もしすでに同じ座標にあるヒエラルキーがある場合、配置せず引き返す（重複する配置の対策）
-					for (const Hierarchy<Model>& model : hierarchyPanel_.GetHierarchyModels()) {
+					for (const std::unique_ptr<Hierarchy<Model>>& model : hierarchyPanel_.GetHierarchyModels()) {
 
 						/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
-						if (model.id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+						if (model->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
 							continue;
 
 						if (
-							subPosition.x == model.transform_.get()->translation_.x &&
-							subPosition.y == model.transform_.get()->translation_.y &&
-							subPosition.z == model.transform_.get()->translation_.z) {
+							subPosition.x == model->transform_.get()->translation_.x &&
+							subPosition.y == model->transform_.get()->translation_.y &&
+							subPosition.z == model->transform_.get()->translation_.z) {
 							break_ = true;
 							break;
 						}
@@ -534,7 +534,7 @@ void Editor::Update()
 
 
 					/* ヒエラルキ-モデル - 追加 */
-					hierarchyPanel_.AddHierarchyModel(h);
+					hierarchyPanel_.AddHierarchyModel(hierarchyPanel_.GetSelectedCurrentLayer(), h);
 
 				}
 
@@ -582,11 +582,11 @@ void Editor::Update()
 					{
 					
 						/* 選択中以外の、アセット以外のIDのヒエラルキーは選択しない */
-						if (hierarchyPanel_.GetHierarchyModels().at(i).id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+						if (hierarchyPanel_.GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
 							continue;
 
 						// ヒエラルキからワールドのポインタ取得！
-						WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i).transform_.get());
+						WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
 
 						// だいたいの中心
 						float size = 1.0f;
@@ -814,20 +814,20 @@ void Editor::Draw() {
 	if (Scene::GetSceneCamera() != nullptr) {
 
 		/* ヒエラルキーモデルの描画 */
-		for (const Hierarchy<Model>& hierarchy : hierarchyPanel_.GetHierarchyModels()) {
+		for (const std::unique_ptr<Hierarchy<Model>>& hierarchy : hierarchyPanel_.GetHierarchyModels()) {
 
 			// 非表示なら描画スキップ
-			if (!hierarchy.isView_) continue;
+			if (!hierarchy->isView_) continue;
 
-			WorldTransform* world = static_cast<WorldTransform*>(hierarchy.transform_.get());
+			WorldTransform* world = static_cast<WorldTransform*>(hierarchy->transform_.get());
 
 			// マップで登録されたidと連携したモデルで描画
 			if (isEditorMode_) {
-				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy.id_]->Draw(*world, camera_);
+				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, camera_);
 			}
 			// エディターモードじゃなければ、シーンのカメラで描画する
 			else {
-				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy.id_]->Draw(*world, *Scene::GetSceneCamera());
+				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, *Scene::GetSceneCamera());
 			}
 
 		}

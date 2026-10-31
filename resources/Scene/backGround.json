@@ -51,8 +51,177 @@
         "vertical": 10
     },
     "Hierarchy": {
-        "ModelProperties": [],
-        "ModelResources": []
+        "LayerNames": [
+            "dssss"
+        ],
+        "Layers": [
+            {
+                "isView": true,
+                "name": "main"
+            },
+            {
+                "isView": true,
+                "name": "a"
+            },
+            {
+                "isView": true,
+                "name": "aa"
+            },
+            {
+                "isView": true,
+                "name": "asss"
+            }
+        ],
+        "ModelProperties": [
+            {
+                "id": "resources/Models/suzanne.obj",
+                "layerName": "main",
+                "name": "suzanne",
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "translation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "type": 0
+            },
+            {
+                "id": "resources/Models/bunny.obj",
+                "layerName": "main",
+                "name": "bunny",
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "translation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "type": 0
+            },
+            {
+                "id": "resources/Models/bunny.obj",
+                "layerName": "a",
+                "name": "bunny",
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "translation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "type": 0
+            },
+            {
+                "id": "resources/Models/suzanne.obj",
+                "layerName": "a",
+                "name": "suzanne",
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "translation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "type": 0
+            },
+            {
+                "id": "resources/Models/suzanne.obj",
+                "layerName": "a",
+                "name": "suzanne",
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "translation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "type": 0
+            },
+            {
+                "id": "resources/Models/suzanne.obj",
+                "layerName": "a",
+                "name": "suzanne",
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "translation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                },
+                "type": 0
+            }
+        ],
+        "ModelResources": [
+            {
+                "isView": true,
+                "pathId": "resources/Models/suzanne.obj"
+            },
+            {
+                "isView": true,
+                "pathId": "resources/Models/bunny.obj"
+            }
+        ]
     },
     "PointLights": {
         "count": 0,

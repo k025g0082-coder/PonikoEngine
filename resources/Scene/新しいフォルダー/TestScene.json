@@ -1,0 +1,198 @@
+{
+    "DirectionalLights": {
+        "count": 1,
+        "lights": [
+            {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    -1.0,
+                    0.0
+                ],
+                "intensity": 1.0
+            }
+        ]
+    },
+    "PointLights": {
+        "count": 0
+    },
+    "Properties": {
+        "camera": {
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "translation": [
+                0.0,
+                4.800000190734863,
+                -49.400001525878906
+            ]
+        },
+        "player": {
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "sprite": {
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        "text": {
+            "anchor": 0,
+            "fontName": "",
+            "position": [
+                0.0,
+                0.0
+            ],
+            "text": "textTest",
+            "textLayout": {
+                "isOutlineBlur": false,
+                "outlineColor": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "outlineSize": 0,
+                "textColor": [
+                    255.0,
+                    255.0,
+                    255.0
+                ],
+                "textSize": 39
+            }
+        }
+    },
+    "SpotLights": {
+        "count": 0
+    },
+    "Test": {
+        "player": {
+            "rotation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        }
+    },
+    "camera": {
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "translation": [
+            2.299999952316284,
+            3.0999999046325684,
+            -74.5
+        ]
+    },
+    "player": {
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "translation": [
+            0.0,
+            0.0,
+            0.0
+        ]
+    },
+    "sprite": {
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "translation": [
+            -5.5,
+            0.0,
+            0.0
+        ]
+    },
+    "text": {
+        "anchor": 0,
+        "fontName": "",
+        "position": [
+            0.0,
+            0.0
+        ],
+        "text": "",
+        "textLayout": {
+            "isOutlineBlur": false,
+            "outlineColor": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "outlineSize": 0,
+            "textColor": [
+                255.0,
+                255.0,
+                255.0
+            ],
+            "textSize": 0
+        }
+    }
+}
