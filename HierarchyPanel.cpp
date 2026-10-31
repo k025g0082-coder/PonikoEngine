@@ -2,6 +2,8 @@
 
 #include "Editor.h"
 
+#include "Scene.h"
+
 #include "ImGuiManager.h"
 
 #include "SceneComponentLoader.h"

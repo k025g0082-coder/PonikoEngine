@@ -719,6 +719,12 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarc
 					*static_cast<WorldTransform*>(hierarchy.transform_.get())
 				);
 
+				// シーン内のカスタム設定。空じゃなけりゃ保存
+				if (!hierarchy.json_.empty()) {
+					item["propaties"] = hierarchy.json_;
+				}
+
+
 				group[name].push_back(item);
 
 			}
@@ -745,6 +751,10 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarc
 				hierarchy.transform_ =
 					std::make_unique<WorldTransform>(world);
 				
+				//
+				if (item.contains("propaties")) {
+					hierarchy.json_ = item.at("propaties");
+				}
 
 				// リストに追加
 				value.push_back(std::move(hierarchy));

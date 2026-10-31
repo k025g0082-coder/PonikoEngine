@@ -82,6 +82,18 @@
     <Filter Include="Engine\Source\imgui\misc">
       <UniqueIdentifier>{06b27da6-d2b1-4306-977b-b1b8a6b7c258}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test\FactoryObjectDemo">
+      <UniqueIdentifier>{b9605afd-79cc-4f08-a38d-4010fa119087}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\FactoryObjectDemo\src">
+      <UniqueIdentifier>{3273b374-2952-4450-b30d-62079e7bc7e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\FactoryObjectDemo\.h">
+      <UniqueIdentifier>{297db755-e4c8-4b43-9357-ce58d4025586}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test\FactoryObjectDemo\.h\core">
+      <UniqueIdentifier>{777ccdc2-8062-471a-bce9-c76864cf897c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinApp.cpp">
@@ -261,6 +273,27 @@
     </ClCompile>
     <ClCompile Include="HierarchyPanel.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="FieldExample.cpp">
+      <Filter>test\FactoryObjectDemo\src</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoFieldObject.cpp">
+      <Filter>test\FactoryObjectDemo\src</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoGimmick.cpp">
+      <Filter>test\FactoryObjectDemo\src</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Engine\Source\ソース ファイル\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseFactory.cpp">
+      <Filter>Engine\Source\ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoFieldObjectFactory.cpp">
+      <Filter>test\FactoryObjectDemo\src</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoPlayer.cpp">
+      <Filter>test\FactoryObjectDemo\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -497,8 +530,29 @@
     <ClInclude Include="HierarchyPanel.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
     </ClInclude>
+    <ClInclude Include="FieldExample.h">
+      <Filter>test\FactoryObjectDemo\.h</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoGimmick.h">
+      <Filter>test\FactoryObjectDemo\.h</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoFieldObject.h">
+      <Filter>test\FactoryObjectDemo\.h</Filter>
+    </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Engine</Filter>
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseFactory.h">
+      <Filter>Engine\Source\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoFieldObjectFactory.h">
+      <Filter>test\FactoryObjectDemo\.h</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoPlayer.h">
+      <Filter>test\FactoryObjectDemo\.h</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

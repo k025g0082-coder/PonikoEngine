@@ -3,6 +3,9 @@
 #include "Model.h"
 #include "Transform.h"
 
+#include "GameObject.h"
+
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
 
@@ -29,8 +32,16 @@ struct Hierarchy {
 	std::string name_;
 	std::string id_;   // IDなどあれば。モデルは↓のと連携する
 
+	
 	// オブジェクトのアドレスのポインタ
 	Type* object = nullptr;
+
+	// ゲームオブジェクトのポインタ（持つ場合）
+	GameObject* gameObject_ = nullptr;
+
+	// gameObjectが持つデータ。名前変えたいけど短いからこれでいいや
+	nlohmann::json json_;
+
 
 	// WorldTransform, ScreenTransformクラスの始祖。newしてキャストして使うw
 	std::unique_ptr<BaseTransform> transform_ = nullptr;
@@ -90,10 +101,14 @@ public:
 	// シーンのJsonパスで読込
 	void HierarchyLoad(const std::string jsonPath);
 
+
 	/* 読み取り専用 */
 	const std::vector<Hierarchy<Model>>& GetHierarchyModels() const { return hierarchyModels_; }
 	const std::vector<ModelResource>& GetHierarchyModelResources() const { return hierarchyModelResouces_; }
 
+	// GameObjectセッター
+	void SetHierarchyModels(int index, GameObject* obj) { hierarchyModels_.at(index).gameObject_ = obj; }
+	
 
 	std::unordered_map<std::string, Model*>& GethierarchyModelResourceList() { return hierarchyModelResourceList_; }
 

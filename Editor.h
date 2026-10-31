@@ -97,6 +97,7 @@ public:
 	/// <param name="path">シーンの相対パス。例 resources/scene/OOXX.json</param>
 	static void LoadScene(std::string path);
 
+	const HierarchyPanel& GetHierarchyPanel() const { return hierarchyPanel_; }
 
 	// エンジン閉じる際の設定
 	void SaveIniFile();
