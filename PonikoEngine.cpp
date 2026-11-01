@@ -50,19 +50,18 @@ namespace PonikoEngine {
 		// 陰
 		ShadowManager::GetInstance()->Initialize();
 
-		// Gameシステムの方の初期化
-		Game::GetInstance()->Init();
-
 		// デバッグ用ライン
 		DebugLine::GetInstance()->Initialize();
 
 		// タイマー
 		Timer::GetInstance()->Initialize();
 
-
 		/*　Editor初期化　*/
 		Editor::GetInstance()->Initialize();
 
+
+		// Gameシステムの方の初期化
+		Game::GetInstance()->Init();
 
 	};
 
@@ -109,7 +108,7 @@ namespace PonikoEngine {
 
 			PostEffectManager::GetInstance()->BeginScene();
 
-		/*　Editor描画処理　*/
+				/*　Editor描画処理　*/
 				Editor::GetInstance()->Draw();
 				/*　Game更新処理　*/
 				Game::GetInstance()->Draw();
@@ -119,8 +118,6 @@ namespace PonikoEngine {
 
 				// デバッグ用
 				DebugLine::GetInstance()->Draw();
-
-
 
 			PostEffectManager::GetInstance()->ApplyScene();
 

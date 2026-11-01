@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AABB.h"
 #include "Model.h"
 #include "Transform.h"
 
@@ -39,6 +40,9 @@ struct Hierarchy {
 	// オブジェクトのアドレスのポインタ
 	Type* object = nullptr;
 
+	// 判定用
+	AABB aabb_; 
+
 	// ゲームオブジェクトのポインタ（持つ場合）
 	GameObject* gameObject_ = nullptr;
 
@@ -72,6 +76,7 @@ struct ModelResource {
 
 };
 
+// レイヤーデータ
 struct HierarchyLayer {
 
 	std::string layerName_;
@@ -116,6 +121,23 @@ public:
 	/* 読み取り専用 */
 	const std::vector<std::unique_ptr<Hierarchy<Model>>>& GetHierarchyModels() const { return hierarchyModels_; }
 	const std::vector<ModelResource>& GetHierarchyModelResources() const { return hierarchyModelResouces_; }
+
+	/// <summary>
+	/// ヒエラルキのレイヤー名の一覧取得
+	/// </summary>
+	/// <param name="layerName">レイヤー名</param>
+	/// <returns></returns>
+	std::vector<Hierarchy<Model>*>& GetHierarchyModelLayer (std::string layerName){ 
+
+		auto it = hierarchyModelToLayer_.find(layerName);
+
+		if (it == hierarchyModelToLayer_.end()) {
+			static std::vector<Hierarchy<Model>*> empty;
+			return empty;
+		}
+
+		return it->second;
+	}
 
 	// GameObjectセッター
 	//void SetHierarchyModels(int index, GameObject* obj) { hierarchyModels_.at(index).get()->gameObject_ = obj; }

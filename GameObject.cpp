@@ -29,6 +29,8 @@ void GameObject::Update()
 {
 	model_->Update();
 
+	aabb_.UpdatePosition(worldTransform.translation_);
+
 	// SRTからviewMatrix生成して更新
 	worldTransform.UpdateMatrix();
 

@@ -137,3 +137,79 @@ bool IsCollision(const LineSegment& line, const AABB& aabb) {
 
     return true;
 }
+
+CollisionResult ResolveAABBCollision(AABB& playerAABB, Vector3& playerPos, const AABB& wallAABB) {
+
+    CollisionResult result;
+
+    // 1. 各軸のめり込み（重なり）量を計算
+    // 右方向・左方向の両方の差分を計算
+    float overlapX1 = wallAABB.max.x - playerAABB.min.x; // プレイヤーが壁の右からめり込んだ場合
+    float overlapX2 = playerAABB.max.x - wallAABB.min.x; // プレイヤーが壁の左からめり込んだ場合
+
+    float overlapY1 = wallAABB.max.y - playerAABB.min.y; // 下から
+    float overlapY2 = playerAABB.max.y - wallAABB.min.y; // 上から
+
+    float overlapZ1 = wallAABB.max.z - playerAABB.min.z; // 奥から
+    float overlapZ2 = playerAABB.max.z - wallAABB.min.z; // 手前から
+
+    // どれかの軸で重なりが 0 以下なら、衝突していない（離れている）
+    if (overlapX1 <= 0 || overlapX2 <= 0 ||
+        overlapY1 <= 0 || overlapY2 <= 0 ||
+        overlapZ1 <= 0 || overlapZ2 <= 0) {
+        return result; // 衝突なし
+    }
+
+    // 2. 各軸ごとの「最小めり込み量」と「押し戻し方向（サイン）」を求める
+    float pushX = (overlapX1 < overlapX2) ? overlapX1 : -overlapX2;
+    float pushY = (overlapY1 < overlapY2) ? overlapY1 : -overlapY2;
+    float pushZ = (overlapZ1 < overlapZ2) ? overlapZ1 : -overlapZ2;
+
+    // 絶対値（めり込みの深さ）を取得
+    float absX = std::abs(pushX);
+    float absY = std::abs(pushY);
+    float absZ = std::abs(pushZ);
+
+    // 3. 一番重なりが浅い（絶対値が小さい）軸を選んで押し戻す
+    if (absX < absY && absX < absZ) {
+
+        // X軸（左右の壁）で押し戻し
+        playerPos.x += pushX;
+        result.hitWall = true;
+
+    }
+    else if (absY < absZ) {
+
+        // Y軸（床や天井）で押し戻し
+        playerPos.y += pushY;
+
+        if (pushY > 0.0f) {
+            // プラス方向に押し戻された ＝ プレイヤーの下に床がある！
+            result.isGrounded = true;
+        }
+        else {
+            // マイナス方向に押し戻された ＝ プレイヤーの上に天井がある！
+            result.hitCeiling = true;
+        }
+
+    }
+    else {
+        // Z軸（前後の壁）で押し戻し
+        playerPos.z += pushZ;
+
+        // 前後
+        result.hitWall = true;
+
+    }
+
+    // AABB の位置も更新されたプレイヤー座標に合わせる
+    // (※AABB のサイズを保持したまま位置だけずらす処理)
+    float width = playerAABB.max.x - playerAABB.min.x;
+    float height = playerAABB.max.y - playerAABB.min.y;
+    float depth = playerAABB.max.z - playerAABB.min.z;
+
+    playerAABB.min = { playerPos.x - width / 2.0f, playerPos.y, playerPos.z - depth / 2.0f };
+    playerAABB.max = { playerPos.x + width / 2.0f, playerPos.y + height, playerPos.z + depth / 2.0f };
+
+    return result; // 衝突して押し戻した
+}

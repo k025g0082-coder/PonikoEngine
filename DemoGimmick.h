@@ -5,14 +5,19 @@
 
 
 //== デモのギミックの基底クラス  ==//
-class DemoGimmick : public DemoFieldObject{
+class DemoGimmick : public DemoFieldObject {
 public:
 
     // FieldObjectの引数をリレーする
-    DemoGimmick(Model* model, Camera* camera, const FieldObjectData& data_)
-        : DemoFieldObject(model, camera, data_)
+    DemoGimmick(Model* model, Camera* camera, const GameObjectData& data_, nlohmann::json* json)
+        : DemoFieldObject(model, camera, data_,json)
     {
-        // なにかあれば
+        // タイプを設定
+        type_ = static_cast<Type>(data_.objectID);
+        subType_ = data_.subObjectID;
+
+        // JSONのアドレスを取得
+        json_ = json;
     }
 
     virtual ~DemoGimmick() = default;
@@ -25,12 +30,24 @@ public:
 
     /* ギミック種類 */
     enum class GimmickType {
+
         kSwitch,
-        kGoal
+        kGoal,
+
+        count
     };
+
+    /* ギミック種類名を取得 */
+	static const char* GetGimmickTypeName(GimmickType type) {
+		return GimmickTypeName[(int)type];
+	}
 
 protected:
     uint32_t gimmickID_ = 0;           // ギミックの識別ID？
+private:
+
+    // ギミックの種類名
+    static const char* GimmickTypeName[(int)GimmickType::count];
 };
 
 
@@ -46,13 +63,13 @@ public:
     // ★ DemoGimmick のコンストラクタをそのまま引き継ぐ
     using DemoGimmick::DemoGimmick;
 
-    void ImGuiView() override;
-
-    //void Initialize() override;
-    //void Update() override;
-    //void Draw() override;
 
 
+    void Initialize() {};
+    void Update();
+    void Draw();
+
+    void ImGuiView() { DemoFieldObject::ImGuiView(); }
 
     // 追加
     void AddID(uint32_t instanceId) {
@@ -78,14 +95,12 @@ public:
     // ★ DemoGimmick のコンストラクタをそのまま引き継ぐ
     using DemoGimmick::DemoGimmick;
 
-
-    void ImGuiView() override;
-
     /* 基底クラスと同じ処理をしたい場合・・書かなくてよい */
-       // void Initialize() override;
-        //void Update() override;
-    //void Draw() override;
+    void Initialize() {};
+    void Update();
+    void Draw();
 
+    void ImGuiView() { DemoFieldObject::ImGuiView(); };
 private:
 
     bool isGoal_ = false;

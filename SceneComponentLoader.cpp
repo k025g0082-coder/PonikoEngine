@@ -414,6 +414,40 @@ void SceneComponentLoader::Property(const std::string& name, Vector3& value) {
 	};
 }
 
+void SceneComponentLoader::Property(const std::string& name, AABB& value)
+{
+
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
+
+			[this, &value, name](json& group) {
+
+				json json_;
+
+				json_["min"] = Vector3ToJson(value.min);
+				json_["max"] = Vector3ToJson(value.max);
+
+				json_["width"] = value.width_;
+				json_["height"] = value.height_;
+				json_["depth"] = value.depth_;
+
+				group[name] = json_;
+			},
+
+			[this, &value, name](const json& group) {
+
+		if (group.contains(name)) {
+
+			value.max = JsonToVector3(group[name]["max"]);
+			value.min = JsonToVector3(group[name]["min"]);
+
+			value.width_ = group[name].value("width", 1.0f);
+			value.height_ = group[name].value("height", 1.0f);
+			value.depth_ = group[name].value("depth", 1.0f);
+		}
+	}
+	};
+}
+
 void SceneComponentLoader::Property(const std::string& name, WorldTransform& value) {
 
 	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
@@ -715,10 +749,15 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<std::un
 
 				item["id"] = hierarchy->id_;
 
+
 				// ヒエラルキのトランスフォーム情報を（強引に）ワールドのにして保存
 				item["transform"] = WorldToJson(
 					*static_cast<WorldTransform*>(hierarchy->transform_.get())
 				);
+
+
+				item["aabb"] = AABBToJson(hierarchy->aabb_);
+				
 
 				// シーン内のカスタム設定。空じゃなけりゃ保存
 				if (!hierarchy->json_.empty()) {
@@ -754,6 +793,10 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<std::un
 				hierarchy->transform_ =
 					std::make_unique<WorldTransform>(world);
 				
+				if (item.contains("aabb")) {
+					hierarchy->aabb_ = JsonToAABB(item.at("aabb"));
+				}
+
 				//
 				if (item.contains("propaties")) {
 					hierarchy->json_ = item.at("propaties");
@@ -1184,4 +1227,30 @@ json  SceneComponentLoader::TextDatasToJson(const TextDatas& data)
 		static_cast<int>(data.anchor_);
 
 	return value;
+}
+
+AABB SceneComponentLoader::JsonToAABB(const json& value)
+{
+	AABB aabb_;
+	aabb_.max = JsonToVector3(value["max"]);
+	aabb_.min = JsonToVector3(value["min"]);
+
+	aabb_.width_ = value.value("width", 1.0f);
+	aabb_.height_ = value.value("height", 1.0f);
+	aabb_.depth_ = value.value("depth", 1.0f);
+	return aabb_;
+}
+
+json SceneComponentLoader::AABBToJson(const AABB& data)
+{
+	json json_;
+
+	json_["min"] = Vector3ToJson(data.min);
+	json_["max"] = Vector3ToJson(data.max);
+
+	json_["width"] = data.width_;
+	json_["height"] = data.height_;
+	json_["depth"] = data.depth_;
+
+	return json_;
 }

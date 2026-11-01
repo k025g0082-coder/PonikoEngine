@@ -38,7 +38,6 @@ public:
     void Draw();
 
     void FieldLoad();
-
 private:
 
     Camera camera_;
@@ -46,7 +45,6 @@ private:
     Model* playerModel_ = nullptr;
     Model* blockModel_ = nullptr;
     Model* goalModel_ = nullptr;
-
 
     // プレイヤー
     std::unique_ptr <DemoPlayer> player_;

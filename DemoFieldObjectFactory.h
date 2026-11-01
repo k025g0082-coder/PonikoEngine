@@ -8,18 +8,22 @@
 */
 
 // ブロック等
-class DemoFieldObjectFactory : public BaseFactory<DemoFieldObject::ObjectType, DemoFieldObject>
+class DemoFieldObjectFactory : public BaseFactory<DemoFieldObject::Type, DemoFieldObject>
 {
+public:
 	// 初期登録
-	void Initialize() override;
+	static void Initialize();
+
+
 
 };
 
 // ギミック
 class DemoGimmickFactory : public BaseFactory<DemoGimmick::GimmickType,DemoGimmick>
 {
+public:
 	// 初期登録
-	void Initialize() override;
+	static void Initialize();
 
 };
 

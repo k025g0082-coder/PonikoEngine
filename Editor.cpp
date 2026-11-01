@@ -232,12 +232,20 @@ void Editor::Update()
 
 				
 			}
+
+			/* ずいぶん右に配置 */
+			ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
+
+			if (ImGui::Button("AABB")) {
+				isDrawAABB_ = !isDrawAABB_;
+			}
+			ImGui::Text(isDrawAABB_ ? " true" : " false");
 		}
 		
 
 		ImGui::EndMainMenuBar();
 	}
-
+	
 	// プロパティー
 	if (showProperty) {
 
@@ -823,12 +831,33 @@ void Editor::Draw() {
 
 			// マップで登録されたidと連携したモデルで描画
 			if (isEditorMode_) {
+
 				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, camera_);
+
+				// 判定用のAABB描画
+				if (isDrawAABB_) {
+					DebugLine::DrawAABB(hierarchy->aabb_, { 0.0f,1,1,0.5f });
+					DebugLine::GetInstance()->Draw(camera_);
+				}
 			}
+
 			// エディターモードじゃなければ、シーンのカメラで描画する
 			else {
+				
+				/* 【重要？】もしシーン内のオブジェクトと共有していたら、描画をスキップする */
+				if (hierarchy->gameObject_)continue;
+
 				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, *Scene::GetSceneCamera());
+
+				// 判定用のAABB描画
+				if (isDrawAABB_) {
+					DebugLine::DrawAABB(hierarchy->aabb_, { 0.0f,1,1,0.5f });
+					DebugLine::GetInstance()->Draw(*Scene::GetSceneCamera());
+				}
+
 			}
+			
+			
 
 		}
 		

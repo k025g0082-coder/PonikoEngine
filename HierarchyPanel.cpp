@@ -34,12 +34,16 @@ void HierarchyPanel::Update()
 		hierarchyModelResouces_.at(i).model_->Update();
 	}
 
-	// ヒエラルキのWorldTransform更新
+	// ヒエラルキの更新
 	for (int i = 0; i < hierarchyModels_.size(); i++)
 	{
-		// キャ・・・キャストして更新・・ｗ
-		if (auto* world = dynamic_cast<WorldTransform*>(
-			hierarchyModels_.at(i)->transform_.get())) {
+		// キャ・・・キャスト
+		if (auto* world = dynamic_cast<WorldTransform*>( hierarchyModels_.at(i)->transform_.get())) {
+
+			/* AABB更新 */
+			hierarchyModels_.at(i)->aabb_.UpdatePosition(world->translation_);
+
+			// 更新
 			world->UpdateMatrix();
 		}
 
@@ -50,6 +54,23 @@ void HierarchyPanel::ViewPanel(bool& show)
 {
 
 #ifdef USE_IMGUI
+
+	/* もし選択中のヒエラルキある場合 */
+	if (selectedModelIndex_.has_value()) {
+
+		/* 選択中のヒエラルキのAABB画面 */
+		hierarchyModels_.at(selectedModelIndex_.value()).get()->aabb_.ImGuiView();
+
+		auto* it =hierarchyModels_.at(selectedModelIndex_.value()).get()->gameObject_;
+
+		if (it != nullptr) {
+
+			// それに登録されたIMGUI表示！！
+			it->ImGuiView();
+		}
+
+	}
+
 
 	/* 色 */
 	ImGui::PushStyleColor(
@@ -497,21 +518,6 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 			});
 	}
 
-	// 読み込んだレイヤー生成
-	for (int i = 0; i < hierarchyLayers_.size(); i++){
-
-		auto name = hierarchyLayers_.at(i).layerName_;
-
-		hierarchyModelToLayer_.try_emplace(name);
-
-	}
-	
-	// 読み込んだレイヤーに、モデルのアドレス追加
-	for (std::unique_ptr<Hierarchy<Model>>& model : hierarchyModels_) {
-
-		hierarchyModelToLayer_[model->layerName_].push_back(model.get());
-
-	}
 
 	// 読み込んだモデルリソースのモデルを全て生成
 	for (int i = 0; i < hierarchyModelResouces_.size(); i++)
@@ -533,6 +539,24 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 	}
 
 
+	// 読み込んだレイヤー生成
+	for (int i = 0; i < hierarchyLayers_.size(); i++){
+
+		auto name = hierarchyLayers_.at(i).layerName_;
+
+		hierarchyModelToLayer_.try_emplace(name);
+
+	}
+	
+	// 読み込んだレイヤーに、モデルのアドレス追加
+	for (std::unique_ptr<Hierarchy<Model>>& model : hierarchyModels_) {
+
+		hierarchyModelToLayer_[model->layerName_].push_back(model.get());
+
+		// ついでにアドレスも追加
+		model->object = hierarchyModelResourceList_[model->id_];
+
+	}
 	//
 	for (int i = 0; i < hierarchyLayers_.size(); i++) {
 

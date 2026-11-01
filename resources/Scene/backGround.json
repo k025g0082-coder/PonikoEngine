@@ -60,15 +60,34 @@
                 "name": "main"
             },
             {
-                "isView": false,
-                "name": "d"
+                "isView": true,
+                "name": "test"
             }
         ],
         "ModelProperties": [
             {
-                "id": "resources/Models/suzanne.obj",
-                "layerName": "d",
-                "name": "suzanne",
+                "aabb": {
+                    "depth": 16.5,
+                    "height": 0.8999999761581421,
+                    "max": [
+                        2.773545026779175,
+                        2.006070375442505,
+                        9.17131519317627
+                    ],
+                    "min": [
+                        -6.826455116271973,
+                        1.1060705184936523,
+                        -7.3286848068237305
+                    ],
+                    "width": 9.600000381469727
+                },
+                "id": "resources/Models/block/cube.obj",
+                "layerName": "test",
+                "name": "cube",
+                "propaties": {
+                    "objectType": 1,
+                    "subObjectType": 0
+                },
                 "transform": {
                     "rotation": [
                         0.0,
@@ -76,14 +95,14 @@
                         0.0
                     ],
                     "scale": [
+                        10.011787414550781,
                         1.0,
-                        1.0,
-                        1.0
+                        17.88274383544922
                     ],
                     "translation": [
-                        0.0,
-                        0.0,
-                        0.0
+                        -2.0264551639556885,
+                        1.5560704469680786,
+                        0.92131507396698
                     ]
                 },
                 "type": 0
@@ -97,6 +116,10 @@
             {
                 "isView": true,
                 "pathId": "resources/Models/bunny.obj"
+            },
+            {
+                "isView": true,
+                "pathId": "resources/Models/block/cube.obj"
             }
         ]
     },

@@ -1,5 +1,13 @@
 #include "DemoGimmick.h"
 
+
+// ギミックの種類名
+const char* DemoGimmick::GimmickTypeName[(int)GimmickType::count] = {
+	"Switch",
+	"Goal"
+};
+
+
 // 基底
 void DemoGimmick::Initialize()
 {
@@ -28,12 +36,33 @@ void DemoGimmick::Draw()
 //}
 
 
-void DemoSwitch::ImGuiView()
+//void DemoSwitch::ImGuiView()
+//{
+//	// imguiのなにか
+//}
+//
+//void DemoGoal::ImGuiView()
+//{
+//
+//}
+
+
+void DemoSwitch::Update()
 {
-	// imguiのなにか
+	DemoGimmick::Update();
+}
+void DemoSwitch::Draw()
+{
+	DemoGimmick::Draw();
 }
 
-void DemoGoal::ImGuiView()
-{
 
+void DemoGoal::Update()
+{
+	DemoGimmick::Update();
 }
+void DemoGoal::Draw()
+{
+	DemoGimmick::Draw();
+}
+

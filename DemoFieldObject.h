@@ -9,17 +9,6 @@
 
 #include "WorldTransform.h"
 
-/* 共通構造体 */
-struct FieldObjectData {
-
-    GameObjectData coreData_;// 基本
-
-    //uint32_t linkID = 0;
-
-    //nlohmann::json parameters; // ギミック固有のプロパティ
-
-};
-
 /// <summary>
 /// フィールド上のオブジェクトとしての基底クラス
 /// </summary>
@@ -29,10 +18,16 @@ class DemoFieldObject : public GameObject{
 public:
 
     // 必要な情報だけGameObjectに渡す
-    DemoFieldObject(Model* model, Camera* camera, const FieldObjectData& data_)
-        : GameObject(model, camera, data_.coreData_)
+    DemoFieldObject(Model* model, Camera* camera, const GameObjectData& data_, nlohmann::json* json)
+        : GameObject(model, camera, data_)
     {
-        // 何か必要な処理などあれば
+        // タイプを設定
+        type_ = static_cast<Type>(data_.objectID);
+		subType_ = data_.subObjectID;
+
+        // JSONのアドレスを取得
+        json_ = json;
+
     };
 
     virtual ~DemoFieldObject() = default;
@@ -44,27 +39,60 @@ public:
     // GameObject) これももちろん
     virtual void ImGuiView() = 0;
 
+    /* ImGuiウインドウ開始*/
+    void BeginImGui();
+
+    /* ImGuiウインドウ終了 */
+    void EndImGui();
+
+    // JSON更新
+    void UpdateObjectTypeJson();
 
     /* オブジェクト種類 */
-    enum class ObjectType {
+    enum class Type {
+
         kBlock,
         kGimmick,
+
+        count
     };
+
+    /* ギミック種類名を取得 */
+    static const char* GetFieldObjectTypeName(Type type) {
+        return fieldObjectTypeName[(int)type];
+    }
 
 protected:
 
+    // ギミックの種類名
+    static const char* fieldObjectTypeName[(int)Type::count];
+
+    // 識別用タイプ
+    Type type_;
+
+    // 識別２．ギミックの種類など
+    uint32_t subType_;
+
+
+    /* ヒエラルキーのJSONのアドレス。データ管理よう. */
+    nlohmann::json* json_ = nullptr;
+
+private:
+    bool showImGuiView = false;
 };
 
 /* ブロックなど静的なもの */
 class DemoBlock : public DemoFieldObject {
 public:
     
-    // 基底のコンストラクタ
-    using DemoFieldObject::DemoFieldObject;
+     using DemoFieldObject::DemoFieldObject;
 
+     void Initialize();
+     void Update();
+     void Draw();
 
-    //void Initialize(Model* model, Camera* camera, const FieldData data_) override;
-    //void Update() override;
-    //void Draw() override;
+    // GameObject) これももちろん
+     void ImGuiView();
+
 private:
 };

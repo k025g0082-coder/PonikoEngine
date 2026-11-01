@@ -3,15 +3,21 @@
 #include <functional>
 #include <memory>
 #include <unordered_map>
+#include <nlohmann/json.hpp>
 
+#include "Model.h"
+#include "Camera.h"
 #include "HierarchyPanel.h"
+
+#include "GameObject.h"
+
 
 /// <summary>
 /// 
 /// 特定の型から登録された、特定のラムダ処理を行わせる親クラス。主に継承して使う
 /// 
 /// 用途・・ステージの読込後のオブジェクトのIDによる初期化処理などに例）GimmickFactory
-/// 
+///			JSONファイルを各自で展開して情報をやり取りする
 /// </summary>
 
 template <typename KeyType, typename CoreType>
@@ -21,13 +27,12 @@ class BaseFactory
 public:
 
 	// 登録されるラムダ式関数
-	using CreatorFunc = std::function<std::unique_ptr<CoreType>()>;
+	using CreatorFunc = std::function<std::unique_ptr<CoreType>(
+		const GameObjectData&, 
+		nlohmann::json*)>;
 
 	//
 	virtual ~BaseFactory() = default;
-
-	/* 初期化（子クラスで行う場合ここにかくといいよ）*/
-	virtual void Initialize() {};
 
 	/// <summary>
 	/// クラス登録
@@ -39,7 +44,7 @@ public:
 	}
 
 	// クラス生成
-	static std::unique_ptr<CoreType> Create(const KeyType& key) {
+	static std::unique_ptr<CoreType> Create(const KeyType& key, const GameObjectData& data,nlohmann::json* param) {
 
 		// 同じキーを検索
 		auto& registry = GetRegistry();
@@ -51,14 +56,19 @@ public:
 				登録しているラムダ式を実行してからreturnする
 			*/
 
-			return it->second();
+			// 引数にjsonを渡す
+			return it->second(data,param);
 
 		}
 
 		return nullptr;
 	}
-	
 
+	// クラス生成　-　デフォルト
+	static std::unique_ptr<CoreType> Create(const KeyType& key, const GameObjectData& data) {
+		nlohmann::json localEmpty = nlohmann::json::object(); // static にせずローカルで生成
+		return Create(key, data, localEmpty);
+	}
 
 private:
 

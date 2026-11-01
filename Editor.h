@@ -97,7 +97,7 @@ public:
 	/// <param name="path">シーンの相対パス。例 resources/scene/OOXX.json</param>
 	static void LoadScene(std::string path);
 
-	const HierarchyPanel& GetHierarchyPanel() const { return hierarchyPanel_; }
+	HierarchyPanel& GetHierarchyPanel() { return hierarchyPanel_; }
 
 	// エンジン閉じる際の設定
 	void SaveIniFile();
@@ -113,6 +113,10 @@ private:
 
 	// エディターモードか
 	bool isEditorMode_ = false;
+
+	// 判定用のAABB描画するか
+	bool isDrawAABB_ = true;
+
 
 	// デバッグ用
 	Camera camera_;

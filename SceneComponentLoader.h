@@ -18,6 +18,7 @@
 #include <vector>
 #include "Model.h"
 #include "Text.h"
+#include "AABB.h"
 
 #include "Particle.h"
 #include "LightingManager.h"
@@ -159,6 +160,7 @@ public:
 
 	// 特殊な型なので、これらはそれぞれオーバーライド
 	void Property(const std::string& name, Vector3& value);
+	void Property(const std::string& name, AABB& value);
 	void Property(const std::string& name, WorldTransform& value);
 	void Property(const std::string& name, ScreenTransform& value);
 	void Property(const std::string& name, Text& value);
@@ -215,6 +217,8 @@ private:
 	TextDatas JsonToTextDatas(const json& value);
 	json TextDatasToJson(const TextDatas& data);
 
+	AABB JsonToAABB(const json& value);
+	json AABBToJson(const AABB& data);
 
 	/* ラムダ式。 */
 
