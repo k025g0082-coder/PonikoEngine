@@ -3,13 +3,13 @@
 #include "Editor.h"
 
 #include "Scene.h"
+#include "GameObject.h"
 
 #include "ImGuiManager.h"
 
 #include "SceneComponentLoader.h"
 
 #include "FileDropManager.h"
-
 
 #include <misc/cpp/imgui_stdlib.h>
 #include <imgui_internal.h>
@@ -289,6 +289,10 @@ void HierarchyPanel::DeleteHierarchyModel(int index)
 		// 生ポインタを取得しておく
 		Hierarchy<Model>* rawTarget = hierarchyModels_.at(index).get();
 
+		/* GameObjectと紐づいてる場合は消す */
+		GameObjectDeleteCheck(rawTarget);
+
+
 		// 削除対象のレイヤーからポインタを外す
 		auto& layer = hierarchyModelToLayer_[rawTarget->layerName_];
 		auto it = std::find(layer.begin(), layer.end(), rawTarget);
@@ -320,6 +324,10 @@ void HierarchyPanel::DeleteHierarchyLayer(const std::string& layerName)
 			}
 		);
 
+		/* GameObjectと紐づいてる場合は消す */
+		GameObjectDeleteCheck(target);
+
+
 		if (hierarchyIt != hierarchyModels_.end()) {
 			hierarchyModels_.erase(hierarchyIt);
 		}
@@ -343,6 +351,55 @@ void HierarchyPanel::DeleteHierarchyLayer(const std::string& layerName)
 }
 
 
+void HierarchyPanel::GameObjectAddCheck()
+{
+	// 今開いてるレイヤー検索
+	auto it = std::find_if(
+		hierarchyLayers_.begin(),
+		hierarchyLayers_.end(),
+		[this](const HierarchyLayer& layer) {
+			return layer.layerName_ == selectedCurrentLayer_;
+		}
+	);
+
+	//* もし、シーン側で登録しているレイヤーで生成された場合 *//
+	if (it->isAlignGameScene) {
+
+		// もし、シーン側で登録しているレイヤーで生成された場合、シーン側のゲームオブジェクトも生成する
+		if (gameObjectAdd_ != nullptr) {
+
+
+			// 種類０：サブ種類０を、仮だけど錬成する
+			gameObjectAdd_(0, 0, *GetHierarchyModels().back().get());
+
+		}
+	}
+
+}
+
+void HierarchyPanel::GameObjectDeleteCheck(Hierarchy<Model>* hierarchy)
+{
+	// 今開いてるレイヤー検索
+	auto it = std::find_if(
+		hierarchyLayers_.begin(),
+		hierarchyLayers_.end(),
+		[this](const HierarchyLayer& layer) {
+			return layer.layerName_ == selectedCurrentLayer_;
+		}
+	);
+
+	//* もし、シーン側で登録しているレイヤーで消された場合 *//
+	if (it->isAlignGameScene) {
+
+		if (gameObjectDelete_ != nullptr) {
+
+			// kesu
+			gameObjectDelete_(*hierarchy);
+
+		}
+	}
+}
+
 WorldTransform* HierarchyPanel::PasteHierarchyModel()
 {
 
@@ -353,6 +410,8 @@ WorldTransform* HierarchyPanel::PasteHierarchyModel()
 	h.type_ = hierarchyModels_.at(selectedModelIndex_.value())->type_;
 	h.id_ = hierarchyModels_.at(selectedModelIndex_.value())->id_;
 	h.name_ = hierarchyModels_.at(selectedModelIndex_.value())->name_;
+
+	h.object = hierarchyModels_.at(selectedModelIndex_.value())->object;
 
 	h.layerName_ = hierarchyModels_.at(selectedModelIndex_.value())->layerName_;
 
@@ -373,6 +432,10 @@ WorldTransform* HierarchyPanel::PasteHierarchyModel()
 
 	/* ヒエラルキ-モデル - 追加 */
 	AddHierarchyModel(selectedCurrentLayer_, h);
+
+
+	/* シーン側のGameObjectに干渉してたら一緒に増やす */
+	GameObjectAddCheck();
 
 
 	// セレクト中のインデックスを末尾のに変更

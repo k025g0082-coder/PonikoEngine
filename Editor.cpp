@@ -16,8 +16,7 @@
 
 #include "Input.h"
 
-//#include "Particle.h"
-//#include "EffectManager.h"
+#include "GameObject.h"
 
 #include "FileDropManager.h"
 
@@ -527,6 +526,8 @@ void Editor::Update()
 					h.id_ = assetsPanel_.selectedHierarchyResource_.pathId_;
 					h.name_ = assetsPanel_.selectedHierarchyResource_.name_;
 
+					h.object = assetsPanel_.selectedHierarchyResource_.model_;
+
 					// WorldTransform座標決定
 					h.transform_ = std::make_unique<WorldTransform>();
 
@@ -540,10 +541,12 @@ void Editor::Update()
 					// 位置更新
 					world->UpdateMatrix();
 
-
 					/* ヒエラルキ-モデル - 追加 */
-					hierarchyPanel_.AddHierarchyModel(hierarchyPanel_.GetSelectedCurrentLayer(), h);
+					hierarchyPanel_.AddHierarchyModel(hierarchyPanel_.GetSelectedCurrentLayerName(), h);
 
+
+					/* シーン側のGameObjectに干渉してたら一緒に増やす */
+					hierarchyPanel_.GameObjectAddCheck();
 				}
 
 				break;
@@ -571,6 +574,9 @@ void Editor::Update()
 				if (!selectedModelWorldTransform_) break;
 
 				hierarchyPanel_.DeleteHierarchyModel();
+
+
+				
 				selectedModelWorldTransform_ = nullptr;
 
 				break;
@@ -768,6 +774,14 @@ void Editor::Update()
 
 				}
 
+				/* 同期させる */
+				if (hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_ != nullptr) {
+
+					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().translation_ = selectedModelWorldTransform_->translation_;
+					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().rotation_ = selectedModelWorldTransform_->rotation_;
+					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().scale_ = selectedModelWorldTransform_->scale_;
+
+				}
 
 				selectedModelWorldTransform_->UpdateMatrix();
 			}

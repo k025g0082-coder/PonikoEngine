@@ -13,6 +13,10 @@ GameObject::GameObject(Model* model, Camera* camera, const GameObjectData& data_
 	//
 	aabb_ = data_.aabb_;
 
+	
+	hierarchy = data_.hierarchy;//
+
+
 
 	/* ワールド初期化 */
 	worldTransform.Initialize();

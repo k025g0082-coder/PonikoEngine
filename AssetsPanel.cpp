@@ -122,7 +122,9 @@ void AssetsPanel::PanelView(bool& show)
 				h.type_ = HierarchyType::kModel; // タイプ
 				h.id_ = resource.pathId_;
 				h.name_ = resource.name_;// 表示名 拡張子を抜いたのを設定する
-				h.layerName_ = hierarchyPanel_->GetSelectedCurrentLayer();
+				h.layerName_ = hierarchyPanel_->GetSelectedCurrentLayerName();
+
+				h.object = resource.model_;
 
 				// WorldTransform初期化
 				h.transform_ = std::make_unique<WorldTransform>();
@@ -131,7 +133,35 @@ void AssetsPanel::PanelView(bool& show)
 				h.isView_ = true;
 
 				/* ヒエラルキ追加 */
-				hierarchyPanel_->AddHierarchyModel(hierarchyPanel_->GetSelectedCurrentLayer(), h);
+				hierarchyPanel_->AddHierarchyModel(hierarchyPanel_->GetSelectedCurrentLayerName(), h);
+
+
+				/* シーン側のGameObjectに干渉してたら一緒に増やす */
+				hierarchyPanel_->GameObjectAddCheck();
+				
+
+				//// 該当レイヤー検索
+				//auto it = std::find_if(
+				//	hierarchyPanel_->GetHierarchyLayers().begin(),
+				//	hierarchyPanel_->GetHierarchyLayers().end(),
+				//	[&h, this](const HierarchyLayer& layer) {
+				//		return layer.layerName_ == hierarchyPanel_->GetSelectedCurrentLayerName();
+				//	}
+				//);
+
+				////* もし、シーン側で登録しているレイヤーで生成された場合 *//
+				//if (it->isAlignGameScene) {
+
+				//	// もし、シーン側で登録しているレイヤーで生成された場合、シーン側のゲームオブジェクトも生成する
+				//	if (hierarchyPanel_->gameObjectAdd_ != nullptr) {
+
+
+				//		// 種類０：サブ種類０を、仮だけど錬成する
+				//		hierarchyPanel_->gameObjectAdd_(0, 0, *hierarchyPanel_->GetHierarchyModels().back().get());
+
+				//	}
+				//}
+
 
 				ImGui::PopID();
 				break;
@@ -274,7 +304,9 @@ void AssetsPanel::AddDropModel()
 			h.type_ = HierarchyType::kModel; // タイプ
 			h.id_ = resource.pathId_;
 			h.name_ = resource.name_;
-			h.layerName_ = hierarchyPanel_->GetSelectedCurrentLayer();
+			h.layerName_ = hierarchyPanel_->GetSelectedCurrentLayerName();
+
+			h.object = resource.model_;
 
 			h.isView_ = true;
 
@@ -284,7 +316,11 @@ void AssetsPanel::AddDropModel()
 
 			/* 初期座標とかあったらその都度っここに　今は０，０，０  */
 
-			hierarchyPanel_->AddHierarchyModel(hierarchyPanel_->GetSelectedCurrentLayer(), h);
+			hierarchyPanel_->AddHierarchyModel(hierarchyPanel_->GetSelectedCurrentLayerName(), h);
+
+
+			/* シーン側のGameObjectに干渉してたら一緒に増やす */
+			hierarchyPanel_->GameObjectAddCheck();
 
 
 		}
