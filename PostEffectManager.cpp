@@ -190,7 +190,7 @@ void PostEffectManager::Initialize() {
 	);
 
 	// 初期値
-	fogParamData_->isFog = false;
+	fogParamData_->isFog = true;
 	fogParamData_->fogColor = { 0.5f, 0.5f, 0.5f };
 	fogParamData_->fogStart = 10.0f;
 	fogParamData_->fogEnd = 100.0f;
@@ -241,10 +241,13 @@ void PostEffectManager::BeginScene() {
 		commandList->ResourceBarrier(1, &depthBarrier);
 	}
 
-	firstFrame_ = false;
-
 	// オフスクリーンRTVに切り替え。初期化時のいろは青っぽい色
 	offscreenRenderTarget_.BeginRender(true,Vector4{ 0.1f, 0.25f, 0.5f,1.0f });
+
+
+	firstFrame_ = false;
+
+
 
 	//// オフスクリーンRTVに切り替え
 	//D3D12_CPU_DESCRIPTOR_HANDLE rtvHandleOffscreen = rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart();
@@ -274,24 +277,15 @@ void PostEffectManager::ApplyScene() {
 	offscreenRenderTarget_.EndRender();
 
 
-		// オフスクリーンを読める状態に
-		//D3D12_RESOURCE_BARRIER barrier = {};
-		//barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		//barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		//barrier.Transition.pResource = offscreenRenderTarget.Get();
-		//barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		//barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		//commandList->ResourceBarrier(1, &barrier);
+	// 深度バッファを読める状態に
+	D3D12_RESOURCE_BARRIER depthBarrier{};
+	depthBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	depthBarrier.Transition.pResource = DirectXCommon::GetInstance()->GetDepthStencilResource().Get();
+	depthBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	depthBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+	depthBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-		// 深度バッファを読める状態に
-		D3D12_RESOURCE_BARRIER depthBarrier{};
-		depthBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		depthBarrier.Transition.pResource = DirectXCommon::GetInstance()->GetDepthStencilResource().Get();
-		depthBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
-		depthBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		depthBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-		commandList->ResourceBarrier(1, &depthBarrier);
+	commandList->ResourceBarrier(1, &depthBarrier);
 
 
 		/* 
