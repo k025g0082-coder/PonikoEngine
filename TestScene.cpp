@@ -269,10 +269,6 @@ void TestScene::Update(Input* input) {
 	}
 #endif
 
-	// ポストエフェクトお試し
-	PostEffectManager::GetInstance()->ImGuiView();
-
-
 	telopSprite.UpdateScreenTransform();
 	
 

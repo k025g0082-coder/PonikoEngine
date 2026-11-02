@@ -20,6 +20,8 @@
 
 #include "FileDropManager.h"
 
+#include "PostEffectManager.h"
+
 #include "DebugLine.h"
 
 #include "Vector.h"
@@ -123,6 +125,7 @@ void Editor::Update()
 	static bool showProperty = false;
 	static bool showHierarchy = false;
 	static bool showLighting = false;
+	static bool showPostEffect = false;
 	static bool showEffectTimeline = false;
 	static bool showAssets = false;
 
@@ -136,6 +139,7 @@ void Editor::Update()
 			ImGui::MenuItem("Assets", nullptr, &showAssets);
 			ImGui::MenuItem("EffectTimeline", nullptr, &showEffectTimeline);
 			ImGui::MenuItem("LightingManager", nullptr, &showLighting);
+			ImGui::MenuItem("PostEffectManager", nullptr, &showPostEffect);
 
 			ImGui::EndMenu();
 		}
@@ -155,16 +159,21 @@ void Editor::Update()
 				WinApp::GetInstance()->SetDragEnabled(true);
 
 				camera_.SetCamera(*Scene::GetSceneCamera());
+
+				DebugLine::SetCamera(&camera_);//
 			}
 			else {
 				////* ドロップ無効に
 				WinApp::GetInstance()->SetDragEnabled(false);
+
+				DebugLine::SetCamera(Scene::GetSceneCamera());//
 			}
 
 			//	 ON/OFF切り替え
 			Scene::GetSceneCamera()->SetEditorMode(isEditorMode_);
 
 		}
+
 		ImGui::SameLine(200.0f);
 
 		if (isEditorMode_) {
@@ -378,6 +387,11 @@ void Editor::Update()
 		// アセットパネル
 		if (showAssets) {
 			assetsPanel_.PanelView(showAssets);
+		}
+
+		// ポストエフェクトパネル
+		if (showPostEffect) {
+			PostEffectManager::GetInstance()->ImGuiView(showPostEffect);
 		}
 	}
 
@@ -828,7 +842,7 @@ void Editor::Draw() {
 		// グリッドの線追加
 		grid.AddLine();
 
-		DebugLine::GetInstance()->Draw(camera_);
+		//DebugLine::GetInstance()->Draw(camera_);
 	}
 
 
@@ -851,23 +865,21 @@ void Editor::Draw() {
 				// 判定用のAABB描画
 				if (isDrawAABB_) {
 					DebugLine::DrawAABB(hierarchy->aabb_, { 0.0f,1,1,0.5f });
-					DebugLine::GetInstance()->Draw(camera_);
 				}
 			}
 
 			// エディターモードじゃなければ、シーンのカメラで描画する
 			else {
-				
-				/* 【重要？】もしシーン内のオブジェクトと共有していたら、描画をスキップする */
-				if (hierarchy->gameObject_)continue;
-
-				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, *Scene::GetSceneCamera());
 
 				// 判定用のAABB描画
 				if (isDrawAABB_) {
 					DebugLine::DrawAABB(hierarchy->aabb_, { 0.0f,1,1,0.5f });
-					DebugLine::GetInstance()->Draw(*Scene::GetSceneCamera());
 				}
+
+				/* 【重要？】もしシーン内のオブジェクトと共有していたら、描画をスキップする */
+				if (hierarchy->gameObject_)continue;
+
+				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, *Scene::GetSceneCamera());
 
 			}
 			

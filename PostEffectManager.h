@@ -52,6 +52,17 @@ struct BloomParam
 	float blurTexelSize; // ブラーのサンプリング幅 - ブラーの幅
 };
 
+/* Fog（遠くほど薄く）のパラメータ */
+struct FogParam
+{
+	bool isFog;
+
+	Vector3 fogColor;
+	float fogStart;
+	float fogEnd;
+
+	float padding[2];
+};
 
 class PostEffectManager
 {
@@ -70,11 +81,12 @@ public:
 	void ApplyScene();
 
 	// パラメータデバッグ用
-	void ImGuiView();
+	void ImGuiView(bool& show);
 
 	//　ポストエフェクトデータの参照
 	PostEffectParam& GetPostEffectParam() { return *postEffectData; }
 	BloomParam& GetBloomParam() { return *bloomParamData_; }
+	FogParam& GetFogParam() { return *fogParamData_; }
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandleOffscreen() {
 		return rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart();
@@ -121,12 +133,11 @@ private:
 
 
 	/* Bloom用のRenderTarget */
-	RenderTarget bloomRenderTarget_;      // 明るい部分の算出結果
-
-
+	RenderTarget bloomRenderTarget_;      // 明るい部分の算出結
 
 	/* Blurピラミッドを採用　そのリスト */
 	std::vector<RenderTarget> blurRenderTargets_;
+
 
 	// 分割数
 	uint32_t kBloomLevel;
@@ -145,12 +156,13 @@ private:
 	/* bloom対象のモデルー＞それに紐づけられたワールド座標のリスト。 みたいな感じで管理  */
 	std::unordered_map < Model*, std::vector<WorldTransform*> > bloomModelPropaties_;
 
-
-
 	// 定数バッファ
 	BloomParam* bloomParamData_ = nullptr;
+	FogParam* fogParamData_ = nullptr;
+
 
 	Microsoft::WRL::ComPtr <ID3D12Resource> bloomParamResource = nullptr;
+	Microsoft::WRL::ComPtr <ID3D12Resource> fogParamResource = nullptr;
 
 	// ポストエフェクト用のシーン描画のRenderTarget
 	Microsoft::WRL::ComPtr <ID3D12Resource> offscreenRenderTarget = nullptr;
@@ -162,5 +174,6 @@ private:
 	// SRV（ポストエフェクトで読むため）
 	D3D12_CPU_DESCRIPTOR_HANDLE offscreenSRVHandleCPU{};
 	D3D12_GPU_DESCRIPTOR_HANDLE offscreenSRVHandleGPU{};
+
 };
 

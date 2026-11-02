@@ -13,8 +13,9 @@ ComPtr<IDXGISwapChain4> DirectXCommon::swapChain_;
 ComPtr <ID3D12DescriptorHeap> DirectXCommon::srvHeap_;
 ComPtr <ID3D12DescriptorHeap> DirectXCommon::rtvHeap_;
 
+ComPtr<ID3D12Resource> DirectXCommon::depthStencilResource;
 ComPtr <ID3D12DescriptorHeap> DirectXCommon::dsvDescriptorHeap;
-
+D3D12_GPU_DESCRIPTOR_HANDLE DirectXCommon::depthSRVHandleGPU;
 D3D12_VIEWPORT DirectXCommon::viewport{};
 D3D12_RECT DirectXCommon::scissorRect{};
 
@@ -27,6 +28,8 @@ D3D12_DEPTH_STENCIL_DESC DirectXCommon::depthStencilDesc = {};
 
 // 初期ばんごー
 uint32_t DirectXCommon::srvIndex_ = 1;
+uint32_t DirectXCommon::depthSRVIndex_ = 0;
+
 
 DirectXCommon* DirectXCommon::GetInstance() {
 	static DirectXCommon instance;
@@ -43,11 +46,13 @@ void DirectXCommon::Initialize() {
 	CreateSwapChain();
 	CreateDescriptorHeap();
 	CreateRTV();
-	CreateDSV();
-	CreateFence();
 
 	// SRV作成.
 	srvHeap_ = DirectXUtility::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+	
+	CreateDSV();
+	CreateFence();
+
 
 	//　ビューポートの設定
 	//クライアント領域のサイズと一緒にして画面全体に表示
@@ -283,10 +288,39 @@ void DirectXCommon::CreateDSV() {
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 	//比較関数はLessEqual。つまり、近ければ描画される
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-
 	/*depthStencilDesc.DepthEnable = TRUE;
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;*/
+
+	/* 
+		20261102 深度を参照するためのSRVを作る
+	*/
+
+	// 設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Shader4ComponentMapping =
+		D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Texture2D.MipLevels = 1;
+
+
+	// SRVの一番後ろ取得
+	depthSRVIndex_ =
+		DirectXCommon::GetInstance()->GetAllocateSrv();
+	
+	// CPU用のSRVハンドル生成
+	auto srvHandle = GetSRVHandle(depthSRVIndex_);
+
+	// DepthSRVのGPUハンドルを取得
+	depthSRVHandleGPU = DirectXCommon::GetInstance()->GetDepthSRVGPUHandle();
+
+	// SRV作成
+	DirectXCommon::GetInstance()->GetDevice().Get()->CreateShaderResourceView(
+	depthStencilResource.Get(),
+    &srvDesc,
+    srvHandle
+);
 
 
 }

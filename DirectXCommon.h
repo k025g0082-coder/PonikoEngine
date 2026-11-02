@@ -55,11 +55,52 @@ public:
     static ComPtr<ID3D12Resource> GetBackBuffer(int i) { return renderTargets_[i];}
     static D3D12_CPU_DESCRIPTOR_HANDLE GetBackBufferRTV(int i) { return rtvHandles[i]; }
 
+	/// <summary>
+	/// SRV生成。CPU,GPU用
+	/// </summary>
+	/// <param name="index">GetAllocateSrv()で取得した,SRVの一番後ろの番号</param>
+	/// <returns></returns>
+	static D3D12_CPU_DESCRIPTOR_HANDLE GetSRVHandle(int index) {
+		D3D12_CPU_DESCRIPTOR_HANDLE handle =
+			srvHeap_->GetCPUDescriptorHandleForHeapStart();
+		UINT incrementSize =
+			device_->GetDescriptorHandleIncrementSize(
+				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+			);
+		handle.ptr += incrementSize * index;
+		return handle;
+	}
+   
+    /* 深度用のSRVハンドルを取得（番号は初期化時に用意してある） */
+    D3D12_GPU_DESCRIPTOR_HANDLE GetDepthSRVGPUHandle() {
+
+        D3D12_GPU_DESCRIPTOR_HANDLE handle =
+            srvHeap_->GetGPUDescriptorHandleForHeapStart();
+
+        UINT incrementSize =
+            device_->GetDescriptorHandleIncrementSize(
+                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+            );
+
+        handle.ptr += incrementSize * depthSRVIndex_;
+
+        return handle;
+    }
+
+
 	static D3D12_VIEWPORT& GetViewport() { return viewport; }
 	static D3D12_RECT& GetScissorRect() { return scissorRect; }
 
+
+    static ComPtr<ID3D12Resource> GetDepthStencilResource() { return depthStencilResource; }
+    
     // モデルのパイプライン設定で必要
     static D3D12_DEPTH_STENCIL_DESC GetDepthStencilDesc() { return depthStencilDesc; }
+
+	static  D3D12_GPU_DESCRIPTOR_HANDLE GetDepthSRVHandleGPU() {
+		return depthSRVHandleGPU;
+	}
+
 
     // SRV管理番号を返す
     static uint32_t GetAllocateSrv() { return srvIndex_++; }
@@ -99,7 +140,7 @@ private:
     static D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 
     static D3D12_DEPTH_STENCIL_DESC depthStencilDesc;
-    ComPtr<ID3D12Resource> depthStencilResource;
+    static ComPtr<ID3D12Resource> depthStencilResource;
     static ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap;
 
     ComPtr<ID3D12Fence> fence_;
@@ -116,6 +157,9 @@ private:
     // SRVの管理番号。Textureを足すたびに加算される？
     static uint32_t srvIndex_;
 
+	// DepthSRVの管理番号。DepthSRVは一個しかないので固定
+    static uint32_t depthSRVIndex_;
+    static D3D12_GPU_DESCRIPTOR_HANDLE depthSRVHandleGPU;
     //ビューポート
     static D3D12_VIEWPORT viewport;
     //シザー矩形

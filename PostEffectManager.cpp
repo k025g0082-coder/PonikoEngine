@@ -116,7 +116,6 @@ void PostEffectManager::Initialize() {
 			descriptorSize,
 			index);
 
-
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescOff{};
 	srvDescOff.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	srvDescOff.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -128,10 +127,7 @@ void PostEffectManager::Initialize() {
 	//*  BloomのRenderTarget初期化  *//
 
 	/* 解像度は２分の一。bloom合成時に元に戻す */
-
-	//blurRenderTarget_.Initialize(WinApp::GetInstance()->GetClientWidth(), WinApp::GetInstance()->GetClientHeight(), kBloomResolution_);
 	bloomRenderTarget_.Initialize(WinApp::GetInstance()->GetClientWidth(), WinApp::GetInstance()->GetClientHeight(), kBloomResolution_);
-
 
 	// 定数バッファの登録
 	bloomParamResource = DirectXUtility::CreateBufferResource(device_, sizeof(BloomParam));
@@ -176,6 +172,22 @@ void PostEffectManager::Initialize() {
 	postEffectData->scanLine = 0.0f;
 	postEffectData->fishLens = 0.0f;
 
+	/* Fog */
+	fogParamResource = DirectXUtility::CreateBufferResource(device_, sizeof(FogParam));
+
+	fogParamResource->Map(
+		0,
+		nullptr,
+		reinterpret_cast<void**>(&fogParamData_)
+	);
+
+	// 初期値
+	fogParamData_->isFog = false;
+	fogParamData_->fogColor = { 0.5f, 0.5f, 0.5f };
+	fogParamData_->fogStart = 10.0f;
+	fogParamData_->fogEnd = 100.0f;
+
+
 	/* blur初期化 */
 	InitializeBlur();
 	
@@ -194,6 +206,7 @@ void PostEffectManager::BeginScene() {
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
 
 	if (!firstFrame_) {
+
 		// オフスクリーンを描画可能に戻す
 		D3D12_RESOURCE_BARRIER barrier{};
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -209,6 +222,16 @@ void PostEffectManager::BeginScene() {
 			D3D12_RESOURCE_STATE_RENDER_TARGET;
 
 		commandList->ResourceBarrier(1, &barrier);
+
+		// 深度バッファ用を元に戻す
+		D3D12_RESOURCE_BARRIER depthBarrier{};
+		depthBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		depthBarrier.Transition.pResource = DirectXCommon::GetInstance()->GetDepthStencilResource().Get();
+		depthBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		depthBarrier.Transition.StateAfter =D3D12_RESOURCE_STATE_DEPTH_WRITE; 
+		depthBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+		commandList->ResourceBarrier(1, &depthBarrier);
 	}
 
 	firstFrame_ = false;
@@ -246,6 +269,16 @@ void PostEffectManager::ApplyScene() {
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		commandList->ResourceBarrier(1, &barrier);
 
+		// 深度バッファを読める状態に
+		D3D12_RESOURCE_BARRIER depthBarrier{};
+		depthBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		depthBarrier.Transition.pResource = DirectXCommon::GetInstance()->GetDepthStencilResource().Get();
+		depthBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+		depthBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		depthBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+		commandList->ResourceBarrier(1, &depthBarrier);
+
 
 		/* 
 			ブラー処理 
@@ -259,13 +292,12 @@ void PostEffectManager::ApplyScene() {
 
 		// 0.5)* 解像度を2/1に
 		bloomRenderTarget_.ChangeViewResolution(kBloomResolution_);
-		//blurRenderTarget_.ChangeViewResolution(kBloomResolution_);
 
 		// 1) 明るいところを摘出
 		DrawBloomExtract();
 
 		// 2) 明るいところをぼかす
-		//DrawBloomBlur();
+		DrawBloomBlur();
 		DrawDownSample();
 		DrawUpSample();
 
@@ -280,11 +312,11 @@ void PostEffectManager::ApplyScene() {
 
 }
 
-void PostEffectManager::ImGuiView() {
+void PostEffectManager::ImGuiView(bool& show) {
 
 #ifdef USE_IMGUI
 
-	ImGui::Begin("PostEffectManager");
+	ImGui::Begin("PostEffectManager",&show);
 
 	/* メイン */
 	ImGui::SeparatorText("Effect");
@@ -328,6 +360,14 @@ void PostEffectManager::ImGuiView() {
 		0.0f, 30.0f
 	);
 
+	/* Fog */
+	ImGui::SeparatorText("Fog");
+
+	ImGui::Checkbox("isFog", &fogParamData_->isFog);
+	ImGui::ColorEdit3("Fog Color", (float*)&fogParamData_->fogColor);
+	ImGui::SliderFloat("Fog Start", &fogParamData_->fogStart, -250.0f, fogParamData_->fogEnd);
+	ImGui::SliderFloat("Fog End", &fogParamData_->fogEnd, fogParamData_->fogStart, 250.0f);
+
 
 	ImGui::End();
 
@@ -359,6 +399,7 @@ void PostEffectManager::DrawBloomExtract()
 			}
 		}
 
+		/* シーン全体をBloomしたときのやつ */
 		/* SceneBloom の Rootsignatureと、パイプラインの設定 */
 		//commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBloom).rootSignature);
 		//commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::SceneBloom).graphicsPipelineState);
@@ -498,11 +539,16 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 	/* 合成 */
 	commandList->SetGraphicsRootDescriptorTable(0, offscreenSRVHandleGPU);
 	commandList->SetGraphicsRootDescriptorTable(1, blurRenderTargets_.back().GetSRVHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(5, DirectXCommon::GetDepthSRVHandleGPU());
 
 
 	//// ポストエフェクト　パラメータ値
 	commandList->SetGraphicsRootConstantBufferView(2, postEffectResource->GetGPUVirtualAddress());
 	commandList->SetGraphicsRootConstantBufferView(3, bloomParamResource->GetGPUVirtualAddress());
+
+
+		commandList->SetGraphicsRootConstantBufferView(4, fogParamResource->GetGPUVirtualAddress());
+	
 
 	commandList->DrawInstanced(6, 1, 0, 0);
 }

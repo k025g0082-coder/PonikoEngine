@@ -122,46 +122,11 @@ PixelShaderOutput main(VertexShaderOutput input) {
     
     PixelShaderOutput output;
     
-    
-    
-    float3 proj = input.lightPosition.xyz / input.lightPosition.w;
-    float2 uv;
-    uv.x = proj.x * 0.5f + 0.5f;
-    uv.y = -proj.y * 0.5f + 0.5f;
-    
-    float currentDepth = proj.z; // 光源からこのピクセルまでの距離
-
-    // 2. シャドウマップと比較サンプラーを使って影の減衰率を計算
-    // (currentDepth が マップの深度より大きければ 0.0、小さければ 1.0 が返る)
-    float shadowFactor = shadowMap.SampleCmpLevelZero(
-        shadowSampler, uv, currentDepth);
-    
-    
-    //// 3. ライティングにシャドウの係数を掛け合わせる
-    float color = lerp(0.05f, 1.0f, shadowFactor);
-    output.color = float4(color, color, color, 1.0f);
-    return output;
-    
-    //if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f ||
-    //proj.z < 0.0f || proj.z > 1.0f)
-    //{
-    //    output.color = float4(0.0f, 0.0f, 1.0f, 1.0f); // 範囲外 = 青
-    //    return output;
-    //}
-
-// 通常のSamplerで深度を見る（ComparisonSamplerではない）
-    float mapDepth = shadowMap.Sample(gSampler, uv).r;
-    output.color = float4(mapDepth, mapDepth, mapDepth, 1.0f);
-    return output;
-    
-    
-    
     float4 uvTransform = mul(float4(input.texcoord, 0.0f, 1.0f), material.uvTransform);
-    //float2 uv = uvTransform.xy;
+    float2 uv = uvTransform.xy;
     
     float4 textureColor = texture0.Sample(gSampler, uv);
    
-
     // 影判定だけを表示
     //output.color = float4(shadow, shadow, shadow, 1.0f);
     //return output;
@@ -197,19 +162,23 @@ PixelShaderOutput main(VertexShaderOutput input) {
 
                 float directionalCos =
             pow(saturate(NdotL * 0.5f + 0.5f), 2.0f);
-
-                directionalLighting +=
-            directionalLights.lights[i].color.rgb *
+            
+            lighting += directionalLights.lights[i].color.rgb *
             directionalCos *
             directionalLights.lights[i].intensity;
+            
+            //    directionalLighting +=
+            //directionalLights.lights[i].color.rgb *
+            //directionalCos *
+            //directionalLights.lights[i].intensity;
         }
         
         // 影を計算
-        float shadow = CalculateShadow(input.lightPosition);
-        float shadowFactor = lerp(0.05f, 1.0f, shadow);
+        //float shadow = CalculateShadow(input.lightPosition);
+        //float shadowFactor = lerp(0.05f, 1.0f, shadow);
 
-        // Directional だけに影を掛ける
-        lighting += directionalLighting * shadowFactor;
+        //// Directional だけに影を掛ける
+        //lighting += directionalLighting * shadowFactor;
         
     // =========================
     // Point Light

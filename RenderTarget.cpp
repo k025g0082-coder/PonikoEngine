@@ -140,8 +140,8 @@ void RenderTarget::BeginRender(bool clear)
 		commandList->ClearRenderTargetView(rtvHandleOffscreen, clearColor, 0, nullptr);
 	}
 
-	// 画面の深さ？
-	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	// 画面の深さ初期化？ 20261102 - Fog使用のためコメントアウト
+	//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	/* 初期化時に設定された、指定の大きさのビューポートを設定する */
 	commandList->RSSetViewports(1, &viewport);

@@ -60,7 +60,8 @@ namespace DirectXUtility
 		resourceDesc.Height = height;
 		resourceDesc.DepthOrArraySize = 1;
 		resourceDesc.MipLevels = 1;
-		resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		resourceDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+		//resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		resourceDesc.SampleDesc.Count = 1;
 		resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 

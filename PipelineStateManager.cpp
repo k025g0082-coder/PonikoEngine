@@ -1151,6 +1151,7 @@ void PipelineStateManager::createPostEffectPipeline() {
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV; // SRV5
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offset0
 
+
 	D3D12_DESCRIPTOR_RANGE descriptorRangeBloom = {};
 	descriptorRangeBloom.RangeType =
 		D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -1160,9 +1161,20 @@ void PipelineStateManager::createPostEffectPipeline() {
 	descriptorRangeBloom.OffsetInDescriptorsFromTableStart =
 		D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
+
+	D3D12_DESCRIPTOR_RANGE descriptorRangeDepth = {};
+	descriptorRangeDepth.RangeType =
+		D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+
+	descriptorRangeDepth.NumDescriptors = 1;
+	descriptorRangeDepth.BaseShaderRegister = 2; // t2
+	descriptorRangeDepth.OffsetInDescriptorsFromTableStart =
+		D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+
 	// RootParameterの設定(追加時は随時長さを足す↓
 	// RootParameterの設定
-	D3D12_ROOT_PARAMETER rootParameters[4] = {};
+	D3D12_ROOT_PARAMETER rootParameters[6] = {};
 
 	// t0：シーン画像
 	rootParameters[0].ParameterType =
@@ -1195,6 +1207,22 @@ void PipelineStateManager::createPostEffectPipeline() {
 	rootParameters[3].Descriptor.ShaderRegister = 2;
 	rootParameters[3].ShaderVisibility =
 		D3D12_SHADER_VISIBILITY_PIXEL;
+
+	// b3：Fogパラメータ
+	rootParameters[4].ParameterType =
+		D3D12_ROOT_PARAMETER_TYPE_CBV;
+	rootParameters[4].Descriptor.ShaderRegister = 3;
+	rootParameters[4].ShaderVisibility =
+		D3D12_SHADER_VISIBILITY_PIXEL;
+
+	// t2：Depth画像
+	rootParameters[5].ParameterType =
+		D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParameters[5].ShaderVisibility =
+		D3D12_SHADER_VISIBILITY_PIXEL;
+	rootParameters[5].DescriptorTable.pDescriptorRanges = &descriptorRangeDepth;
+	rootParameters[5].DescriptorTable.NumDescriptorRanges = 1;
+
 
 	descriptionRootSignature.pParameters = rootParameters;
 	descriptionRootSignature.NumParameters = _countof(rootParameters);

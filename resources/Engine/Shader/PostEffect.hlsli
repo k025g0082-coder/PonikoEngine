@@ -33,3 +33,12 @@ struct BloomParam
     float bloomSoftness;
     float blurTexelSize; 
 };
+
+struct FogParam
+{
+    bool isFog;
+    float3 fogColor;
+    float fogStart;
+    float fogEnd;
+    float2 padding;
+};
