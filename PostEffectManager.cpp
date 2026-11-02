@@ -62,66 +62,74 @@ void PostEffectManager::Initialize() {
 	vertexDataScreen[5].position = { 1.0f, -1.0f, 0.0f, 1.0f };
 	vertexDataScreen[5].texcoord = { 1.0f, 1.0f };
 
+
+	/*
+		オフスクリーン　RenderTarget初期化
+	*/
+	offscreenRenderTarget_.Initialize(
+		WinApp::GetInstance()->GetClientWidth(),
+		WinApp::GetInstance()->GetClientHeight());
+
 	// オフスクリーンRTV用ヒープ
-	rtvHeapOffscreen = DirectXUtility::CreateDescriptorHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1, false);
+	//rtvHeapOffscreen = DirectXUtility::CreateDescriptorHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1, false);
 
-	// オフスクリーン用テクスチャ作成
-	D3D12_RESOURCE_DESC rtvDescOffscreen{};
-	rtvDescOffscreen.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	rtvDescOffscreen.Width = WinApp::GetInstance()->GetClientWidth();
-	rtvDescOffscreen.Height = WinApp::GetInstance()->GetClientHeight();
-	rtvDescOffscreen.DepthOrArraySize = 1;
-	rtvDescOffscreen.MipLevels = 1;
-	rtvDescOffscreen.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	rtvDescOffscreen.SampleDesc.Count = 1;
-	rtvDescOffscreen.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+	//// オフスクリーン用テクスチャ作成
+	//D3D12_RESOURCE_DESC rtvDescOffscreen{};
+	//rtvDescOffscreen.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	//rtvDescOffscreen.Width = WinApp::GetInstance()->GetClientWidth();
+	//rtvDescOffscreen.Height = WinApp::GetInstance()->GetClientHeight();
+	//rtvDescOffscreen.DepthOrArraySize = 1;
+	//rtvDescOffscreen.MipLevels = 1;
+	//rtvDescOffscreen.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	//rtvDescOffscreen.SampleDesc.Count = 1;
+	//rtvDescOffscreen.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
-	D3D12_HEAP_PROPERTIES heapProps{};
-	heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+	//D3D12_HEAP_PROPERTIES heapProps{};
+	//heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
 
-	D3D12_CLEAR_VALUE clearValue{};
-	clearValue.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	clearValue.Color[0] = 0.1f; clearValue.Color[1] = 0.25f; clearValue.Color[2] = 0.5f; clearValue.Color[3] = 1.0f;
+	//D3D12_CLEAR_VALUE clearValue{};
+	//clearValue.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	//clearValue.Color[0] = 0.1f; clearValue.Color[1] = 0.25f; clearValue.Color[2] = 0.5f; clearValue.Color[3] = 1.0f;
 
-	device_->CreateCommittedResource(
-		&heapProps, D3D12_HEAP_FLAG_NONE,
-		&rtvDescOffscreen, D3D12_RESOURCE_STATE_RENDER_TARGET,
-		&clearValue, IID_PPV_ARGS(&offscreenRenderTarget)
-	);
+	//device_->CreateCommittedResource(
+	//	&heapProps, D3D12_HEAP_FLAG_NONE,
+	//	&rtvDescOffscreen, D3D12_RESOURCE_STATE_RENDER_TARGET,
+	//	&clearValue, IID_PPV_ARGS(&offscreenRenderTarget)
+	//);
 
 	// RTV作成
-	D3D12_RENDER_TARGET_VIEW_DESC rtvDescOff{};
-	rtvDescOff.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	rtvDescOff.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-	device_->CreateRenderTargetView(offscreenRenderTarget.Get(), &rtvDescOff, rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart());
+	//D3D12_RENDER_TARGET_VIEW_DESC rtvDescOff{};
+	//rtvDescOff.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	//rtvDescOff.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+	//device_->CreateRenderTargetView(offscreenRenderTarget.Get(), &rtvDescOff, rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart());
 
 
-	UINT index = DirectXCommon::GetInstance()->GetAllocateSrv();
+	//UINT index = DirectXCommon::GetInstance()->GetAllocateSrv();
 
-	UINT descriptorSize =
-		DirectXCommon::GetInstance()
-			->GetDevice()
-			->GetDescriptorHandleIncrementSize(
-				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	//UINT descriptorSize =
+	//	DirectXCommon::GetInstance()
+	//		->GetDevice()
+	//		->GetDescriptorHandleIncrementSize(
+	//			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-	offscreenSRVHandleCPU =
-		DirectXUtility::GetCPUDescriptorHandle(
-			DirectXCommon::GetInstance()->GetSrvHeap().Get(),
-			descriptorSize,
-			index);
+	//offscreenSRVHandleCPU =
+	//	DirectXUtility::GetCPUDescriptorHandle(
+	//		DirectXCommon::GetInstance()->GetSrvHeap().Get(),
+	//		descriptorSize,
+	//		index);
 
-	offscreenSRVHandleGPU =
-		DirectXUtility::GetGPUDescriptorHandle(
-			DirectXCommon::GetInstance()->GetSrvHeap().Get(),
-			descriptorSize,
-			index);
+	//offscreenSRVHandleGPU =
+	//	DirectXUtility::GetGPUDescriptorHandle(
+	//		DirectXCommon::GetInstance()->GetSrvHeap().Get(),
+	//		descriptorSize,
+	//		index);
 
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDescOff{};
-	srvDescOff.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	srvDescOff.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDescOff.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDescOff.Texture2D.MipLevels = 1;
-	device_->CreateShaderResourceView(offscreenRenderTarget.Get(), &srvDescOff, offscreenSRVHandleCPU);
+	//D3D12_SHADER_RESOURCE_VIEW_DESC srvDescOff{};
+	//srvDescOff.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	//srvDescOff.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	//srvDescOff.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//srvDescOff.Texture2D.MipLevels = 1;
+	//device_->CreateShaderResourceView(offscreenRenderTarget.Get(), &srvDescOff, offscreenSRVHandleCPU);
 
 
 	//*  BloomのRenderTarget初期化  *//
@@ -191,11 +199,10 @@ void PostEffectManager::Initialize() {
 	/* blur初期化 */
 	InitializeBlur();
 	
-
-	OutputDebugStringA(std::format(
-		"offscreenSRVHandleGPU.ptr = 0x{:X}\n",
-		offscreenSRVHandleGPU.ptr
-	).c_str());
+	//OutputDebugStringA(std::format(
+	//	"offscreenSRVHandleGPU.ptr = 0x{:X}\n",
+	//	offscreenSRVHandleGPU.ptr
+	//).c_str());
 }
 
 // ポストエフェクト受付開始
@@ -208,20 +215,20 @@ void PostEffectManager::BeginScene() {
 	if (!firstFrame_) {
 
 		// オフスクリーンを描画可能に戻す
-		D3D12_RESOURCE_BARRIER barrier{};
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		//D3D12_RESOURCE_BARRIER barrier{};
+		//barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		//barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
-		barrier.Transition.pResource =
-			offscreenRenderTarget.Get();
+		//barrier.Transition.pResource =
+		//	offscreenRenderTarget.Get();
 
-		barrier.Transition.StateBefore =
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		//barrier.Transition.StateBefore =
+		//	D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 
-		barrier.Transition.StateAfter =
-			D3D12_RESOURCE_STATE_RENDER_TARGET;
+		//barrier.Transition.StateAfter =
+		//	D3D12_RESOURCE_STATE_RENDER_TARGET;
 
-		commandList->ResourceBarrier(1, &barrier);
+		//commandList->ResourceBarrier(1, &barrier);
 
 		// 深度バッファ用を元に戻す
 		D3D12_RESOURCE_BARRIER depthBarrier{};
@@ -236,20 +243,23 @@ void PostEffectManager::BeginScene() {
 
 	firstFrame_ = false;
 
-	// オフスクリーンRTVに切り替え
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandleOffscreen = rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart();
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DirectXCommon::GetInstance()->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
+	// オフスクリーンRTVに切り替え。初期化時のいろは青っぽい色
+	offscreenRenderTarget_.BeginRender(true,Vector4{ 0.1f, 0.25f, 0.5f,1.0f });
 
-	commandList->OMSetRenderTargets(1, &rtvHandleOffscreen, FALSE, &dsvHandle);
+	//// オフスクリーンRTVに切り替え
+	//D3D12_CPU_DESCRIPTOR_HANDLE rtvHandleOffscreen = rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart();
+	//D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DirectXCommon::GetInstance()->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
 
-	// クリア
-	float clearColor[] = { 0.1f, 0.25f, 0.5f,1.0f };// 青色。RGBAの順
-	commandList->ClearRenderTargetView(rtvHandleOffscreen, clearColor, 0, nullptr);
+	//commandList->OMSetRenderTargets(1, &rtvHandleOffscreen, FALSE, &dsvHandle);
 
-	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	//// クリア
+	//float clearColor[] = { 0.1f, 0.25f, 0.5f,1.0f };// 青色。RGBAの順
+	//commandList->ClearRenderTargetView(rtvHandleOffscreen, clearColor, 0, nullptr);
 
-	commandList->RSSetViewports(1, &DirectXCommon::GetInstance()->GetViewport());
-	commandList->RSSetScissorRects(1, &DirectXCommon::GetInstance()->GetScissorRect());
+	//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+	//commandList->RSSetViewports(1, &DirectXCommon::GetInstance()->GetViewport());
+	//commandList->RSSetScissorRects(1, &DirectXCommon::GetInstance()->GetScissorRect());
 
 	
 
@@ -259,15 +269,19 @@ void PostEffectManager::BeginScene() {
 void PostEffectManager::ApplyScene() {
 
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
+	
+	// オフスクリーンを読める状態に
+	offscreenRenderTarget_.EndRender();
+
 
 		// オフスクリーンを読める状態に
-		D3D12_RESOURCE_BARRIER barrier = {};
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = offscreenRenderTarget.Get();
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-		commandList->ResourceBarrier(1, &barrier);
+		//D3D12_RESOURCE_BARRIER barrier = {};
+		//barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		//barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		//barrier.Transition.pResource = offscreenRenderTarget.Get();
+		//barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		//barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+		//commandList->ResourceBarrier(1, &barrier);
 
 		// 深度バッファを読める状態に
 		D3D12_RESOURCE_BARRIER depthBarrier{};
@@ -290,8 +304,8 @@ void PostEffectManager::ApplyScene() {
 
 		*/
 
-		// 0.5)* 解像度を2/1に
-		bloomRenderTarget_.ChangeViewResolution(kBloomResolution_);
+		// 0.5)* 解像度を2/1に ( なんかバグるのでやめ20261103  多分viewPort関連
+		//bloomRenderTarget_.ChangeViewResolution(kBloomResolution_);
 
 		// 1) 明るいところを摘出
 		DrawBloomExtract();
@@ -303,7 +317,7 @@ void PostEffectManager::ApplyScene() {
 
 
 		// 2.5)* 解像度を戻の解像度に戻す
-		bloomRenderTarget_.ChangeViewResolution(1.0f);
+		//bloomRenderTarget_.ChangeViewResolution(1.0f);
 
 
 		// 3) 最終的なBuckBufferへの描画。
@@ -487,6 +501,7 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 
 	// ★バックバッファを RENDER_TARGET に（安全のため入れる）
 	UINT backBufferIndex = DirectXCommon::GetInstance()->GetSwapChain()->GetCurrentBackBufferIndex();
+
 	offscreenTransitionBarrier_.Transition.pResource = DirectXCommon::GetInstance()->GetBackBuffer(backBufferIndex).Get(); // 適切な取得関数に合わせて
 	offscreenTransitionBarrier_.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 	offscreenTransitionBarrier_.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -496,27 +511,28 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 	/* 描画先はBackBuffer */
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle =
 		DirectXCommon::GetInstance()->GetBackBufferRTV(backBufferIndex);
+	// ★修正: DSV（深度バッファ）のハンドルを取得する
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle =
+		DirectXCommon::GetInstance()->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
 
 	commandList->OMSetRenderTargets(
 		1,
 		&rtvHandle,
-		FALSE,
-		nullptr);
+		FALSE,&dsvHandle);
 
-	//// ★修正 3: バックバッファのクリア（必要に応じて）
-	//float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	//commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-
+	// バックバッファ全体を黒でクリア（リサイズ時に余白部分が残らないようにする）
+	float clearColor[] = { 0.10f, 0.10f, 0.10f, 1.0f };
+	commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
 	// ポストエフェクト用のViewport / Scissorを設定
 	commandList->RSSetViewports(
 		1,
-		&DirectXCommon::GetInstance()->GetViewport()
+		&offscreenRenderTarget_.GetViewPort()
 	);
 
 	commandList->RSSetScissorRects(
 		1,
-		&DirectXCommon::GetInstance()->GetScissorRect()
+		&offscreenRenderTarget_.GetScissorRect()
 	);
 
 
@@ -537,7 +553,7 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	/* 合成 */
-	commandList->SetGraphicsRootDescriptorTable(0, offscreenSRVHandleGPU);
+	commandList->SetGraphicsRootDescriptorTable(0, offscreenRenderTarget_.GetSRVHandleGPU());
 	commandList->SetGraphicsRootDescriptorTable(1, blurRenderTargets_.back().GetSRVHandleGPU());
 	commandList->SetGraphicsRootDescriptorTable(5, DirectXCommon::GetDepthSRVHandleGPU());
 

@@ -2,6 +2,8 @@
 
 #include "WinApp.h"
 
+#include "Game.h"
+
 // シングルトン
 Input* Input::GetInstance(){
 	static Input instance;
@@ -32,6 +34,20 @@ void Input::Initialize()
 };
 
 void Input::Update() {
+
+	// マウス座標を、現在のViewの大きさから計算( 1280x720 からSceneのRenderTargetの縦横幅を引いて求めてる )
+	float scaleX = 
+		static_cast<float>(WinApp::GetInstance()->GetClientWidth() / Game::GetInstance()->GetGameScreenWidth());
+	
+	float scaleY = 
+		static_cast<float>(WinApp::GetInstance()->GetClientHeight() / Game::GetInstance()->GetGameScreenHeight());
+
+	mousePositionX_ = static_cast<int>(
+		(tmpMousePositionX_ - Game::GetInstance()->GetGameScreenOffset().x) * scaleX);
+
+	mousePositionY_ = static_cast<int>(
+		(tmpMousePositionY_ - Game::GetInstance()->GetGameScreenOffset().y) * scaleY);
+
 
 	// キーボード
 	keyboard->Acquire();

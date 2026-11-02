@@ -63,8 +63,12 @@ public:
 	}
 
 	void SetMousePosition(int x, int y) {
+
 		mousePositionX_ = x;
 		mousePositionY_ = y;
+
+		tmpMousePositionX_ = x;
+		tmpMousePositionY_ = y;
 	}
 
 	// マウス座標取得
@@ -101,6 +105,10 @@ private:
 
 	int mousePositionX_ = 0;
 	int mousePositionY_ = 0;
+
+	int tmpMousePositionX_ = 0;
+	int tmpMousePositionY_ = 0;
+
 
 	bool leftButton_ = false;
 	bool rightButton_ = false;

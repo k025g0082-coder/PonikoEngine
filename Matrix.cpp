@@ -8,8 +8,23 @@
 
 #include <cassert>
 
+float Lerp(const float& a, const float& b, float t) {
+	return a + (b - a) * t;
 
-Vector3 Lerp(const Vector3& a, const Vector3& b, float t) { return {a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t}; }
+};
+
+Vector2 Lerp(const Vector2& a, const Vector2& b, float t) {
+	return {
+		a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t
+	};
+}
+
+Vector3 Lerp(const Vector3& a, const Vector3& b, float t) { 
+	return {
+		a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t
+	};
+}
+
 Vector4 Lerp(const Vector4& a, const Vector4& b, float t)
 {
 	return {

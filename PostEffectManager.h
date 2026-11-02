@@ -88,10 +88,10 @@ public:
 	BloomParam& GetBloomParam() { return *bloomParamData_; }
 	FogParam& GetFogParam() { return *fogParamData_; }
 
-	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandleOffscreen() {
-		return rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart();
-	};
 
+	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandleOffscreen() {
+		return offscreenRenderTarget_.GetRtvHandle();
+	};
 
 	/* Bloomさせるモデルを追加 */
 	void AddBloomModel(Model* model, WorldTransform* worldTransform) {
@@ -101,6 +101,27 @@ public:
 
 	}
 
+	// オフスクリーンの大きさリサイズ
+	void ResizeOffscreen(uint32_t width, uint32_t height , Vector2 offset) {
+		
+		offscreenRenderTarget_.Resize(width, height, offset);
+	
+		bloomRenderTarget_.Resize(width , height, offset);
+		
+		for (RenderTarget& r : blurRenderTargets_) {
+			r.Resize(width, height, offset);
+		}
+	}
+
+	void SetViewOffset(Vector2 v) {
+		offscreenRenderTarget_.SetViewOffset(v);
+
+		bloomRenderTarget_.SetViewOffset(v);
+
+		for (RenderTarget& r : blurRenderTargets_) {
+			r.SetViewOffset(v);
+		}
+	};
 private:
 
 	bool firstFrame_ = true;
@@ -114,6 +135,10 @@ private:
 
 	/* 定数バッファ */
 	PostEffectParam* postEffectData = nullptr;
+
+	
+	/* 画面全体用のRenderTarget */
+	RenderTarget offscreenRenderTarget_;
 
 
 	// オフスクリーンRTに描画できるようにする
@@ -164,16 +189,18 @@ private:
 	Microsoft::WRL::ComPtr <ID3D12Resource> bloomParamResource = nullptr;
 	Microsoft::WRL::ComPtr <ID3D12Resource> fogParamResource = nullptr;
 
-	// ポストエフェクト用のシーン描画のRenderTarget
-	Microsoft::WRL::ComPtr <ID3D12Resource> offscreenRenderTarget = nullptr;
 
 
-	ID3D12DescriptorHeap* rtvHeapOffscreen = nullptr;  // オフスクリーン用RTV
-	D3D12_CPU_DESCRIPTOR_HANDLE offscreenRTVHandle{};
+	//// ポストエフェクト用のシーン描画のRenderTarget
+	//Microsoft::WRL::ComPtr <ID3D12Resource> offscreenRenderTarget = nullptr;
 
-	// SRV（ポストエフェクトで読むため）
-	D3D12_CPU_DESCRIPTOR_HANDLE offscreenSRVHandleCPU{};
-	D3D12_GPU_DESCRIPTOR_HANDLE offscreenSRVHandleGPU{};
+
+	//ID3D12DescriptorHeap* rtvHeapOffscreen = nullptr;  // オフスクリーン用RTV
+	//D3D12_CPU_DESCRIPTOR_HANDLE offscreenRTVHandle{};
+
+	//// SRV（ポストエフェクトで読むため）
+	//D3D12_CPU_DESCRIPTOR_HANDLE offscreenSRVHandleCPU{};
+	//D3D12_GPU_DESCRIPTOR_HANDLE offscreenSRVHandleGPU{};
 
 };
 

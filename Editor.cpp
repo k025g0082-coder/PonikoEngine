@@ -49,17 +49,23 @@ void Editor::Initialize() {
 
 	camera_.Initialize();
 
-	
 	// エディタの設定読込
 	LoadIniFile();
 
+
+	/* エディターモードの場合 */
+	if (isEditorMode_) {
+		Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kEditorMode);
+	}
+	else {
+		Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kFullScreenMode);
+	}
 
 	// 各パネルの初期化
 	hierarchyPanel_.Initialize(currentSceneJsonPath,grid);
 
 	assetsPanel_.Initialize();
 	assetsPanel_.SetHierarchyPanel(hierarchyPanel_);
-
 
 
 	effectSequencer_.mFrameMin = -100;
@@ -152,21 +158,31 @@ void Editor::Update()
 		/* エディターモード起動 */
 		if (ToggleSwitch("Editor ", &isEditorMode_)) {
 
-			// 押された瞬間,メインカメラからviewをコピー
+			// 有効化
 			if (isEditorMode_) {
 				
 				////* ドロップ有効に
 				WinApp::GetInstance()->SetDragEnabled(true);
 
+				// 押された瞬間,メインカメラからviewをコピー
 				camera_.SetCamera(*Scene::GetSceneCamera());
 
 				DebugLine::SetCamera(&camera_);//
+
+				/* ゲームのビューサイズをエディター用に設定 */
+				Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kEditorMode);
+				
 			}
+
+			// 無効化
 			else {
 				////* ドロップ無効に
 				WinApp::GetInstance()->SetDragEnabled(false);
 
 				DebugLine::SetCamera(Scene::GetSceneCamera());//
+
+				/* ゲームのビューサイズをRelease用に設定 */
+				Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kFullScreenMode);
 			}
 
 			//	 ON/OFF切り替え
@@ -322,10 +338,43 @@ void Editor::Update()
 		}
 
 
+		ImGui::Separator();
+		ImGui::SeparatorText("SceneSize");
 
+		static float size = 1.0f; // 初期値を設定
+		static int off[2] = { 1, 1 };
+		static float w = 0.0f;
+		static float h = 0.0f;
 
+		// 1. ImGui によるサイズ変更処理
+		Vector2 of = Game::GetInstance()->GetGameScreenOffset();
+
+		if (ImGui::SliderFloat("Size", &size, 0.1f, 1.0f)) {
+			// Lerp で新しい幅と高さを計算
+			w = Lerp(
+				1.0f,
+				static_cast<float>(WinApp::GetInstance()->GetClientWidth()),
+				size
+			);
+
+			h = Lerp(
+				1.0f,
+				static_cast<float>(WinApp::GetInstance()->GetClientHeight()),
+				size
+			);
+
+			// 画面サイズを変更
+			Game::GetInstance()->ResizeGameScreen(static_cast<int32_t>(w), static_cast<int32_t>(h), of);
+		}
 		
-		
+		ImGui::Text("Width: %d", (int)w);
+		ImGui::Text("Height: %d", (int)h);
+
+		if (ImGui::SliderFloat2("Offset", &of.x, 1, 1000)) {
+			
+			Game::GetInstance()->SetGameScreenOffset(of);
+
+		}
 
 		ImGui::Separator();
 
@@ -421,16 +470,15 @@ void Editor::Update()
 
 	ImVec2 mouse = ImGui::GetMousePos();
 
-	float width = static_cast<float>(
-		WinApp::GetInstance()->GetClientWidth());
+	float width = (float)Game::GetInstance()->GetGameScreenWidth();
+	float height = (float)Game::GetInstance()->GetGameScreenHeight();
 
-	float height = static_cast<float>(
-		WinApp::GetInstance()->GetClientHeight());
+	Vector2 offset = Game::GetInstance()->GetGameScreenOffset();
 
 	bool insideScene =
-		mouse.x >= 0.0f &&
+		mouse.x >= offset.x &&
 		mouse.x <= width &&
-		mouse.y >= 0.0f &&
+		mouse.y >= offset.y &&
 		mouse.y <= height;
 
 	/* ImGuiの枠にかさならない */
@@ -476,7 +524,7 @@ void Editor::Update()
 					WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
 
 					// だいたいの中心
-					float size = 1.0f;
+					float size = 3.0f;
 
 					AABB aabb;
 					aabb.min = Vector3{ -size, -size, -size } + world->translation_;
@@ -617,7 +665,7 @@ void Editor::Update()
 						WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
 
 						// だいたいの中心
-						float size = 1.0f;
+						float size = 3.0f;
 
 						AABB aabb;
 						aabb.min = Vector3{ -size, -size, -size } + world->translation_;
@@ -657,7 +705,7 @@ void Editor::Update()
 	float w = static_cast<float>(WinApp::GetInstance()->GetClientWidth());
 	float h = static_cast<float>(WinApp::GetInstance()->GetClientHeight());
 
-	ImGuizmo::SetRect(0.0f, 0.0f, w, h);
+	ImGuizmo::SetRect(offset.x, offset.y, width, height);
 
 
 	//ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
@@ -829,7 +877,7 @@ void Editor::Draw() {
 			WorldTransform* world = selectedModelWorldTransform_;
 
 			// だいたいの中心サイズ
-			float size = 1.0f;
+			float size = 3.0f;
 
 			AABB aabb;
 			aabb.min = Vector3{ -size, -size, -size } + world->translation_;

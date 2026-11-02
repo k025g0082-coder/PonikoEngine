@@ -3,7 +3,39 @@
 
 #include "Text.h"
 
+#include "PostEffectManager.h"
+
 Fade Game::fade;
+
+uint32_t Game::kGameScreenWidth;
+uint32_t Game::kGameScreenHeight;
+Vector2 Game::kGameScreenOffset;
+
+Game::WindowViewMode Game::currentViewMode_ = Game::WindowViewMode::kFullScreenMode;
+
+Game::WindowViewParam Game::windowViewParams_[(int)WindowViewMode::count] = {
+
+	// EditorMode
+	{ 
+		878,
+		494,
+		0,
+		16.0f,
+
+	}, 
+
+	// FullScreenMode
+	{
+		1280,
+		720,
+		0,
+		0,
+
+	},
+
+}; 
+
+
 
 // シングルトン
 Game* Game::GetInstance() {
@@ -12,6 +44,8 @@ Game* Game::GetInstance() {
 };
 
 void Game::Init() { 
+
+	//SetWindowViewMode(currentViewMode_);
 
 	// 入力の初期化
 	gamepad.Initialize();
@@ -28,6 +62,7 @@ void Game::Update() {
 	Scene::ProcessChange();
 
 	// 各画面のアプデ
+
 	Scene::getInstance()->Update(&gamepad);
 
 	fade.Update();
@@ -45,4 +80,25 @@ void Game::Draw() {
 
 void Game::Finalize() {
 
+}
+
+void Game::ResizeGameScreen(int32_t width, int32_t height, Vector2 offset)
+{
+
+	kGameScreenWidth = width;
+	kGameScreenHeight = height;
+
+	kGameScreenOffset = offset;
+
+	// ポストエフェクト側のオフスクリーンの大きさも変更
+	PostEffectManager::GetInstance()->ResizeOffscreen(width, height, offset);
+
+}
+
+void Game::SetGameScreenOffset(Vector2 v)
+{
+	kGameScreenOffset = v;
+
+	// ポストエフェクト側のオフスクリーンの大きさも変更
+	PostEffectManager::GetInstance()->SetViewOffset(v);
 }
