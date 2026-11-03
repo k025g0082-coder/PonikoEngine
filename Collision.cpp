@@ -138,7 +138,7 @@ bool IsCollision(const LineSegment& line, const AABB& aabb) {
     return true;
 }
 
-CollisionResult ResolveAABBCollision(AABB& playerAABB, Vector3& playerPos, const AABB& wallAABB) {
+CollisionResult ResolveAABBCollision(AABB& playerAABB, Vector3& playerPos, const AABB& wallAABB, const bool& isPushBack) {
 
     CollisionResult result;
 
@@ -174,14 +174,17 @@ CollisionResult ResolveAABBCollision(AABB& playerAABB, Vector3& playerPos, const
     if (absX < absY && absX < absZ) {
 
         // X軸（左右の壁）で押し戻し
-        playerPos.x += pushX;
+        if (isPushBack)
+            playerPos.x += pushX;
+
         result.hitWall = true;
 
     }
     else if (absY < absZ) {
 
         // Y軸（床や天井）で押し戻し
-        playerPos.y += pushY;
+        if (isPushBack)
+            playerPos.y += pushY;
 
         if (pushY > 0.0f) {
             // プラス方向に押し戻された ＝ プレイヤーの下に床がある！
@@ -195,12 +198,19 @@ CollisionResult ResolveAABBCollision(AABB& playerAABB, Vector3& playerPos, const
     }
     else {
         // Z軸（前後の壁）で押し戻し
-        playerPos.z += pushZ;
+        if (isPushBack)
+            playerPos.z += pushZ;
 
         // 前後
         result.hitWall = true;
 
     }
+
+    // 衝突しました
+    result.isCollision = true;
+
+    if (!isPushBack) return result;
+
 
     // AABB の位置も更新されたプレイヤー座標に合わせる
     // (※AABB のサイズを保持したまま位置だけずらす処理)

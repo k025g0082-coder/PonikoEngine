@@ -9,7 +9,7 @@ void DemoFieldObjectFactory::Initialize()
 {
 	/* 事前に必要な処理を登録 */
 
-	Register(DemoFieldObject::Type::kBlock, [](const GameObjectData& data,nlohmann::json* json) {
+	Register(DemoFieldObject::BlockType::kNormal, [](const GameObjectData& data,nlohmann::json* json) {
 		return std::make_unique<DemoBlock>( data.model, Scene::GetSceneCamera(), data, json );
 	});
 

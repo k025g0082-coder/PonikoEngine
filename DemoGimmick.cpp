@@ -24,36 +24,41 @@ void DemoGimmick::Draw()
 }
 
 
-//void DemoSwitch::Initialize(Model* model, Camera* camera, const FieldData data_)
-//{
-//	/* 共通 */
-//	DemoFieldObject::Initialize(model, camera, data_);
-//	
-//	// こっからIDとか取り出し
-//
-//	AddID(1);// ＊適当に１
-//
-//}
-
-
-//void DemoSwitch::ImGuiView()
-//{
-//	// imguiのなにか
-//}
-//
-//void DemoGoal::ImGuiView()
-//{
-//
-//}
-
-
 void DemoSwitch::Update()
 {
 	DemoGimmick::Update();
+
+	// 押されたときの
+	if (isPush_) {
+		pushScaleYEase.Step();
+		worldTransform.scale_.y = pushScaleYEase.getEasingNum();
+		aabb_.height_ = pushScaleYEase.getEasingNum();
+	}
+
+	if (pushScaleYEase.getIsFinished()) {
+		// なんかエフェクト
+	}
+
 }
 void DemoSwitch::Draw()
 {
 	DemoGimmick::Draw();
+}
+
+void DemoSwitch::onCollisionToPlayer(DemoPlayer* player, CollisionResult result)
+{
+	(void)player;
+	(void)result;
+
+	if (isPush_)return;
+
+	// もし上から踏まれた
+	if (!result.isGrounded) return;
+
+	// おされたアニメ開始
+	pushScaleYEase.Start(EasingVec::EASE_None, 10.0f, 1.0f, 0.0f);
+
+	isPush_ = true;
 }
 
 
@@ -64,5 +69,10 @@ void DemoGoal::Update()
 void DemoGoal::Draw()
 {
 	DemoGimmick::Draw();
+}
+
+void DemoGoal::onCollisionToPlayer(DemoPlayer* player)
+{
+	player;
 }
 

@@ -370,7 +370,11 @@ void HierarchyPanel::GameObjectAddCheck()
 
 
 			// 種類０：サブ種類０を、仮だけど錬成する
-			gameObjectAdd_(0, 0, *GetHierarchyModels().back().get());
+			gameObjectAdd_(
+				GetHierarchyModels().back().get()->gameObject_->GetId(),
+				GetHierarchyModels().back().get()->gameObject_->GetSubId(),
+				*GetHierarchyModels().back().get()
+			);
 
 		}
 	}
@@ -412,6 +416,8 @@ WorldTransform* HierarchyPanel::PasteHierarchyModel()
 	h.name_ = hierarchyModels_.at(selectedModelIndex_.value())->name_;
 
 	h.object = hierarchyModels_.at(selectedModelIndex_.value())->object;
+
+	h.aabb_ = hierarchyModels_.at(selectedModelIndex_.value())->aabb_;
 
 	h.layerName_ = hierarchyModels_.at(selectedModelIndex_.value())->layerName_;
 

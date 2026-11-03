@@ -3,10 +3,21 @@
 
 #include "ImGuiManager.h"
 
+#include "DemoPlayer.h"
+#include "DemoGimmick.h"
+
+#include "Collision.h"
+
+
 // ギミックの種類名
 const char* DemoFieldObject::fieldObjectTypeName[(int)Type::count] = {
+	"null",
+
+	"Player",
+
 	"Block",
 	"Gimmick"
+
 };
 
 
@@ -32,6 +43,18 @@ void DemoFieldObject::Draw()
 {
 	/* worldTransform基に描画 */
 	model_->Draw(worldTransform, *camera_);
+}
+
+void DemoFieldObject::Collision(DemoFieldObject* a, DemoFieldObject* b)
+{
+	// どっちもTrueなら押し戻す(ブロック判定)
+	bool push = a->isCollisionBlock_ && b->isCollisionBlock_;
+
+	CollisionResult result = ResolveAABBCollision( a->GetAABB(), a->GetWorldTransform().translation_, b->GetAABB(),push);
+
+	a->onCollision(b, result);
+	b->onCollision(a, result);
+
 }
 
 void DemoFieldObject::ImGuiView()
@@ -106,7 +129,7 @@ void DemoBlock::ImGuiView()
 #ifdef USE_IMGUI
 	DemoFieldObject::BeginImGui();
 
-	ImGui::Text("test");
+	ImGui::Text("Block");
 
 	DemoFieldObject::EndImGui();
 #endif

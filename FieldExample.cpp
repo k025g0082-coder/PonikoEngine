@@ -47,21 +47,26 @@ void FieldExample::Update(Input * input)
 {
 	input;
 	
-	// カメラ
-	Vector3 targetPosition = player_->GetWorldTransform().translation_;
-	Vector3 targetRotation = player_->GetWorldTransform().rotation_;
+	if (player_) {
 
-	Vector3 targetOffsetPos = { -6.487f,9.148f,-24.729f };
-	Vector3 targetOffsetRot = { 0.300f,0.171f,-0.000f };
+		// カメラ
+		Vector3 targetPosition = player_->GetWorldTransform().translation_;
+		Vector3 targetRotation = player_->GetWorldTransform().rotation_;
 
-	// プレイヤーに追跡
-	camera_.GetWorldTransform().translation_ = targetPosition + targetOffsetPos;
-	camera_.GetWorldTransform().rotation_    = targetRotation + targetOffsetRot;
+		Vector3 targetOffsetPos = { -6.487f,9.148f,-24.729f };
+		Vector3 targetOffsetRot = { 0.300f,0.171f,-0.000f };
+
+		// プレイヤーに追跡
+		camera_.GetWorldTransform().translation_ = targetPosition + targetOffsetPos;
+		camera_.GetWorldTransform().rotation_ = targetRotation + targetOffsetRot;
+
+		/* 
+			プレイヤー更新
+		*/
+		player_->Update();
+	}
 
 	camera_.Update();
-
-
-	player_->Update();
 
 
 	/* 更新 */
@@ -70,7 +75,12 @@ void FieldExample::Update(Input * input)
 	}
 
 	for (const std::unique_ptr<DemoGimmick>& gmk : gimmicks_) {
+
 		gmk->Update();
+
+		// プレイヤーとギミック判定
+		if (player_)
+			DemoFieldObject::Collision(player_.get(), gmk.get());
 	}
 
 #ifdef USE_IMGUI
@@ -81,9 +91,12 @@ void FieldExample::Update(Input * input)
 	//}
 
 	if (ImGui::Button("Reload")) {
+
 		blocks_.clear();
 		gimmicks_.clear();
+
 		FieldLoad();
+
 	}
 
 	ImGui::End();
@@ -93,8 +106,8 @@ void FieldExample::Update(Input * input)
 
 void FieldExample::Draw()
 {
-
-	player_->Draw();
+	if (player_)
+		player_->Draw();
 
 
 	/* 描画 */
@@ -110,11 +123,6 @@ void FieldExample::Draw()
 
 void FieldExample::FieldLoad()
 {
-	// プレイヤー
-	GameObjectData data;
-
-	player_ = std::make_unique<DemoPlayer>(playerModel_, &camera_, data);
-
 
 	// ADD とかー＞　std::function createGameObject(type,subType)    
 	// けす　　ー＞　std::function deleteGameObject(ヒエラルキ
@@ -126,9 +134,6 @@ void FieldExample::FieldLoad()
 
 	// レイヤーなかったら
 	if (hierarchys.empty()) return;
-
-	player_->SetStageHierarchyList(&hierarchys);// セット
-
 
 	/* エディター側ー＞ゲーム側に　データを受け渡す！！！！ */
 	for (Hierarchy<Model>*h : hierarchys) {
@@ -157,26 +162,31 @@ void FieldExample::FieldLoad()
 	
 		uint32_t value;
 
+		uint32_t defaultType = static_cast<uint32_t>(DemoFieldObject::Type::kBlock);
+
 		/* ファクトリーに登録された、クラス生成の型である識別idを、ヒエラルキーJSONから取得 */
 		if (!h->json_.contains("objectType")) {
 			
-			value = static_cast<uint32_t>(DemoFieldObject::Type::kBlock);
+			/*** 無い場合デフォルトでブロック ***/
+			value = defaultType;
 
-			// なければブロック
-			h->json_["objectType"] = static_cast<uint32_t>(DemoFieldObject::Type::kBlock);
+			h->json_["objectType"] = defaultType;
 	
 		}
 		else {
+
 			// タイプ名取得
 			value = h->json_["objectType"].get<uint32_t>();
+
+			// nullなら（しつこい）
+			if (value == (int)DemoFieldObject::Type::Null)
+				value = defaultType;
 		}
 
 		// タイプを記録しとく
 		data_.objectID = value;
 
-		// キー
-		DemoFieldObject::Type type = static_cast<DemoFieldObject::Type>(value);
-
+		value = 0;
 
 		// 読込２
 		if (!h->json_.contains("subObjectType")) {
@@ -208,6 +218,11 @@ void FieldExample::FieldLoad()
 
 void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subType, Hierarchy<Model>& hierarchy)
 {
+	//
+	if (type == (uint32_t)DemoFieldObject::Type::Null)
+		return;
+
+
 	/* ヒエラルキーから,ゲームオブジェクトにデータを設定する */
 	GameObjectData data_;
 
@@ -242,11 +257,32 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 	switch (type_) {
 
 	//
+	//  * プレイヤー *
+	//
+	case DemoFieldObject::Type::kPlayer:
+
+		/* もうすでにいる場合 */
+		if (player_ != nullptr) {
+			player_.release();
+		}
+
+		player_ = std::make_unique<DemoPlayer>(playerModel_, &camera_, data_,&hierarchy.json_);
+		player_->SetStageHierarchyList(&Editor::GetInstance()->GetHierarchyPanel().GetHierarchyModelLayer("test"));// セット
+
+		// ヒエラルキ側にも登録
+		hierarchy.gameObject_ = player_.get();
+
+		break;
+
+	//
 	//    ブロック
 	//
 	case DemoFieldObject::Type::kBlock:
 
-		blocks_.push_back(std::move(DemoFieldObjectFactory::Create(static_cast<DemoFieldObject::Type>(data_.subObjectID), data_, &hierarchy.json_)));
+		blocks_.push_back(
+			std::move(
+				DemoFieldObjectFactory::Create(
+					static_cast<DemoFieldObject::BlockType>(data_.subObjectID), data_, &hierarchy.json_)));
 
 		// ヒエラルキ側にも登録
 		hierarchy.gameObject_ = blocks_.back().get();
@@ -257,7 +293,10 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 	//
 	case DemoFieldObject::Type::kGimmick:
 
-		gimmicks_.push_back(std::move(DemoGimmickFactory::Create(static_cast<DemoGimmick::GimmickType>(data_.subObjectID), data_, &hierarchy.json_)));
+		gimmicks_.push_back(
+			std::move(
+				DemoGimmickFactory::Create(
+					static_cast<DemoGimmick::GimmickType>(data_.subObjectID), data_, &hierarchy.json_)));
 
 		// ヒエラルキ側にも登録
 		hierarchy.gameObject_ = gimmicks_.back().get();

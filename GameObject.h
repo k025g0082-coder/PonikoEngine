@@ -45,13 +45,23 @@ public:
     virtual void ImGuiView() = 0;
 
     WorldTransform& GetWorldTransform(){ return worldTransform; } 
-    const AABB& GetAABB() const { return aabb_; }
+    AABB& GetAABB() { return aabb_; }
+
 	const Hierarchy<Model>* GetHierarchy() const { return hierarchy; }
+
+    const uint32_t& GetId() const { return objectID_; }
+    const uint32_t& GetSubId() const { return objectSubID_; }
+
 
     /* === 派生クラスで引き継げる機能 === */
 
     // 他と接触があった場合
     virtual void onCollision(GameObject* other) {};
+
+
+    // 接触があったオブジェクトのOnCollisionを呼ぶ
+    static void Collision(GameObject* a, GameObject* b);
+
 
 protected:
 
@@ -62,7 +72,8 @@ protected:
 
     WorldTransform worldTransform;// WorldTransform情報
 
-    uint32_t objectID_ = 0;           // オブジェクトの個別ID？
+    uint32_t objectID_    = 0;           // オブジェクトの識別ID？
+    uint32_t objectSubID_ = 0;           // オブジェクトのサブ識別ID？
 
     AABB aabb_;
 

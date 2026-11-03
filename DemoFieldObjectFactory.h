@@ -8,7 +8,7 @@
 */
 
 // ブロック等
-class DemoFieldObjectFactory : public BaseFactory<DemoFieldObject::Type, DemoFieldObject>
+class DemoFieldObjectFactory : public BaseFactory<DemoFieldObject::BlockType, DemoFieldObject>
 {
 public:
 	// 初期登録

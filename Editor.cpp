@@ -55,7 +55,14 @@ void Editor::Initialize() {
 
 	/* エディターモードの場合 */
 	if (isEditorMode_) {
+
+		// もしデバッグモードの場合（力技）
+#ifdef _DEBUG
 		Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kEditorMode);
+#else
+		Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kFullScreenMode);
+#endif
+
 	}
 	else {
 		Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kFullScreenMode);
@@ -258,6 +265,15 @@ void Editor::Update()
 			}
 
 			/* ずいぶん右に配置 */
+			ImGui::SameLine(ImGui::GetWindowWidth() - 200.0f);
+
+			if (ImGui::Button("ResetCamera")) {
+				camera_.GetWorldTransform().translation_ = tmpCameraPosition_;
+				camera_.GetWorldTransform().rotation_ = tmpCameraRotation_;
+				camera_.UpdateMatrix();
+			}
+
+			/* ずいぶん右に配置 */
 			ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
 
 			if (ImGui::Button("AABB")) {
@@ -453,6 +469,17 @@ void Editor::Update()
 
 	if (selectedModelWorldTransform_) {
 
+		/* 回転キーなどショトカ */
+		if (Input::GetInstance()->TriggerKey(DIK_T)) {
+			operation_ = ImGuizmo::TRANSLATE;
+		}
+		if (Input::GetInstance()->TriggerKey(DIK_R)) {
+			operation_ = ImGuizmo::ROTATE;
+		}
+		if (Input::GetInstance()->TriggerKey(DIK_S)) {
+			operation_ = ImGuizmo::SCALE;
+		}
+
 		// ペースト
 		if (Input::GetInstance()->TriggerKey(DIK_V)) {
 
@@ -508,6 +535,7 @@ void Editor::Update()
 				// すべてのモデル
 				for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
 				{
+
 					// もし選択中のモデルアセットがあった場合
 					if (!assetsPanel_.selectedHierarchyResource_.pathId_.empty()) {
 
@@ -524,14 +552,17 @@ void Editor::Update()
 					WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
 
 					// だいたいの中心
-					float size = 3.0f;
+					//float size = 3.0f;
 
-					AABB aabb;
-					aabb.min = Vector3{ -size, -size, -size } + world->translation_;
-					aabb.max = Vector3{ size,  size,  size } + world->translation_;
+					//AABB aabb;
+					//aabb.min = Vector3{ -size, -size, -size } + world->translation_;
+					//aabb.max = Vector3{ size,  size,  size } + world->translation_;
+
+					// そのヒエラルキが持つAABB？
+					AABB* aabb = &hierarchyPanel_.GetHierarchyModels().at(i)->aabb_;
 
 					// モデルのAABBと判定
-					if (camera_.IntersectRayAABB(ray, aabb, distance)) {
+					if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
 
 						hierarchyPanel_.SetSelectedHierarchyModelIndex(i);
 						selectedModelWorldTransform_ = world;
@@ -665,14 +696,17 @@ void Editor::Update()
 						WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
 
 						// だいたいの中心
-						float size = 3.0f;
+						//float size = 3.0f;
 
-						AABB aabb;
-						aabb.min = Vector3{ -size, -size, -size } + world->translation_;
-						aabb.max = Vector3{ size,  size,  size } + world->translation_;
+						//AABB aabb;
+						//aabb.min = Vector3{ -size, -size, -size } + world->translation_;
+						//aabb.max = Vector3{ size,  size,  size } + world->translation_;
+
+						// そのヒエラルキが持つAABB？
+						AABB* aabb = &hierarchyPanel_.GetHierarchyModels().at(i)->aabb_;
 
 						// モデルのAABBと判定
-						if (camera_.IntersectRayAABB(ray, aabb, distance)) {
+						if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
 
 							/* 当たったヒエラルキモデルを削除 */
 							hierarchyPanel_.DeleteHierarchyModel(i);
@@ -877,11 +911,12 @@ void Editor::Draw() {
 			WorldTransform* world = selectedModelWorldTransform_;
 
 			// だいたいの中心サイズ
-			float size = 3.0f;
+			float size = 2.0f;
 
 			AABB aabb;
 			aabb.min = Vector3{ -size, -size, -size } + world->translation_;
 			aabb.max = Vector3{ size,  size,  size } + world->translation_;
+
 
 			DebugLine::DrawAABB(aabb, { 1.0f,0,0,1.0f });
 
@@ -897,6 +932,11 @@ void Editor::Draw() {
 	// シーンカメラが設定されてれば
 	if (Scene::GetSceneCamera() != nullptr) {
 
+		// 選択中のヒエラルキのAABB描画
+		if (isDrawAABB_ && selectedModelWorldTransform_ != nullptr) {
+			DebugLine::DrawAABB(hierarchyPanel_.GetSelectedHierarchyModel()->aabb_, { 0.0f,1,1,0.5f });
+		}
+
 		/* ヒエラルキーモデルの描画 */
 		for (const std::unique_ptr<Hierarchy<Model>>& hierarchy : hierarchyPanel_.GetHierarchyModels()) {
 
@@ -909,20 +949,17 @@ void Editor::Draw() {
 			if (isEditorMode_) {
 
 				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, camera_);
-
-				// 判定用のAABB描画
-				if (isDrawAABB_) {
-					DebugLine::DrawAABB(hierarchy->aabb_, { 0.0f,1,1,0.5f });
-				}
+				
 			}
 
+			
 			// エディターモードじゃなければ、シーンのカメラで描画する
 			else {
 
 				// 判定用のAABB描画
-				if (isDrawAABB_) {
-					DebugLine::DrawAABB(hierarchy->aabb_, { 0.0f,1,1,0.5f });
-				}
+				//if (isDrawAABB_) {
+				//	DebugLine::DrawAABB(hierarchy->aabb_, { 0.0f,1,1,0.5f });
+				//}
 
 				/* 【重要？】もしシーン内のオブジェクトと共有していたら、描画をスキップする */
 				if (hierarchy->gameObject_)continue;

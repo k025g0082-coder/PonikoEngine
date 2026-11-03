@@ -3,6 +3,8 @@
 // フィールド上の基底クラス
 #include "DemoFieldObject.h"
 
+#include "DemoPlayer.h"
+#include "EasingVec.h"
 
 //== デモのギミックの基底クラス  ==//
 class DemoGimmick : public DemoFieldObject {
@@ -26,7 +28,21 @@ public:
     virtual void Update() = 0;
     virtual void Draw() = 0;
 
+    // ***
+    void onCollision(DemoFieldObject* other, CollisionResult result) override {
+
+        // ギミックに当たったよと言う
+        other->onCollisionToGimmick(this,result);
+
+    }
+
     virtual void ImGuiView() = 0;
+
+
+
+    // 上から踏まれたプレイヤーに
+   // virtual void TreadOnPlayerAction(DemoPlayer* player) = 0;
+
 
     /* ギミック種類 */
     enum class GimmickType {
@@ -64,12 +80,19 @@ public:
     using DemoGimmick::DemoGimmick;
 
 
-
     void Initialize() {};
     void Update();
     void Draw();
 
     void ImGuiView() { DemoFieldObject::ImGuiView(); }
+
+    //*** プレイヤにあたった
+    void onCollisionToPlayer(DemoPlayer* player, CollisionResult result) override;
+
+
+    // 上から踏まれたプレイヤーに
+//    void TreadOnPlayerAction(DemoPlayer* player);
+
 
     // 追加
     void AddID(uint32_t instanceId) {
@@ -80,6 +103,8 @@ public:
 private:
 
     bool isPush_ = false;
+
+    EasingVec pushScaleYEase;
 
     // 作動させるIDを追加する
     std::vector<uint32_t> processIDs_;
@@ -99,6 +124,11 @@ public:
     void Initialize() {};
     void Update();
     void Draw();
+
+    void onCollisionToPlayer(DemoPlayer* player);
+
+    // 上から踏まれたプレイヤーに
+    //void TreadOnPlayerAction(DemoPlayer* player) { player; };
 
     void ImGuiView() { DemoFieldObject::ImGuiView(); };
 private:

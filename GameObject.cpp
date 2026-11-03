@@ -1,11 +1,14 @@
 #include "GameObject.h"
+#include "Collision.h"
 
 //
 GameObject::GameObject(Model* model, Camera* camera, const GameObjectData& data_)
 {
 	// オブジェクトごとにIDを持たせる
-	objectID_ = countId_++;
+	/*objectID_ = countId_++;*/
 
+	objectID_ = data_.objectID;
+	objectSubID_ = data_.subObjectID;
 
 	model_ = model;
 	camera_ = camera;
@@ -43,5 +46,15 @@ void GameObject::Draw()
 {
 	/* worldTransform基に描画 */
 	model_->Draw(worldTransform, *camera_);
+}
+
+void GameObject::Collision(GameObject* a, GameObject* b)
+{
+	if (IsCollision(a->GetAABB(), b->GetAABB())) {
+
+		a->onCollision(b);
+		b->onCollision(a);
+
+	}
 }
 

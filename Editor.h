@@ -121,6 +121,10 @@ private:
 	// デバッグ用
 	Camera camera_;
 
+	Vector3 tmpCameraPosition_ = {0,0,-50.0f};
+	Vector3 tmpCameraRotation_;
+
+
 	/* 各パネル */
 	static HierarchyPanel hierarchyPanel_;
 	AssetsPanel assetsPanel_;

@@ -1,12 +1,17 @@
 #include "DemoPlayer.h"
 
+#include "DemoGimmick.h"
+
 #include "Input.h"
 #include "Collision.h"
+
+void DemoPlayer::Initialize()
+{}
 
 void DemoPlayer::Update()
 {
 	// 共通
-	GameObject::Update();
+	DemoFieldObject::Update();
 
 	float speed = 0.1f;
 	Vector3 move{ 0,0,0 };
@@ -26,7 +31,6 @@ void DemoPlayer::Update()
 	if (Input::GetInstance()->PushKey(DIK_S)) {
 		move.z -= speed;
 	}
-
 
 
 	// ジャンプ
@@ -51,20 +55,10 @@ void DemoPlayer::Update()
 
 	collisionResult_ = { false, false, false };
 
-	/* ステージのオブジェクト内のすべてとのAABB */
-	for (auto& hierarchy : *stageHierarchyList_) {
 
-		// FieldObjectのAABBを取得
-		const AABB& targetAABB = hierarchy->gameObject_->GetAABB();
+	// 押し戻し、各判定
+	CollisionToAllBlock();
 
-		// AABB同士の衝突判定と押し戻し処理
-		CollisionResult collisionResult = ResolveAABBCollision(aabb_, worldTransform.translation_, targetAABB);
-
-		/* 結果を論理和 (OR) で積み重ねてく */
-		collisionResult_.isGrounded |= collisionResult.isGrounded;
-		collisionResult_.hitCeiling |= collisionResult.hitCeiling;
-		collisionResult_.hitWall    |= collisionResult.hitWall;
-	}
 
 	// 地面についた
 	if (collisionResult_.isGrounded) {
@@ -79,8 +73,51 @@ void DemoPlayer::Draw()
 
 }
 
+void DemoPlayer::CollisionToAllBlock()
+{
+	/* ヒエラルキ内の、シーン内の連携された全てのとAABB */
+	for (auto& hierarchy : *stageHierarchyList_) {
+
+		if (hierarchy->gameObject_ == nullptr) continue;
+
+		// Nullなら
+		auto type = hierarchy->gameObject_->GetId();
+		if (type == (uint32_t)DemoFieldObject::Type::Null) continue;
+		if (type == (uint32_t)DemoFieldObject::Type::kPlayer) continue;
+
+
+		// FieldObjectのAABBを取得
+		const AABB& targetAABB = hierarchy->gameObject_->GetAABB();
+
+		// AABB同士の衝突判定と押し戻し処理
+		CollisionResult collisionResult = ResolveAABBCollision(aabb_, worldTransform.translation_, targetAABB);
+
+		/* 結果を論理和 (OR) で積み重ねてく */
+		collisionResult_.isGrounded |= collisionResult.isGrounded;
+		collisionResult_.hitCeiling |= collisionResult.hitCeiling;
+		collisionResult_.hitWall |= collisionResult.hitWall;
+
+	}
+}
+
+void DemoPlayer::onCollisionToGimmick(DemoGimmick* gimmick,CollisionResult result)
+{
+	(void)result;
+	uint32_t id = gimmick->GetSubId();
+
+	switch ((DemoGimmick::GimmickType)id) {
+
+		case DemoGimmick::GimmickType::kSwitch:
+			// スイッチ当たった
+			id;
+		break;
+
+	}
+
+}
+
 void DemoPlayer::ImGuiView()
 {
 	//
-
+	DemoFieldObject::ImGuiView();
 }
