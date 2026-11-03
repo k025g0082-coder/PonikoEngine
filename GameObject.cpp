@@ -44,8 +44,35 @@ void GameObject::Update()
 }
 void GameObject::Draw()
 {
+	if (!isView_) return;
+
 	/* worldTransform基に描画 */
 	model_->Draw(worldTransform, *camera_);
+}
+
+GameObjectData GameObject::ConvertGameData(Hierarchy<Model>& hierarchy)
+{
+	/* ヒエラルキーから,ゲームオブジェクトにデータを設定する */
+	GameObjectData data_;
+
+	// モデルももらう
+	data_.model = hierarchy.object;
+
+	// 判定用AABB
+	data_.aabb_ = hierarchy.aabb_;
+
+	/* ヒエラルキ自身のポインタ */
+	data_.hierarchy = &hierarchy;
+
+	// キャスト
+	auto* world = dynamic_cast<WorldTransform*>(hierarchy.transform_.get());
+
+	/* ヒエラルキーから情報取り出す */
+	data_.position = world->translation_;
+	data_.rotation = world->rotation_;
+	data_.scale = world->scale_;
+
+	return data_;
 }
 
 void GameObject::Collision(GameObject* a, GameObject* b)

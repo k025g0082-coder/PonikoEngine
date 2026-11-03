@@ -28,6 +28,11 @@ public:
     virtual void Update() = 0;
     virtual void Draw() = 0;
 
+
+    // ギミックが、他のギミックから発火された際に実行される
+    virtual void ByTriggerGimmick(DemoGimmick* gimmick) { gimmick; }
+
+
     // ***
     void onCollision(DemoFieldObject* other, CollisionResult result) override {
 
@@ -38,16 +43,11 @@ public:
 
     virtual void ImGuiView() = 0;
 
-
-
-    // 上から踏まれたプレイヤーに
-   // virtual void TreadOnPlayerAction(DemoPlayer* player) = 0;
-
-
     /* ギミック種類 */
     enum class GimmickType {
 
         kSwitch,
+        kDoor,
         kGoal,
 
         count
@@ -59,7 +59,8 @@ public:
 	}
 
 protected:
-    uint32_t gimmickID_ = 0;           // ギミックの識別ID？
+
+   
 private:
 
     // ギミックの種類名
@@ -76,33 +77,60 @@ private:
 class DemoSwitch : public DemoGimmick {
 public:
 
-    // ★ DemoGimmick のコンストラクタをそのまま引き継ぐ
-    using DemoGimmick::DemoGimmick;
+    // FieldObjectの引数をリレーする
+    DemoSwitch(Model* model, Camera* camera, const GameObjectData& data_, nlohmann::json* json)
+        : DemoGimmick(model, camera, data_, json)
+    {
+        // もしなければ新しく作る
+        if (!json_->contains("processID")) {
+            (*json_)["processID"] = nlohmann::json::array();
+        }
 
+        // jsonからprocessIDを取り出す
+        for (const auto& item : json_->at("processID")) {
+
+            // 数字だった場合
+            if (item.is_number_integer()) {
+                processIDs_.push_back(item.get<uint32_t>());
+            }
+
+        }
+        
+    }
 
     void Initialize() {};
     void Update();
     void Draw();
 
-    void ImGuiView() { DemoFieldObject::ImGuiView(); }
+    void ImGuiView();
 
     //*** プレイヤにあたった
     void onCollisionToPlayer(DemoPlayer* player, CollisionResult result) override;
 
-
-    // 上から踏まれたプレイヤーに
-//    void TreadOnPlayerAction(DemoPlayer* player);
-
-
     // 追加
     void AddID(uint32_t instanceId) {
         
-        //重複はめんどいからあと
-        processIDs_.push_back(instanceId);
+        //検索して無かったら追加
+        auto it = std::find(
+            processIDs_.begin(),
+            processIDs_.end(),
+            instanceId);
+
+        if (it == processIDs_.end()) {
+            processIDs_.push_back(instanceId);
+
+            if (json_ != nullptr) {
+                (*json_)["processID"].push_back(instanceId); // 単体の ID を追加
+            }
+        }
+
+        
     }
+
 private:
 
     bool isPush_ = false;
+    bool isProcess_ = false;
 
     EasingVec pushScaleYEase;
 
@@ -110,6 +138,33 @@ private:
     std::vector<uint32_t> processIDs_;
 
 };
+
+/// <summary>
+/// ドア
+/// </summary>
+class DemoDoor : public DemoGimmick {
+public:
+
+    // ★ DemoGimmick のコンストラクタをそのまま引き継ぐ
+    using DemoGimmick::DemoGimmick;
+
+    /* 基底クラスと同じ処理をしたい場合・・書かなくてよい */
+    void Initialize() {};
+    void Update();
+    void Draw();
+
+    // ギミックが、他のギミックから発火された際に実行される
+    void ByTriggerGimmick(DemoGimmick* gimmick)override;
+
+
+    void ImGuiView() { DemoFieldObject::ImGuiView(); };
+private:
+
+    bool isTriggered_ = false;
+
+    EasingVec openPositionEase;
+};
+
 
 /// <summary>
 /// ゴール
@@ -127,8 +182,6 @@ public:
 
     void onCollisionToPlayer(DemoPlayer* player);
 
-    // 上から踏まれたプレイヤーに
-    //void TreadOnPlayerAction(DemoPlayer* player) { player; };
 
     void ImGuiView() { DemoFieldObject::ImGuiView(); };
 private:

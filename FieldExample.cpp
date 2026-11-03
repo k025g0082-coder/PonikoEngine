@@ -11,13 +11,15 @@
 
 #include <utility>
 
+std::unordered_map<uint32_t, DemoFieldObject*> FieldExample::uniqueIdMap_;
+
+
 void FieldExample::Init()
 {
 	camera_.Initialize();
 
 	// カメラセット
 	Scene::SetSceneCamera(&camera_);
-
 
 	/* モデル（仮） */
 	playerModel_ = Model::CreateOBJ("resources/Models/cube/cube.obj");
@@ -37,6 +39,7 @@ void FieldExample::Init()
 		使う（ヒエラルキーを取得する）レイヤーを宣言
 	*/
 	Editor::GetInstance()->GetHierarchyPanel().SetUseGameObjectLayer("test");
+	Editor::GetInstance()->GetHierarchyPanel().SetUseGameObjectLayer("test2");
 
 
 	// ロード
@@ -120,17 +123,27 @@ void FieldExample::Draw()
 	}
 
 }
+void FieldExample::FieldLoad() {
 
-void FieldExample::FieldLoad()
+	/* 
+	
+		宣言したレイヤー名のリスト内に配置されたオブジェクト全て読込
+		
+	*/
+
+	for (const std::string& s : *Editor::GetAlignHierarchyLayerNames()) {
+		FieldLayerLoad(s);
+	}
+
+}
+
+
+
+void FieldExample::FieldLayerLoad(std::string layerName)
 {
 
-	// ADD とかー＞　std::function createGameObject(type,subType)    
-	// けす　　ー＞　std::function deleteGameObject(ヒエラルキ
-	//  					ameOvjectにヒエラルキのあどれす持たせる　でそれを検索とかで一致した奴を削除
-
-
 	// Editorからレイヤーでしわけられた（名前で指定）ヒエラルキーリストをもらう
-	auto& hierarchys = Editor::GetInstance()->GetHierarchyPanel().GetHierarchyModelLayer("test");
+	auto& hierarchys = Editor::GetHierarchyModelLayer(layerName);
 
 	// レイヤーなかったら
 	if (hierarchys.empty()) return;
@@ -138,26 +151,8 @@ void FieldExample::FieldLoad()
 	/* エディター側ー＞ゲーム側に　データを受け渡す！！！！ */
 	for (Hierarchy<Model>*h : hierarchys) {
 
-		// キャスト
-		auto* world = dynamic_cast<WorldTransform*>(h->transform_.get());
-
-		GameObjectData data_;
-
-
-		// モデルももらう
-		data_.model = h->object;
-
-		// 判定用AABB
-		data_.aabb_ = h->aabb_;
-
-		/* ヒエラルキ自身のポインタ */
-		data_.hierarchy = h;
-
-
-		/* ヒエラルキーから情報取り出す */
-		data_.position = world->translation_;
-		data_.rotation = world->rotation_;
-		data_.scale = world->scale_;
+		/* ヒエラルキーから,転送用データに変換する */
+		GameObjectData data_ = GameObject::ConvertGameData(*h);
 
 	
 		uint32_t value;
@@ -188,7 +183,7 @@ void FieldExample::FieldLoad()
 
 		value = 0;
 
-		// 読込２
+		// ==読込２
 		if (!h->json_.contains("subObjectType")) {
 
 			// なければ０番
@@ -223,26 +218,9 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 		return;
 
 
-	/* ヒエラルキーから,ゲームオブジェクトにデータを設定する */
-	GameObjectData data_;
-
-	// モデルももらう
-	data_.model = hierarchy.object;
-
-	// 判定用AABB
-	data_.aabb_ = hierarchy.aabb_;
-
-	/* ヒエラルキ自身のポインタ */
-	data_.hierarchy = &hierarchy;
-
-
-	// キャスト
-	auto* world = dynamic_cast<WorldTransform*>(hierarchy.transform_.get());
-
-	/* ヒエラルキーから情報取り出す */
-	data_.position = world->translation_;
-	data_.rotation = world->rotation_;
-	data_.scale = world->scale_;
+	/* ヒエラルキーから,転送用データに変換する */
+	GameObjectData data_ = 
+		GameObject::ConvertGameData(hierarchy);
 
 	data_.objectID = type;
 	data_.subObjectID = subType;
@@ -253,6 +231,8 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 	
 	// キー
 	DemoFieldObject::Type type_ = static_cast<DemoFieldObject::Type>(type);
+	
+	DemoFieldObject* object = nullptr;
 
 	switch (type_) {
 
@@ -267,10 +247,10 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 		}
 
 		player_ = std::make_unique<DemoPlayer>(playerModel_, &camera_, data_,&hierarchy.json_);
-		player_->SetStageHierarchyList(&Editor::GetInstance()->GetHierarchyPanel().GetHierarchyModelLayer("test"));// セット
-
+	
 		// ヒエラルキ側にも登録
 		hierarchy.gameObject_ = player_.get();
+		object = player_.get();
 
 		break;
 
@@ -286,6 +266,8 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 
 		// ヒエラルキ側にも登録
 		hierarchy.gameObject_ = blocks_.back().get();
+		object = blocks_.back().get();
+
 		break;
 
 	//
@@ -300,9 +282,15 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 
 		// ヒエラルキ側にも登録
 		hierarchy.gameObject_ = gimmicks_.back().get();
+		object = gimmicks_.back().get();
+
 		break;
 
 	}
+
+	// 各FieldObjectの、uniqueIDを記録
+	RecordUniqueId(object);
+
 }
 
 
@@ -338,6 +326,13 @@ void FieldExample::DeleteFunctionRegion()
 		if (DeleteObject(gimmicks_, hierarchy))return;
 
 	};
+
+}
+
+void FieldExample::RecordUniqueId(DemoFieldObject* object)
+{
+	// UniqueIDを取り出して記録
+	uniqueIdMap_[object->GetUniqueID()] = object;
 
 }
 

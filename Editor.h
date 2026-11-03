@@ -109,6 +109,28 @@ public:
 		kCreateMode, // ドラッグで一気に配置
 	};
 
+
+	/* ラッパパパァｯｯ!!!　 */
+
+
+	/// <summary>
+	/// 連携を宣言したレイヤー名一覧のリストを取得
+	/// </summary>
+	/// <returns></returns>
+	static std::vector<std::string>* GetAlignHierarchyLayerNames() {
+		return hierarchyPanel_.getAlignHierarchyLayerNames();
+	}
+
+	/// <summary>
+	/// 対象のレイヤー名からヒエラルキをレイヤーから一覧取得. ないとき/SetUseGameObjectLayer()がされていない場合は空
+	/// </summary>
+	/// <param name="layerName">レイヤー名</param>
+	/// <returns></returns>
+	static std::vector<Hierarchy<Model>*>& GetHierarchyModelLayer(std::string layerName) {
+		return hierarchyPanel_.GetHierarchyModelLayer(layerName);
+	}
+
+
 private:
 
 	// エディターモードか

@@ -125,9 +125,21 @@ void RenderTarget::BeginRender(bool clear, Vector4 clearColor, bool depth)
 
 	// オフスクリーンRTVに切り替え
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandleOffscreen = rtvHeap_->GetCPUDescriptorHandleForHeapStart();
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = DirectXCommon::GetInstance()->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
+	
 
-	commandList->OMSetRenderTargets(1, &rtvHandleOffscreen, FALSE, &dsvHandle);
+
+	/* もし深度DSVが設定されていれば・・ */
+	if (dsvCPUHandle.ptr) {
+		commandList->OMSetRenderTargets(1, &rtvHandleOffscreen, FALSE, &dsvCPUHandle);
+	}
+	else {
+
+		// ない場合共通のを使う
+		D3D12_CPU_DESCRIPTOR_HANDLE defaultDsvHandle = DirectXCommon::GetInstance()->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
+
+		commandList->OMSetRenderTargets(1, &rtvHandleOffscreen, FALSE, &defaultDsvHandle);
+	}
+	
 
 	if (clear) {
 
@@ -144,7 +156,7 @@ void RenderTarget::BeginRender(bool clear, Vector4 clearColor, bool depth)
 
 	// 画面の深さ初期化？ これがあるとfogが動かないので
 	if (depth) {
-		commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+		commandList->ClearDepthStencilView(dsvCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	}
 
 	/* 初期化時に設定された、指定の大きさのビューポートを設定する */

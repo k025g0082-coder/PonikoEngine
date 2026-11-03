@@ -345,9 +345,17 @@ void HierarchyPanel::DeleteHierarchyLayer(const std::string& layerName)
 		}
 	);
 
-	if (itt != hierarchyLayers_.end()) {
-		hierarchyLayers_.erase(itt);
+	auto ittt = std::find(
+		alignHierarchyLayerNames_.begin(),
+		alignHierarchyLayerNames_.end(),
+		layerName
+	);
+
+	// あったら名前一覧から削除
+	if (ittt != alignHierarchyLayerNames_.end()) {
+		alignHierarchyLayerNames_.erase(ittt);
 	}
+
 }
 
 
@@ -368,11 +376,13 @@ void HierarchyPanel::GameObjectAddCheck()
 		// もし、シーン側で登録しているレイヤーで生成された場合、シーン側のゲームオブジェクトも生成する
 		if (gameObjectAdd_ != nullptr) {
 
+			/* 
+				種類２：サブ種類０を、仮だけど錬成する
+			*/
 
-			// 種類０：サブ種類０を、仮だけど錬成する
 			gameObjectAdd_(
-				GetHierarchyModels().back().get()->gameObject_->GetId(),
-				GetHierarchyModels().back().get()->gameObject_->GetSubId(),
+				2,
+				0,
 				*GetHierarchyModels().back().get()
 			);
 
@@ -497,7 +507,12 @@ void HierarchyPanel::ChangeHierarchyModelView(bool b, int assetIndex)
 void HierarchyPanel::ChangeHierarchyModelLayer(bool b, std::string layerName)
 {
 	for (Hierarchy<Model>* model : hierarchyModelToLayer_[layerName]) {
+		
 		model->isView_ = b;
+
+		if (model->gameObject_) {
+			model->gameObject_->SetView(b);
+		}
 	}
 }
 

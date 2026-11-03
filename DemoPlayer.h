@@ -35,10 +35,6 @@ public:
 
     void ImGuiView() override;
 
-	void SetStageHierarchyList(std::vector<Hierarchy<Model>*>* list) {
-        stageHierarchyList_ = list; 
-    }
-
 private:
 
     Vector3 velocity_;// 移動量
@@ -52,7 +48,5 @@ private:
     // ジャンプ初速(上方向)
     static inline float kJumpAcceleration = 0.3f;
 
-    /* ステージ内の連携しているヒエラルキのリストのぽいんた */
-    std::vector<Hierarchy<Model>*>* stageHierarchyList_;
 };
 

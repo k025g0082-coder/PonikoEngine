@@ -133,7 +133,7 @@ public:
 	const std::vector<ModelResource>& GetHierarchyModelResources() const { return hierarchyModelResouces_; }
 
 	/// <summary>
-	/// ヒエラルキのレイヤー名の一覧取得. ないとき/SetUseGameObjectLayer()がされていない場合は空
+	/// 対象のレイヤー名からヒエラルキをレイヤーから一覧取得. ないとき/SetUseGameObjectLayer()がされていない場合は空
 	/// </summary>
 	/// <param name="layerName">レイヤー名</param>
 	/// <returns></returns>
@@ -150,18 +150,9 @@ public:
 
 		// みつかんなかった
 		if (it == hierarchyLayers_.end()) {
-			if (it->isAlignGameScene) {
-				// シーン側で使うレイヤーとして登録されてるのに、ヒエラルキパネル側で見つからなかった場合は、空のvectorを返す
-				static std::vector<Hierarchy<Model>*> empty;
-				return empty;
-			}
-			else {
-				// そもそもレイヤーが存在しない場合は、空のvectorを返す
-				static std::vector<Hierarchy<Model>*> empty;
-				return empty;
-			}
+			static std::vector<Hierarchy<Model>*> empty;
+			return empty;
 		}
-
 
 		auto itt = hierarchyModelToLayer_.find(layerName);
 
@@ -190,8 +181,23 @@ public:
 
 		// 有効化
 		if (it != hierarchyLayers_.end()) {
+
 			it->isAlignGameScene = true;
 		}
+
+		// ---
+		auto itt = std::find(
+			alignHierarchyLayerNames_.begin(),
+			alignHierarchyLayerNames_.end(),
+			layerName
+		);
+
+		// なかったら名前一覧に追加
+		if (itt == alignHierarchyLayerNames_.end()) {
+			alignHierarchyLayerNames_.push_back(layerName);
+		}
+
+
 	};
 
 	std::unordered_map<std::string, Model*>& GethierarchyModelResourceList() { return hierarchyModelResourceList_; }
@@ -221,8 +227,14 @@ public:
 	 　シーン側で、ヒエラルキの追加や削除を行う場合、ゲーム側で予め登録する関数のラムダ式を登録しておくと、ヒエラルキパネル側で自動的に呼ばれる
 	   これによりヒエラルキーリストが更新された際の、シーン側のゲームオブジェクト生成削除処理をエディタ側で発火できる！
 	*/
+
 	std::function<void (const uint32_t& type, const uint32_t& subType, Hierarchy<Model>& hierarchy)> gameObjectAdd_ = nullptr;
 	std::function<void (const Hierarchy<Model>& hierarchy)> gameObjectDelete_ = nullptr;
+
+	// ADD とかー＞　std::function createGameObject(type,subType)    
+	// けす　　ー＞　std::function deleteGameObject(ヒエラルキ
+	//  					ameOvjectにヒエラルキのあどれす持たせる　でそれを検索とかで一致した奴を削除
+
 
 	// ゲームオブジェクトの追加をチェックする
 	void GameObjectAddCheck();
@@ -247,6 +259,13 @@ public:
 	void ChangeHierarchyModelView(bool b, int index);
 	void ChangeHierarchyModelLayer(bool b, std::string layerName);
 
+	/// <summary>
+	/// 連携を宣言したレイヤー名一覧のリストを取得
+	/// </summary>
+	/// <returns></returns>
+	std::vector<std::string>* getAlignHierarchyLayerNames() { return &alignHierarchyLayerNames_; }
+
+
 	// いま選択されてるレイヤー名
 	std::string GetSelectedCurrentLayerName() { return selectedCurrentLayer_; }
 
@@ -265,7 +284,9 @@ private:
 	//* 上のオブジェクトをパス名で登録しておく
 	std::unordered_map<std::string, Model*> hierarchyModelResourceList_;
 
-	std::vector<HierarchyLayer> hierarchyLayers_;// レイヤー一覧
+	std::vector<HierarchyLayer> hierarchyLayers_;	      // レイヤー一覧
+	std::vector<std::string>    alignHierarchyLayerNames_;// 連携しているレイヤー名一覧
+
 	std::string selectedCurrentLayer_;// 現在選択されているレイヤー名
 
 

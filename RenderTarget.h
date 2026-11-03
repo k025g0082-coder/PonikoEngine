@@ -114,6 +114,9 @@ public:
 
 	const Vector2& GetViewOffset() const { return offset_; }
 
+	/* 深度用DSV　あればセット */
+	void SetDsvCPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE& handle) { dsvCPUHandle = handle; }
+
 
 	// RenderTargetの描画区域など
 	void ImGuiView();
@@ -141,6 +144,9 @@ private:
 
 	// GPUに知らせる用の、SRV（Viewportで使うよ！）
 	D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_{};
+
+	// 深度用のCPUハンドル
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvCPUHandle;
 
 	// 解像度
 	float resolution_ = 1.0f;

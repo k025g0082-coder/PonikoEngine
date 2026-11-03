@@ -101,17 +101,17 @@ public:
 
 	}
 
+	/// <summary>
+	/// ポストエフェクト用DSVテキスチャーの作成
+	/// </summary>
+	/// <param name="w">横</param>
+	/// <param name="h">縦</param>
+	/// <param name="resize">リサイズか</param>
+	void CreateOffscreenDSV(int w, int h, bool resize);
+
+
 	// オフスクリーンの大きさリサイズ
-	void ResizeOffscreen(uint32_t width, uint32_t height , Vector2 offset) {
-		
-		offscreenRenderTarget_.Resize(width, height, offset);
-	
-		bloomRenderTarget_.Resize(width , height, offset);
-		
-		for (RenderTarget& r : blurRenderTargets_) {
-			r.Resize(width, height, offset);
-		}
-	}
+	void ResizeOffscreen(uint32_t width, uint32_t height, Vector2 offset);
 
 	void SetViewOffset(Vector2 v) {
 		offscreenRenderTarget_.SetViewOffset(v);
@@ -190,17 +190,15 @@ private:
 	Microsoft::WRL::ComPtr <ID3D12Resource> fogParamResource = nullptr;
 
 
+	/* ポストエフェクト用のDSV */
+	D3D12_DEPTH_STENCIL_DESC offscreenDepthStencilDesc;
 
-	//// ポストエフェクト用のシーン描画のRenderTarget
-	//Microsoft::WRL::ComPtr <ID3D12Resource> offscreenRenderTarget = nullptr;
+	ComPtr<ID3D12Resource> offscreenDepthStencilResource;
+	ComPtr<ID3D12DescriptorHeap> offscreenDsvDescriptorHeap;
 
+	uint32_t offscreenDepthSRVIndex_;
+	D3D12_GPU_DESCRIPTOR_HANDLE offscreenDepthSRVHandleGPU;
 
-	//ID3D12DescriptorHeap* rtvHeapOffscreen = nullptr;  // オフスクリーン用RTV
-	//D3D12_CPU_DESCRIPTOR_HANDLE offscreenRTVHandle{};
-
-	//// SRV（ポストエフェクトで読むため）
-	//D3D12_CPU_DESCRIPTOR_HANDLE offscreenSRVHandleCPU{};
-	//D3D12_GPU_DESCRIPTOR_HANDLE offscreenSRVHandleGPU{};
 
 };
 

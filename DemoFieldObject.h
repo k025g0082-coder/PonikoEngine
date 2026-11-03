@@ -18,6 +18,7 @@ class DemoGimmick;
 /// フィールド上のオブジェクトとしての基底クラス
 /// </summary>
 /// 
+static uint32_t nextUniqueID_ = 1;
 
 class DemoFieldObject : public GameObject{
 public:
@@ -50,6 +51,28 @@ public:
         // JSONのアドレスを取得
         json_ = json;
 
+        // ユニークIDを識別
+        if (json_ != nullptr) {
+            if (json_->contains("uniqueID")) {
+                
+                // 存在すれば読込
+                uniqueID_ = (*json_)["uniqueID"].get<uint32_t>();
+
+                // カウンターの重複のために読み込んだIDより大きいIDに設定し続けておく
+                if (uniqueID_ >= nextUniqueID_) {
+                    nextUniqueID_ = uniqueID_ + 1;
+                }
+
+            }
+            else {
+
+                // エディタ等で新しく定義された場合
+                uniqueID_ = nextUniqueID_++;
+                (*json_)["uniqueID"] = uniqueID_;
+
+            }
+        }
+
     };
 
     virtual ~DemoFieldObject() = default;
@@ -58,7 +81,10 @@ public:
     virtual void Update() = 0;
     virtual void Draw() = 0;
 
-    
+    // 当たったか判定関数
+    static void Collision(DemoFieldObject* a, DemoFieldObject* b);
+   
+
     /// <summary>
     /// 衝突時のエントリーポイント。　ここでother->onCollisionTo.. 別途実装する
     /// </summary>
@@ -66,22 +92,16 @@ public:
     /// <param name="result">判定結果</param>
     virtual void onCollision(DemoFieldObject* other, CollisionResult result) = 0;
 
-
-    /* 判定 */
-
-    // 当たった
-    static void Collision(DemoFieldObject* a, DemoFieldObject* b);
-
-
     /*
         === 継承された型にあった判定の関数 ===
     */
     // 　ダブルディスパッチ（Visitorパターン） OOP設計　というらしい。　
     //   *このクラスを継承した子は、下の当たった相手の方のplayer,gimmickなどの関数を選んでそのクラスで実行できるので、という
-
     virtual void onCollisionToPlayer(DemoPlayer* player, CollisionResult result)           { /* プレイヤーに当たった時 */ };
     virtual void onCollisionToGimmick(DemoGimmick* gimmick, CollisionResult result)        { /* ギミックに当たった時. */ };
 
+    //
+    
     //virtual void onCollisionToFieldObject(DemoFieldObject* other)  { /* フィールドブロックに当たった時 */ };
 
     // GameObject) これももちろん
@@ -94,9 +114,11 @@ public:
     /* ImGuiウインドウ終了 */
     void EndImGui();
 
-
     // JSON更新
     void UpdateObjectTypeJson();
+
+
+    const uint32_t& GetUniqueID() const { return uniqueID_; }
 
     /* ギミック種類名を取得 */
     static const char* GetFieldObjectTypeName(Type type) {
@@ -109,6 +131,7 @@ protected:
     static const char* fieldObjectTypeName[(int)Type::count];
 
 
+
     // ブロックのように当たり判定の際押し戻すか
     bool isCollisionBlock_ = true;
 
@@ -119,8 +142,14 @@ protected:
     // 識別２．ギミックの種類など
     uint32_t subType_;
 
-    /* ヒエラルキーのJSONのアドレス。データ管理よう. */
+    // fieldObjectのインスタンス識別ID
+    uint32_t uniqueID_ = 0;           
+
+    /* 
+        ヒエラルキーのJSONのアドレス。データ管理よう。神.
+    */
     nlohmann::json* json_ = nullptr;
+
 
 private:
     bool showImGuiView = false;

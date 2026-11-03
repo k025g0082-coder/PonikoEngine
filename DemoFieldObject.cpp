@@ -31,18 +31,14 @@ void DemoFieldObject::Initialize()
 void DemoFieldObject::Update()
 {
 
-	model_->Update();
-
-	aabb_.UpdatePosition(worldTransform.translation_);
-
-	// SRTからviewMatrix生成して更新
-	worldTransform.UpdateMatrix();
+	GameObject::Update();
 
 }
 void DemoFieldObject::Draw()
 {
-	/* worldTransform基に描画 */
-	model_->Draw(worldTransform, *camera_);
+
+	GameObject::Draw();
+
 }
 
 void DemoFieldObject::Collision(DemoFieldObject* a, DemoFieldObject* b)
@@ -78,8 +74,19 @@ void DemoFieldObject::BeginImGui()
 		UpdateObjectTypeJson();
 	}
 
+	// サブ
+	int v2 = static_cast<int>(subType_);
+
+	if (ImGui::DragInt("subType_", &v2, 0,0)) {
+
+		subType_ = static_cast<uint32_t>(v2);
+
+		UpdateObjectTypeJson();
+	}
+
+
 	// タイプ名
-	ImGui::Text("Type_: %s", DemoFieldObject::GetFieldObjectTypeName(type_));
+	ImGui::Text("Type_:    %s", DemoFieldObject::GetFieldObjectTypeName(type_));
 
 	// 種類名
 	switch (type_) {
@@ -90,6 +97,9 @@ void DemoFieldObject::BeginImGui()
 		ImGui::Text("subType_: %s", DemoGimmick::GetGimmickTypeName(static_cast<DemoGimmick::GimmickType>(subType_)));
 		break;
 	}
+
+
+	ImGui::Text("UniqueID_: %d", uniqueID_);
 
 	ImGui::Separator();
 

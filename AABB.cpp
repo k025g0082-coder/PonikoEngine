@@ -20,9 +20,9 @@ void AABB::ImGuiView(bool viewMinMax) {
 		ImGui::DragFloat3("max   : ", &max.x, 0.1f);
 	}
 
-	ImGui::DragFloat("width ", &width_, 0.1f);
-	ImGui::DragFloat("height", &height_, 0.1f);
-	ImGui::DragFloat("depth ", &depth_, 0.1f);
+	ImGui::DragFloat("width ", &width_, 0.1f,0);
+	ImGui::DragFloat("height", &height_, 0.1f,0);
+	ImGui::DragFloat("depth ", &depth_, 0.1f,0);
 
 	ImGui::Separator();
 

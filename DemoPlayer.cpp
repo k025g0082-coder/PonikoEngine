@@ -2,6 +2,8 @@
 
 #include "DemoGimmick.h"
 
+#include "Editor.h"
+
 #include "Input.h"
 #include "Collision.h"
 
@@ -75,28 +77,33 @@ void DemoPlayer::Draw()
 
 void DemoPlayer::CollisionToAllBlock()
 {
-	/* ヒエラルキ内の、シーン内の連携された全てのとAABB */
-	for (auto& hierarchy : *stageHierarchyList_) {
 
-		if (hierarchy->gameObject_ == nullptr) continue;
+	auto* layerNames_ = Editor::GetAlignHierarchyLayerNames();
 
-		// Nullなら
-		auto type = hierarchy->gameObject_->GetId();
-		if (type == (uint32_t)DemoFieldObject::Type::Null) continue;
-		if (type == (uint32_t)DemoFieldObject::Type::kPlayer) continue;
+	/* レイヤー名一覧から取得 */
+for (std::string name : *layerNames_) {
 
+		/* ヒエラルキ内の、シーン内の連携された全てのとAABB */
+		for (auto& hierarchy : Editor::GetHierarchyModelLayer(name)) {
 
-		// FieldObjectのAABBを取得
-		const AABB& targetAABB = hierarchy->gameObject_->GetAABB();
+			if (hierarchy->gameObject_ == nullptr) continue;
 
-		// AABB同士の衝突判定と押し戻し処理
-		CollisionResult collisionResult = ResolveAABBCollision(aabb_, worldTransform.translation_, targetAABB);
+			// Nullなら
+				auto type = hierarchy->gameObject_->GetId();
+				if (type != (uint32_t)DemoFieldObject::Type::kBlock) continue;// ブロックじゃなければReturn
 
-		/* 結果を論理和 (OR) で積み重ねてく */
-		collisionResult_.isGrounded |= collisionResult.isGrounded;
-		collisionResult_.hitCeiling |= collisionResult.hitCeiling;
-		collisionResult_.hitWall |= collisionResult.hitWall;
+				// FieldObjectのAABBを取得
+					const AABB& targetAABB = hierarchy->gameObject_->GetAABB();
 
+			// AABB同士の衝突判定と押し戻し処理
+			CollisionResult collisionResult = ResolveAABBCollision(aabb_, worldTransform.translation_, targetAABB, true);
+
+			/* 結果を論理和 (OR) で積み重ねてく */
+			collisionResult_.isGrounded |= collisionResult.isGrounded;
+			collisionResult_.hitCeiling |= collisionResult.hitCeiling;
+			collisionResult_.hitWall |= collisionResult.hitWall;
+
+		}
 	}
 }
 

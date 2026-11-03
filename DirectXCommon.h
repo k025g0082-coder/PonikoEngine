@@ -118,6 +118,8 @@ private:
     void CreateFence();
     void InitializeDxc();
 
+   
+
     DirectXCommon() = default;
 
     ComPtr<IDXGIFactory7> dxgiFactory_;

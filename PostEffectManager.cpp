@@ -70,68 +70,6 @@ void PostEffectManager::Initialize() {
 		WinApp::GetInstance()->GetClientWidth(),
 		WinApp::GetInstance()->GetClientHeight());
 
-	// オフスクリーンRTV用ヒープ
-	//rtvHeapOffscreen = DirectXUtility::CreateDescriptorHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1, false);
-
-	//// オフスクリーン用テクスチャ作成
-	//D3D12_RESOURCE_DESC rtvDescOffscreen{};
-	//rtvDescOffscreen.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	//rtvDescOffscreen.Width = WinApp::GetInstance()->GetClientWidth();
-	//rtvDescOffscreen.Height = WinApp::GetInstance()->GetClientHeight();
-	//rtvDescOffscreen.DepthOrArraySize = 1;
-	//rtvDescOffscreen.MipLevels = 1;
-	//rtvDescOffscreen.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//rtvDescOffscreen.SampleDesc.Count = 1;
-	//rtvDescOffscreen.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-
-	//D3D12_HEAP_PROPERTIES heapProps{};
-	//heapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
-
-	//D3D12_CLEAR_VALUE clearValue{};
-	//clearValue.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//clearValue.Color[0] = 0.1f; clearValue.Color[1] = 0.25f; clearValue.Color[2] = 0.5f; clearValue.Color[3] = 1.0f;
-
-	//device_->CreateCommittedResource(
-	//	&heapProps, D3D12_HEAP_FLAG_NONE,
-	//	&rtvDescOffscreen, D3D12_RESOURCE_STATE_RENDER_TARGET,
-	//	&clearValue, IID_PPV_ARGS(&offscreenRenderTarget)
-	//);
-
-	// RTV作成
-	//D3D12_RENDER_TARGET_VIEW_DESC rtvDescOff{};
-	//rtvDescOff.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//rtvDescOff.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-	//device_->CreateRenderTargetView(offscreenRenderTarget.Get(), &rtvDescOff, rtvHeapOffscreen->GetCPUDescriptorHandleForHeapStart());
-
-
-	//UINT index = DirectXCommon::GetInstance()->GetAllocateSrv();
-
-	//UINT descriptorSize =
-	//	DirectXCommon::GetInstance()
-	//		->GetDevice()
-	//		->GetDescriptorHandleIncrementSize(
-	//			D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-	//offscreenSRVHandleCPU =
-	//	DirectXUtility::GetCPUDescriptorHandle(
-	//		DirectXCommon::GetInstance()->GetSrvHeap().Get(),
-	//		descriptorSize,
-	//		index);
-
-	//offscreenSRVHandleGPU =
-	//	DirectXUtility::GetGPUDescriptorHandle(
-	//		DirectXCommon::GetInstance()->GetSrvHeap().Get(),
-	//		descriptorSize,
-	//		index);
-
-	//D3D12_SHADER_RESOURCE_VIEW_DESC srvDescOff{};
-	//srvDescOff.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-	//srvDescOff.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	//srvDescOff.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	//srvDescOff.Texture2D.MipLevels = 1;
-	//device_->CreateShaderResourceView(offscreenRenderTarget.Get(), &srvDescOff, offscreenSRVHandleCPU);
-
-
 	//*  BloomのRenderTarget初期化  *//
 
 	/* 解像度は２分の一。bloom合成時に元に戻す */
@@ -199,10 +137,15 @@ void PostEffectManager::Initialize() {
 	/* blur初期化 */
 	InitializeBlur();
 	
-	//OutputDebugStringA(std::format(
-	//	"offscreenSRVHandleGPU.ptr = 0x{:X}\n",
-	//	offscreenSRVHandleGPU.ptr
-	//).c_str());
+	/* オフスクリーン専用DSV作成 */
+	CreateOffscreenDSV(
+		WinApp::GetInstance()->GetClientWidth(),
+		WinApp::GetInstance()->GetClientHeight(),
+		false);
+
+	auto a = offscreenDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	offscreenRenderTarget_.SetDsvCPUHandle(a);
+
 }
 
 // ポストエフェクト受付開始
@@ -233,7 +176,7 @@ void PostEffectManager::BeginScene() {
 		// 深度バッファ用を元に戻す
 		D3D12_RESOURCE_BARRIER depthBarrier{};
 		depthBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		depthBarrier.Transition.pResource = DirectXCommon::GetInstance()->GetDepthStencilResource().Get();
+		depthBarrier.Transition.pResource = offscreenDepthStencilResource.Get();
 		depthBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		depthBarrier.Transition.StateAfter =D3D12_RESOURCE_STATE_DEPTH_WRITE; 
 		depthBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -280,7 +223,7 @@ void PostEffectManager::ApplyScene() {
 	// 深度バッファを読める状態に
 	D3D12_RESOURCE_BARRIER depthBarrier{};
 	depthBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	depthBarrier.Transition.pResource = DirectXCommon::GetInstance()->GetDepthStencilResource().Get();
+	depthBarrier.Transition.pResource = offscreenDepthStencilResource.Get();
 	depthBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 	depthBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 	depthBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
@@ -297,21 +240,24 @@ void PostEffectManager::ApplyScene() {
 		　    　backBufferを描画先にして、blurと既存のポストエフェクト効果を掛け合わせたのを描画
 
 		*/
+		if (bloomModelPropaties_.size() > 0) {
 
-		// 0.5)* 解像度を2/1に ( なんかバグるのでやめ20261103  多分viewPort関連
-		//bloomRenderTarget_.ChangeViewResolution(kBloomResolution_);
+			// 0.5)* 解像度を2/1に ( なんかバグるのでやめ20261103  多分viewPort関連
+			//bloomRenderTarget_.ChangeViewResolution(kBloomResolution_);
 
-		// 1) 明るいところを摘出
-		DrawBloomExtract();
+			// 1) 明るいところを摘出
+			DrawBloomExtract();
 
-		// 2) 明るいところをぼかす
-		DrawBloomBlur();
-		DrawDownSample();
-		DrawUpSample();
+			// 2) 明るいところをぼかす
+			DrawBloomBlur();
+			DrawDownSample();
+			DrawUpSample();
 
+			// 2.5)* 解像度を戻の解像度に戻す
+			//bloomRenderTarget_.ChangeViewResolution(1.0f);
+		}
 
-		// 2.5)* 解像度を戻の解像度に戻す
-		//bloomRenderTarget_.ChangeViewResolution(1.0f);
+		
 
 
 		// 3) 最終的なBuckBufferへの描画。
@@ -384,6 +330,103 @@ void PostEffectManager::ImGuiView(bool& show) {
 }
 
 
+	/*=== ポストエフェクト用、DSV(Depth)の作成 === */
+void PostEffectManager::CreateOffscreenDSV(int w,int h, bool resize) {
+
+	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
+
+	//.. リサイズの場合
+	if (resize) {
+		
+		offscreenDepthStencilResource.Reset();// 古いDepthStencilResourceを解放
+
+	}
+
+	// DepthStencilTextureを作る
+	offscreenDepthStencilResource = DirectXUtility::CreateDepthStencilTexture(
+		device_,
+		w,
+		h
+	);
+
+	//DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないので、ShaderVisibleはfalse
+	if (!resize)
+		offscreenDsvDescriptorHeap = DirectXUtility::CreateDescriptorHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+
+	// DSVの設定
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//Format。基本的にはResourceに合わせる
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D; // 2dTexture
+
+	//DSVHeapの先頭にDSVをつくる
+	device_->CreateDepthStencilView(offscreenDepthStencilResource.Get(), &dsvDesc, offscreenDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
+	//DepthStencilStateの設定
+
+	//Depthの機能を有効化する
+	offscreenDepthStencilDesc.DepthEnable = true;
+	//書き込みします
+	offscreenDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	//比較関数はLessEqual。つまり、近ければ描画される
+	offscreenDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	/*
+		20261102 深度を参照するためのSRVを作る
+	*/
+
+	// 設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Shader4ComponentMapping =
+		D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	if (!resize) {
+		// SRVの一番後ろ取得
+		offscreenDepthSRVIndex_ =
+			DirectXCommon::GetInstance()->GetAllocateSrv();
+	}
+
+	// CPU用のSRVハンドル生成
+	auto srvHandle = DirectXCommon::GetSRVHandle(offscreenDepthSRVIndex_);
+
+
+	// DepthSRVのGPUハンドルを取得
+	offscreenDepthSRVHandleGPU =
+			DirectXCommon::GetInstance()->GetSrvHeap()
+				->GetGPUDescriptorHandleForHeapStart();
+
+		UINT incrementSize =
+			device_->GetDescriptorHandleIncrementSize(
+				D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV
+			);
+
+		offscreenDepthSRVHandleGPU.ptr += incrementSize * offscreenDepthSRVIndex_;
+
+	// SRV作成
+	DirectXCommon::GetInstance()->GetDevice().Get()->CreateShaderResourceView(
+		offscreenDepthStencilResource.Get(),
+		&srvDesc,
+		srvHandle
+	);
+}
+
+void PostEffectManager::ResizeOffscreen(uint32_t width, uint32_t height, Vector2 offset) {
+
+	offscreenRenderTarget_.Resize(width, height, offset);
+
+	bloomRenderTarget_.Resize(width, height, offset);
+
+	for (RenderTarget& r : blurRenderTargets_) {
+		r.Resize(width, height, offset);
+	}
+
+	/* DSVも作りなおす */
+	CreateOffscreenDSV((int)width, (int)height, true);
+}
+
+
 void PostEffectManager::DrawBloomExtract()
 {
 	
@@ -394,7 +437,7 @@ void PostEffectManager::DrawBloomExtract()
 
 
 	//
-	bloomRenderTarget_.BeginRender();
+	bloomRenderTarget_.BeginRender(true,{0,0,0,0},false);
 
 	{
 		ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
@@ -505,14 +548,13 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 	/* 描画先はBackBuffer */
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle =
 		DirectXCommon::GetInstance()->GetBackBufferRTV(backBufferIndex);
-	// ★修正: DSV（深度バッファ）のハンドルを取得する
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle =
-		DirectXCommon::GetInstance()->GetDsvHeap()->GetCPUDescriptorHandleForHeapStart();
 
+	//
 	commandList->OMSetRenderTargets(
 		1,
 		&rtvHandle,
-		FALSE,&dsvHandle);
+		FALSE,nullptr);
+
 
 	// バックバッファ全体を黒でクリア（リサイズ時に余白部分が残らないようにする）
 	float clearColor[] = { 0.10f, 0.10f, 0.10f, 1.0f };
@@ -549,7 +591,7 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 	/* 合成 */
 	commandList->SetGraphicsRootDescriptorTable(0, offscreenRenderTarget_.GetSRVHandleGPU());
 	commandList->SetGraphicsRootDescriptorTable(1, blurRenderTargets_.back().GetSRVHandleGPU());
-	commandList->SetGraphicsRootDescriptorTable(5, DirectXCommon::GetDepthSRVHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(5, offscreenDepthSRVHandleGPU);
 
 
 	//// ポストエフェクト　パラメータ値

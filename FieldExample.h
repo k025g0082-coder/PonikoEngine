@@ -29,6 +29,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <unordered_map>
 
 class FieldExample :
     public Scene
@@ -41,6 +42,8 @@ public:
 
     void FieldLoad();
 
+    void FieldLayerLoad(std::string layerName);
+
 
     /* 　オブジェクトの生成　 */
     void CreateGameObject(const uint32_t& type, const uint32_t& subType, Hierarchy<Model>& hierarchy);
@@ -49,6 +52,17 @@ public:
     /* エディタで生成などされた際のラムダ式関数の登録 */
     void CreateFunctionRegion();
     void DeleteFunctionRegion();
+
+
+    // 対応したFieldObjectをゲット
+    static DemoFieldObject* GetUniqueIdToFieldObject(uint32_t uniqueId) {
+
+        auto it = uniqueIdMap_.find(uniqueId);
+        if (it != uniqueIdMap_.end()) {
+            return it->second; // 見つかった場合は生ポインタを返す(.get())
+        }
+        return nullptr; // 見つからなかった場合は nullptr
+    }
 
 private:
 
@@ -62,15 +76,45 @@ private:
     std::unique_ptr <DemoPlayer> player_;
 
 
+    // 生成時、ユニークＩＤを記録
+    void RecordUniqueId(DemoFieldObject* object);
+
+    // フィールドのUniqueIDとそのインスタンスの対応表
+    static std::unordered_map<uint32_t, DemoFieldObject*> uniqueIdMap_;
+
+    
+
+
     // ブロック等のリスト
     std::vector<std::unique_ptr<DemoFieldObject>> blocks_;
 
     // ギミックのリスト
     std::vector<std::unique_ptr<DemoGimmick>> gimmicks_;
 
+    // リスト削除用のテンプレート
+    //template <typename T>
+    //bool DeleteObject(
+    //    std::vector<std::unique_ptr<T>>& objects,
+    //    const Hierarchy<Model>& hierarchy) {
 
-    // 上ののさくじょ用のテンプレート
-    template <typename T>
+    //    auto it = std::find_if(
+    //        objects.begin(),
+    //        objects.end(),
+    //        [&hierarchy](const std::unique_ptr<T>& obj) {
+    //            return obj->GetHierarchy() == &hierarchy;
+    //        }
+    //    );
+
+    //    if (it == objects.end()) {
+    //        return false;
+    //    }
+
+    //    objects.erase(it);
+    //    return true;
+    //}
+    
+    // リスト削除用           
+    template<typename T>
     bool DeleteObject(
         std::vector<std::unique_ptr<T>>& objects,
         const Hierarchy<Model>& hierarchy) {
@@ -87,7 +131,17 @@ private:
             return false;
         }
 
+        
+        /* 記録用マップからも削除 */
+        DemoFieldObject* fieldObject = it->get();
+
+        auto itt = uniqueIdMap_.find(fieldObject->GetUniqueID());
+        if (itt != uniqueIdMap_.end())// 存在すれば？
+            uniqueIdMap_.erase(itt);
+
+
         objects.erase(it);
+        
         return true;
     }
 };

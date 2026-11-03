@@ -52,6 +52,12 @@ public:
     const uint32_t& GetId() const { return objectID_; }
     const uint32_t& GetSubId() const { return objectSubID_; }
 
+    void SetView(bool b) { isView_ = b; }
+
+
+    // ヒエラルキーモデルからゲームデータに変換
+    static GameObjectData ConvertGameData(Hierarchy<Model>& hierarchy);
+
 
     /* === 派生クラスで引き継げる機能 === */
 
@@ -62,7 +68,7 @@ public:
     // 接触があったオブジェクトのOnCollisionを呼ぶ
     static void Collision(GameObject* a, GameObject* b);
 
-
+ 
 protected:
 
     Model* model_ = nullptr;
@@ -76,6 +82,9 @@ protected:
     uint32_t objectSubID_ = 0;           // オブジェクトのサブ識別ID？
 
     AABB aabb_;
+
+    /* レイヤー表示非表示切り替え */
+    bool isView_ = true;
 
 private:
 
