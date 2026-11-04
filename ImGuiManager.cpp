@@ -49,10 +49,20 @@ void ImGuiManager::Initialize() {
 // 受付開始
 void ImGuiManager::Begin() {
 #ifdef USE_IMGUI
+
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+
+
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
+	/* ドッキング有効化 */
+	ImGui::DockSpaceOverViewport(
+		0,
+		ImGui::GetMainViewport()
+	);
 
 #endif
 };

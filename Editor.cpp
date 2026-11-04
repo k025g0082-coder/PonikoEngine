@@ -85,6 +85,13 @@ void Editor::Initialize() {
 
 }
 
+static bool showProperty = false;
+static bool showHierarchy = false;
+static bool showLighting = false;
+static bool showPostEffect = false;
+static bool showEffectTimeline = false;
+static bool showAssets = false;
+
 /* エディター更新 */
 void Editor::Update()
 {
@@ -135,303 +142,39 @@ void Editor::Update()
 
 #ifdef USE_IMGUI
 
-	static bool showProperty = false;
-	static bool showHierarchy = false;
-	static bool showLighting = false;
-	static bool showPostEffect = false;
-	static bool showEffectTimeline = false;
-	static bool showAssets = false;
+	ImGui::Begin("Game View");
 
-	/* メニュー表示 */
-	if (ImGui::BeginMainMenuBar()) {
+	mainViewPos = ImGui::GetCursorScreenPos();   // ウィンドウ内の描画開始位置（左上のスクリーン座標）
+	mainViewSize = ImGui::GetContentRegionAvail(); // 利用可能な幅と高さ
 
-		if (ImGui::BeginMenu("Window")) {
+	// オフスクリーンのレンダーターゲットテクスチャをImGui上で表示する
+	ImGui::Image(
+		(ImTextureID)PostEffectManager::GetInstance()->GetOffscreenSRVHandleGPU().ptr,
+		mainViewSize
+	);
 
-			ImGui::MenuItem("Property", nullptr, &showProperty);
-			ImGui::MenuItem("Hierarchy", nullptr, &showHierarchy);
-			ImGui::MenuItem("Assets", nullptr, &showAssets);
-			ImGui::MenuItem("EffectTimeline", nullptr, &showEffectTimeline);
-			ImGui::MenuItem("LightingManager", nullptr, &showLighting);
-			ImGui::MenuItem("PostEffectManager", nullptr, &showPostEffect);
+	// 通知のビョーガ
+	notification_.Draw();
 
-			ImGui::EndMenu();
-		}
 
-		// Window の横に配置
-		ImGui::SameLine(60.0f);
-		ImGui::Text("DebugMode:");
-		ImGui::SameLine();
 
-		/* エディターモード起動 */
-		if (ToggleSwitch("Editor ", &isEditorMode_)) {
 
-			// 有効化
-			if (isEditorMode_) {
-				
-				////* ドロップ有効に
-				WinApp::GetInstance()->SetDragEnabled(true);
 
-				// 押された瞬間,メインカメラからviewをコピー
-				camera_.SetCamera(*Scene::GetSceneCamera());
+	ImGui::End();
 
-				DebugLine::SetCamera(&camera_);//
+	/*
+		上部バー
+	*/
+	TopMenuVar();
 
-				/* ゲームのビューサイズをエディター用に設定 */
-				Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kEditorMode);
-				
-			}
 
-			// 無効化
-			else {
-				////* ドロップ無効に
-				WinApp::GetInstance()->SetDragEnabled(false);
+	/*
+		プロパティ
+	*/
+	PropartyTab();
 
-				DebugLine::SetCamera(Scene::GetSceneCamera());//
-
-				/* ゲームのビューサイズをRelease用に設定 */
-				Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kFullScreenMode);
-			}
-
-			//	 ON/OFF切り替え
-			Scene::GetSceneCamera()->SetEditorMode(isEditorMode_);
-
-		}
-
-		ImGui::SameLine(200.0f);
-
-		if (isEditorMode_) {
-
-			if (ImGui::Button("Translate")) {
-				operation_ = ImGuizmo::TRANSLATE;
-			}
-
-			ImGui::SameLine();
-
-			if (ImGui::Button("Rotate")) {
-				operation_ = ImGuizmo::ROTATE;
-			}
-
-			ImGui::SameLine();
-
-			if (ImGui::Button("Scale")) {
-				operation_ = ImGuizmo::SCALE;
-			}
-
-			if (selectedModelWorldTransform_) {
-
-				// もしヒエラルキ移動ボタン押されたら
-				if (operation_ == ImGuizmo::TRANSLATE) {
-					ImGui::SameLine();
-					ImGui::Text("Translate:");
-					ImGui::SameLine();
-					ImGui::SetNextItemWidth(200.0f);
-					ImGui::DragFloat3(" ", &selectedModelWorldTransform_->translation_.x, 0.1f);
-				}
-				// もしヒエラルキ回転ボタン押されたら
-				if (operation_ == ImGuizmo::ROTATE) {
-					ImGui::SameLine();
-					ImGui::Text("Rotate:");
-					ImGui::SameLine();
-					ImGui::SetNextItemWidth(200.0f);
-					ImGui::DragFloat3(" ", &selectedModelWorldTransform_->rotation_.x, 0.1f);
-
-					ImGui::SameLine();
-					if (ImGui::Button("x")) {
-						selectedModelWorldTransform_->rotation_.x -= std::numbers::pi_v<float> / 4.0f;
-						selectedModelWorldTransform_->UpdateMatrix();
-					}
-					ImGui::SameLine();
-					if (ImGui::Button("y")) {
-						selectedModelWorldTransform_->rotation_.y -= std::numbers::pi_v<float> / 4.0f;
-						selectedModelWorldTransform_->UpdateMatrix();
-					}
-					ImGui::SameLine();
-					if (ImGui::Button("z")) {
-						selectedModelWorldTransform_->rotation_.z -= std::numbers::pi_v<float> / 4.0f;
-						selectedModelWorldTransform_->UpdateMatrix();
-					}
-				}
-					// もしヒエラルキ拡大ボタン押されたら
-					if (operation_ == ImGuizmo::SCALE) {
-						ImGui::SameLine();
-						ImGui::Text("Scale:");
-						ImGui::SameLine();
-						ImGui::SetNextItemWidth(200.0f);
-						ImGui::DragFloat3(" ", &selectedModelWorldTransform_->scale_.x, 0.1f);
-					}
-					
-
-				
-			}
-
-			/* ずいぶん右に配置 */
-			ImGui::SameLine(ImGui::GetWindowWidth() - 200.0f);
-
-			if (ImGui::Button("ResetCamera")) {
-				camera_.GetWorldTransform().translation_ = tmpCameraPosition_;
-				camera_.GetWorldTransform().rotation_ = tmpCameraRotation_;
-				camera_.UpdateMatrix();
-			}
-
-			/* ずいぶん右に配置 */
-			ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
-
-			if (ImGui::Button("AABB")) {
-				isDrawAABB_ = !isDrawAABB_;
-			}
-			ImGui::Text(isDrawAABB_ ? " true" : " false");
-		}
-		
-
-		ImGui::EndMainMenuBar();
-	}
-	
-	// プロパティー
-	if (showProperty) {
-
-		/* 色 */
-		ImGui::PushStyleColor(
-			ImGuiCol_WindowBg,
-			ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
-		);
-
-		ImGui::Begin("Property",&showProperty);
-
-		/* 今開いてるシーン名 */
-		ImGui::Text("SceneName: %s", currentSceneName_.c_str());
-		ImGui::SameLine();
-
-
-		ImGui::InputText(" ", &currentSceneJsonPath);
-
-
-		// ロードボタン
-		if (ImGui::Button("Load")) {
-			hierarchyPanel_.HierarchyLoad(currentSceneJsonPath);
-		}
-
-		ImGui::SameLine();
-
-		// セーブボタン
-		if (ImGui::Button("Save")) {
-			hierarchyPanel_.HierarchySave(currentSceneJsonPath);
-		}
-
-
-		// ワールド座標系に
-		Matrix4x4 viewMatrix = Inverse(camera_.GetViewMatrix());
-
-		/* カメラから位置と回転を入手 */
-		Vector3 cameraPosition;
-		cameraPosition.x = viewMatrix.m[3][0];
-		cameraPosition.y = viewMatrix.m[3][1];
-		cameraPosition.z = viewMatrix.m[3][2];
-
-		Vector3 cameraRotation = ExtractRotation(viewMatrix, { 1.0f,1.0f,1.0f });
-
-		ImGui::Separator();
-
-		ImGui::Text("Camera WorldTransrate x:%3.2f y:%3.2f z:%3.2f ", cameraPosition.x, cameraPosition.y, cameraPosition.z);
-		ImGui::Text("Camera WorldRotation x:%3.2f y:%3.2f z:%3.2f ", cameraRotation.x, cameraRotation.y, cameraRotation.z);
-
-		// カメラ位置コピー（小癪な・・）
-		if (ImGui::Button("Copy")) {
-
-			// 少数第3位までフォーマット
-			std::string tpos = "Vector3{" +
-				std::format("{:.3f}", cameraPosition.x) + "f," +
-				std::format("{:.3f}", cameraPosition.y) + "f," +
-				std::format("{:.3f}", cameraPosition.z) + "f}";
-
-			std::string trot = "Vector3{" +
-				std::format("{:.3f}", cameraRotation.x) + "f," +
-				std::format("{:.3f}", cameraRotation.y) + "f," +
-				std::format("{:.3f}", cameraRotation.z) + "f}";
-
-			std::string txt = tpos + "\n" + trot;
-
-			ImGui::SetClipboardText(txt.c_str());
-		}
-
-
-		ImGui::Separator();
-		ImGui::SeparatorText("SceneSize");
-
-		static float size = 1.0f; // 初期値を設定
-		static int off[2] = { 1, 1 };
-		static float w = 0.0f;
-		static float h = 0.0f;
-
-		// 1. ImGui によるサイズ変更処理
-		Vector2 of = Game::GetInstance()->GetGameScreenOffset();
-
-		if (ImGui::SliderFloat("Size", &size, 0.1f, 1.0f)) {
-			// Lerp で新しい幅と高さを計算
-			w = Lerp(
-				1.0f,
-				static_cast<float>(WinApp::GetInstance()->GetClientWidth()),
-				size
-			);
-
-			h = Lerp(
-				1.0f,
-				static_cast<float>(WinApp::GetInstance()->GetClientHeight()),
-				size
-			);
-
-			// 画面サイズを変更
-			Game::GetInstance()->ResizeGameScreen(static_cast<int32_t>(w), static_cast<int32_t>(h), of);
-		}
-		
-		ImGui::Text("Width: %d", (int)w);
-		ImGui::Text("Height: %d", (int)h);
-
-		if (ImGui::SliderFloat2("Offset", &of.x, 1, 1000)) {
-			
-			Game::GetInstance()->SetGameScreenOffset(of);
-
-		}
-
-		ImGui::Separator();
-
-		// === グリッド設定
-		ImGui::SeparatorText("Grid");
-
-		// スナップ状態なら
-		if (grid.isSnap_) {
-
-			// 選択中は色変える
-			if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
-				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
-
-			bool b = ImGui::Button("MapCreateMode");
-
-			if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
-				ImGui::PopStyleColor();
-
-
-			if (b) {
-				// 切り替え
-				currentModelHierarchyMode_ == ModelHierarchyMode::kSelectMode ?
-					currentModelHierarchyMode_ = ModelHierarchyMode::kCreateMode :
-					currentModelHierarchyMode_ = ModelHierarchyMode::kSelectMode;
-
-			}
-		}
-
-		grid.ImGuiView();
-
-		ImGui::ColorEdit4("tuuti backcol", &notification_.backCol_.x);
-		ImGui::ColorEdit4("tuuti textcol", &notification_.textCol_.x);
-
-		ImGui::End();
-
-		// 色の
-		ImGui::PopStyleColor();
-	}
 
 	/* 各パネルはEditormodeがONの場合表示させる */
-
 	if (isEditorMode_) {
 
 		// ヒエラルキーパネル
@@ -458,437 +201,69 @@ void Editor::Update()
 		if (showPostEffect) {
 			PostEffectManager::GetInstance()->ImGuiView(showPostEffect);
 		}
-	}
 
-#endif
+	}
 
 	//*
 	if (!isEditorMode_) return;
 
-#ifdef USE_IMGUI
+	/*
+		キーボード操作
+	*/
+	OperationKeyBoard();
 
-	if (selectedModelWorldTransform_) {
 
-		/* 回転キーなどショトカ */
-		if (Input::GetInstance()->TriggerKey(DIK_T)) {
-			operation_ = ImGuizmo::TRANSLATE;
-		}
-		if (Input::GetInstance()->TriggerKey(DIK_R)) {
-			operation_ = ImGuizmo::ROTATE;
-		}
-		if (Input::GetInstance()->TriggerKey(DIK_S)) {
-			operation_ = ImGuizmo::SCALE;
-		}
+	mouse = ImGui::GetMousePos();
 
-		// ペースト
-		if (Input::GetInstance()->TriggerKey(DIK_V)) {
+	// ウインドウの｛０，０｝から見たローカル座標
+	maiViewLocalMouseX = mouse.x - mainViewPos.x;
+	mainViewLocalMouseY = mouse.y - mainViewPos.y;
 
-			selectedModelWorldTransform_ = hierarchyPanel_.PasteHierarchyModel();
-
-			// コピー処理が成功したタイミングで呼ぶ
-			notification_.PopText("Model Pasted!!",ImVec2(170.0f,30.0f));
-		}
-
-	}
-
-	// 通知のビョーガ
-	notification_.Draw();
-
-	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-	ImVec2 mouse = ImGui::GetMousePos();
-
-	float width = (float)Game::GetInstance()->GetGameScreenWidth();
-	float height = (float)Game::GetInstance()->GetGameScreenHeight();
-
-	Vector2 offset = Game::GetInstance()->GetGameScreenOffset();
+	mainViewWidth = mainViewSize.x;
+	mainViewHeight = mainViewSize.y;
 
 	bool insideScene =
-		mouse.x >= offset.x &&
-		mouse.x <= width &&
-		mouse.y >= offset.y &&
-		mouse.y <= height;
+		mouse.x >= mainViewPos.x &&
+		mouse.x <= (mainViewPos.x + mainViewSize.x) &&
+		mouse.y >= mainViewPos.y &&
+		mouse.y <= (mainViewPos.y + mainViewSize.y);
 
-	/* ImGuiの枠にかさならない */
+	// ImGuiの枠にかさならない
 	if (insideScene &&
-		!ImGui::GetIO().WantCaptureMouse &&
 		!ImGuizmo::IsUsing()) {
 
-		/* 左クリックを押された際の処理 */
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-
-
-			// スクリーンの大きさとスクリーン座標からから、レイ生成
-			Camera::Ray ray = camera_.ScreenPointToRay(Vector2{ mouse.x,mouse.y }, width, height);
-
-			float distance = 0.0f;
-
-			hierarchyPanel_.SetSelectedHierarchyModelIndex(std::nullopt);
-			selectedModelWorldTransform_ = nullptr;
-
-			//* モード別の処理　*//
-			switch (currentModelHierarchyMode_) {
-
-
-			//* 選択モード
-			case ModelHierarchyMode::kSelectMode:
-
-				// すべてのモデル
-				for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
-				{
-
-					// もし選択中のモデルアセットがあった場合
-					if (!assetsPanel_.selectedHierarchyResource_.pathId_.empty()) {
-
-						/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
-						if (hierarchyPanel_.GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
-							continue;
-					}
-
-					// 非表示なら選択もスキップ
-					if (!hierarchyPanel_.GetHierarchyModels().at(i)->isView_)
-						continue;
-
-					// ヒエラルキからワールドのポインタ取得！
-					WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
-
-					// だいたいの中心
-					//float size = 3.0f;
-
-					//AABB aabb;
-					//aabb.min = Vector3{ -size, -size, -size } + world->translation_;
-					//aabb.max = Vector3{ size,  size,  size } + world->translation_;
-
-					// そのヒエラルキが持つAABB？
-					AABB* aabb = &hierarchyPanel_.GetHierarchyModels().at(i)->aabb_;
-
-					// モデルのAABBと判定
-					if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
-
-						hierarchyPanel_.SetSelectedHierarchyModelIndex(i);
-						selectedModelWorldTransform_ = world;
-
-						// ビューポートにモデルを追加
-						//effectViewport_.AddModel(hierarchyModels_.at(i).object);
-
-						// 選択中のモデルのview更新
-						SelectModelUpdateView();
-
-						break;
-					}
-				}
-				break;
-
-				//* 一気に配置モード
-			case ModelHierarchyMode::kCreateMode:
-
-				if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
-
-				// グリッドのplaneと判定
-				std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
-
-				// 当たったら
-				if (hit.has_value()) {
-
-					// マスの大きさで割ったのを設定する
-					Vector3 subPosition = Grid::snapGrid(hit.value());
-
-					bool break_ = false;
-
-					//* もしすでに同じ座標にあるヒエラルキーがある場合、配置せず引き返す（重複する配置の対策）
-					for (const std::unique_ptr<Hierarchy<Model>>& model : hierarchyPanel_.GetHierarchyModels()) {
-
-						/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
-						if (model->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
-							continue;
-
-						if (
-							subPosition.x == model->transform_.get()->translation_.x &&
-							subPosition.y == model->transform_.get()->translation_.y &&
-							subPosition.z == model->transform_.get()->translation_.z) {
-							break_ = true;
-							break;
-						}
-					}
-
-					if (break_) break;// breakの場合ここで
-
-					///* モデルのヒエラルキ追加 */
-					Hierarchy<Model> h;
-
-					h.type_ = HierarchyType::kModel; // タイプ
-					h.id_ = assetsPanel_.selectedHierarchyResource_.pathId_;
-					h.name_ = assetsPanel_.selectedHierarchyResource_.name_;
-
-					h.object = assetsPanel_.selectedHierarchyResource_.model_;
-
-					// WorldTransform座標決定
-					h.transform_ = std::make_unique<WorldTransform>();
-
-					h.transform_->Initialize();
-					h.transform_->translation_ = { subPosition.x,subPosition.y,subPosition.z };
-
-					WorldTransform* world = static_cast<WorldTransform*>(h.transform_.get());
-					
-					h.isView_ = true;
-
-					// 位置更新
-					world->UpdateMatrix();
-
-					/* ヒエラルキ-モデル - 追加 */
-					hierarchyPanel_.AddHierarchyModel(hierarchyPanel_.GetSelectedCurrentLayerName(), h);
-
-
-					/* シーン側のGameObjectに干渉してたら一緒に増やす */
-					hierarchyPanel_.GameObjectAddCheck();
-				}
-
-				break;
-
-			}
-		}
-
-
-		/* ImGuiの枠にかさならないよう右クリックを押された際の処理 */
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-
-
-			// スクリーンの大きさとスクリーン座標からから、レイ生成
-			Camera::Ray ray = camera_.ScreenPointToRay(Vector2{ mouse.x,mouse.y }, width, height);
-
-			float distance = 0.0f;
-
-
-			//* モード別の処理　*//
-			switch (currentModelHierarchyMode_) {
-
-			//* 選択モード
-			case ModelHierarchyMode::kSelectMode:
-
-				if (!selectedModelWorldTransform_) break;
-
-				hierarchyPanel_.DeleteHierarchyModel();
-
-
-				
-				selectedModelWorldTransform_ = nullptr;
-
-				break;
-			//* 配置モード
-			case ModelHierarchyMode::kCreateMode:
-
-				if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
-
-				// グリッドのplaneと判定
-				std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
-
-				// 当たったら
-				if (hit.has_value()) {
-
-					// すべてのモデル
-					for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
-					{
-					
-						/* 選択中以外の、アセット以外のIDのヒエラルキーは選択しない */
-						if (hierarchyPanel_.GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
-							continue;
-
-						// ヒエラルキからワールドのポインタ取得！
-						WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
-
-						// だいたいの中心
-						//float size = 3.0f;
-
-						//AABB aabb;
-						//aabb.min = Vector3{ -size, -size, -size } + world->translation_;
-						//aabb.max = Vector3{ size,  size,  size } + world->translation_;
-
-						// そのヒエラルキが持つAABB？
-						AABB* aabb = &hierarchyPanel_.GetHierarchyModels().at(i)->aabb_;
-
-						// モデルのAABBと判定
-						if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
-
-							/* 当たったヒエラルキモデルを削除 */
-							hierarchyPanel_.DeleteHierarchyModel(i);
-
-							break;
-						}
-					}
-				}
-
-				break;
-
-			}
-
-		}
+		/*
+			左、右クリ操作
+		*/
+		OperationLeftClick();
+		OperationRightClick();
 
 	}
-
-
 
 	// ImGuizmoのフレーム開始
 	ImGuizmo::BeginFrame();
-
-	
-
 	ImGuizmo::Enable(true);
 
 	// 3. カメラの投影モードを設定（透視投影の場合は false）
 	ImGuizmo::SetOrthographic(false);
 
-	float w = static_cast<float>(WinApp::GetInstance()->GetClientWidth());
-	float h = static_cast<float>(WinApp::GetInstance()->GetClientHeight());
-
-	ImGuizmo::SetRect(offset.x, offset.y, width, height);
-
+	ImGuizmo::SetRect(mainViewPos.x, mainViewPos.y,mainViewSize.x, mainViewSize.y);
 
 	//ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
 
-	/*カメラ視点の回転 */
-
-	/* ホイール操作 */
-	if (Input::GetInstance()->GetMouseWheel() != 0) {
-		if (selectedModelWorldTransform_) {
-			
-			selectedModelLength_ += static_cast<float>(Input::GetInstance()->GetMouseWheel()) * 0.075f;
-
-			// 近いの遠いの防止
-			selectedModelLength_ = std::clamp(selectedModelLength_, 10.0f, 100.0f);
-			
-			//  また例の処理
-			//
-
-			Vector3 targetPos = selectedModelWorldTransform_->translation_;
-
-			// 1) View行列からカメラのワールド行列を復元
-			Matrix4x4 cameraWorld = Inverse(camera_.GetViewMatrix());
-
-			// 2) ワールド座標を取り出す
-			Vector3 camPos = {
-				cameraWorld.m[3][0],
-				cameraWorld.m[3][1],
-				cameraWorld.m[3][2]
-			};
-
-			// 4) thetaとphi
-			Vector3 offset = camPos - targetPos;
-			selectedSphereTheta_ = std::asin(offset.y / selectedModelLength_);
-			selectedSpherePhi_ = std::atan2(offset.z, offset.x);
-
-			// 5) view更新！！
-			camera_.SphericalCameraUpdate(
-				targetPos,
-				selectedModelLength_,
-				selectedSphereTheta_,
-				selectedSpherePhi_
-			);
-
-
-		}
-	}
-
-	/* ギズモによるカメラ回転 */
-	if (selectedModelWorldTransform_) {
-
-		// 現在のカメラView行列を取得
-		Matrix4x4 viewMatrix = camera_.GetViewMatrix();
-
-		ImGuizmo::ViewManipulate(
-			&viewMatrix.m[0][0],
-			selectedModelLength_,
-			ImVec2(ImGui::GetIO().DisplaySize.x - 256.0f, 0.0f),
-			ImVec2(256.0f, 256.0f),
-			0x10101010
-		);
-
-		// 変更されたView行列をそのまま反映
-		camera_.SetViewMatrix(viewMatrix);
-	}
-	else {
-
-		/* 非選択時は固定値８．０ｆ */
-		Matrix4x4 viewMatrix = camera_.GetViewMatrix();
-
-		ImGuizmo::ViewManipulate(
-			&viewMatrix.m[0][0],
-			8.0f,
-			ImVec2(ImGui::GetIO().DisplaySize.x - 256.0f, 0.0f),
-			ImVec2(256.0f, 256.0f),
-			0x10101010
-		);
-
-		// 変更されたView行列をそのまま反映
-		camera_.SetViewMatrix(viewMatrix);
-	}
+	/*
+		カメラ操作などによる選択の変形など
+	*/
+	UpdateSelectedHierarchyTransform();
 
 
 	if (isEditorMode_) {
-
-		// 選択中のモデルがあるときだけ操作
-		if (selectedModelWorldTransform_) {
-
-			// 転置なしでそのまま渡す
-			Matrix4x4 viewMat = camera_.GetViewMatrix();
-			Matrix4x4 projMat = camera_.GetProjectionMatrix();
-			Matrix4x4 worldMat = selectedModelWorldTransform_->matWorld_;
-
-			bool isManipulated = ImGuizmo::Manipulate(
-				&viewMat.m[0][0],
-				&projMat.m[0][0],
-				operation_,
-				ImGuizmo::WORLD,
-				&worldMat.m[0][0]
-			);
-
-			/* もしスナップ中なら */
-			if (grid.isSnap_) {
-
-				Vector3 translation = {
-					worldMat.m[3][0],
-					worldMat.m[3][1],
-					worldMat.m[3][2],
-				};
-
-				selectedModelWorldTransform_->translation_ = Grid::snapGrid(translation);
-
-			}
-
-			if (isManipulated || ImGuizmo::IsUsing()) {
-
-				switch (operation_) {
-				case ImGuizmo::TRANSLATE:
-					selectedModelWorldTransform_->translation_.x = worldMat.m[3][0];
-					selectedModelWorldTransform_->translation_.y = worldMat.m[3][1];
-					selectedModelWorldTransform_->translation_.z = worldMat.m[3][2];
-					break;
-				case ImGuizmo::ROTATE:
-					selectedModelWorldTransform_->rotation_ = ExtractRotation(worldMat, selectedModelWorldTransform_->scale_);
-					break;
-				case ImGuizmo::SCALE:
-					selectedModelWorldTransform_->scale_ = ExtractScale(worldMat);
-					break;
-
-				}
-
-				/* 同期させる */
-				if (hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_ != nullptr) {
-
-					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().translation_ = selectedModelWorldTransform_->translation_;
-					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().rotation_ = selectedModelWorldTransform_->rotation_;
-					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().scale_ = selectedModelWorldTransform_->scale_;
-
-				}
-
-				selectedModelWorldTransform_->UpdateMatrix();
-			}
-		}
-		else {
-
+		if (selectedModelWorldTransform_ == nullptr) {
 			// 非選択時はキーで移動
 			FreeMoveCamera();
 		}
 	}
+
 #endif
 
 	// もしデバッグモードであれば、デバッグカメラのviewをメインカメラにコピー
@@ -995,6 +370,550 @@ void Editor::Draw() {
 
 }
 
+void Editor::TopMenuVar()
+{
+
+	/* メニュー表示 */
+	if (ImGui::BeginMainMenuBar()) {
+
+		if (ImGui::BeginMenu("Window")) {
+
+			ImGui::MenuItem("Property", nullptr, &showProperty);
+			ImGui::MenuItem("Hierarchy", nullptr, &showHierarchy);
+			ImGui::MenuItem("Assets", nullptr, &showAssets);
+			ImGui::MenuItem("EffectTimeline", nullptr, &showEffectTimeline);
+			ImGui::MenuItem("LightingManager", nullptr, &showLighting);
+			ImGui::MenuItem("PostEffectManager", nullptr, &showPostEffect);
+
+			ImGui::EndMenu();
+		}
+
+		// Window の横に配置
+		ImGui::SameLine(60.0f);
+		ImGui::Text("DebugMode:");
+		ImGui::SameLine();
+
+		/* エディターモード起動 */
+		if (ToggleSwitch("Editor ", &isEditorMode_)) {
+
+			// 有効化
+			if (isEditorMode_) {
+
+				////* ドロップ有効に
+				WinApp::GetInstance()->SetDragEnabled(true);
+
+				// 押された瞬間,メインカメラからviewをコピー
+				camera_.SetCamera(*Scene::GetSceneCamera());
+
+				DebugLine::SetCamera(&camera_);//
+
+				/* ゲームのビューサイズをエディター用に設定 */
+				Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kEditorMode);
+
+			}
+
+			// 無効化
+			else {
+				////* ドロップ無効に
+				WinApp::GetInstance()->SetDragEnabled(false);
+
+				DebugLine::SetCamera(Scene::GetSceneCamera());//
+
+				/* ゲームのビューサイズをRelease用に設定 */
+				Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kFullScreenMode);
+			}
+
+			//	 ON/OFF切り替え
+			Scene::GetSceneCamera()->SetEditorMode(isEditorMode_);
+
+		}
+
+		ImGui::SameLine(200.0f);
+
+		if (isEditorMode_) {
+
+			if (ImGui::Button("Translate")) {
+				operation_ = ImGuizmo::TRANSLATE;
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Rotate")) {
+				operation_ = ImGuizmo::ROTATE;
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Scale")) {
+				operation_ = ImGuizmo::SCALE;
+			}
+
+			if (selectedModelWorldTransform_) {
+
+				// もしヒエラルキ移動ボタン押されたら
+				if (operation_ == ImGuizmo::TRANSLATE) {
+					ImGui::SameLine();
+					ImGui::Text("Translate:");
+					ImGui::SameLine();
+					ImGui::SetNextItemWidth(200.0f);
+					ImGui::DragFloat3(" ", &selectedModelWorldTransform_->translation_.x, 0.1f);
+				}
+				// もしヒエラルキ回転ボタン押されたら
+				if (operation_ == ImGuizmo::ROTATE) {
+					ImGui::SameLine();
+					ImGui::Text("Rotate:");
+					ImGui::SameLine();
+					ImGui::SetNextItemWidth(200.0f);
+					ImGui::DragFloat3(" ", &selectedModelWorldTransform_->rotation_.x, 0.1f);
+
+					ImGui::SameLine();
+					if (ImGui::Button("x")) {
+						selectedModelWorldTransform_->rotation_.x -= std::numbers::pi_v<float> / 4.0f;
+						selectedModelWorldTransform_->UpdateMatrix();
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("y")) {
+						selectedModelWorldTransform_->rotation_.y -= std::numbers::pi_v<float> / 4.0f;
+						selectedModelWorldTransform_->UpdateMatrix();
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("z")) {
+						selectedModelWorldTransform_->rotation_.z -= std::numbers::pi_v<float> / 4.0f;
+						selectedModelWorldTransform_->UpdateMatrix();
+					}
+				}
+				// もしヒエラルキ拡大ボタン押されたら
+				if (operation_ == ImGuizmo::SCALE) {
+					ImGui::SameLine();
+					ImGui::Text("Scale:");
+					ImGui::SameLine();
+					ImGui::SetNextItemWidth(200.0f);
+					ImGui::DragFloat3(" ", &selectedModelWorldTransform_->scale_.x, 0.1f);
+				}
+
+
+
+			}
+
+			/* ずいぶん右に配置 */
+			ImGui::SameLine(ImGui::GetWindowWidth() - 200.0f);
+
+			if (ImGui::Button("ResetCamera")) {
+				camera_.GetWorldTransform().translation_ = tmpCameraPosition_;
+				camera_.GetWorldTransform().rotation_ = tmpCameraRotation_;
+				camera_.UpdateMatrix();
+			}
+
+			/* ずいぶん右に配置 */
+			ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
+
+			if (ImGui::Button("AABB")) {
+				isDrawAABB_ = !isDrawAABB_;
+			}
+			ImGui::Text(isDrawAABB_ ? " true" : " false");
+		}
+
+
+		ImGui::EndMainMenuBar();
+	}
+
+}
+
+void Editor::UpdateHierarchySelection()
+{
+
+
+}
+
+void Editor::OperationKeyBoard()
+{
+	if (selectedModelWorldTransform_) {
+
+		/* 回転キーなどショトカ */
+		if (Input::GetInstance()->TriggerKey(DIK_T)) {
+			operation_ = ImGuizmo::TRANSLATE;
+		}
+		if (Input::GetInstance()->TriggerKey(DIK_R)) {
+			operation_ = ImGuizmo::ROTATE;
+		}
+		if (Input::GetInstance()->TriggerKey(DIK_S)) {
+			operation_ = ImGuizmo::SCALE;
+		}
+
+		// ペースト
+		if (Input::GetInstance()->TriggerKey(DIK_V)) {
+
+			selectedModelWorldTransform_ = hierarchyPanel_.PasteHierarchyModel();
+
+			// コピー処理が成功したタイミングで呼ぶ
+			notification_.PopText("Model Pasted!!", ImVec2(170.0f, 30.0f));
+		}
+
+	}
+}
+
+void Editor::OperationLeftClick()
+{
+	/* 左クリックを押された際の処理 */
+	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+
+		// スクリーンの大きさとスクリーン座標からから、レイ生成
+		Camera::Ray ray = camera_.ScreenPointToRay(Vector2{ maiViewLocalMouseX,mainViewLocalMouseY }, mainViewWidth, mainViewHeight);
+
+		float distance = 0.0f;
+
+		hierarchyPanel_.SetSelectedHierarchyModelIndex(std::nullopt);
+		selectedModelWorldTransform_ = nullptr;
+
+		//* モード別の処理　*//
+		switch (currentModelHierarchyMode_) {
+
+
+		//* 選択モード
+		case ModelHierarchyMode::kSelectMode:
+
+			// すべてのモデル
+			for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
+			{
+
+				// もし選択中のモデルアセットがあった場合
+				if (!assetsPanel_.selectedHierarchyResource_.pathId_.empty()) {
+
+					/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
+					if (hierarchyPanel_.GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+						continue;
+				}
+
+				// 非表示なら選択もスキップ
+				if (!hierarchyPanel_.GetHierarchyModels().at(i)->isView_)
+					continue;
+
+				// ヒエラルキからワールドのポインタ取得！
+				WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
+
+
+				// そのヒエラルキが持つAABB？
+				AABB* aabb = &hierarchyPanel_.GetHierarchyModels().at(i)->aabb_;
+
+				// モデルのAABBと判定
+				if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
+
+					hierarchyPanel_.SetSelectedHierarchyModelIndex(i);
+					selectedModelWorldTransform_ = world;
+
+					// ビューポートにモデルを追加
+					//effectViewport_.AddModel(hierarchyModels_.at(i).object);
+
+					// 選択中のモデルのview更新
+					SelectModelUpdateView();
+
+					break;
+				}
+			}
+			break;
+
+			//* 一気に配置モード
+		case ModelHierarchyMode::kCreateMode:
+
+			if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
+
+			// グリッドのplaneと判定
+			std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
+
+			// 当たったら
+			if (hit.has_value()) {
+
+				// マスの大きさで割ったのを設定する
+				Vector3 subPosition = Grid::snapGrid(hit.value());
+
+				bool break_ = false;
+
+				//* もしすでに同じ座標にあるヒエラルキーがある場合、配置せず引き返す（重複する配置の対策）
+				for (const std::unique_ptr<Hierarchy<Model>>& model : hierarchyPanel_.GetHierarchyModels()) {
+
+					/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
+					if (model->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+						continue;
+
+					if (
+						subPosition.x == model->transform_.get()->translation_.x &&
+						subPosition.y == model->transform_.get()->translation_.y &&
+						subPosition.z == model->transform_.get()->translation_.z) {
+						break_ = true;
+						break;
+					}
+				}
+
+				if (break_) break;// breakの場合ここで
+
+				///* モデルのヒエラルキ追加 */
+				Hierarchy<Model> h;
+
+				h.type_ = HierarchyType::kModel; // タイプ
+				h.id_ = assetsPanel_.selectedHierarchyResource_.pathId_;
+				h.name_ = assetsPanel_.selectedHierarchyResource_.name_;
+
+				h.object = assetsPanel_.selectedHierarchyResource_.model_;
+
+				// WorldTransform座標決定
+				h.transform_ = std::make_unique<WorldTransform>();
+
+				h.transform_->Initialize();
+				h.transform_->translation_ = { subPosition.x,subPosition.y,subPosition.z };
+
+				WorldTransform* world = static_cast<WorldTransform*>(h.transform_.get());
+					
+				h.isView_ = true;
+
+				// 位置更新
+				world->UpdateMatrix();
+
+				/* ヒエラルキ-モデル - 追加 */
+				hierarchyPanel_.AddHierarchyModel(hierarchyPanel_.GetSelectedCurrentLayerName(), h);
+
+
+				/* シーン側のGameObjectに干渉してたら一緒に増やす */
+				hierarchyPanel_.GameObjectAddCheck();
+			}
+
+			break;
+
+		}
+	}
+}
+
+void Editor::OperationRightClick()
+{
+/* ImGuiの枠にかさならないよう右クリックを押された際の処理 */
+	if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+
+
+		// スクリーンの大きさとスクリーン座標からから、レイ生成
+		Camera::Ray ray = camera_.ScreenPointToRay(Vector2{ mouse.x,mouse.y }, mainViewWidth, mainViewHeight);
+
+		float distance = 0.0f;
+
+
+		//* モード別の処理　*//
+		switch (currentModelHierarchyMode_) {
+
+		//* 選択モード
+		case ModelHierarchyMode::kSelectMode:
+
+			if (!selectedModelWorldTransform_) break;
+
+			hierarchyPanel_.DeleteHierarchyModel();
+
+
+				
+			selectedModelWorldTransform_ = nullptr;
+
+			break;
+		//* 配置モード
+		case ModelHierarchyMode::kCreateMode:
+
+			if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
+
+			// グリッドのplaneと判定
+			std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
+
+			// 当たったら
+			if (hit.has_value()) {
+
+				// すべてのモデル
+				for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
+				{
+					
+					/* 選択中以外の、アセット以外のIDのヒエラルキーは選択しない */
+					if (hierarchyPanel_.GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+						continue;
+
+					// ヒエラルキからワールドのポインタ取得！
+					WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
+
+					// だいたいの中心
+					//float size = 3.0f;
+
+					//AABB aabb;
+					//aabb.min = Vector3{ -size, -size, -size } + world->translation_;
+					//aabb.max = Vector3{ size,  size,  size } + world->translation_;
+
+					// そのヒエラルキが持つAABB？
+					AABB* aabb = &hierarchyPanel_.GetHierarchyModels().at(i)->aabb_;
+
+					// モデルのAABBと判定
+					if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
+
+						/* 当たったヒエラルキモデルを削除 */
+						hierarchyPanel_.DeleteHierarchyModel(i);
+
+						break;
+					}
+				}
+			}
+
+			break;
+
+		}
+
+	}
+}
+
+void Editor::OperationWheel()
+{
+	/* ホイール操作 */
+	if (Input::GetInstance()->GetMouseWheel() != 0) {
+
+		if (selectedModelWorldTransform_) {
+
+			selectedModelLength_ += static_cast<float>(Input::GetInstance()->GetMouseWheel()) * 0.075f;
+
+			// 近いの遠いの防止
+			selectedModelLength_ = std::clamp(selectedModelLength_, 10.0f, 100.0f);
+
+			//  また例の処理
+			//
+
+			Vector3 targetPos = selectedModelWorldTransform_->translation_;
+
+			// 1) View行列からカメラのワールド行列を復元
+			Matrix4x4 cameraWorld = Inverse(camera_.GetViewMatrix());
+
+			// 2) ワールド座標を取り出す
+			Vector3 camPos = {
+				cameraWorld.m[3][0],
+				cameraWorld.m[3][1],
+				cameraWorld.m[3][2]
+			};
+
+			// 4) thetaとphi
+			Vector3 offset = camPos - targetPos;
+			selectedSphereTheta_ = std::asin(offset.y / selectedModelLength_);
+			selectedSpherePhi_ = std::atan2(offset.z, offset.x);
+
+			// 5) view更新！！
+			camera_.SphericalCameraUpdate(
+				targetPos,
+				selectedModelLength_,
+				selectedSphereTheta_,
+				selectedSpherePhi_
+			);
+		}
+	}
+}
+
+void Editor::UpdateSelectedHierarchyTransform()
+{
+
+	/*カメラ視点の回転 */
+	ImVec2 manipulateSize = ImVec2(128.0f, 128.0f);
+	ImVec2 manipulatePos = ImVec2(mainViewPos.x + mainViewSize.x - manipulateSize.x - 10.0f, mainViewPos.y + 10.0f);
+
+
+	/* ギズモによるカメラ回転 */
+	if (selectedModelWorldTransform_) {
+
+		// 現在のカメラView行列を取得
+		Matrix4x4 viewMatrix = camera_.GetViewMatrix();
+
+
+		ImGuizmo::ViewManipulate(
+			&viewMatrix.m[0][0],
+			selectedModelLength_,
+			manipulatePos,
+			manipulateSize,
+			0x10101010
+		);
+
+		// 変更されたView行列をそのまま反映
+		camera_.SetViewMatrix(viewMatrix);
+	}
+	else {
+
+		/* 非選択時は固定値８．０ｆ */
+		Matrix4x4 viewMatrix = camera_.GetViewMatrix();
+
+		ImGuizmo::ViewManipulate(
+			&viewMatrix.m[0][0],
+			8.0f,
+			manipulatePos,
+			manipulateSize,
+			0x10101010
+		);
+
+		// 変更されたView行列をそのまま反映
+		camera_.SetViewMatrix(viewMatrix);
+	}
+
+
+
+	if (isEditorMode_) {
+
+		// 選択中のモデルがあるときだけ操作
+		if (selectedModelWorldTransform_) {
+
+			// 転置なしでそのまま渡す
+			Matrix4x4 viewMat = camera_.GetViewMatrix();
+			Matrix4x4 projMat = camera_.GetProjectionMatrix();
+			Matrix4x4 worldMat = selectedModelWorldTransform_->matWorld_;
+
+			bool isManipulated = ImGuizmo::Manipulate(
+				&viewMat.m[0][0],
+				&projMat.m[0][0],
+				operation_,
+				ImGuizmo::WORLD,
+				&worldMat.m[0][0]
+			);
+
+			/* もしスナップ中なら */
+			if (grid.isSnap_) {
+
+				Vector3 translation = {
+					worldMat.m[3][0],
+					worldMat.m[3][1],
+					worldMat.m[3][2],
+				};
+
+				selectedModelWorldTransform_->translation_ = Grid::snapGrid(translation);
+
+			}
+
+			if (isManipulated || ImGuizmo::IsUsing()) {
+
+				switch (operation_) {
+				case ImGuizmo::TRANSLATE:
+					selectedModelWorldTransform_->translation_.x = worldMat.m[3][0];
+					selectedModelWorldTransform_->translation_.y = worldMat.m[3][1];
+					selectedModelWorldTransform_->translation_.z = worldMat.m[3][2];
+					break;
+				case ImGuizmo::ROTATE:
+					selectedModelWorldTransform_->rotation_ = ExtractRotation(worldMat, selectedModelWorldTransform_->scale_);
+					break;
+				case ImGuizmo::SCALE:
+					selectedModelWorldTransform_->scale_ = ExtractScale(worldMat);
+					break;
+
+				}
+
+				/* 同期させる */
+				if (hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_ != nullptr) {
+
+					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().translation_ = selectedModelWorldTransform_->translation_;
+					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().rotation_ = selectedModelWorldTransform_->rotation_;
+					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().scale_ = selectedModelWorldTransform_->scale_;
+
+				}
+
+				selectedModelWorldTransform_->UpdateMatrix();
+			}
+		}
+		
+	}
+}
+
+
+
+
 void Editor::LoadScene(std::string path)
 {
 
@@ -1082,6 +1001,153 @@ void Editor::FreeMoveCamera()
 	// ワールド行列からView行列に戻す
 	camera_.SetViewMatrix(Inverse(cameraWorld));
 
+}
+
+void Editor::PropartyTab()
+{
+	// プロパティー
+	if (showProperty) {
+
+		/* 色 */
+		ImGui::PushStyleColor(
+			ImGuiCol_WindowBg,
+			ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
+		);
+
+		ImGui::Begin("Property", &showProperty);
+
+		/* 今開いてるシーン名 */
+		ImGui::Text("SceneName: %s", currentSceneName_.c_str());
+		ImGui::SameLine();
+
+
+		ImGui::InputText(" ", &currentSceneJsonPath);
+
+
+		// ロードボタン
+		if (ImGui::Button("Load")) {
+			hierarchyPanel_.HierarchyLoad(currentSceneJsonPath);
+		}
+
+		ImGui::SameLine();
+
+		// セーブボタン
+		if (ImGui::Button("Save")) {
+			hierarchyPanel_.HierarchySave(currentSceneJsonPath);
+		}
+
+
+		// ワールド座標系に
+		Matrix4x4 viewMatrix = Inverse(camera_.GetViewMatrix());
+
+		/* カメラから位置と回転を入手 */
+		Vector3 cameraPosition;
+		cameraPosition.x = viewMatrix.m[3][0];
+		cameraPosition.y = viewMatrix.m[3][1];
+		cameraPosition.z = viewMatrix.m[3][2];
+
+		Vector3 cameraRotation = ExtractRotation(viewMatrix, { 1.0f,1.0f,1.0f });
+
+		ImGui::Separator();
+
+		ImGui::Text("Camera WorldTransrate x:%3.2f y:%3.2f z:%3.2f ", cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		ImGui::Text("Camera WorldRotation x:%3.2f y:%3.2f z:%3.2f ", cameraRotation.x, cameraRotation.y, cameraRotation.z);
+
+		// カメラ位置コピー（小癪な・・）
+		if (ImGui::Button("Copy")) {
+
+			// 少数第3位までフォーマット
+			std::string tpos = "Vector3{" +
+				std::format("{:.3f}", cameraPosition.x) + "f," +
+				std::format("{:.3f}", cameraPosition.y) + "f," +
+				std::format("{:.3f}", cameraPosition.z) + "f}";
+
+			std::string trot = "Vector3{" +
+				std::format("{:.3f}", cameraRotation.x) + "f," +
+				std::format("{:.3f}", cameraRotation.y) + "f," +
+				std::format("{:.3f}", cameraRotation.z) + "f}";
+
+			std::string txt = tpos + "\n" + trot;
+
+			ImGui::SetClipboardText(txt.c_str());
+		}
+
+
+		ImGui::Separator();
+		ImGui::SeparatorText("SceneSize");
+
+		static float size = 1.0f; // 初期値を設定
+		static int off[2] = { 1, 1 };
+		static float w = 0.0f;
+		static float h = 0.0f;
+
+		// 1. ImGui によるサイズ変更処理
+		Vector2 of = Game::GetInstance()->GetGameScreenOffset();
+
+		if (ImGui::SliderFloat("Size", &size, 0.1f, 1.0f)) {
+			// Lerp で新しい幅と高さを計算
+			w = Lerp(
+				1.0f,
+				static_cast<float>(WinApp::GetInstance()->GetClientWidth()),
+				size
+			);
+
+			h = Lerp(
+				1.0f,
+				static_cast<float>(WinApp::GetInstance()->GetClientHeight()),
+				size
+			);
+
+			// 画面サイズを変更
+			Game::GetInstance()->ResizeGameScreen(static_cast<int32_t>(w), static_cast<int32_t>(h), of);
+		}
+
+		ImGui::Text("Width: %d", (int)w);
+		ImGui::Text("Height: %d", (int)h);
+
+		if (ImGui::SliderFloat2("Offset", &of.x, 1, 1000)) {
+
+			Game::GetInstance()->SetGameScreenOffset(of);
+
+		}
+
+		ImGui::Separator();
+
+		// === グリッド設定
+		ImGui::SeparatorText("Grid");
+
+		// スナップ状態なら
+		if (grid.isSnap_) {
+
+			// 選択中は色変える
+			if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
+				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
+
+			bool b = ImGui::Button("MapCreateMode");
+
+			if (currentModelHierarchyMode_ == ModelHierarchyMode::kCreateMode)
+				ImGui::PopStyleColor();
+
+
+			if (b) {
+				// 切り替え
+				currentModelHierarchyMode_ == ModelHierarchyMode::kSelectMode ?
+					currentModelHierarchyMode_ = ModelHierarchyMode::kCreateMode :
+					currentModelHierarchyMode_ = ModelHierarchyMode::kSelectMode;
+
+			}
+		}
+
+		grid.ImGuiView();
+
+		ImGui::ColorEdit4("tuuti backcol", &notification_.backCol_.x);
+		ImGui::ColorEdit4("tuuti textcol", &notification_.textCol_.x);
+
+		ImGui::End();
+
+		// 色の
+		ImGui::PopStyleColor();
+	}
 }
 
 void Editor::LightingManagerTab(bool& show) {

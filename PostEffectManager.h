@@ -88,6 +88,14 @@ public:
 	BloomParam& GetBloomParam() { return *bloomParamData_; }
 	FogParam& GetFogParam() { return *fogParamData_; }
 
+	D3D12_GPU_DESCRIPTOR_HANDLE GetOffscreenDepthSRVHandleGPU() {
+		return offscreenDepthSRVHandleGPU;
+	}
+
+	/* SRV */
+	D3D12_GPU_DESCRIPTOR_HANDLE GetOffscreenSRVHandleGPU() {
+		return offscreenRenderTarget_.GetSRVHandleGPU();
+	};
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandleOffscreen() {
 		return offscreenRenderTarget_.GetRtvHandle();

@@ -72,8 +72,6 @@ Vector3 rotation_;
 	// マスの大きさで割ったのを返す
 	static Vector3 snapGrid(Vector3 v);
 
-	
-
 };
 
 
@@ -91,11 +89,14 @@ public:
 	// エンジン内のSceneの描画
 	void Draw();
 
-	/// <summary>
-	/// 特定のシーンのヒエラルキー情報を読み込む
-	/// </summary>
-	/// <param name="path">シーンの相対パス。例 resources/scene/OOXX.json</param>
-	static void LoadScene(std::string path);
+	/* モデル選択モード */
+	enum class ModelHierarchyMode {
+		kSelectMode, // 個別にサイズを調整できる
+		kCreateMode, // ドラッグで一気に配置
+	};
+
+
+
 
 	HierarchyPanel& GetHierarchyPanel() { return hierarchyPanel_; }
 
@@ -103,11 +104,11 @@ public:
 	void SaveIniFile();
 	void LoadIniFile();
 
-	/* モデル選択モード */
-	enum class ModelHierarchyMode {
-		kSelectMode, // 個別にサイズを調整できる
-		kCreateMode, // ドラッグで一気に配置
-	};
+	/// <summary>
+	/// 特定のシーンのヒエラルキー情報を読み込む
+	/// </summary>
+	/// <param name="path">シーンの相対パス。例 resources/scene/OOXX.json</param>
+	static void LoadScene(std::string path);
 
 
 	/* ラッパパパァｯｯ!!!　 */
@@ -133,74 +134,120 @@ public:
 
 private:
 
+
+	ModelHierarchyMode currentModelHierarchyMode_ = ModelHierarchyMode::kSelectMode;
+
+	//* モデルSRT操作モード
+	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
+
+
 	// エディターモードか
 	bool isEditorMode_ = false;
 
 	// 判定用のAABB描画するか
 	bool isDrawAABB_ = true;
+	
+
+	// マウス座標
+	ImVec2 mouse;
+
+	// ウィンドウ内の描画開始位置（左上のスクリーン座標）
+	ImVec2 mainViewPos;  
+
+	// 利用可能な幅と高さ
+	ImVec2 mainViewSize;  
+
+	// ウインドウの｛０，０｝から見たローカル座標
+	float maiViewLocalMouseX;
+	float mainViewLocalMouseY;
+
+	// ウインドウ大きさ
+	float mainViewWidth;
+	float mainViewHeight;
 
 
-	// デバッグ用
+	/*
+		デバッグカメラ
+	*/
 	Camera camera_;
+
+	float camDistance = 8.0f;
 
 	Vector3 tmpCameraPosition_ = {0,0,-50.0f};
 	Vector3 tmpCameraRotation_;
 
+	// 非選択時のカメラ移動
+	void FreeMoveCamera();
 
-	/* 各パネル */
+
+	/* 
+		各パネル
+	*/
 	static HierarchyPanel hierarchyPanel_;
 	AssetsPanel assetsPanel_;
 
 	static Grid grid;
 	
-	//* モデルSRT操作モード
-	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
 
-	// 今読み込んでるシーンのJsonパス
-	static std::string currentSceneJsonPath;
-	std::string currentSceneName_;
+	/*
+		メインとなる各操作
+	*/
+
+	// ウインドウ上部
+	void TopMenuVar();
+
+	// スクリーン上からレイを飛ばしてヒエラルキを選択
+	void UpdateHierarchySelection();
+
+	// 各操作
+	void OperationKeyBoard();
+	void OperationLeftClick();
+	void OperationRightClick();
+	void OperationWheel();
+
+	// 選択しているヒエラルキのWorldTransformを変形
+	void UpdateSelectedHierarchyTransform();
 
 
-	ModelHierarchyMode currentModelHierarchyMode_ = ModelHierarchyMode::kSelectMode;
+	/*
+		仮のタブたち
+	*/
 
+	//
+	void PropartyTab();
+
+	//　ライティング用
+	void LightingManagerTab(bool& show);
+
+	//　アセット一覧用
+	void AssetsTab(bool& show);
+
+	// エフェクトエディタ
+	void EffectEditorTimeLine();
+	EffectSequencer effectSequencer_;
+
+
+	// 選択中のモデルのView更新
+	void SelectModelUpdateView();
 
 	// 選択中のモデルのワールドトランスフォーム
 	WorldTransform* selectedModelWorldTransform_ = nullptr;
 
-
-
-
-	// との距離
+	// 距離
 	float selectedModelLength_ = 0.0f;
 
 	// との球面座標系の色イロ
 	float selectedSphereTheta_;
 	float selectedSpherePhi_;
 
-	// 選択中のモデルのView更新
-	void SelectModelUpdateView();
 
-	// 非選択時のカメラ移動
-	void FreeMoveCamera();
-
-
-	//　ライティング用
-	void LightingManagerTab(bool& show);
-
-
-	//　アセット一覧用
-	void AssetsTab(bool& show);
-
-
-	float camDistance = 8.0f;
-	void EffectEditorTimeLine();
-
-
-	/* タイムラインの */
-	EffectSequencer effectSequencer_;
-
+	// 今読み込んでるシーンのJsonパス
+	static std::string currentSceneJsonPath;
+	std::string currentSceneName_;
+	
 	Vector3 ExtractScale(const Matrix4x4& m);
 	Vector3 ExtractRotation(const Matrix4x4& m, const Vector3& scale);
+
 
 	// カワイイスイッチ
 	bool ToggleSwitch(const char* label, bool* value);
