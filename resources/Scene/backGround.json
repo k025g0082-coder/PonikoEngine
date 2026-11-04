@@ -304,20 +304,6 @@
                 },
                 "type": 0
             }
-        ],
-        "ModelResources": [
-            {
-                "isView": true,
-                "pathId": "resources/Models/suzanne.obj"
-            },
-            {
-                "isView": true,
-                "pathId": "resources/Models/bunny.obj"
-            },
-            {
-                "isView": true,
-                "pathId": "resources/Models/block/cube.obj"
-            }
         ]
     },
     "PointLights": {

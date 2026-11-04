@@ -14,6 +14,7 @@
 #include "ScreenTransform.h"
 
 #include "HierarchyPanel.h"
+#include "AssetsPanel.h"
 
 #include <vector>
 #include "Model.h"
@@ -180,6 +181,7 @@ public:
 
 	//* モデルのIDやパスの登録
 	void Property(const std::string& name, std::vector< ModelResource >& value);
+	void Property(const std::string& name, std::vector< TextureResource >& value);
 
 	// レイヤー設定
 	void Property(const std::string& name, std::vector< HierarchyLayer >& value);

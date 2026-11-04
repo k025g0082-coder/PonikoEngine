@@ -69,10 +69,17 @@ void Editor::Initialize() {
 	}
 
 	// 各パネルの初期化
+
+	// モデルなどアセット読み込み
+	assetsPanel_.Initialize();
+	assetsPanel_.SetHierarchyPanel(&hierarchyPanel_);
+
+	// アセットをもとにヒエラルキ生成
+	hierarchyPanel_.SetAssetsPanel(&assetsPanel_);
 	hierarchyPanel_.Initialize(currentSceneJsonPath,grid);
 
-	assetsPanel_.Initialize();
-	assetsPanel_.SetHierarchyPanel(hierarchyPanel_);
+
+
 
 
 	effectSequencer_.mFrameMin = -100;
@@ -348,7 +355,7 @@ void Editor::Draw() {
 			// マップで登録されたidと連携したモデルで描画
 			if (isEditorMode_) {
 
-				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, camera_);
+				assetsPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, camera_);
 				
 			}
 
@@ -364,7 +371,7 @@ void Editor::Draw() {
 				/* 【重要？】もしシーン内のオブジェクトと共有していたら、描画をスキップする */
 				if (hierarchy->gameObject_)continue;
 
-				hierarchyPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, *Scene::GetSceneCamera());
+				assetsPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, *Scene::GetSceneCamera());
 
 			}
 			
@@ -1066,6 +1073,7 @@ void Editor::PropartyTab()
 		// セーブボタン
 		if (ImGui::Button("Save")) {
 			hierarchyPanel_.HierarchySave(currentSceneJsonPath);
+			assetsPanel_.AssetsSave();
 		}
 
 

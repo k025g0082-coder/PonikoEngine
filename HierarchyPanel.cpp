@@ -1,4 +1,5 @@
 #include "HierarchyPanel.h"
+#include "AssetsPanel.h"
 
 #include "Editor.h"
 
@@ -40,11 +41,11 @@ void HierarchyPanel::Initialize(const std::string jsonPath, Grid& g)
 
 void HierarchyPanel::Update()
 {
-	// モデル更新
-	for (int i = 0; i < hierarchyModelResouces_.size(); i++)
-	{
-		hierarchyModelResouces_.at(i).model_->Update();
-	}
+	//// モデル更新
+	//for (int i = 0; i < hierarchyModelResouces_.size(); i++)
+	//{
+	//	hierarchyModelResouces_.at(i).model_->Update();
+	//}
 
 	// ヒエラルキの更新
 	for (int i = 0; i < hierarchyModels_.size(); i++)
@@ -515,31 +516,34 @@ void HierarchyPanel::DeleteHierarchyResouce(int index)
 
 		std::unique_ptr<Hierarchy<Model>>& model = hierarchyModels_.at(i);
 
-		if (model->id_ == hierarchyModelResouces_.at(index).pathId_) {
+		if (model->id_ == assetsPanel_->GetHierarchyModelResources().at(index).pathId_) {
 			hierarchyModels_.erase(hierarchyModels_.begin() + i);
 			i--;
 		}
 	}
 
+	//　アセットの方も削除
+	assetsPanel_->DeleteModelResource(index);
+	
 	// 先にモデルと紐づけたマップを削除
-	hierarchyModelResourceList_.erase(hierarchyModelResouces_.at(index).pathId_);
+	//hierarchyModelResourceList_.erase(hierarchyModelResouces_.at(index).pathId_);
 
-	// モデルのリソース情報削除
-	hierarchyModelResouces_.erase(hierarchyModelResouces_.begin() + index);
+	//// モデルのリソース情報削除
+	//hierarchyModelResouces_.erase(hierarchyModelResouces_.begin() + index);
 
 }
 
 void HierarchyPanel::ChangeHierarchyModelView(bool b, int assetIndex)
 {
 
-	hierarchyModelResouces_.at(assetIndex).isView_ = b;
+	assetsPanel_->GetHierarchyModelResources().at(assetIndex).isView_ = b;
 
 	// 対応したアセットが紐づけられたヒエラルキモデル表示・非表示切り替え
 	for (int i = 0; i < hierarchyModels_.size(); i++)
 	{
 		std::unique_ptr<Hierarchy<Model>>& model = hierarchyModels_.at(i);
 
-		if (model->id_ == hierarchyModelResouces_.at(assetIndex).pathId_) {
+		if (model->id_ == assetsPanel_->GetHierarchyModelResources().at(assetIndex).pathId_) {
 			model->isView_ = b;
 		}
 	}
@@ -656,8 +660,8 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 		// ヒエラルキのレイヤー名一覧
 		loder->Property("Layers", hierarchyLayers_);
 
-		// ヒエラルキのモデルのパスリスト 登録
-		loder->Property("ModelResources", hierarchyModelResouces_);
+		//// ヒエラルキのモデルのパスリスト 登録
+		//loder->Property("ModelResources", hierarchyModelResouces_);
 
 		// ヒエラルキのモデル情報リスト 登録
 		loder->Property("ModelProperties", hierarchyModels_);
@@ -696,10 +700,10 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 
 
 	// 読み込んだモデルリソースのモデルを全て生成
-	for (int i = 0; i < hierarchyModelResouces_.size(); i++)
+	for (int i = 0; i < assetsPanel_->GetHierarchyModelResources().size(); i++)
 	{
 		
-		ModelResource& r = hierarchyModelResouces_.at(i);
+		ModelResource& r = assetsPanel_->GetHierarchyModelResources().at(i);
 
 		r.model_ = Model::CreateOBJ(r.pathId_);
 		
@@ -707,7 +711,7 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 		r.model_->SetLightSets();
 
 		// モデルのポインタ登録
-		hierarchyModelResourceList_[r.pathId_] = r.model_;
+		assetsPanel_->GethierarchyModelResourceList()[r.pathId_] = r.model_;
 		r.name_ = FileDropManager::GetFileNameWithoutExtension(FileDropManager::ToWide(r.pathId_));// 表示名 拡張子を抜いたのを設定する
 
 		/* 読み込んだ表示非表示の切り替え */
@@ -730,7 +734,7 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 		hierarchyModelToLayer_[model->layerName_].push_back(model.get());
 
 		// ついでにアドレスも追加
-		model->object = hierarchyModelResourceList_[model->id_];
+		model->object = assetsPanel_->GethierarchyModelResourceList()[model->id_];
 
 	}
 	//

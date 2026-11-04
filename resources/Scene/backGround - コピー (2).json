@@ -1,0 +1,371 @@
+{
+    "DirectionalLights": {
+        "count": 1,
+        "lights": [
+            {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    -1.0,
+                    0.0
+                ],
+                "intensity": 1.0
+            },
+            {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    -1.0,
+                    0.0
+                ],
+                "intensity": 16.899999618530273
+            }
+        ]
+    },
+    "Grid": {
+        "gridDepth": 1.0,
+        "gridHeight": 1.0,
+        "gridWidth": 1.0,
+        "horizontal": 1,
+        "isSnap": false,
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "translation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "vertical": 10
+    },
+    "Hierarchy": {
+        "LayerNames": [
+            "dssss"
+        ],
+        "Layers": [
+            {
+                "isView": true,
+                "name": "main",
+                "type": 0
+            },
+            {
+                "isView": true,
+                "name": "test",
+                "type": 0
+            },
+            {
+                "isView": true,
+                "name": "tetettt",
+                "type": 1
+            }
+        ],
+        "ModelProperties": [
+            {
+                "aabb": {
+                    "depth": 37.70000076293945,
+                    "height": 1.2999999523162842,
+                    "max": [
+                        28.23031997680664,
+                        -19.82032585144043,
+                        19.85295295715332
+                    ],
+                    "min": [
+                        -32.36967849731445,
+                        -21.120325088500977,
+                        -17.847047805786133
+                    ],
+                    "width": 60.599998474121094
+                },
+                "id": "resources/Models/block/cube.obj",
+                "layerName": "test",
+                "name": "cube",
+                "propaties": {
+                    "objectType": 0,
+                    "subObjectType": 0,
+                    "uniqueID": 1
+                },
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        -0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        61.600486755371094,
+                        1.149086594581604,
+                        38.99924087524414
+                    ],
+                    "translation": [
+                        -2.0696797370910645,
+                        -20.470325469970703,
+                        1.002952218055725
+                    ]
+                },
+                "type": 0
+            },
+            {
+                "aabb": {
+                    "depth": 7.5,
+                    "height": 1.0,
+                    "max": [
+                        -10.196895599365234,
+                        -18.72695541381836,
+                        -8.277833938598633
+                    ],
+                    "min": [
+                        -15.596895217895508,
+                        -19.72695541381836,
+                        -15.777833938598633
+                    ],
+                    "width": 5.400000095367432
+                },
+                "id": "resources/Models/block/cube.obj",
+                "layerName": "test",
+                "name": "cube",
+                "propaties": {
+                    "objectType": 3,
+                    "processID": [
+                        [
+                            3
+                        ],
+                        [
+                            3
+                        ],
+                        [
+                            3
+                        ],
+                        [
+                            3,
+                            1
+                        ],
+                        3
+                    ],
+                    "subObjectType": 0,
+                    "uniqueID": 2
+                },
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        5.603449821472168,
+                        1.0,
+                        7.708240985870361
+                    ],
+                    "translation": [
+                        -12.896895408630371,
+                        -19.22695541381836,
+                        -12.027833938598633
+                    ]
+                },
+                "type": 0
+            },
+            {
+                "aabb": {
+                    "depth": 0.6000000238418579,
+                    "height": 4.599999904632568,
+                    "max": [
+                        -13.122897148132324,
+                        -15.460309028625488,
+                        -3.5022313594818115
+                    ],
+                    "min": [
+                        -16.12289810180664,
+                        -20.0603084564209,
+                        -4.102231502532959
+                    ],
+                    "width": 3.0
+                },
+                "id": "resources/Models/block/cube.obj",
+                "layerName": "test",
+                "name": "cube",
+                "propaties": {
+                    "objectType": 3,
+                    "processID": [],
+                    "subObjectType": 1,
+                    "uniqueID": 3
+                },
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        3.033097743988037,
+                        4.6727728843688965,
+                        0.8050845861434937
+                    ],
+                    "translation": [
+                        -14.622897148132324,
+                        -17.76030921936035,
+                        -3.8022313117980957
+                    ]
+                },
+                "type": 0
+            },
+            {
+                "aabb": {
+                    "depth": 4.199999809265137,
+                    "height": 1.7000000476837158,
+                    "max": [
+                        -1.811350703239441,
+                        -8.740296363830566,
+                        -8.95672607421875
+                    ],
+                    "min": [
+                        -5.011350631713867,
+                        -10.44029712677002,
+                        -13.15672492980957
+                    ],
+                    "width": 3.200000047683716
+                },
+                "id": "resources/Models/block/cube.obj",
+                "layerName": "test",
+                "name": "cube",
+                "propaties": {
+                    "objectType": 1,
+                    "subObjectType": 0,
+                    "uniqueID": 4
+                },
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        2.725529670715332,
+                        1.0,
+                        4.494526386260986
+                    ],
+                    "translation": [
+                        -3.411350727081299,
+                        -9.590296745300293,
+                        -11.05672550201416
+                    ]
+                },
+                "type": 0
+            },
+            {
+                "aabb": {
+                    "depth": 7.5,
+                    "height": 1.0,
+                    "max": [
+                        1.5585613250732422,
+                        -18.72695541381836,
+                        3.550365924835205
+                    ],
+                    "min": [
+                        -3.8414387702941895,
+                        -19.72695541381836,
+                        -3.949634075164795
+                    ],
+                    "width": 5.400000095367432
+                },
+                "id": "resources/Models/block/cube.obj",
+                "layerName": "test",
+                "name": "cube",
+                "propaties": {
+                    "objectType": 2,
+                    "subObjectType": 0,
+                    "uniqueID": 8
+                },
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        5.603449821472168,
+                        1.0,
+                        7.708240985870361
+                    ],
+                    "translation": [
+                        -1.1414387226104736,
+                        -19.22695541381836,
+                        -0.19963419437408447
+                    ]
+                },
+                "type": 0
+            }
+        ],
+        "ModelResources": [
+            {
+                "isView": true,
+                "pathId": "resources/Models/suzanne.obj"
+            },
+            {
+                "isView": true,
+                "pathId": "resources/Models/bunny.obj"
+            },
+            {
+                "isView": true,
+                "pathId": "resources/Models/block/cube.obj"
+            }
+        ]
+    },
+    "PointLights": {
+        "count": 0,
+        "lights": [
+            {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "intensity": 1.0,
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "radius": 10.0
+            }
+        ]
+    },
+    "SpotLights": {
+        "count": 0,
+        "lights": [
+            {
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "direction": [
+                    0.0,
+                    -1.0,
+                    0.0
+                ],
+                "distance": 50.0,
+                "falloff": 1.0,
+                "innerAngle": 15.0,
+                "intensity": 1.0,
+                "outerAngle": 30.0,
+                "position": [
+                    0.0,
+                    5.0,
+                    0.0
+                ]
+            }
+        ]
+    }
+}

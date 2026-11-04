@@ -1,4 +1,5 @@
 #include "AssetsPanel.h"
+#include "HierarchyPanel.h"
 
 #include "ImGuiManager.h"
 
@@ -9,9 +10,15 @@
 #include <algorithm>
 #include <memory>
 
+#include "SceneComponentLoader.h"
 
 void AssetsPanel::Initialize()
 {
+	
+	/* 全てのアセットをロード */
+	AssetsLoad();
+
+
 	// エフェクト専用部屋の初期化
 	selectedModelViewport_.Initialize(320, 180);
 }
@@ -40,10 +47,10 @@ void AssetsPanel::PanelView(bool& show)
 		ImGui::SeparatorText("Models");
 
 		// === モデル
-		for (int i = 0; i < hierarchyPanel_->GetHierarchyModelResources().size(); i++)
+		for (int i = 0; i < hierarchyModelResouces_.size(); i++)
 		{
 
-			const ModelResource& resource = hierarchyPanel_->GetHierarchyModelResources().at(i);
+			const ModelResource& resource = hierarchyModelResouces_.at(i);
 
 			int alpha = 255;
 
@@ -184,6 +191,33 @@ void AssetsPanel::PanelView(bool& show)
 			ImGui::PopID();
 		}
 
+		/*
+			スプライト
+		*/
+		ImGui::SeparatorText("Sprites");
+
+		for (int i = 0; i < hierarchyTextureResouces_.size(); i++)
+		{
+
+			const TextureResource& resource = hierarchyTextureResouces_.at(i);
+
+			float size = 24.0f;
+
+			/* 画像表示 */
+			ImGui::Image(
+				(ImTextureID)resource.texture_->GetTextureSrvHandleGPU().ptr,
+				ImVec2(size, size)
+			);
+
+			ImGui::SameLine();
+
+			// 名前
+			ImGui::Text(resource.name_.c_str());
+
+		}
+
+
+
 
 		/* 選択中のモデルのビューポート表示 */
 		ImGui::Image(
@@ -201,8 +235,75 @@ void AssetsPanel::PanelView(bool& show)
 
 }
 
+void AssetsPanel::AssetsLoad()
+{
+
+	// よみこむJSONパス（プロジェクト一個で固定）
+	jsonPath = "resources/AssetList_.json";
+
+
+	if (jsonPath.empty()) return;
+
+	// 読込み
+	if (SceneComponentLoader::GetInstance()->Load(jsonPath)) {
+
+		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+
+		/* 
+			モデル
+		*/
+		loder->BeginGroup("Model");
+
+			// ヒエラルキのモデルのパスリスト 登録
+			loder->Property("ModelResources", hierarchyModelResouces_);
+
+		loder->EndGroup();
+
+		/*
+			テキスチャ
+		*/
+
+		loder->BeginGroup("Texture");
+
+			loder->Property("TextureResources", hierarchyTextureResouces_);
+
+		loder->EndGroup();
+
+
+			// 読み込み
+		loder->LoadGroup("Model");
+		loder->LoadGroup("Texture");
+
+	}
+
+}
+
+void AssetsPanel::AssetsSave()
+{
+	// セーブ
+	if (SceneComponentLoader::GetInstance()->Load(jsonPath)) {
+
+		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+
+		/* セーブ前のJson切り替え */
+		if (loder->SaveSwitchJson(jsonPath)) {
+
+			loder->SaveGroup("Model");
+			loder->SaveGroup("Texture");
+
+			SceneComponentLoader::GetInstance()->Save(jsonPath);
+		}
+	}
+}
+
 void AssetsPanel::Update()
 {
+	// モデル更新(いる？
+	for (int i = 0; i < hierarchyModelResouces_.size(); i++)
+	{
+		hierarchyModelResouces_.at(i).model_->Update();
+	}
+
 	// ウインドウ上にドロップされたモデルを追加
 	AddDropModel();
 
@@ -247,8 +348,8 @@ void AssetsPanel::AddDropModel()
 
 			auto it = std::find_if(
 
-				hierarchyPanel_->GetHierarchyModelResources().begin(),
-				hierarchyPanel_->GetHierarchyModelResources().end(),
+				hierarchyModelResouces_.begin(),
+				hierarchyModelResouces_.end(),
 
 				//* ラムダ式 *//
 				// ↓キャプチャ  ↓forのように取り出し
@@ -258,7 +359,7 @@ void AssetsPanel::AddDropModel()
 			);
 
 			//* 見つかった
-			if (it != hierarchyPanel_->GetHierarchyModelResources().end()) {
+			if (it != hierarchyModelResouces_.end()) {
 
 				// 登録せずサヨナラ
 				continue;
@@ -288,7 +389,7 @@ void AssetsPanel::AddDropModel()
 			
 			/* すでに同じ名前があったら */
 			int count = 2;
-			for (const ModelResource& r : hierarchyPanel_->GetHierarchyModelResources()) {
+			for (const ModelResource& r : hierarchyModelResouces_) {
 
 				if (r.name_ == resource.name_) {
 
@@ -299,7 +400,7 @@ void AssetsPanel::AddDropModel()
 			}
 
 			// モデルリソース追加
-			hierarchyPanel_->AddModelResource(resource);
+			AddModelResource(resource);
 
 			/* モデルのヒエラルキ追加 */
 			Hierarchy<Model> h;
@@ -350,25 +451,25 @@ void AssetsPanel::AddDropSprite()
 		}
 
 
-		//　モデルのIDの取得（モデルのパス）
-		std::string modelId = relativePath;
+		//　スプライトのIDの取得（spriteのパス）
+		std::string spriteId = relativePath;
 
 		{// モデルの管理情報から、すでに登録されたIDのがあるかvector検索
 
 			auto it = std::find_if(
 
-				hierarchyPanel_->GetHierarchyModelResources().begin(),
-				hierarchyPanel_->GetHierarchyModelResources().end(),
+				hierarchyTextureResouces_.begin(),
+				hierarchyTextureResouces_.end(),
 
 				//* ラムダ式 *//
 				// ↓キャプチャ  ↓forのように取り出し
-				[&modelId](const auto& h) {
-					return h.pathId_ == modelId;
+				[&spriteId](const auto& h) {
+					return h.pathId_ == spriteId;
 				}
 			);
 
 			//* 見つかった
-			if (it != hierarchyPanel_->GetHierarchyModelResources().end()) {
+			if (it != hierarchyTextureResouces_.end()) {
 
 				// 登録せずサヨナラ
 				continue;
@@ -376,11 +477,35 @@ void AssetsPanel::AddDropSprite()
 		}
 
 
-		// モデル生成
-		Model* model = Model::CreateOBJ(relativePath);
-
+		// texture生成
+		Texture* texture = new Texture();
+		texture->Initialize(relativePath);
 
 		// 読み込めた
-		if (model) {}
+		if (texture->IsLoaded()) {
+
+			/* 管理情報の登録 */
+			TextureResource resource;
+
+			resource.pathId_ = relativePath;
+			resource.texture_ = texture;		// モデル登録
+
+			resource.name_ = FileDropManager::GetFileNameWithoutExtension(path);// 表示名 拡張子を抜いたのを設定する
+
+			/* すでに同じ名前があったら */
+			int count = 2;
+			for (const ModelResource& r : hierarchyModelResouces_) {
+
+				if (r.name_ == resource.name_) {
+
+					resource.name_ = r.name_ + "_" + std::to_string(count);
+					count++;
+
+				}
+			}
+
+			// モデルリソース追加
+			AddSpriteResource(resource);
+		}
 	}
 }

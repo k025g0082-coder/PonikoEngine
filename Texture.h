@@ -35,6 +35,11 @@ public:
 
 	uint32_t GetSrvIndex() { return srvIndex_; }
 
+	// よみこめたか（多分あってない）
+	bool IsLoaded() {
+		return GetTextureSrvHandleGPU().ptr != 0;
+	};
+
 private:
 
 	DirectX::ScratchImage mipImages;

@@ -182,6 +182,13 @@ public:
 		screenTransform_.UpdateMatrix();
 	}
 
+	// よみこめたか（多分あってない）
+	bool IsLoaded() {
+		return texture.GetTextureSrvHandleGPU().ptr != 0;
+	};
+
+	// てくうちゃSRV
+
 private:
 
 	int imageWidth = 0;

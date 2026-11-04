@@ -924,6 +924,63 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<ModelRe
 	};
 }
 
+
+// 
+void SceneComponentLoader::Property(const std::string& name, std::vector<TextureResource>& value) {
+
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
+
+		// save
+		[this, &value, name](json& group) {
+
+			// 空でも必ず配列として保存
+			group[name] = json::array();
+
+			for (const auto& resourceProp : value) {
+
+				json item;
+
+				item["pathId"] = resourceProp.pathId_;
+
+				group[name].push_back(item);
+
+			}
+		},
+
+		// load
+		[this, &value, name](const json& group) {
+
+			// なかった場合
+			if (!group.contains(name)) {
+				return;
+			}
+
+			for (const auto& item : group.at(name)) {
+
+				TextureResource textureResource;
+
+				textureResource.pathId_ = item.at("pathId").get<std::string>();
+
+				// 既に同じIDがあるか検索
+				auto it = std::find_if(
+					value.begin(),
+					value.end(),
+					[&textureResource](const TextureResource& r) {
+						return r.pathId_ == textureResource.pathId_;
+					}
+				);
+
+				// 無ければ追加
+				if (it == value.end()) {
+					value.push_back(std::move(textureResource));
+				}
+
+			}
+
+		}
+	};
+}
+
 bool SceneComponentLoader::SaveSwitchJson(std::string jsonPath)
 {
 
