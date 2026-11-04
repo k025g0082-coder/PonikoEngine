@@ -196,6 +196,14 @@ private:
 	// ウインドウ上部
 	void TopMenuVar();
 
+
+	// 矢印描画＆選択しているののWorldTransformを変形
+	void DrawArrowToSelectedTransform();
+
+	// 便利な四角
+	void DrawViewManipulate();
+
+
 	// スクリーン上からレイを飛ばしてヒエラルキを選択
 	void UpdateHierarchySelection();
 
@@ -205,8 +213,7 @@ private:
 	void OperationRightClick();
 	void OperationWheel();
 
-	// 選択しているヒエラルキのWorldTransformを変形
-	void UpdateSelectedHierarchyTransform();
+
 
 
 	/*

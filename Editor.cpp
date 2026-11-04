@@ -157,10 +157,32 @@ void Editor::Update()
 	notification_.Draw();
 
 
+	/// ImGuizmoのフレーム開始
+	ImGuizmo::BeginFrame();
+	ImGuizmo::Enable(true);
 
 
+	// カメラの投影モードを設定（透視投影の場合は false）
+	ImGuizmo::SetOrthographic(false);
 
-	ImGui::End();
+	ImGuizmo::SetRect(mainViewPos.x, mainViewPos.y, mainViewSize.x, mainViewSize.y);
+
+	ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
+
+	/*
+		便利なキューブ
+	*/
+	DrawViewManipulate();
+
+
+	/*
+		カメラ操作などによる選択の変形など
+	*/
+	DrawArrowToSelectedTransform();
+
+
+ImGui::End();
+
 
 	/*
 		上部バー
@@ -230,6 +252,7 @@ void Editor::Update()
 
 	// ImGuiの枠にかさならない
 	if (insideScene &&
+
 		!ImGuizmo::IsUsing()) {
 
 		/*
@@ -240,21 +263,15 @@ void Editor::Update()
 
 	}
 
-	// ImGuizmoのフレーム開始
-	ImGuizmo::BeginFrame();
-	ImGuizmo::Enable(true);
 
-	// 3. カメラの投影モードを設定（透視投影の場合は false）
-	ImGuizmo::SetOrthographic(false);
 
-	ImGuizmo::SetRect(mainViewPos.x, mainViewPos.y,mainViewSize.x, mainViewSize.y);
 
-	//ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
 
-	/*
-		カメラ操作などによる選択の変形など
-	*/
-	UpdateSelectedHierarchyTransform();
+
+
+
+
+
 
 
 	if (isEditorMode_) {
@@ -515,6 +532,51 @@ void Editor::TopMenuVar()
 
 
 		ImGui::EndMainMenuBar();
+	}
+
+}
+
+void Editor::DrawViewManipulate()
+{
+
+	/*カメラ視点の回転 */
+	ImVec2 manipulateSize = ImVec2(256.0f, 256.0f);
+	ImVec2 manipulatePos = ImVec2(mainViewPos.x + mainViewSize.x - manipulateSize.x - 10.0f, mainViewPos.y + 10.0f);
+
+
+	/* ギズモによるカメラ回転 */
+	if (selectedModelWorldTransform_) {
+
+		// 現在のカメラView行列を取得
+		Matrix4x4 viewMatrix = camera_.GetViewMatrix();
+
+
+		ImGuizmo::ViewManipulate(
+			&viewMatrix.m[0][0],
+			selectedModelLength_,
+			manipulatePos,
+			manipulateSize,
+			0x10101010
+		);
+
+		// 変更されたView行列をそのまま反映
+		camera_.SetViewMatrix(viewMatrix);
+	}
+	else {
+
+		/* 非選択時は固定値８．０ｆ */
+		Matrix4x4 viewMatrix = camera_.GetViewMatrix();
+
+		ImGuizmo::ViewManipulate(
+			&viewMatrix.m[0][0],
+			8.0f,
+			manipulatePos,
+			manipulateSize,
+			0x10101010
+		);
+
+		// 変更されたView行列をそのまま反映
+		camera_.SetViewMatrix(viewMatrix);
 	}
 
 }
@@ -802,51 +864,8 @@ void Editor::OperationWheel()
 	}
 }
 
-void Editor::UpdateSelectedHierarchyTransform()
+void Editor::DrawArrowToSelectedTransform()
 {
-
-	/*カメラ視点の回転 */
-	ImVec2 manipulateSize = ImVec2(128.0f, 128.0f);
-	ImVec2 manipulatePos = ImVec2(mainViewPos.x + mainViewSize.x - manipulateSize.x - 10.0f, mainViewPos.y + 10.0f);
-
-
-	/* ギズモによるカメラ回転 */
-	if (selectedModelWorldTransform_) {
-
-		// 現在のカメラView行列を取得
-		Matrix4x4 viewMatrix = camera_.GetViewMatrix();
-
-
-		ImGuizmo::ViewManipulate(
-			&viewMatrix.m[0][0],
-			selectedModelLength_,
-			manipulatePos,
-			manipulateSize,
-			0x10101010
-		);
-
-		// 変更されたView行列をそのまま反映
-		camera_.SetViewMatrix(viewMatrix);
-	}
-	else {
-
-		/* 非選択時は固定値８．０ｆ */
-		Matrix4x4 viewMatrix = camera_.GetViewMatrix();
-
-		ImGuizmo::ViewManipulate(
-			&viewMatrix.m[0][0],
-			8.0f,
-			manipulatePos,
-			manipulateSize,
-			0x10101010
-		);
-
-		// 変更されたView行列をそのまま反映
-		camera_.SetViewMatrix(viewMatrix);
-	}
-
-
-
 	if (isEditorMode_) {
 
 		// 選択中のモデルがあるときだけ操作
@@ -857,6 +876,9 @@ void Editor::UpdateSelectedHierarchyTransform()
 			Matrix4x4 projMat = camera_.GetProjectionMatrix();
 			Matrix4x4 worldMat = selectedModelWorldTransform_->matWorld_;
 
+			/*
+				ImGuizmoの矢印を描画
+			*/
 			bool isManipulated = ImGuizmo::Manipulate(
 				&viewMat.m[0][0],
 				&projMat.m[0][0],
@@ -878,6 +900,9 @@ void Editor::UpdateSelectedHierarchyTransform()
 
 			}
 
+			/*
+				変形処理
+			*/
 			if (isManipulated || ImGuizmo::IsUsing()) {
 
 				switch (operation_) {
