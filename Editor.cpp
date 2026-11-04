@@ -494,6 +494,7 @@ void Editor::Update()
 	// 通知のビョーガ
 	notification_.Draw();
 
+	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	ImVec2 mouse = ImGui::GetMousePos();
 

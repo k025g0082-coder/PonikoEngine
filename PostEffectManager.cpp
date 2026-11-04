@@ -549,7 +549,7 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle =
 		DirectXCommon::GetInstance()->GetBackBufferRTV(backBufferIndex);
 
-	//
+	//　書きこむ先を設定。　..DSVの欄はSRVで読み込む際に必要なだけなので要らない。
 	commandList->OMSetRenderTargets(
 		1,
 		&rtvHandle,

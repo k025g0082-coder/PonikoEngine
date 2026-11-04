@@ -81,31 +81,30 @@ void DemoPlayer::CollisionToAllBlock()
 	auto* layerNames_ = Editor::GetAlignHierarchyLayerNames();
 
 	/* レイヤー名一覧から取得 */
-for (std::string name : *layerNames_) {
+	for (std::string name : *layerNames_) {
 
 		/* ヒエラルキ内の、シーン内の連携された全てのとAABB */
 		for (auto& hierarchy : Editor::GetHierarchyModelLayer(name)) {
 
 			if (hierarchy->gameObject_ == nullptr) continue;
 
-			// Nullなら
 				auto type = hierarchy->gameObject_->GetId();
 				if (type != (uint32_t)DemoFieldObject::Type::kBlock) continue;// ブロックじゃなければReturn
 
 				// FieldObjectのAABBを取得
-					const AABB& targetAABB = hierarchy->gameObject_->GetAABB();
+				const AABB& targetAABB = hierarchy->gameObject_->GetAABB();
 
-			// AABB同士の衝突判定と押し戻し処理
-			CollisionResult collisionResult = ResolveAABBCollision(aabb_, worldTransform.translation_, targetAABB, true);
+				// AABB同士の衝突判定と押し戻し処理
+				CollisionResult collisionResult = ResolveAABBCollision(aabb_, worldTransform.translation_, targetAABB, true);
 
-			/* 結果を論理和 (OR) で積み重ねてく */
-			collisionResult_.isGrounded |= collisionResult.isGrounded;
-			collisionResult_.hitCeiling |= collisionResult.hitCeiling;
-			collisionResult_.hitWall |= collisionResult.hitWall;
+				/* 結果を論理和 (OR) で積み重ねてく */
+				collisionResult_.isGrounded |= collisionResult.isGrounded;
+				collisionResult_.hitCeiling |= collisionResult.hitCeiling;
+				collisionResult_.hitWall |= collisionResult.hitWall;
 
+			}
 		}
 	}
-}
 
 void DemoPlayer::onCollisionToGimmick(DemoGimmick* gimmick,CollisionResult result)
 {
