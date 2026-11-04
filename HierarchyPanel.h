@@ -77,15 +77,36 @@ struct ModelResource {
 
 };
 
+
+//reiya-t
+enum class HierarchyLayerType {
+
+	// モデルレイヤー
+	kModelLayer, 
+
+	// キャンバスレイヤー
+	kCanvasLayer
+
+};
+static int currentSelectedLayerType_ = (int)HierarchyLayerType::kModelLayer;
+
+// 
+const char* kLayerTypeIcons[];
+const char* kLayerTypeNames[];
+
+
 // レイヤーデータ
 struct HierarchyLayer {
 
+	HierarchyLayerType layerType_ = HierarchyLayerType::kModelLayer;
 	std::string layerName_;
 
 	bool isView_ = true;
 	bool isAlignGameScene = false;// シーン側のゲームオブジェクトとの連携中のレイヤーか。
 
 };
+
+
 
 class Grid;
 
@@ -271,6 +292,13 @@ public:
 
 private:
 
+	// レイヤー追加時のウインドウ
+	void AddLayerPopupWindow();
+
+	// ロード時にクリア
+	void HierarchyClear();
+
+
 	// 選択中のヒエラルキモデル番号
 	std::optional<int> selectedModelIndex_;
 
@@ -288,10 +316,6 @@ private:
 	std::vector<std::string>    alignHierarchyLayerNames_;// 連携しているレイヤー名一覧
 
 	std::string selectedCurrentLayer_;// 現在選択されているレイヤー名
-
-
-	// ロード時にクリア
-	void HierarchyClear();
 
 
 	// エディターのグリッド

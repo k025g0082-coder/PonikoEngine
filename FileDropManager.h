@@ -9,6 +9,7 @@
 enum class FileType {
 
 	kModel,
+	kSprite,
 	kJson,
 
 	kTypeCount

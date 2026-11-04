@@ -205,6 +205,9 @@ void AssetsPanel::Update()
 {
 	// ウインドウ上にドロップされたモデルを追加
 	AddDropModel();
+
+	// ウインドウ上にドロップされたスプライトを追加
+	AddDropSprite();
 }
 
 void AssetsPanel::Draw()
@@ -327,4 +330,57 @@ void AssetsPanel::AddDropModel()
 
 	}
 
+}
+
+void AssetsPanel::AddDropSprite()
+{
+	// 新しくドロップされたパスを取得
+	auto paths =
+		FileDropManager::TakeFilePaths(FileType::kSprite);
+
+	for (const auto& path : paths) {
+
+		// 絶対パス → resources/ 以下の相対パス
+		std::string relativePath =
+			FileDropManager::GetRelativePath(path);
+
+		// 相対パスが取得できなければスキップ
+		if (relativePath.empty()) {
+			continue;
+		}
+
+
+		//　モデルのIDの取得（モデルのパス）
+		std::string modelId = relativePath;
+
+		{// モデルの管理情報から、すでに登録されたIDのがあるかvector検索
+
+			auto it = std::find_if(
+
+				hierarchyPanel_->GetHierarchyModelResources().begin(),
+				hierarchyPanel_->GetHierarchyModelResources().end(),
+
+				//* ラムダ式 *//
+				// ↓キャプチャ  ↓forのように取り出し
+				[&modelId](const auto& h) {
+					return h.pathId_ == modelId;
+				}
+			);
+
+			//* 見つかった
+			if (it != hierarchyPanel_->GetHierarchyModelResources().end()) {
+
+				// 登録せずサヨナラ
+				continue;
+			}
+		}
+
+
+		// モデル生成
+		Model* model = Model::CreateOBJ(relativePath);
+
+
+		// 読み込めた
+		if (model) {}
+	}
 }

@@ -3,6 +3,8 @@
 #include "WinApp.h"
 #include "DirectXCommon.h"
 
+#include <imgui/IconsFontAwesome.h>
+
 ImGuiManager* ImGuiManager::GetInstance() {
 	static ImGuiManager instance;
 	return &instance;
@@ -41,6 +43,41 @@ void ImGuiManager::Initialize() {
 	ImGui_ImplDX12_Init(&initInfo);
 
 	ImGuiIO& io = ImGui::GetIO();
+
+
+	ImFontConfig fontConfig{};
+
+	ImFontConfig jconfig;
+	jconfig.SizePixels = 16.0f;
+
+	// 通常フォントを先に登録
+	io.Fonts->AddFontFromFileTTF("resources/Engine/font/NotoSansJP-Regular.otf", 13.0f, &jconfig, io.Fonts->GetGlyphRangesJapanese());
+
+
+	static const ImWchar iconRanges[] = {
+		ICON_MIN_FA,
+		ICON_MAX_FA,
+		0
+	};
+
+// アイコンフォントを重ねる
+	ImFontConfig config;
+	config.MergeMode = true;
+	config.PixelSnapH = true;
+	config.SizePixels = 16.0f;
+
+	//
+	io.Fonts->AddFontFromFileTTF(
+		"resources/Engine/font/fa-solid-900.ttf",
+		16.0f,
+		&config,
+		iconRanges
+	);
+
+	
+
+
+	// すべて読込終わったのでビルド
 	io.Fonts->Build();
 
 #endif
@@ -51,7 +88,6 @@ void ImGuiManager::Begin() {
 #ifdef USE_IMGUI
 
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
 
 
 	ImGui_ImplDX12_NewFrame();

@@ -825,6 +825,7 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarc
 				json item;
 
 				item["name"] = layer.layerName_;
+				item["type"] = (int)layer.layerType_;
 				item["isView"] = layer.isView_;
 
 				group[name].push_back(item);
@@ -844,6 +845,11 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Hierarc
 				HierarchyLayer layer;
 
 				layer.layerName_ = item.at("name").get<std::string>();
+
+				if (item.contains("type")) {
+					layer.layerType_ = item.at("type").get<HierarchyLayerType>();
+				}
+
 				layer.isView_    = item.at("isView").get<bool>();
 
 				value.push_back(layer);

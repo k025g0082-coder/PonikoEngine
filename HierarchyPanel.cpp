@@ -14,9 +14,21 @@
 #include <misc/cpp/imgui_stdlib.h>
 #include <imgui_internal.h>
 
+#include <imgui/IconsFontAwesome.h>
+
 #include <iterator>
 #include <algorithm>
 #include <memory>
+
+const char* kLayerTypeIcons[] = {
+	(char*)ICON_FA_CUBE,
+	(char*)ICON_FA_PEN
+};
+
+const char* kLayerTypeNames[] = {
+	(char*)ICON_FA_CUBE  "  ModelLayer",
+	(char*)ICON_FA_PEN  "  CanvasLayer"
+};
 
 void HierarchyPanel::Initialize(const std::string jsonPath, Grid& g)
 {	
@@ -80,28 +92,16 @@ void HierarchyPanel::ViewPanel(bool& show)
 
 	if (ImGui::Begin("Hierarchy", &show)) {
 
-		static std::string inputLayerName;
-		ImGui::InputText(" ", &inputLayerName);
-		ImGui::SameLine();
+		
 
-		/* レイヤー操作 */
-		if (ImGui::Button("Add")) {
-			
-			if (!inputLayerName.empty()) {
-
-				// 追加
-				if (!hierarchyModelToLayer_.contains(inputLayerName)) {
-
-					hierarchyModelToLayer_.try_emplace(inputLayerName);
-
-					// レイヤー
-					hierarchyLayers_.push_back(HierarchyLayer{
-						.layerName_ = inputLayerName
-					});
-
-				}
-			}
+		/* レイヤー追加ウインドウ表示 */
+		if (ImGui::Button("+")) {
+			ImGui::OpenPopup("Popup");
 		}
+
+
+		AddLayerPopupWindow();
+
 
 		// === ヒエラルキー
 		ImGui::SeparatorText("HierarchyLayers");
@@ -109,18 +109,110 @@ void HierarchyPanel::ViewPanel(bool& show)
 		std::string deleteLayter = "";
 		int layerCount = 0;
 
+
+
 		/* ヒエラルキーレイヤーによって分ける */
-		for (const auto& [key, value] : hierarchyModelToLayer_) {
+		for (int layerCount = 0; layerCount < hierarchyLayers_.size(); layerCount++) {
+
+			auto& layerInfo = hierarchyLayers_.at(layerCount);
+			const std::string& key = layerInfo.layerName_;
+
+			// マップ内に存在しない場合はスキップ
+			if (!hierarchyModelToLayer_.contains(key)) continue;
+
+			// マップから該当レイヤーのモデルリストを取得
+			auto& value = hierarchyModelToLayer_[key];
+
 
 			/* 選択中は色変え */
 			if (selectedCurrentLayer_ == key) {
 				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
 			}
 
+
+			int layerType = (int)hierarchyLayers_.at(layerCount).layerType_;
+
+			std::string icon = kLayerTypeIcons[layerType];
+			std::string layerName = key.c_str();
+
+			ImGui::SetWindowFontScale(1.1f);// 一時的に大きく
+
 			// レイヤー名
-			if (ImGui::TreeNode(key.c_str())) {
+			bool isOpen = ImGui::TreeNodeEx((icon + "  " + layerName).c_str(), ImGuiTreeNodeFlags_OpenOnArrow |
+				ImGuiTreeNodeFlags_SpanLabelWidth);
 
+			ImGui::SetWindowFontScale(1.0f);//
 
+			// 色とじ
+			if (selectedCurrentLayer_ == key) {
+				ImGui::PopStyleColor();
+			}
+
+			ImGui::SameLine(ImGui::GetWindowWidth() - 150.0f);
+
+			ImGui::PushID(layerCount);
+
+			// レイヤー非表示切り替え
+			if (!hierarchyLayers_.at(layerCount).isView_) {
+
+				if (ImGui::Button("ON")) {
+
+					hierarchyLayers_.at(layerCount).isView_ = true;
+					ChangeHierarchyModelLayer(true,key);
+
+					ImGui::PopID();
+					// ツリーが開いていた場合は TreePop を呼んでから抜ける
+					if (isOpen) {
+						ImGui::TreePop();
+					}
+					break;
+				}
+			}
+			else {
+				if (ImGui::Button("OFF")) {
+
+					hierarchyLayers_.at(layerCount).isView_ = false;
+					ChangeHierarchyModelLayer(false, key);
+
+					ImGui::PopID();
+					// ツリーが開いていた場合は TreePop を呼んでから抜ける
+					if (isOpen) {
+						ImGui::TreePop();
+					}
+					break;
+				}
+			}
+			ImGui::SameLine();
+
+			/* 選択中レイヤー変更 */
+			ImGui::PushID(layerCount);
+
+			if (ImGui::Button("Select")) {
+				selectedCurrentLayer_ = key;
+			}
+			ImGui::PopID();
+
+			ImGui::SameLine(0,-4.0f);
+
+			// レイヤー削除
+			if (ImGui::Button("Del")) {
+
+				deleteLayter = key;
+
+				ImGui::PopID();
+
+				// ツリーが開いていた場合は TreePop を呼んでから抜ける
+				if (isOpen) {
+					ImGui::TreePop();
+				}
+
+				break;
+			}
+			ImGui::PopID();
+
+			
+			
+			if (isOpen){
 
 				/* ヒエラルキー小分け */
 				for (int i = 0; i < value.size(); i++) {
@@ -143,7 +235,7 @@ void HierarchyPanel::ViewPanel(bool& show)
 					ImGui::PushID(i);
 
 					// 削除ボタンを右寄りに配置（↑のおかげ
-					if (ImGui::Button("del")) {
+					if (ImGui::Button("Del")) {
 
 						// また検索
 						auto it = std::find_if(
@@ -167,7 +259,6 @@ void HierarchyPanel::ViewPanel(bool& show)
 					}
 					
 
-
 					ImGui::PopID();
 
 				}
@@ -176,61 +267,6 @@ void HierarchyPanel::ViewPanel(bool& show)
 
 				ImGui::TreePop();
 			}
-
-			// 色とじ
-			if (selectedCurrentLayer_ == key) {
-				ImGui::PopStyleColor();
-			}
-
-			ImGui::SameLine(ImGui::GetWindowWidth() - 150.0f);
-
-			ImGui::PushID(layerCount);
-
-			// レイヤー非表示切り替え
-			if (!hierarchyLayers_.at(layerCount).isView_) {
-
-				if (ImGui::Button("ON")) {
-
-					hierarchyLayers_.at(layerCount).isView_ = true;
-					ChangeHierarchyModelLayer(true,key);
-
-					ImGui::PopID();
-					break;
-				}
-			}
-			else {
-				if (ImGui::Button("OFF")) {
-
-					hierarchyLayers_.at(layerCount).isView_ = false;
-					ChangeHierarchyModelLayer(false, key);
-
-					ImGui::PopID();
-					break;
-				}
-			}
-			ImGui::SameLine();
-
-			/* 選択中レイヤー変更 */
-			ImGui::PushID(layerCount);
-
-			if (ImGui::Button("Select")) {
-				selectedCurrentLayer_ = key;
-			}
-			ImGui::PopID();
-
-			ImGui::SameLine(0,-4.0f);
-
-			// レイヤー削除
-			if (ImGui::Button("Del")) {
-
-				deleteLayter = key;
-
-				ImGui::PopID();
-				break;
-			}
-			ImGui::PopID();
-
-			layerCount++;
 		}
 
 		// ループ抜けた後削除
@@ -344,6 +380,11 @@ void HierarchyPanel::DeleteHierarchyLayer(const std::string& layerName)
 			return l.layerName_ == layerName;
 		}
 	);
+
+	// あったら名前一覧から削除
+	if (itt != hierarchyLayers_.end()) {
+		hierarchyLayers_.erase(itt);
+	}
 
 	auto ittt = std::find(
 		alignHierarchyLayerNames_.begin(),
@@ -514,6 +555,57 @@ void HierarchyPanel::ChangeHierarchyModelLayer(bool b, std::string layerName)
 			model->gameObject_->SetView(b);
 		}
 	}
+}
+
+void HierarchyPanel::AddLayerPopupWindow()
+{
+	
+	// ポップアップ本体
+	if (ImGui::BeginPopup("Popup")) {
+
+		ImGui::Text("レイヤー追加");
+
+		ImGui::Text("レイヤー名：");
+		ImGui::SameLine();
+
+
+		static std::string inputLayerName;
+		ImGui::InputText(" ", &inputLayerName);
+
+
+		ImGui::Text("レイヤータイプ：");
+		ImGui::SameLine();
+
+		/* レイヤータイプを選択 */
+		ImGui::Combo("type", &currentSelectedLayerType_, kLayerTypeNames, IM_ARRAYSIZE(kLayerTypeNames));
+
+
+		/* レイヤー操作 */
+		if (ImGui::Button("Add")) {
+
+			if (!inputLayerName.empty()) {
+
+				// 追加
+				if (!hierarchyModelToLayer_.contains(inputLayerName)) {
+
+					hierarchyModelToLayer_.try_emplace(inputLayerName);
+
+					// レイヤー
+					hierarchyLayers_.push_back(HierarchyLayer{
+						.layerType_ = (HierarchyLayerType)currentSelectedLayerType_,
+						.layerName_ = inputLayerName
+						});
+
+					// 閉じる
+					ImGui::CloseCurrentPopup();
+
+				}
+			}
+		}
+
+		ImGui::EndPopup();
+	}
+
 }
 
 void HierarchyPanel::HierarchyClear()

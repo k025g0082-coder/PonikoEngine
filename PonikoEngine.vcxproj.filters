@@ -94,6 +94,12 @@
     <Filter Include="test\FactoryObjectDemo\.h\core">
       <UniqueIdentifier>{777ccdc2-8062-471a-bce9-c76864cf897c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Source\ヘッダー ファイル\Editor\Panel">
+      <UniqueIdentifier>{538d230a-7287-44b0-9ccc-62c0afd44828}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Source\ヘッダー ファイル\Editor\GameUI">
+      <UniqueIdentifier>{c36c3598-277a-49ac-9050-1cf26f44e76a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinApp.cpp">
@@ -524,12 +530,6 @@
     <ClInclude Include="Plane.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="AssetsPanel.h">
-      <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="HierarchyPanel.h">
-      <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
-    </ClInclude>
     <ClInclude Include="FieldExample.h">
       <Filter>test\FactoryObjectDemo\.h</Filter>
     </ClInclude>
@@ -553,6 +553,12 @@
     </ClInclude>
     <ClInclude Include="DemoPlayer.h">
       <Filter>test\FactoryObjectDemo\.h</Filter>
+    </ClInclude>
+    <ClInclude Include="AssetsPanel.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Editor\Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="HierarchyPanel.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Editor\Panel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

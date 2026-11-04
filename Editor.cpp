@@ -85,8 +85,8 @@ void Editor::Initialize() {
 
 }
 
-static bool showProperty = false;
-static bool showHierarchy = false;
+static bool showProperty = true; //
+static bool showHierarchy = true; // 
 static bool showLighting = false;
 static bool showPostEffect = false;
 static bool showEffectTimeline = false;
@@ -244,15 +244,32 @@ ImGui::End();
 	mainViewWidth = mainViewSize.x;
 	mainViewHeight = mainViewSize.y;
 
+	/* ビュー上にあるか */
 	bool insideScene =
 		mouse.x >= mainViewPos.x &&
 		mouse.x <= (mainViewPos.x + mainViewSize.x) &&
 		mouse.y >= mainViewPos.y &&
 		mouse.y <= (mainViewPos.y + mainViewSize.y);
 
+
+	// ViewManipulateの領域
+	ImVec2 manipulateSize = ImVec2(256.0f, 256.0f);
+
+	ImVec2 manipulatePos = ImVec2(
+		mainViewPos.x + mainViewSize.x - manipulateSize.x - 10.0f,
+		mainViewPos.y + 10.0f
+	);
+
+	/* マウスがキューブ上にあるか */
+	bool insideViewCube =
+		mouse.x >= manipulatePos.x &&
+		mouse.x <= manipulatePos.x + manipulateSize.x &&
+		mouse.y >= manipulatePos.y &&
+		mouse.y <= manipulatePos.y + manipulateSize.y;
+
 	// ImGuiの枠にかさならない
 	if (insideScene &&
-
+		!insideViewCube &&
 		!ImGuizmo::IsUsing()) {
 
 		/*
@@ -262,16 +279,6 @@ ImGui::End();
 		OperationRightClick();
 
 	}
-
-
-
-
-
-
-
-
-
-
 
 
 	if (isEditorMode_) {

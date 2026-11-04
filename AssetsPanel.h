@@ -25,6 +25,10 @@ private:
 	/* 画面上にドロップされたobjの読み取り,ヒエラルキとしてついでに追加 */
 	void AddDropModel();
 
+	/* 画面上にドロップされたpngスプライトの読み取り,Assetsの素材として追加 */
+	void AddDropSprite();
+
+
 	HierarchyPanel* hierarchyPanel_ = nullptr;
 
 	/* 選択しているモデルのview */

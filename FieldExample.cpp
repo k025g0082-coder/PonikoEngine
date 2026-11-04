@@ -26,7 +26,6 @@ void FieldExample::Init()
 	blockModel_  = Model::CreateOBJ("resources/Models/cube/cube.obj");
 	goalModel_   = Model::CreateOBJ("resources/Models/cube/cube.obj");
 
-
 	// factoryら 初期化
 	DemoFieldObjectFactory::Initialize();
 	DemoGimmickFactory::Initialize();
@@ -44,6 +43,8 @@ void FieldExample::Init()
 
 	// ロード
 	FieldLoad();
+
+
 }
 
 void FieldExample::Update(Input * input)
