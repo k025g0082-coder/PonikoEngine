@@ -93,13 +93,19 @@ public:
 	}
 
 	/* SRV */
-	D3D12_GPU_DESCRIPTOR_HANDLE GetOffscreenSRVHandleGPU() {
-		return offscreenRenderTarget_.GetSRVHandleGPU();
+	D3D12_GPU_DESCRIPTOR_HANDLE GetOffscreenFinalSRVHandleGPU() {
+		return finalRenderTarget_.GetSRVHandleGPU();
 	};
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvHandleOffscreen() {
-		return offscreenRenderTarget_.GetRtvHandle();
+		return  finalRenderTarget_.GetRtvHandle();
 	};
+
+
+	RenderTarget& GetFinalRenderTarget() {
+		return finalRenderTarget_;
+	}
+
 
 	/* Bloomさせるモデルを追加 */
 	void AddBloomModel(Model* model, WorldTransform* worldTransform) {
@@ -123,6 +129,7 @@ public:
 
 	void SetViewOffset(Vector2 v) {
 		offscreenRenderTarget_.SetViewOffset(v);
+		finalRenderTarget_.SetViewOffset(v);
 
 		bloomRenderTarget_.SetViewOffset(v);
 
@@ -161,8 +168,19 @@ private:
 	/* 明るい部分のぼかし */
 	void DrawBloomBlur();
 
-	/* シーンと合成 */
+
+	// Fog描画
+	void DrawFog();
+
+
+	/* FInal シーンと合成 - Debug用 */
+	void DrawCompositeToFinalRenderTarget();
+
+	/* Final シーンと合成 - Release用 */
 	void DrawCompositeToBackBuffer();
+
+
+
 
 
 	/* Bloom用のRenderTarget */
@@ -170,6 +188,10 @@ private:
 
 	/* Blurピラミッドを採用　そのリスト */
 	std::vector<RenderTarget> blurRenderTargets_;
+
+
+	// ImGuiのImageに渡す最終的な描画結果のRenderTarget
+	RenderTarget finalRenderTarget_;
 
 
 	// 分割数

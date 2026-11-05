@@ -6,6 +6,7 @@
 
 #include "GameObject.h"
 #include "DemoFieldObjectFactory.h"
+#include "PostEffectManager.h"
 
 #include "ImGuiManager.h"
 
@@ -39,7 +40,6 @@ void FieldExample::Init()
 	*/
 	Editor::GetInstance()->GetHierarchyPanel().SetUseGameObjectLayer("test");
 	Editor::GetInstance()->GetHierarchyPanel().SetUseGameObjectLayer("test2");
-
 
 	// ロード
 	FieldLoad();
@@ -248,7 +248,10 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 		}
 
 		player_ = std::make_unique<DemoPlayer>(playerModel_, &camera_, data_,&hierarchy.json_);
-	
+
+		/* bloomテスト */
+		PostEffectManager::GetInstance()->AddBloomModel(playerModel_, &player_->GetWorldTransform());
+
 		// ヒエラルキ側にも登録
 		hierarchy.gameObject_ = player_.get();
 		object = player_.get();

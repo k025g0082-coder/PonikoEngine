@@ -183,7 +183,7 @@ void Editor::Update()
 
 	// オフスクリーンのレンダーターゲットテクスチャをImGui上で表示する
 	ImGui::Image(
-		(ImTextureID)PostEffectManager::GetInstance()->GetOffscreenSRVHandleGPU().ptr,
+		(ImTextureID)PostEffectManager::GetInstance()->GetOffscreenFinalSRVHandleGPU().ptr,
 		mainViewSize
 	);
 

@@ -126,11 +126,6 @@ namespace PonikoEngine {
 				/*　Game更新処理　*/
 				Game::GetInstance()->Draw();
 
-
-				//* UIManagerの描画 *//
-				UIManager::GetInstance()->DrawElements();
-
-
 				// パーティクル
 				Particle::GetInstance()->Draw();
 

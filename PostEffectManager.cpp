@@ -8,6 +8,8 @@
 #include "WinApp.h"
 #include "DirectXUtility.h"
 
+#include "UIManager.h"
+
 #include "timer.h"
 
 #include "Scene.h"
@@ -69,6 +71,12 @@ void PostEffectManager::Initialize() {
 	offscreenRenderTarget_.Initialize(
 		WinApp::GetInstance()->GetClientWidth(),
 		WinApp::GetInstance()->GetClientHeight());
+
+	// 最終的な描画結果
+	finalRenderTarget_.Initialize(
+		WinApp::GetInstance()->GetClientWidth(),
+		WinApp::GetInstance()->GetClientHeight());
+
 
 	//*  BloomのRenderTarget初期化  *//
 
@@ -185,7 +193,7 @@ void PostEffectManager::BeginScene() {
 	}
 
 	// オフスクリーンRTVに切り替え。初期化時のいろは青っぽい色
-	offscreenRenderTarget_.BeginRender(true,Vector4{ 0.1f, 0.25f, 0.5f,1.0f });
+	offscreenRenderTarget_.BeginRender(true,Vector4{ 0.1f, 0.25f, 0.5f,1.0f },true);
 
 
 	firstFrame_ = false;
@@ -236,10 +244,21 @@ void PostEffectManager::ApplyScene() {
 
 			1) 明るいところを摘出
 			2) 明るいところをぼかす
-			3) 最終的なBuckBufferへの描画。
-		　    　backBufferを描画先にして、blurと既存のポストエフェクト効果を掛け合わせたのを描画
+			3) 最終的なBuckBufferなどへの描画。
 
 		*/
+
+		/*
+			描画順序　（こうすればFogとSpriteが混合しない）
+
+			1) シーンの明るいとこ摘出/ぼかす/Bloom処理
+			2) Fog描画（重ね書き）
+			3) UI/Spriteびょうが（重ね書き）
+			4) 重ね書きしたoffscreenをfinalRenderTarget/buckBufferに描画する
+
+		*/
+
+		// 1) シーンの明るいとこ摘出/ぼかす/Bloom処理
 		if (bloomModelPropaties_.size() > 0) {
 
 			// 0.5)* 解像度を2/1に ( なんかバグるのでやめ20261103  多分viewPort関連
@@ -257,11 +276,19 @@ void PostEffectManager::ApplyScene() {
 			//bloomRenderTarget_.ChangeViewResolution(1.0f);
 		}
 
+		// 2)Fog描画（重ね書き）
 		
 
+		// Sprite,UI描画（重ね書き）
 
-		// 3) 最終的なBuckBufferへの描画。
-		//    backBufferを描画先にして、blurと既存のポストエフェクト効果を掛け合わせたのを描画
+
+
+		// 3) 最終的な描画。
+		
+		// 　 Debug版  ・・FinalRenderTargetを描画先にして、blurと既存のポストエフェクト効果を掛け合わせたのを描画
+		DrawCompositeToFinalRenderTarget();
+
+		//    Release版・・backBufferを描画先にして、blurと既存のポストエフェクト効果を掛け合わせたのを描画
 		DrawCompositeToBackBuffer();
 
 }
@@ -530,6 +557,60 @@ void PostEffectManager::DrawBloomBlur()
 	//blurRenderTarget_.EndRender();
 }
 
+void PostEffectManager::DrawFog()
+{
+
+
+
+}
+
+
+void PostEffectManager::DrawCompositeToFinalRenderTarget()
+{
+
+	finalRenderTarget_.BeginRender(true, { 0.0f,0.0f,0.0f,0.0f });
+
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
+	// RootSignatureを設定。
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).rootSignature);
+
+	// PSOを設定
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).graphicsPipelineState);
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = {
+	DirectXCommon::GetSrvHeap().Get()
+	};
+
+	commandList->SetDescriptorHeaps(1, descriptorHeaps);
+
+
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	/* 合成 */
+	commandList->SetGraphicsRootDescriptorTable(0, offscreenRenderTarget_.GetSRVHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(1, blurRenderTargets_.back().GetSRVHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(5, offscreenDepthSRVHandleGPU);
+
+
+	//// ポストエフェクト　パラメータ値
+	commandList->SetGraphicsRootConstantBufferView(2, postEffectResource->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(3, bloomParamResource->GetGPUVirtualAddress());
+
+
+	commandList->SetGraphicsRootConstantBufferView(4, fogParamResource->GetGPUVirtualAddress());
+
+
+	commandList->DrawInstanced(6, 1, 0, 0);
+
+
+	//* UIManagerの描画 *//
+	UIManager::GetInstance()->DrawElements();
+
+
+	finalRenderTarget_.EndRender();
+}
 
 void PostEffectManager::DrawCompositeToBackBuffer()
 {
@@ -603,6 +684,10 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 	
 
 	commandList->DrawInstanced(6, 1, 0, 0);
+
+	//* UIManagerの描画 *//
+	UIManager::GetInstance()->DrawElements();
+
 }
 
 void PostEffectManager::InitializeBlur()

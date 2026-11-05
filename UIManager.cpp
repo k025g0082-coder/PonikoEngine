@@ -6,6 +6,8 @@
 #include "Input.h"
 #include "SceneComponentLoader.h"
 
+#include "PostEffectManager.h"
+
 #include "AssetsPanel.h"
 
 UIManager* UIManager::GetInstance()
@@ -166,6 +168,7 @@ void UIManager::UpdateElements()
 
 void UIManager::DrawElements()
 {
+
 	//　ElementDataの描画
 	for (UIData& data : elementDatas_) {
 
@@ -177,6 +180,7 @@ void UIManager::DrawElements()
 		}
 
 	}
+
 }
 
 void UIManager::JudgeMouseSelectElement(UIElement& e,int index)
