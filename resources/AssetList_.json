@@ -1,5 +1,12 @@
 {
     "Model": {
+        "ModelFolerNames": [
+            "Main",
+            "Enemy",
+            "Boss",
+            "Other",
+            "ssss"
+        ],
         "ModelResources": [
             {
                 "folderName": "Main",

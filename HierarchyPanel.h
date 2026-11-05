@@ -250,8 +250,15 @@ public:
 
 
 
-	// アセット削除（ここに描くなAssetPanelにかけ）
-	void DeleteHierarchyResouce(int index);
+	/// <summary>
+	/// モデルリソースに対応したヒエラルキーモデルを一斉削除
+	/// もし削除したヒエラルキーにGameObjectとれんけいしたのがあった場合false
+	/// </summary>
+	/// <param name="index"> リソースのindex番号 </param>
+	/// <returns>
+	/// 削除成功ならtrue。GameObject連携があればfalse
+	/// </returns>
+	bool DeleteHierarchyResouce(int index);
 
 	// モデル　表示非表示切り替え
 	void ChangeHierarchyModelView(bool b, int index);

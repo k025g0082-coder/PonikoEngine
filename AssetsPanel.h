@@ -113,6 +113,10 @@ private:
 	void ViewTextureTreeNode();
 
 
+	void AddModelLayerPopupWindow();
+
+
+
 	/* ヒエラルキの追加 */
 	void AddHierarchyModel(const ModelResource& resource);
 
@@ -128,7 +132,6 @@ private:
 
 	/* 選択しているモデルのview */
 	SceneViewport selectedModelViewport_;
-	
 
 
 	//* 各モデルのパスやIDをまとめたもの
@@ -139,7 +142,6 @@ private:
 	std::unordered_map<std::string, Model*> hierarchyModelResourceList_;
 	std::unordered_map<std::string, Texture*> hierarchyTextureResourceList_;
 	
-
 	std::vector<std::string> modelFolderNames_ = {
 		"Main",
 		"Enemy",

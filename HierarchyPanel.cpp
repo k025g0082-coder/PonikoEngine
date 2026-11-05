@@ -138,9 +138,13 @@ void HierarchyPanel::ViewPanel(bool& show)
 
 			ImGui::SetWindowFontScale(1.1f);// 一時的に大きく
 
+
+			//
+			ImGui::AlignTextToFramePadding();
+
+
 			// レイヤー名
-			bool isOpen = ImGui::TreeNodeEx((icon + "  " + layerName).c_str(), ImGuiTreeNodeFlags_OpenOnArrow |
-				ImGuiTreeNodeFlags_SpanLabelWidth);
+			bool isOpen = ImGui::TreeNodeEx((icon + "  " + layerName).c_str(), ImGuiTreeNodeFlags_SpanLabelWidth);
 
 			ImGui::SetWindowFontScale(1.0f);//
 
@@ -508,8 +512,20 @@ WorldTransform* HierarchyPanel::PasteHierarchyModel()
 }
 
 
-void HierarchyPanel::DeleteHierarchyResouce(int index)
+bool HierarchyPanel::DeleteHierarchyResouce(int index)
 {
+	/*
+		GameObjectを含んでるか探索
+	*/
+	for (int i = 0; i < hierarchyModels_.size(); i++)
+	{
+		std::unique_ptr<Hierarchy<Model>>& model = hierarchyModels_.at(i);
+		
+		if (model->gameObject_ != nullptr)
+			return false;// 見つかった場合 失敗.  False
+	}
+
+
 	// リソースに紐づけられたIDのモデルを全て削除
 	for (int i = 0; i < hierarchyModels_.size(); i++)
 	{
@@ -530,7 +546,7 @@ void HierarchyPanel::DeleteHierarchyResouce(int index)
 
 	//// モデルのリソース情報削除
 	//hierarchyModelResouces_.erase(hierarchyModelResouces_.begin() + index);
-
+	return true;
 }
 
 void HierarchyPanel::ChangeHierarchyModelView(bool b, int assetIndex)

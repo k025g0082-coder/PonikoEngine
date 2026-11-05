@@ -5,8 +5,7 @@
 
 #include "FileDropManager.h"
 
-#include "WinApp.h"
-
+#include <misc/cpp/imgui_stdlib.h>
 #include <imgui/IconsFontAwesome.h>
 
 #include <algorithm>
@@ -129,9 +128,12 @@ void AssetsPanel::AssetsLoad()
 		*/
 		loder->BeginGroup("Model");
 
+			// フォルダの名前一覧
+			loder->Property("ModelFolerNames",modelFolderNames_);
+
 			// ヒエラルキのモデルのパスリスト 登録
 			loder->Property("ModelResources", hierarchyModelResouces_);
-
+			
 		loder->EndGroup();
 
 		/*
@@ -542,6 +544,18 @@ void AssetsPanel::AddDropSprite()
 
 void AssetsPanel::ViewModelTreeNode()
 {
+	/* レイヤー追加ウインドウ表示 */
+	if (ImGui::Button("レイヤー追加")) {
+		ImGui::OpenPopup("Popup");
+	}
+
+	ImGui::Dummy(ImVec2{ 0,4.0f });// 余白
+
+
+	// 追加ウインドウ
+	AddModelLayerPopupWindow();
+
+
 	for (int folderIndex = 0; folderIndex < modelFolderNames_.size(); folderIndex++)
 	{
 
@@ -552,10 +566,14 @@ void AssetsPanel::ViewModelTreeNode()
 		ImGui::PushID(("Model_" + folder).c_str());
 
 
+		//
+		ImGui::AlignTextToFramePadding();
+
+
 		// フォルダ表示
 		bool isOpen = ImGui::TreeNodeEx(
 			folder.c_str(),
-			ImGuiTreeNodeFlags_SpanAvailWidth
+			ImGuiTreeNodeFlags_SpanLabelWidth
 		);
 
 		/*   -ドラッグ終了地点   */
@@ -573,6 +591,58 @@ void AssetsPanel::ViewModelTreeNode()
 
 			ImGui::EndDragDropTarget();
 		}
+
+		// 削除ボタン
+
+		ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
+
+		ImGui::PushID(("Model_" + folder).c_str());
+		if (ImGui::Button("Delete")) {
+
+			// もしフォルダー名がMainじゃなかったら
+			if (folder != "Main") {
+
+
+				bool del = true;
+
+				// 対応したレイヤー内の使われたヒエラルキーresourceを削除
+				for (int i = 0; i < hierarchyModelResouces_.size(); i++)
+				{
+					const auto& resource = hierarchyModelResouces_.at(i);
+
+					// もしレイヤー名が同じであるリソースであれば
+					if (resource.folderName_ == folder) {
+						del = hierarchyPanel_->DeleteHierarchyResouce(i);// 削除
+						break;
+					}
+					
+				}
+
+				if (!del) {
+					// 削除失敗の場合リターン
+					ImGui::PopID();
+					ImGui::PopID();
+					if (isOpen) {
+						ImGui::TreePop();
+					}
+					return;
+				}
+
+				// 削除
+				modelFolderNames_.erase(modelFolderNames_.begin() + folderIndex);
+
+			}
+
+			ImGui::PopID();
+			ImGui::PopID();
+
+			// ★ツリーが開いていたら必ず TreePop を呼んでから抜ける　　ダルｗｗｗｗ
+			if (isOpen) {
+				ImGui::TreePop();
+			}
+			break;
+		}
+		ImGui::PopID();
 
 		// フォルダの中身 - 表示,一般の処理
 		if (isOpen)
@@ -636,6 +706,10 @@ void AssetsPanel::ViewModelTreeNode()
 		// スコープ終了
 		ImGui::PopID();
 	}
+
+	
+
+
 }
 
 /*
@@ -903,6 +977,50 @@ void AssetsPanel::ViewTextureTreeNode()
 		// スコープ終了
 		ImGui::PopID();
 	}
+}
+
+void AssetsPanel::AddModelLayerPopupWindow()
+{
+	// ポップアップ本体
+	if (ImGui::BeginPopup("Popup")) {
+
+		ImGui::Text("レイヤー追加");
+
+		ImGui::Text("レイヤー名：");
+		ImGui::SameLine();
+
+		
+		static std::string inputLayerName;
+		ImGui::InputText(" ", &inputLayerName);
+
+
+		/* レイヤー操作 */
+		if (ImGui::Button("Add")) {
+
+			if (!inputLayerName.empty()) {
+
+				// 検索
+				auto it = std::find(
+					modelFolderNames_.begin(),
+					modelFolderNames_.end(),
+					inputLayerName
+				);
+
+				// 同じ名前そんざいしない
+				if (it == modelFolderNames_.end()) {
+
+					// 追加
+					modelFolderNames_.push_back(inputLayerName);
+
+					// 閉じる
+					ImGui::CloseCurrentPopup();
+				}
+			}
+		}
+
+		ImGui::EndPopup();
+	}
+
 }
 
 void AssetsPanel::AddHierarchyModel(const ModelResource& resource)
