@@ -48,6 +48,25 @@ void Input::Update() {
 	mousePositionY_ = static_cast<int>(
 		(tmpMousePositionY_ - Game::GetInstance()->GetGameScreenOffset().y) * scaleY);
 
+	// 左クリ - 押された瞬間：今フレームON && 前フレームOFF
+	leftTriggerButton_ = (leftButton_ && !prevLeftButton_);
+
+	// 左クリ - 離された瞬間：今フレームOFF && 前フレームON
+	leftReleaseButton_ = (!leftButton_ && prevLeftButton_);
+
+	/* 左クリ - 前フレームの状態を更新 */
+	prevLeftButton_ = leftButton_;
+
+
+	// 右クリ - 押された瞬間：今フレームON && 前フレームOFF
+	rightTriggerButton_ = (rightButton_ && !prevRightButton_);
+
+	// 右クリ - 離された瞬間：今フレームOFF && 前フレームON
+	rightReleaseButton_ = (!rightButton_ && prevRightButton_);
+
+	/* 右クリ - 前フレームの状態を更新 */
+	prevRightButton_ = rightButton_;
+
 
 	// キーボード
 	keyboard->Acquire();

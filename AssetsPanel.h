@@ -1,7 +1,9 @@
 #pragma once
 #include "SceneViewport.h"
-
 #include "Texture.h"
+
+#include <unordered_map>
+
 
 class HierarchyPanel;
 
@@ -40,6 +42,13 @@ struct TextureResource {
 	std::string folderName_ = "Main";
 
 };
+
+// DragDropPayload用。　なんか２つ以上登録できないらしいので仕方ない
+struct DragTextureResource {
+	int index;
+	char pathId[256];		// pathID。構造体とかstd::stringはわたせないらしい。
+};
+
 
 /* エディタのアセット管理パネル */
 class AssetsPanel

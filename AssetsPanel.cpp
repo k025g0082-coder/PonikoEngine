@@ -73,24 +73,39 @@ void AssetsPanel::PanelView(bool& show)
 		ImGuiCol_WindowBg,
 		ImVec4(0.10f, 0.14f, 0.20f, 1.0f)
 	);
-
-	if (ImGui::Begin("Assets-Manager", &show)) {
-
-
-		ImGui::SeparatorText("Models");
-
-		// === モデル
+	
+	// ===開始。 上のばーなし
+	if (ImGui::Begin("Assets-Manager", &show, ImGuiWindowFlags_NoTitleBar)) {
 		
-		ViewModelTreeNode();
+		ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.11f, 0.11f, 0.11f, 0.86f));        // 通常の非選択タブ
+		ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.18f, 0.18f, 0.18f, 1.00f)); // ホバー時の非選択タブ
 
-		/*
-			テキスチャー
-		*/
-		ImGui::SeparatorText("Textures");
+		/* 各タブ表示 */
+		if (ImGui::BeginTabBar("MyTabBar")) {
 
-		/* テキスチャーの一覧表示 */
-		ViewTextureTreeNode();
+			if (ImGui::BeginTabItem(ICON_FA_CUBE "  Model")) {
 
+				/*
+					モデル
+				*/
+				ImGui::SeparatorText("Models");
+				ViewModelTreeNode();
+
+				ImGui::EndTabItem();
+			}
+			if (ImGui::BeginTabItem(ICON_FA_PHOTO_FILM "  Texture")) {
+
+				/*
+					テキスチャー
+				*/
+				ImGui::SeparatorText("Textures");
+				ViewTextureTreeNode();
+
+				ImGui::EndTabItem();
+			}
+			ImGui::EndTabBar();
+		}
+		ImGui::PopStyleColor(2);
 
 
 		/* 選択中のモデルのビューポート表示 */
@@ -99,7 +114,7 @@ void AssetsPanel::PanelView(bool& show)
 			ImVec2(320.0f, 180.0f)
 		);
 
-		selectedModelViewport_.ImGuiView();
+		//selectedModelViewport_.ImGuiView();
 	}
 
 	ImGui::End();
@@ -544,6 +559,8 @@ void AssetsPanel::AddDropSprite()
 
 void AssetsPanel::ViewModelTreeNode()
 {
+#ifdef USE_IMGUI
+
 	/* レイヤー追加ウインドウ表示 */
 	if (ImGui::Button("レイヤー追加")) {
 		ImGui::OpenPopup("Popup");
@@ -580,7 +597,7 @@ void AssetsPanel::ViewModelTreeNode()
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload =
-				ImGui::AcceptDragDropPayload("MODEL"))
+				ImGui::AcceptDragDropPayload("MODEL_INDEX"))
 			{
 				// 受け取ったモデルの配列番号
 				int index = *(const int*)payload->Data;
@@ -681,7 +698,7 @@ void AssetsPanel::ViewModelTreeNode()
 					{
 						//  ドラッグ開始した配列のindexを渡す  //
 						ImGui::SetDragDropPayload(
-							"MODEL",
+							"MODEL_INDEX",
 							&i,
 							sizeof(int)
 						);
@@ -709,7 +726,7 @@ void AssetsPanel::ViewModelTreeNode()
 
 	
 
-
+#endif
 }
 
 /*
@@ -717,6 +734,7 @@ void AssetsPanel::ViewModelTreeNode()
 */
 void AssetsPanel::ViewModelLeafTreeNode(int index, const ModelResource& resource)
 {
+#ifdef USE_IMGUI
 
 	int alpha = 255;
 
@@ -744,7 +762,7 @@ void AssetsPanel::ViewModelLeafTreeNode(int index, const ModelResource& resource
 	/* --- ドラッグ開始処理 --- */
 	if (ImGui::BeginDragDropSource()) {
 		// 配列番号（index）をペイロードとして渡す
-		ImGui::SetDragDropPayload("MODEL", &index, sizeof(int));
+		ImGui::SetDragDropPayload("MODEL_INDEX", &index, sizeof(int));
 
 		// ドラッグ中にカーソル横に表示するプレビューテキスト
 		ImGui::Text("%s", resource.name_.c_str());
@@ -880,11 +898,13 @@ void AssetsPanel::ViewModelLeafTreeNode(int index, const ModelResource& resource
 
 	ImGui::PopID();
 
+#endif
 }
 
 
 void AssetsPanel::ViewTextureTreeNode()
 {
+#ifdef USE_IMGUI
 	for (int folderIndex = 0; folderIndex < textureFolderNames_.size(); folderIndex++)
 	{
 
@@ -904,11 +924,13 @@ void AssetsPanel::ViewTextureTreeNode()
 		/*   -ドラッグ終了地点   */
 		if (ImGui::BeginDragDropTarget())
 		{
+			/* indexを受け取る */
 			if (const ImGuiPayload* payload =
 				ImGui::AcceptDragDropPayload("TEXTURE"))
 			{
 				// 受け取ったモデルの配列番号
-				int index = *(const int*)payload->Data;
+				DragTextureResource r = *(const DragTextureResource*)payload->Data;
+				int index = r.index;
 
 				// モデルの所属フォルダを変更
 				hierarchyTextureResouces_[index].folderName_ = folder;
@@ -923,7 +945,7 @@ void AssetsPanel::ViewTextureTreeNode()
 			for (int i = 0; i < hierarchyTextureResouces_.size(); i++)
 			{
 				//
-				const auto& resource = hierarchyTextureResouces_.at(i);
+				auto& resource = hierarchyTextureResouces_.at(i);
 
 				if (resource.folderName_ == folder)
 				{
@@ -948,11 +970,22 @@ void AssetsPanel::ViewTextureTreeNode()
 					/*   -ドラッグ開始地点-    */
 					if (ImGui::BeginDragDropSource())
 					{
-						//  ドラッグ開始した配列のindexを渡す  //
+
+						/*
+							ドラッグされた情報をペイロードする。
+							なんか１ついじょうSetDragDropPayloadは同時にできないらしくラップ？した構造体
+						*/
+						DragTextureResource r{};
+						r.index = i;
+
+						// 受け渡すPathId ＜－リソースPathId  をコピー。
+						strcpy_s(r.pathId, sizeof(r.pathId), resource.pathId_.c_str());
+						
+
 						ImGui::SetDragDropPayload(
 							"TEXTURE",
-							&i,
-							sizeof(int)
+							&r,
+							sizeof(DragTextureResource)
 						);
 
 						// 名前
@@ -977,10 +1010,12 @@ void AssetsPanel::ViewTextureTreeNode()
 		// スコープ終了
 		ImGui::PopID();
 	}
+#endif
 }
 
 void AssetsPanel::AddModelLayerPopupWindow()
 {
+#ifdef USE_IMGUI
 	// ポップアップ本体
 	if (ImGui::BeginPopup("Popup")) {
 
@@ -1020,7 +1055,7 @@ void AssetsPanel::AddModelLayerPopupWindow()
 
 		ImGui::EndPopup();
 	}
-
+#endif
 }
 
 void AssetsPanel::AddHierarchyModel(const ModelResource& resource)
@@ -1053,16 +1088,17 @@ void AssetsPanel::AddHierarchyModel(const ModelResource& resource)
 
 void AssetsPanel::PushButtonStyle()
 {
+#ifdef USE_IMGUI
 	//ImGui::SetWindowFontScale(1.2f);// 一時的に大きく
 	ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);// 枠無くし
 	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.3f, 0.3f, 0.6f, 1));// カラー
-
+#endif
 }
 void AssetsPanel::PopButtonStyle()
 {
-
+#ifdef USE_IMGUI
 	//ImGui::SetWindowFontScale(1.0f);
 	ImGui::PopStyleVar();
 	ImGui::PopStyleColor();
-
+#endif
 }

@@ -4,6 +4,8 @@
 #include "DirectXCommon.h"
 #include "DirectXUtility.h"
 
+#include <format>
+
 void Texture::Initialize(std::string texturePath) {
 
 	//Texture読込み
@@ -22,7 +24,7 @@ void Texture::Initialize(std::string texturePath) {
 
 	// === metaDataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metadata.format;
+	srvDesc.Format = DirectX::MakeSRGB(metadata.format);// 
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; //2D++
 	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
@@ -51,6 +53,13 @@ void Texture::Initialize(std::string texturePath) {
 	//SRVの生成
 	DirectXCommon::GetInstance()->GetDevice().Get()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
 	texturePath_ = texturePath;
+
+	//OutputDebugStringA(
+	//	std::format(
+	//		"Texture Format: {}\n",
+	//		static_cast<int>(metadata.format)
+	//	).c_str()
+	//);
 }
 
 	// imageからtextureを作る場合の初期化処理

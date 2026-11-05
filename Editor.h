@@ -96,9 +96,8 @@ public:
 	};
 
 
-
-
 	HierarchyPanel& GetHierarchyPanel() { return hierarchyPanel_; }
+
 
 	// エンジン閉じる際の設定
 	void SaveIniFile();
@@ -132,6 +131,23 @@ public:
 	}
 
 
+	/// <summary>
+	/// マウスがメインビューの左上を原点0,0として、矩形内ににあるかを返す
+	/// </summary>
+	/// <param name="min">左上の座標</param>
+	/// <param name="max">右上の座標</param>
+	/// <returns>あるか</returns>
+	bool IsMainViewInsideMouse(Vector2 min,Vector2 max) {
+		return  maiViewLocalMouseX >= min.x &&
+				maiViewLocalMouseX <= max.x &&
+				mainViewLocalMouseY >= min.y &&
+				mainViewLocalMouseY <= max.y;
+	}
+
+
+	// 1280pxを基にした時の現在の画面比率をかえす
+	float GetMainViewRatio()  { return mainViewSize.x / 1280.0f; };
+	
 private:
 
 

@@ -2,10 +2,7 @@
     "Model": {
         "ModelFolerNames": [
             "Main",
-            "Enemy",
-            "Boss",
-            "Other",
-            "ssss"
+            "Test"
         ],
         "ModelResources": [
             {
@@ -18,12 +15,20 @@
     "Texture": {
         "TextureResources": [
             {
-                "folderName": "Main",
+                "folderName": "UI",
                 "pathId": "resources/white100x100.png"
             },
             {
-                "folderName": "Main",
+                "folderName": "UI",
                 "pathId": "resources/black100x100.png"
+            },
+            {
+                "folderName": "Main",
+                "pathId": "resources/keichan.png"
+            },
+            {
+                "folderName": "Main",
+                "pathId": "resources/Engine/uvChecker.png"
             }
         ]
     }

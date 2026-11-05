@@ -987,6 +987,86 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Texture
 	};
 }
 
+void SceneComponentLoader::Property(const std::string& name, std::vector< UIData >& value) {
+
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
+
+		// save
+		[this, &value, name](json& group) {
+
+			// 空でも必ず配列として保存
+			group[name] = json::array();
+
+			for (auto& data : value) {
+
+				json item;
+
+				item["name"] = data.name_;
+
+				// 空でも（ｒｙ
+				item["elements"] = json::array();
+
+				/* データ内のElements読み込み */
+				for (auto& element : data.elements_) {
+					
+					// 空データなら
+					if (element.pathID_.empty()) continue;
+
+					json e;
+					
+					e["type"] = (int)element.type_;
+					e["pathID"] = element.pathID_;
+					e["groupName"] = element.groupName_;
+
+					e["position"] = Vector3ToJson(element.sprite_.GetScreenTransform().translation_);
+					e["scale"]    = Vector3ToJson(element.sprite_.GetScreenTransform().scale_);
+					e["rotation"] = Vector3ToJson(element.sprite_.GetScreenTransform().rotation_);
+
+					//
+					item["elements"].push_back(e);
+				}
+
+				group[name].push_back(item);
+
+			}
+		},
+
+		// load
+		[this, &value, name](const json& group) {
+
+			// なかった場合
+			if (!group.contains(name)) {
+				return;
+			}
+
+			for (auto& data : group.at(name)) {
+
+				UIData& data_ = value.emplace_back();
+
+				data_.name_ = data.at("name").get<std::string>();
+
+				// Elementの一斉読み込み
+				for (auto& item : data.at("elements")) {
+
+					UIElement& element = data_.elements_.emplace_back();
+
+					element.type_   = item.at("type").get<UIType>();
+					element.pathID_ = item.at("pathID").get<std::string>();
+					element.groupName_ = item.at("groupName").get<std::string>();
+
+					element.position_ = JsonToVector3(item.at("position"));
+					element.scale_    = JsonToVector3(item.at("scale"));
+					element.rotation_ = JsonToVector3(item.at("rotation"));
+					
+				}
+
+			}
+
+		}
+	};
+}
+
+
 bool SceneComponentLoader::SaveSwitchJson(std::string jsonPath)
 {
 

@@ -18,7 +18,7 @@ void RenderTarget::Initialize(int32_t width, int32_t height, float viewResolutio
 	height_ = static_cast<int32_t>(static_cast<float>(height) * viewResolution);
 	
 	viewDrawRect_.right = width_;
-	viewDrawRect_.bottom = width_;
+	viewDrawRect_.bottom = height_;
 
 	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
 

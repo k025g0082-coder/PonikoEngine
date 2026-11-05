@@ -24,6 +24,8 @@
 #include "Particle.h"
 #include "LightingManager.h"
 
+#include "UIManager.h"
+
 
 using json = nlohmann::json;
 
@@ -185,6 +187,9 @@ public:
 
 	// レイヤー設定
 	void Property(const std::string& name, std::vector< HierarchyLayer >& value);
+	
+	// UIデータ
+	void Property(const std::string& name, std::vector< UIData >& value);
 
 
 	/// <summary>

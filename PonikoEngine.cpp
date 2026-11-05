@@ -7,6 +7,10 @@
 
 #include "EffekseerManager.h"
 
+
+#include "UIManager.h"
+
+
 namespace PonikoEngine {
 
 	void Initialize(const wchar_t* title) {
@@ -59,6 +63,9 @@ namespace PonikoEngine {
 		/*　Editor初期化　*/
 		Editor::GetInstance()->Initialize();
 
+		/* UIManagerの初期化 */
+		UIManager::GetInstance()->Initialize();
+
 
 		// Gameシステムの方の初期化
 		Game::GetInstance()->Init();
@@ -79,6 +86,11 @@ namespace PonikoEngine {
 			/*　Editor更新処理　*/
 			Editor::GetInstance()->Update();
 			
+
+			//* UIManagerの更新 *//
+			UIManager::GetInstance()->UpdateElements();
+
+
 			/*　Game更新処理　*/
 			Game::GetInstance()->Update();
 
@@ -110,8 +122,14 @@ namespace PonikoEngine {
 
 				/*　Editor描画処理　*/
 				Editor::GetInstance()->Draw();
+
 				/*　Game更新処理　*/
 				Game::GetInstance()->Draw();
+
+
+				//* UIManagerの描画 *//
+				UIManager::GetInstance()->DrawElements();
+
 
 				// パーティクル
 				Particle::GetInstance()->Draw();

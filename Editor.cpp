@@ -20,7 +20,11 @@
 
 #include "FileDropManager.h"
 
+#include "UIManager.h"
+
 #include "PostEffectManager.h"
+
+#include "UIManager.h"
 
 #include "DebugLine.h"
 
@@ -68,7 +72,9 @@ void Editor::Initialize() {
 		Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kFullScreenMode);
 	}
 
-	// 各パネルの初期化
+	/*
+		各パネルの初期化
+	*/ 
 
 	// モデルなどアセット読み込み
 	assetsPanel_.Initialize();
@@ -77,6 +83,11 @@ void Editor::Initialize() {
 	// アセットをもとにヒエラルキ生成
 	hierarchyPanel_.SetAssetsPanel(&assetsPanel_);
 	hierarchyPanel_.Initialize(currentSceneJsonPath,grid);
+
+
+	/* UIManager初期化 */
+	UIManager::GetInstance()->SetAssetPanel(&assetsPanel_);
+	UIManager::GetInstance()->SetHierarchyPanel(&hierarchyPanel_);
 
 
 	effectSequencer_.mFrameMin = -100;
@@ -175,6 +186,33 @@ void Editor::Update()
 		(ImTextureID)PostEffectManager::GetInstance()->GetOffscreenSRVHandleGPU().ptr,
 		mainViewSize
 	);
+
+
+
+	/*   AssetsPanelから、Textureがッドラッグされた際の処理　　*/
+
+
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* payload =
+			ImGui::AcceptDragDropPayload("TEXTURE"))
+		{
+
+			// 受け取ったモデルの配列番号
+			DragTextureResource resource = *(const DragTextureResource*)payload->Data;
+
+			/*
+				UIElementを生成
+			*/
+			UIManager::GetInstance()->AddUIElement( hierarchyPanel_.GetSelectedCurrentLayerName(), resource.pathId );
+				
+		}
+
+		ImGui::EndDragDropTarget();
+	}
+
+
+
 
 	// 通知のビョーガ
 	notification_.Draw();
@@ -276,7 +314,7 @@ ImGui::End();
 
 
 	// ViewManipulateの領域
-	ImVec2 manipulateSize = ImVec2(256.0f, 256.0f);
+	ImVec2 manipulateSize = ImVec2(128.0f, 128.0f);
 
 	ImVec2 manipulatePos = ImVec2(
 		mainViewPos.x + mainViewSize.x - manipulateSize.x - 10.0f,
@@ -570,7 +608,7 @@ void Editor::DrawViewManipulate()
 {
 
 	/*カメラ視点の回転 */
-	ImVec2 manipulateSize = ImVec2(256.0f, 256.0f);
+	ImVec2 manipulateSize = ImVec2(128.0f, 128.0f);
 	ImVec2 manipulatePos = ImVec2(mainViewPos.x + mainViewSize.x - manipulateSize.x - 10.0f, mainViewPos.y + 10.0f);
 
 
@@ -1080,16 +1118,22 @@ void Editor::PropartyTab()
 
 
 		// ロードボタン
-		if (ImGui::Button("Load")) {
+		if (ImGui::Button("Load(バグ)")) {
 			hierarchyPanel_.HierarchyLoad(currentSceneJsonPath);
 		}
 
 		ImGui::SameLine();
 
-		// セーブボタン
+		/*
+			一斉セーブボタン
+		*/
 		if (ImGui::Button("Save")) {
+
 			hierarchyPanel_.HierarchySave(currentSceneJsonPath);
 			assetsPanel_.AssetsSave();
+
+			UIManager::GetInstance()->SaveElementData();
+
 		}
 
 

@@ -21,8 +21,11 @@
 
 #pragma once
 
+
 #ifndef IMGUI_DISABLE
 
+#include <imgui.h>
+#include <imgui_internal.h>
 #include <string>
 
 namespace ImGui

@@ -12,6 +12,8 @@
 
 #include "FileDropManager.h"
 
+#include "UIManager.h"
+
 #include <misc/cpp/imgui_stdlib.h>
 #include <imgui_internal.h>
 
@@ -96,7 +98,7 @@ void HierarchyPanel::ViewPanel(bool& show)
 		
 
 		/* レイヤー追加ウインドウ表示 */
-		if (ImGui::Button("+")) {
+		if (ImGui::Button("レイヤー追加")) {
 			ImGui::OpenPopup("Popup");
 		}
 

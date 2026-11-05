@@ -80,12 +80,32 @@ public:
 	}
 
 	// 左クリック
-	void SetLeftButton(bool isDown) { leftButton_ = isDown; }
+	void SetLeftButton(bool isDown) { 
+		
+		leftButton_ = isDown;
+
+	}
+
 	bool GetLeftMouseButtonDown() const { return leftButton_; }
 
 	// 右クリック
-	void SetRightButton(bool isDown) { rightButton_ = isDown; }
+	void SetRightButton(bool isDown) {
+
+		rightButton_ = isDown;
+
+	}
+
 	bool GetRightMouseButtonDown() const { return rightButton_; }
+
+
+	// 押した瞬間 (Trigger)
+	bool GetLeftMouseButtonTrigger() const { return leftTriggerButton_; }
+	bool GetRightMouseButtonTrigger() const { return rightTriggerButton_; }
+
+	// 離した瞬間 (Release)
+	bool GetLeftMouseButtonRelease() const { return leftReleaseButton_; }
+	bool GetRightMouseButtonRelease() const { return rightReleaseButton_; }
+
 
 	// ホイール操作
 	int GetMouseWheel() const { return mouseWheel_; }
@@ -111,7 +131,18 @@ private:
 
 
 	bool leftButton_ = false;
+	bool prevLeftButton_ = false;   // 前の状態
+
+	bool leftTriggerButton_ = false;// 押された瞬間
+	bool leftReleaseButton_ = false;// 離された瞬間
+
+
 	bool rightButton_ = false;
+	bool prevRightButton_ = false;	 // 前の状態
+
+	bool rightTriggerButton_ = false;// 押された瞬間
+	bool rightReleaseButton_ = false;// 離された瞬間
+
 
 	int mouseWheel_ = 0;
 
