@@ -12,6 +12,10 @@ public:
 
 	void Initialize(std::string texturePath);
 
+	// Assetsからポインタ貰う用
+	void Initialize(Texture* texture);
+
+
 	void TextTextureInitialize(unsigned char* image, int width, int height);
 
 	void TextTextureUpdate(unsigned char* image);
@@ -184,7 +188,7 @@ public:
 
 	// よみこめたか（多分あってない）
 	bool IsLoaded() {
-		return texture.GetTextureSrvHandleGPU().ptr != 0;
+		return texture_->GetTextureSrvHandleGPU().ptr != 0;
 	};
 
 	// てくうちゃSRV
@@ -198,7 +202,12 @@ private:
 	ScreenTransform screenTransform_;
 
 	// テクスチャ
-	Texture texture;
+	Texture* texture_ = nullptr;
+
+
+	// テキスト用
+	Texture textTexture_;
+
 
 	ID3D12Device* device_;
 

@@ -18,6 +18,10 @@ struct ModelResource {
 
 	bool isView_ = true;	 // 表示非表示
 
+
+	// パネルの所属フォルダ
+	std::string folderName_ = "Main";
+
 };
 
 
@@ -28,11 +32,14 @@ struct TextureResource {
 
 	std::string pathId_;     // パスおよびIDの意味を持つ
 
-	Texture* texture_;
+	Texture* texture_ = nullptr; // 実体
 	std::string name_;		 // 名前表示用
 
-};
 
+	// パネルの所属フォルダ
+	std::string folderName_ = "Main";
+
+};
 
 /* エディタのアセット管理パネル */
 class AssetsPanel
@@ -50,8 +57,10 @@ public:
 
 	// タグー＞モデルのアドレス のリスト
 	std::unordered_map<std::string, Model*>& GethierarchyModelResourceList() { return hierarchyModelResourceList_; }
+	std::unordered_map<std::string, Texture*>& GethierarchyTextureResourceList() { return hierarchyTextureResourceList_; }
 	
 	std::vector<ModelResource>& GetHierarchyModelResources() { return hierarchyModelResouces_; }
+	std::vector<TextureResource>& GetHierarchyTextureResources() { return hierarchyTextureResouces_; }
 
 	
 	// モデルリソース - 追加	
@@ -67,14 +76,14 @@ public:
 	}
 
 
-	// スプライトリソース - 追加
-	void AddSpriteResource(TextureResource& r) {
+	// Textureリソース - 追加
+	void AddTextureResource(TextureResource& r) {
 		hierarchyTextureResouces_.push_back(r);
 		hierarchyTextureResourceList_[r.pathId_] = r.texture_;
 	}
 
-	// スプライトリソース - 削除
-	void DeleteSpriteResource(int index) {
+	// Textureリソース - 削除
+	void DeleteTextureResource(int index) {
 		hierarchyTextureResourceList_.erase(hierarchyTextureResouces_.at(index).pathId_);
 		hierarchyTextureResouces_.erase(hierarchyTextureResouces_.begin() + index);
 	}
@@ -89,11 +98,30 @@ public:
 
 private:
 
-	/* 画面上にドロップされたobjの読み取り,ヒエラルキとしてついでに追加 */
+	// 画面上にドロップされたobjの読み取り,ヒエラルキとしてついでに追加
 	void AddDropModel();
 
-	/* 画面上にドロップされたpngスプライトの読み取り,Assetsの素材として追加 */
+	// 画面上にドロップされたpngスプライトの読み取り,Assetsの素材として追加
 	void AddDropSprite();
+
+
+	// モデル一覧
+	void ViewModelTreeNode();
+	void ViewModelLeafTreeNode(int index, const ModelResource& resource);
+
+	// テキスチャ一覧
+	void ViewTextureTreeNode();
+
+
+	/* ヒエラルキの追加 */
+	void AddHierarchyModel(const ModelResource& resource);
+
+
+	// 一覧表示で使うボタンの開始
+	void PushButtonStyle();
+
+	// 一覧表示で使うボタンの終了
+	void PopButtonStyle();
 
 
 	HierarchyPanel* hierarchyPanel_ = nullptr;
@@ -111,6 +139,20 @@ private:
 	std::unordered_map<std::string, Model*> hierarchyModelResourceList_;
 	std::unordered_map<std::string, Texture*> hierarchyTextureResourceList_;
 	
+
+	std::vector<std::string> modelFolderNames_ = {
+		"Main",
+		"Enemy",
+		"Boss",
+		"Other",
+	};
+
+	std::vector<std::string> textureFolderNames_ = {
+		"Main",
+		"UI",
+		"Effect",
+	};
+
 
 	/* よみこむJSONのパス */
 	std::string jsonPath;

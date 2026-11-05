@@ -15,7 +15,7 @@ void Sprite::TextTextureInitialize(unsigned char* image,int width,int height) {
 
 	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
 
-	texture.Initialize(image,width,height);
+	textTexture_.Initialize(image,width,height);
 
 	imageWidth = width;
 	imageHeight = height;
@@ -119,7 +119,9 @@ void Sprite::Initialize(std::string texturePath)
 {
 
 	// テクスチャ
-	texture.Initialize(texturePath);
+	texture_ = new Texture();
+	texture_->Initialize(texturePath);
+
 
 	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
 
@@ -163,8 +165,8 @@ void Sprite::Initialize(std::string texturePath)
 		SUCCEEDED(hr)
 	);
 
-	int tWidth = (int)texture.GetTextureWidth();
-	int tHeight = (int)texture.GetTextureHeight();
+	int tWidth = (int)texture_->GetTextureWidth();
+	int tHeight = (int)texture_->GetTextureHeight();
 
 
 
@@ -229,10 +231,129 @@ void Sprite::Initialize(std::string texturePath)
 
 };
 
+
+
+void Sprite::Initialize(Texture* texture)
+{
+
+	// テクスチャ
+	texture_ = texture;
+
+
+	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
+
+	//頂点リソース用のヒープ
+	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
+	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
+
+	// 頂点リソースの設定
+	D3D12_RESOURCE_DESC vertexResourceDesc{};
+
+	vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	vertexResourceDesc.Width = sizeof(SpriteVertexData) * 3;
+
+	vertexResourceDesc.Height = 1;
+	vertexResourceDesc.DepthOrArraySize = 1;
+	vertexResourceDesc.MipLevels = 1;
+	vertexResourceDesc.SampleDesc.Count = 1;
+
+	// バッファはこれにする決まり
+	vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+	//Sprite用の頂点リソースを作る
+	vertexResource = DirectXUtility::CreateBufferResource(device_, sizeof(SpriteVertexData) * 6);
+
+	// リソースの先頭のアドレスから使う
+	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+
+	// 使用するリソースのサイズは頂点３つ分
+	vertexBufferView.SizeInBytes = sizeof(SpriteVertexData) * 6;
+
+	//　１頂点のサイズ
+	vertexBufferView.StrideInBytes = sizeof(SpriteVertexData);
+
+	// リソースの箱にデータを書き込んでく
+	HRESULT hr = vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
+
+	DirectXUtility::Log(
+		"Initialize vertexResource=%p vertexDataSprite=%p hr=%d",
+		vertexResource,
+		vertexDataSprite,
+		SUCCEEDED(hr)
+	);
+
+	int tWidth = (int)texture_->GetTextureWidth();
+	int tHeight = (int)texture_->GetTextureHeight();
+
+
+
+	// 大きさ設定
+	SetSize(tWidth, tHeight);
+
+	//// 1枚目の三角形
+	//vertexDataSprite[0].position = { 0.0f, tHeight, 0.0f, 1.0f }; // 左下
+	//vertexDataSprite[0].texcoord = { 0.0f, 1.0f };
+
+	//vertexDataSprite[1].position = { 0.0f,    0.0f,    0.0f, 1.0f }; // 左上
+	//vertexDataSprite[1].texcoord = { 0.0f, 0.0f };
+
+	//vertexDataSprite[2].position = { tWidth,  tHeight, 0.0f, 1.0f }; // 右下
+	//vertexDataSprite[2].texcoord = { 1.0f, 1.0f };
+
+	//// 2枚目の三角形
+	//vertexDataSprite[3].position = { 0.0f,    0.0f,    0.0f, 1.0f }; // 左上
+	//vertexDataSprite[3].texcoord = { 0.0f, 0.0f };
+
+	//vertexDataSprite[4].position = { tWidth,  0.0f,    0.0f, 1.0f }; // 右上
+	//vertexDataSprite[4].texcoord = { 1.0f, 0.0f };
+
+	//vertexDataSprite[5].position = { tWidth,  tHeight, 0.0f, 1.0f }; // 右下
+	//vertexDataSprite[5].texcoord = { 1.0f, 1.0f };
+
+
+	//Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
+	//wvpResource = DirectXUtility::CreateBufferResource(device_, sizeof(Matrix4x4));
+
+	////書き込むためのアドレスを取得
+	//wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&mvpData));
+	////単位行列を書きこんでおく
+	//*mvpData = MakeIdentity4x4();
+
+	// WVP行列を計算してリソースに書き込む
+	//Matrix4x4 worldMatrix = MakeAffineMatrix(worldTransform_.scale_, worldTransform_.rotation_,worldTransform_.translation_);
+	//Matrix4x4 viewMatrix = MakeIdentity4x4();
+
+	//// カメラ使わないため正射影行列の計算
+	//Matrix4x4 projectionMatrix = MakeOrthographicMatrix(
+	//	0.0f,
+	//	0.0f,
+	//	(float)WinApp::GetInstance()->GetClientWidth(),
+	//	(float)WinApp::GetInstance()->GetClientHeight(),
+	//	0.0f,
+	//	100.0f);
+
+	//*mvpData = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+
+	// これから書き込むRTVのインデックス
+	UINT backBufferIndex = DirectXCommon::GetInstance()->GetSwapChain()->GetCurrentBackBufferIndex();
+
+	// マテリアル用のリソース
+	materialResource = DirectXUtility::CreateBufferResource(device_, sizeof(SpriteVertexData));
+	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	*materialData = { 1.0f,1.0f,1.0f,1.0f }; // 白色
+
+	// メンバの方初期化
+	screenTransform_.Initialize();
+	screenTransform_.UpdateMatrix();
+
+};
+
+
+
 void Sprite::TextTextureUpdate(unsigned char* image) {
 
 	// テクスチャ更新
-	texture.TextTextureUpdate(image);
+	textTexture_.TextTextureUpdate(image);
 };
 
 
@@ -294,7 +415,7 @@ void Sprite::Draw() {
 	commandList->SetDescriptorHeaps(1, heaps);
 
 	// SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
-	commandList->SetGraphicsRootDescriptorTable(2, texture.GetTextureSrvHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(2, texture_->GetTextureSrvHandleGPU());
 
 	//描画!(DrawCall/ドローコール)
 	commandList->DrawInstanced(6, 1, 0, 0);
@@ -387,9 +508,9 @@ void Sprite::Draw(ScreenTransform& screenTransform_) {
 	commandList->SetDescriptorHeaps(1, heaps);
 
 	// SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
-	commandList->SetGraphicsRootDescriptorTable(2, texture.GetTextureSrvHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(2, texture_->GetTextureSrvHandleGPU());
 
 	//描画!(DrawCall/ドローコール)
 	commandList->DrawInstanced(6, 1, 0, 0);
 
-};
+}

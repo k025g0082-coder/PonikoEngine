@@ -878,6 +878,8 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<ModelRe
 				item["pathId"] = resourceProp.pathId_;
 				item["isView"] = resourceProp.isView_;
 
+				item["folderName"] = resourceProp.folderName_;
+
 				group[name].push_back(item);
 
 			}
@@ -896,6 +898,7 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<ModelRe
 				ModelResource modelResource;
 
 				modelResource.pathId_   = item.at("pathId").get<std::string>();
+				modelResource.folderName_ = item.at("folderName").get<std::string>();
 
 				if (item.contains("isView")) {
 					modelResource.isView_ = item.at("isView").get<bool>();
@@ -942,6 +945,8 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Texture
 
 				item["pathId"] = resourceProp.pathId_;
 
+				item["folderName"] = resourceProp.folderName_;
+
 				group[name].push_back(item);
 
 			}
@@ -960,6 +965,7 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Texture
 				TextureResource textureResource;
 
 				textureResource.pathId_ = item.at("pathId").get<std::string>();
+				textureResource.folderName_ = item.at("folderName").get<std::string>();
 
 				// 既に同じIDがあるか検索
 				auto it = std::find_if(

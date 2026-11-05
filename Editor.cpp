@@ -79,9 +79,6 @@ void Editor::Initialize() {
 	hierarchyPanel_.Initialize(currentSceneJsonPath,grid);
 
 
-
-
-
 	effectSequencer_.mFrameMin = -100;
 	effectSequencer_.mFrameMax = 1000;
 	effectSequencer_.items_.push_back(EffectSequencer::SequenceItem{ 0, 10, 30 });
@@ -97,7 +94,7 @@ static bool showHierarchy = true; //
 static bool showLighting = false;
 static bool showPostEffect = false;
 static bool showEffectTimeline = false;
-static bool showAssets = false;
+static bool showAssets = true; //
 
 /* エディター更新 */
 void Editor::Update()
@@ -153,6 +150,25 @@ void Editor::Update()
 
 	mainViewPos = ImGui::GetCursorScreenPos();   // ウィンドウ内の描画開始位置（左上のスクリーン座標）
 	mainViewSize = ImGui::GetContentRegionAvail(); // 利用可能な幅と高さ
+
+	/*
+		縦横比固定
+	*/
+
+	// 元のアスペクト比
+	constexpr float aspectRatio = 1280.0f / 720.0f;
+
+	// 利用可能な領域
+	float width = mainViewSize.x;
+	float height = width / aspectRatio;
+
+	// 高さが足りなければ高さ基準にする
+	if (height > mainViewSize.y) {
+		height = mainViewSize.y;
+		width = height * aspectRatio;
+	}
+
+	mainViewSize = ImVec2(width, height);
 
 	// オフスクリーンのレンダーターゲットテクスチャをImGui上で表示する
 	ImGui::Image(

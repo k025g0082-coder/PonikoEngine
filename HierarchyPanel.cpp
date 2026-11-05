@@ -699,20 +699,11 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 	}
 
 
-	// 読み込んだモデルリソースのモデルを全て生成
+	// 読み込んだリソースのモデルを表示/非表示設定
 	for (int i = 0; i < assetsPanel_->GetHierarchyModelResources().size(); i++)
 	{
 		
 		ModelResource& r = assetsPanel_->GetHierarchyModelResources().at(i);
-
-		r.model_ = Model::CreateOBJ(r.pathId_);
-		
-		/* ライティングはデフォルトでON */
-		r.model_->SetLightSets();
-
-		// モデルのポインタ登録
-		assetsPanel_->GethierarchyModelResourceList()[r.pathId_] = r.model_;
-		r.name_ = FileDropManager::GetFileNameWithoutExtension(FileDropManager::ToWide(r.pathId_));// 表示名 拡張子を抜いたのを設定する
 
 		/* 読み込んだ表示非表示の切り替え */
 		ChangeHierarchyModelView(r.isView_,i);

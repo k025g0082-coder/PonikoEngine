@@ -156,7 +156,13 @@ void RenderTarget::BeginRender(bool clear, Vector4 clearColor, bool depth)
 
 	// 画面の深さ初期化？ これがあるとfogが動かないので
 	if (depth) {
-		commandList->ClearDepthStencilView(dsvCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+		/*
+			20261105 よくエラーなるのでもしdsvHandleが未設定なら動かないように
+		*/
+
+		if (dsvCPUHandle.ptr != 0)
+			commandList->ClearDepthStencilView(dsvCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	}
 
 	/* 初期化時に設定された、指定の大きさのビューポートを設定する */

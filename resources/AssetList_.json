@@ -2,16 +2,21 @@
     "Model": {
         "ModelResources": [
             {
-                "isView": true,
-                "pathId": "resources/Models/suzanne.obj"
-            },
-            {
-                "isView": true,
-                "pathId": "resources/Models/bunny.obj"
-            },
-            {
+                "folderName": "Main",
                 "isView": true,
                 "pathId": "resources/Models/block/cube.obj"
+            }
+        ]
+    },
+    "Texture": {
+        "TextureResources": [
+            {
+                "folderName": "Main",
+                "pathId": "resources/white100x100.png"
+            },
+            {
+                "folderName": "Main",
+                "pathId": "resources/black100x100.png"
             }
         ]
     }
