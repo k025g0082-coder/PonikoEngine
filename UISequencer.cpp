@@ -17,13 +17,6 @@ void UISequencer::Update()
 
 #ifdef USE_IMGUI
 
-	//if (currentSelectItemIndex != -1 && currentSelectItemKeyIndex != -1) {
-	//	ImGui::Text("selectItem: %s", items_.at(currentSelectItemIndex).name);
-	//	ImGui::Text("selectItemKeyVec: %f, %f,  %f",
-	//		items_.at(currentSelectItemIndex).keyFrames.at(currentSelectItemKeyIndex).value.x,
-	//		items_.at(currentSelectItemIndex).keyFrames.at(currentSelectItemKeyIndex).value.y,
-	//		items_.at(currentSelectItemIndex).keyFrames.at(currentSelectItemKeyIndex).value.z);// 草
-	//}
 	// 再生
 	if (isPlaying) {
 
@@ -90,13 +83,13 @@ void UISequencer::Update()
 					// 全てのキー
 					for (int j = 0; j < items_.at(i).keyFrames.size(); ++j) {
 
-						if (ImGui::IsNeoKeyframeSelected()) {
-							currentSelectItemKeyIndex = j; // 選択中のインデックスを更新
-						}
-
 						KeyFrame<Vector3>& key = items_.at(i).keyFrames.at(j);
 
 						ImGui::NeoKeyframe(&key.frame);
+
+						if (ImGui::IsNeoKeyframeSelected()) {
+							currentSelectItemKeyIndex = j; // 選択中のインデックスを更新
+						}
 
 
 						if (lerped) continue;
@@ -140,13 +133,16 @@ void UISequencer::Update()
 
 					// 右クリ - 削除
 					if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-						{
+					{
+						if (currentSelectItemKeyIndex >= 0 && currentSelectItemKeyIndex < items_.at(i).keyFrames.size()) {
+
 							items_.at(i).keyFrames.erase(items_.at(i).keyFrames.begin() + currentSelectItemKeyIndex);
-							
+
 							ImGui::EndNeoGroup();
 							ImGui::EndNeoSequencer();
 							return;
 						}
+					}
 					
 				}
 			}
