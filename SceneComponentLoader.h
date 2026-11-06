@@ -16,6 +16,8 @@
 #include "HierarchyPanel.h"
 #include "AssetsPanel.h"
 
+#include "UISequencer.h"
+
 #include <vector>
 #include "Model.h"
 #include "Text.h"
@@ -226,6 +228,7 @@ private:
 
 	AABB JsonToAABB(const json& value);
 	json AABBToJson(const AABB& data);
+
 
 	/* ラムダ式。 */
 

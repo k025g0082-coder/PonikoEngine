@@ -3,6 +3,8 @@
 #include "LightingManager.h"
 #include "ImGuiManager.h"
 
+#include "UISequencer.h"
+
 SceneComponentLoader* SceneComponentLoader::GetInstance() {
 	static SceneComponentLoader instance;
 	return &instance;
@@ -1017,10 +1019,14 @@ void SceneComponentLoader::Property(const std::string& name, std::vector< UIData
 					e["type"] = (int)element.type_;
 					e["pathID"] = element.pathID_;
 					e["groupName"] = element.groupName_;
+					
+					// アニメデータ  (変換時のto_json,from_jsonはヘッダー内に定義してるので使える)
+					e["animationData"] = element.animationDatas_;
 
-					e["position"] = Vector3ToJson(element.sprite_.GetScreenTransform().translation_);
-					e["scale"]    = Vector3ToJson(element.sprite_.GetScreenTransform().scale_);
-					e["rotation"] = Vector3ToJson(element.sprite_.GetScreenTransform().rotation_);
+
+					e["position"] = Vector3ToJson(element.position_);
+					e["scale"]    = Vector3ToJson(element.scale_);
+					e["rotation"] = Vector3ToJson(element.rotation_);
 
 					//
 					item["elements"].push_back(e);
@@ -1054,10 +1060,17 @@ void SceneComponentLoader::Property(const std::string& name, std::vector< UIData
 					element.pathID_ = item.at("pathID").get<std::string>();
 					element.groupName_ = item.at("groupName").get<std::string>();
 
+
+					if (item.contains("animationData")) {
+
+						// アニメデータ  (変換時のto_json,from_jsonはヘッダー内に定義してるので使える)
+						element.animationDatas_ = item.at("animationData").get<UIElementAnimationData>();
+					}
+
 					element.position_ = JsonToVector3(item.at("position"));
 					element.scale_    = JsonToVector3(item.at("scale"));
 					element.rotation_ = JsonToVector3(item.at("rotation"));
-					
+
 				}
 
 			}

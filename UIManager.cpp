@@ -104,51 +104,10 @@ void UIManager::UpdateElements()
 	
 	}
 
-	if (selectedElemet_) {
+	
+	//
+	SelectedElementAnimationView();
 
-
-		ImGui::DragFloat3("座標", &selectedElemet_->sprite_.GetScreenTransform().translation_.x, 0.1f);
-		
-		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
-
-		ImGui::PushID("b1");
-		if (ImGui::Button((char*)ICON_FA_KEY)) {
-
-			//if (!sequencer_.IsTrackType(SequenceItemType::kPosition)) 
-			//	sequencer_.Add((int)SequenceItemType::kPosition);	//もしトラックなかったら錬成
-
-			//// スケールキー追加
-			//sequencer_.AddItem(SequenceItem{});
-			
-		}
-		ImGui::PopID();
-
-
-		ImGui::DragFloat3("スケール", &selectedElemet_->sprite_.GetScreenTransform().scale_.x, 0.1f);
-
-		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
-
-		ImGui::PushID("b2");
-		if (ImGui::Button((char*)ICON_FA_KEY)) {
-			// スケールキー追加
-			//sequencer_.Add((int)SequenceItemType::kScale);
-		}
-		ImGui::PopID();
-
-
-		ImGui::DragFloat3("回転", &selectedElemet_->sprite_.GetScreenTransform().rotation_.x, 0.1f);
-
-
-		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
-
-		ImGui::PushID("b3");
-		if (ImGui::Button((char*)ICON_FA_KEY)) {
-			// 回転キー追加
-			//sequencer_.Add((int)SequenceItemType::kRotation);
-		}
-		ImGui::PopID();
-
-	}
 
 	//　ElementData内の表示
 	/*
@@ -249,6 +208,91 @@ void UIManager::DrawElements()
 
 }
 
+void UIManager::SelectedElementAnimationView()
+{
+#ifdef USE_IMGUI
+
+
+	if (selectedElemet_) {
+
+
+		ImGui::DragFloat3("座標", &selectedElemet_->sprite_.GetScreenTransform().translation_.x, 0.1f);
+
+		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
+
+		ImGui::PushID("b1");
+		if (ImGui::Button((char*)ICON_FA_KEY)) {
+
+			//
+			if (selectedElemet_) {
+
+				//座標
+				Vector3 vec = selectedElemet_->sprite_.GetScreenTransform().translation_;
+
+				// キーフレーム追加
+				sequencer_.AddKeyFrame(SequenceItemType::kPosition, KeyFrame<Vector3>{
+					sequencer_.GetCurrentFrame(),
+						vec,
+						EasingType::None
+				});
+			}
+
+		}
+		ImGui::PopID();
+
+
+		ImGui::DragFloat3("拡大", &selectedElemet_->sprite_.GetScreenTransform().scale_.x, 0.1f);
+
+		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
+
+		ImGui::PushID("b2");
+		if (ImGui::Button((char*)ICON_FA_KEY)) {
+
+			if (selectedElemet_) {
+
+				//　スケール
+				Vector3	scale = selectedElemet_->sprite_.GetScreenTransform().scale_;
+
+				// キーフレーム追加
+				sequencer_.AddKeyFrame(SequenceItemType::kScale, KeyFrame<Vector3>{
+					sequencer_.GetCurrentFrame(),
+						scale,
+						EasingType::None
+				});
+			}
+		}
+		ImGui::PopID();
+
+
+		ImGui::DragFloat3("回転", &selectedElemet_->sprite_.GetScreenTransform().rotation_.x, 0.1f);
+
+
+		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
+
+		ImGui::PushID("b3");
+		if (ImGui::Button((char*)ICON_FA_KEY)) {
+			//
+			if (selectedElemet_) {
+
+				//回転
+				Vector3 rot = selectedElemet_->sprite_.GetScreenTransform().rotation_;
+
+				// キーフレーム追加
+				sequencer_.AddKeyFrame(SequenceItemType::kRotation, KeyFrame<Vector3>{
+					sequencer_.GetCurrentFrame(),
+						rot,
+						EasingType::None
+				});
+			}
+		}
+		ImGui::PopID();
+
+	}
+
+#endif
+
+}
+
 void UIManager::JudgeMouseSelectElement(UIElement& e,int index)
 {
 	// 現在のEditorのMainViewの比率を得る
@@ -285,9 +329,18 @@ void UIManager::JudgeMouseSelectElement(UIElement& e,int index)
 		左マウス - 選択
 	*/
 	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+
 		if (inside) {
-			selectedElemet_ = &e; // 対象を選択
+
+			// 対象を選択
+			selectedElemet_ = &e; 
 			isDragSelectedElement_ = true; // ドラッグ中
+
+			/*
+				新たに選択されたので、アニメーションのデータを受け渡す
+			*/
+			sequencer_.SetUIElementAnimationData(selectedElemet_->animationDatas_);
+
 		}
 	}
 	/*

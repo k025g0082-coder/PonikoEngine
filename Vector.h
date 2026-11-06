@@ -1,4 +1,5 @@
 #pragma once
+#include <nlohmann/json.hpp>
 
 struct Vector2 {
     float x = 0.0f;
@@ -152,4 +153,22 @@ inline bool operator==(const Vector3& a, const Vector3& b) {
 
 inline bool operator!=(const Vector3& a, const Vector3& b) {
     return !(a == b);
+}
+
+// json保存
+inline void to_json(nlohmann::json& j, const Vector3& v)
+{
+    j = {
+        { "x", v.x },
+        { "y", v.y },
+        { "z", v.z }
+    };
+}
+
+// json読み取り
+inline void from_json(const nlohmann::json& j, Vector3& v)
+{
+    v.x = j.at("x").get<float>();
+    v.y = j.at("y").get<float>();
+    v.z = j.at("z").get<float>();
 }

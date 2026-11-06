@@ -1,0 +1,75 @@
+{
+    "UI": {
+        "data": [
+            {
+                "elements": [
+                    {
+                        "groupName": "Main",
+                        "pathID": "resources/white100x100.png",
+                        "position": [
+                            540.9490356445313,
+                            154.7597198486328,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "type": 0
+                    },
+                    {
+                        "groupName": "Main",
+                        "pathID": "resources/keichan.png",
+                        "position": [
+                            307.5552978515625,
+                            250.66673278808594,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "type": 0
+                    },
+                    {
+                        "groupName": "Main",
+                        "pathID": "resources/Engine/uvChecker.png",
+                        "position": [
+                            994.2252807617188,
+                            451.76483154296875,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "type": 0
+                    }
+                ],
+                "name": "Canvas"
+            },
+            {
+                "elements": [],
+                "name": "ee"
+            }
+        ]
+    }
+}

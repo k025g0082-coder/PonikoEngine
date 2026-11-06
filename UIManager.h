@@ -31,6 +31,8 @@ struct UIElement {
 	std::string pathID_;			   //   アセット参照用
 	std::string groupName_ = "Main";   //   グループの名前。
 
+	UIElementAnimationData animationDatas_; // アニメーションのデータ？
+
 	// SRT
 	Vector3 position_;
 	Vector3 scale_;
@@ -83,10 +85,16 @@ public:
 	// UIの描画。- PonikoEngine.cppの方にかいてる（Spriteの描画順の都合上20261105）
 	void DrawElements();
 
+	
+	// 選択されているUIElementのアニメーションビュー
+	void SelectedElementAnimationView();
+
+
 	//
 	void SetAssetPanel(AssetsPanel* instance) { assetPanel_ = instance; }
 	void SetHierarchyPanel(HierarchyPanel* instance) { hierarchyPanel_ = instance; }
 
+	
 
 	// 選択中のエレメント
 	UIElement* GetSelectedElement() {
