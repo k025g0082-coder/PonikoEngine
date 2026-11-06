@@ -20,10 +20,11 @@ enum class PipelineType {
 
 	DebugLine,
 
-	PostEffect,
 
-	/* ブルーム */
-	SceneBloom,
+	ScenePostEffect, //  3D空間のエフェクト適用用  Fog/Bloom等
+	ScreenPostEffect,//　スクリーン上のエフェクト適用用
+
+	//SceneBloom,
 
 	/* ブラー ピラミッド方式のため２つ用意 */
 	SceneBlurDownSample,
@@ -31,6 +32,7 @@ enum class PipelineType {
 
 	SceneComposite,
 
+	/* ブルーム */
 	ModelBloom,
 
 };
@@ -92,7 +94,8 @@ private:
 
 	void createDebugLinePipeline();
 
-	void createPostEffectPipeline();
+	void createScenePostEffectPipeline();
+	void createScreenPostEffectPipeline();
 
 	void createModelBloomPipeline();
 	void createModelBlurPipeline();

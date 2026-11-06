@@ -6,7 +6,10 @@
 #include "Input.h"
 #include "SceneComponentLoader.h"
 
-#include "PostEffectManager.h"
+#include <imgui/IconsFontAwesome.h>
+
+
+
 
 #include "AssetsPanel.h"
 
@@ -22,6 +25,15 @@ void UIManager::Initialize()
 		ElementData読み込み
 	*/
 	LoadElementData();
+
+
+	/*sequencer_.mFrameMin = -100;
+	sequencer_.mFrameMax = 1000;*/
+	//sequencer_.items_.push_back(UISequencer::SequenceItem{ 0, 10, 30 });
+	//sequencer_.items_.push_back(UISequencer::SequenceItem{ 1, 20, 30 });
+	//sequencer_.items_.push_back(UISequencer::SequenceItem{ 2, 12, 60 });
+	//sequencer_.items_.push_back(UISequencer::SequenceItem{ 1, 61, 90 });
+	//sequencer_.items_.push_back(UISequencer::SequenceItem{ 2, 90, 99 });
 
 }
 
@@ -92,7 +104,54 @@ void UIManager::UpdateElements()
 	
 	}
 
+	if (selectedElemet_) {
+
+
+		ImGui::DragFloat3("座標", &selectedElemet_->sprite_.GetScreenTransform().translation_.x, 0.1f);
+		
+		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
+
+		ImGui::PushID("b1");
+		if (ImGui::Button((char*)ICON_FA_KEY)) {
+
+			//if (!sequencer_.IsTrackType(SequenceItemType::kPosition)) 
+			//	sequencer_.Add((int)SequenceItemType::kPosition);	//もしトラックなかったら錬成
+
+			//// スケールキー追加
+			//sequencer_.AddItem(SequenceItem{});
+			
+		}
+		ImGui::PopID();
+
+
+		ImGui::DragFloat3("スケール", &selectedElemet_->sprite_.GetScreenTransform().scale_.x, 0.1f);
+
+		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
+
+		ImGui::PushID("b2");
+		if (ImGui::Button((char*)ICON_FA_KEY)) {
+			// スケールキー追加
+			//sequencer_.Add((int)SequenceItemType::kScale);
+		}
+		ImGui::PopID();
+
+
+		ImGui::DragFloat3("回転", &selectedElemet_->sprite_.GetScreenTransform().rotation_.x, 0.1f);
+
+
+		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
+
+		ImGui::PushID("b3");
+		if (ImGui::Button((char*)ICON_FA_KEY)) {
+			// 回転キー追加
+			//sequencer_.Add((int)SequenceItemType::kRotation);
+		}
+		ImGui::PopID();
+
+	}
+
 	//　ElementData内の表示
+	/*
 	for (UIData& data : elementDatas_) {
 
 		ImGui::Text(data.name_.c_str());
@@ -105,7 +164,7 @@ void UIManager::UpdateElements()
 			ImGui::Text(text.c_str());
 		}
 	}
-
+	*/
 
 	ImGui::End();
 
@@ -153,6 +212,9 @@ void UIManager::UpdateElements()
 		}
 	}
 
+	// もしキャンバスレイヤーじゃなきゃここで抜ける
+	if (hierarchyPanel_->GetSelectedCurrentLayerType() != HierarchyLayerType::kCanvasLayer) return;
+
 #ifdef USE_IMGUI
 
 	if (selectedElemet_) {
@@ -163,6 +225,10 @@ void UIManager::UpdateElements()
 		MoveSelectElement();
 
 	}
+
+	// タイムライン
+	UIEditorTimeLine();
+
 #endif
 }
 
@@ -221,6 +287,7 @@ void UIManager::JudgeMouseSelectElement(UIElement& e,int index)
 	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 		if (inside) {
 			selectedElemet_ = &e; // 対象を選択
+			isDragSelectedElement_ = true; // ドラッグ中
 		}
 	}
 	/*
@@ -238,9 +305,11 @@ void UIManager::MoveSelectElement()
 {
 	if (!selectedElemet_)return;
 
-	// 左マウスが離されたら選択解除
-	if (!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-		selectedElemet_ = nullptr;
+	// 左マウスが離されたら選択中のドラッグ解除
+	if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+
+		isDragSelectedElement_ = false;
+
 		return;
 	}
 
@@ -248,7 +317,7 @@ void UIManager::MoveSelectElement()
 	ImVec2 mouseDelta = ImGui::GetIO().MouseDelta;
 	float radio = Editor::GetInstance()->GetMainViewRatio();
 
-	if (radio > 0.0f) {
+	if (isDragSelectedElement_ && radio > 0.0f) {
 		// マウスの移動量を画面スケールで割って、1280x720のゲーム座標系に変換して加算
 		selectedElemet_->sprite_.GetScreenTransform().translation_.x += mouseDelta.x / radio;
 		selectedElemet_->sprite_.GetScreenTransform().translation_.y += mouseDelta.y / radio;
@@ -325,4 +394,17 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 }
 
 
+void UIManager::UIEditorTimeLine()
+{
 
+#ifdef USE_IMGUI
+	ImGui::Begin("UIView");
+
+	// シーケンサー更新
+	sequencer_.Update();
+
+	ImGui::End();
+#endif
+	
+
+}

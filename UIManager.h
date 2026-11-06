@@ -3,6 +3,11 @@
 #include "HierarchyPanel.h"
 #include "Sprite.h"
 
+// これ外部ライブラリ
+#include "ImGuizmo.h"
+
+#include "UISequencer.h"
+
 
 #include "Vector.h"
 
@@ -82,9 +87,25 @@ public:
 	void SetAssetPanel(AssetsPanel* instance) { assetPanel_ = instance; }
 	void SetHierarchyPanel(HierarchyPanel* instance) { hierarchyPanel_ = instance; }
 
+
+	// 選択中のエレメント
+	UIElement* GetSelectedElement() {
+		return selectedElemet_;
+	}
+
+	//// タイムライン表示非表示
+	//void SetViewTimeline(bool b) { isShowTimeline_ = b; }
+
 private:
 
 	std::string jsonPath;
+
+	// エディタータイムライン表示
+	void UIEditorTimeLine();
+	UISequencer sequencer_;
+
+
+
 
 
 	// マウスからエレメントを選択
@@ -107,7 +128,11 @@ private:
 
 	// 選択中のエレメント
 	UIElement* selectedElemet_ = nullptr;
-	
+
+	// 選択中のをドラッグ中か
+	bool isDragSelectedElement_ = false;
+
+
 	// 削除予定エレメントのindex
 	int deleteElementIndex_ = -1;
 	

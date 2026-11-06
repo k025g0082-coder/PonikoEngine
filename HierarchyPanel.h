@@ -272,7 +272,8 @@ public:
 
 	// いま選択されてるレイヤー名
 	std::string GetSelectedCurrentLayerName() { return selectedCurrentLayer_; }
-	
+	HierarchyLayerType GetSelectedCurrentLayerType() { return selectedCurrentLayerType_; }
+
 	// アセットパネルのアドレスをセット
 	void SetAssetsPanel(AssetsPanel* h) { assetsPanel_ = h; }
 
@@ -296,7 +297,14 @@ private:
 	std::vector<HierarchyLayer> hierarchyLayers_;	      // レイヤー一覧
 	std::vector<std::string>    alignHierarchyLayerNames_;// 連携しているレイヤー名一覧
 
+	// レイヤーが、以前開いていたかを記録する
+	std::unordered_map<std::string, bool> previousLayerIsOpen;
+
+
 	std::string selectedCurrentLayer_;// 現在選択されているレイヤー名
+	HierarchyLayerType selectedCurrentLayerType_; // 現在選択されているレイヤータイプ
+
+	std::string previousLayer_;// 前のレイヤー名
 
 
 	// エディターのグリッド

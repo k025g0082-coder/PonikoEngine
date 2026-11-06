@@ -109,6 +109,9 @@
     <Filter Include="Engine\Source\imgui\NewFilter1">
       <UniqueIdentifier>{3b8bac61-afed-46f6-8c67-31648082a181}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Source\im-neo-sequencer">
+      <UniqueIdentifier>{de3de441-2822-4919-9503-b8a1cee151c4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinApp.cpp">
@@ -312,6 +315,15 @@
     </ClCompile>
     <ClCompile Include="externals\imgui\misc\cpp\imgui_stdlib.cpp">
       <Filter>Engine\Source\imgui\NewFilter1</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\im-neo-sequencer\imgui_neo_internal.cpp">
+      <Filter>Engine\Source\im-neo-sequencer</Filter>
+    </ClCompile>
+    <ClCompile Include="externals\im-neo-sequencer\imgui_neo_sequencer.cpp">
+      <Filter>Engine\Source\im-neo-sequencer</Filter>
+    </ClCompile>
+    <ClCompile Include="UISequencer.cpp">
+      <Filter>Engine\Source\ソース ファイル\Editor\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -575,6 +587,18 @@
     <ClInclude Include="externals\imgui\misc\cpp\imgui_stdlib.h">
       <Filter>Engine\Source\imgui\NewFilter1</Filter>
     </ClInclude>
+    <ClInclude Include="externals\im-neo-sequencer\imgui_neo_internal.h">
+      <Filter>Engine\Source\im-neo-sequencer</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\im-neo-sequencer\imgui_neo_sequencer.h">
+      <Filter>Engine\Source\im-neo-sequencer</Filter>
+    </ClInclude>
+    <ClInclude Include="UISequencer.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Editor\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Easing.h">
+      <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\Engine\Shader\Model.PS.hlsl">
@@ -607,10 +631,10 @@
     <FxCompile Include="resources\Engine\Shader\Shadow.VS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="resources\Engine\Shader\PostEffect.PS.hlsl">
+    <FxCompile Include="resources\Engine\Shader\ScreenPostEffect.PS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="resources\Engine\Shader\PostEffect.VS.hlsl">
+    <FxCompile Include="resources\Engine\Shader\ScreenPostEffect.VS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
     <FxCompile Include="resources\Engine\Shader\DebugLine.PS.hlsl">
@@ -626,6 +650,12 @@
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
     <FxCompile Include="resources\Engine\Shader\ModelBloom.VS.hlsl">
+      <Filter>Engine\リソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\Engine\Shader\ScenePostEffect.PS.hlsl">
+      <Filter>Engine\リソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resources\Engine\Shader\ScenePostEffect.VS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
   </ItemGroup>

@@ -274,6 +274,8 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="EffectSequencer.cpp" />
     <ClCompile Include="ExampleEffect.cpp" />
+    <ClCompile Include="externals\im-neo-sequencer\imgui_neo_internal.cpp" />
+    <ClCompile Include="externals\im-neo-sequencer\imgui_neo_sequencer.cpp" />
     <ClCompile Include="externals\imGuizmo\GraphEditor.cpp" />
     <ClCompile Include="externals\imGuizmo\ImGuizmo.cpp" />
     <ClCompile Include="externals\imGuizmo\ImSequencer.cpp" />
@@ -337,6 +339,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="UIManager.cpp" />
+    <ClCompile Include="UISequencer.cpp" />
     <ClCompile Include="WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -367,6 +370,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="DirectXCommon.h" />
     <ClInclude Include="DirectXUtility.h" />
     <ClInclude Include="DxcCompiler.h" />
+    <ClInclude Include="Easing.h" />
     <ClInclude Include="EasingVec.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="Effect.h" />
@@ -374,6 +378,8 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="EffectSequencer.h" />
     <ClInclude Include="EffekseerManager.h" />
     <ClInclude Include="ExampleEffect.h" />
+    <ClInclude Include="externals\im-neo-sequencer\imgui_neo_internal.h" />
+    <ClInclude Include="externals\im-neo-sequencer\imgui_neo_sequencer.h" />
     <ClInclude Include="externals\imGuizmo\GraphEditor.h" />
     <ClInclude Include="externals\imGuizmo\ImGuizmo.h" />
     <ClInclude Include="externals\imGuizmo\ImSequencer.h" />
@@ -427,6 +433,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Triangle.h" />
     <ClInclude Include="UIManager.h" />
+    <ClInclude Include="UISequencer.h" />
     <ClInclude Include="Vector.h" />
     <ClInclude Include="WinApp.h" />
     <ClInclude Include="WorldTransform.h" />
@@ -497,13 +504,21 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="resources\Engine\Shader\PostEffect.PS.hlsl">
+    <FxCompile Include="resources\Engine\Shader\ScenePostEffect.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\Engine\Shader\ScenePostEffect.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resources\Engine\Shader\ScreenPostEffect.PS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="resources\Engine\Shader\PostEffect.VS.hlsl">
+    <FxCompile Include="resources\Engine\Shader\ScreenPostEffect.VS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

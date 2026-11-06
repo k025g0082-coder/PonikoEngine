@@ -1,8 +1,6 @@
 #include "resources/Engine/Shader/PostEffect.hlsli"
 
 Texture2D<float4> texture0 : register(t0);
-Texture2D<float4> gCompositeTexture : register(t1);
-Texture2D<float>  gDepthTexture : register(t2);
 
 SamplerState gSampler : register(s0);
 
@@ -10,17 +8,6 @@ cbuffer PostEffect : register(b1)
 {
     PostEffectParam gPostEffect;
 };
-
-cbuffer BloomBuffer : register(b2)
-{
-    BloomParam gBloom;
-};
-
-cbuffer FogParam : register(b3)
-{
-    FogParam gFogParam;
-};
-
 
     struct PixelShaderOutput
 {
@@ -41,19 +28,7 @@ float randRange(float x, float minValue, float maxValue)
     return lerp(minValue, maxValue, rand(x));
 }
 
-
-/* シーンの描画結果と合成するテクスチャを合成します */
-float4 SceneComposite(VertexShaderOutput input) : SV_TARGET
-{
-    float4 scene = texture0.Sample(gSampler, input.texcoord);
-    float3 bloom = gCompositeTexture.Sample(gSampler, input.texcoord).rgb;
-
-    return float4(scene.rgb + bloom * gBloom.bloomIntensity, scene.a);
-}
-
-
 // 魚眼レンズ
-
 
 // 範囲外なら黒く塗りつぶすかどうかも指定
 float2 fishLens(float2 uv, float power, bool fillBlack, out bool isOutside)
@@ -256,33 +231,6 @@ float4 ApplyScanLine(float2 uv, float4 color)
     return color;
 }
 
-// 深度値から距離フォグ計算を行い、色に適用する
-float4 ApplyDistanceFog(FogParam fogParam, float4 color, float depth)
-{
-
-    // 背景はフォグを適用しない
-    if (depth >= 0.999999f)
-    {
-        return color;
-    }
-
-    // 深度値をカメラからの距離に変換
-    const float nearZ = 0.1f;
-    const float farZ = 10000.0f;
-
-    float linearDepth =
-        (nearZ * farZ) /
-        (farZ - depth * (farZ - nearZ));
-
-    // 距離に応じてフォグを強くする
-    float fogFactor = saturate(
-        (linearDepth - fogParam.fogStart) / (fogParam.fogEnd - fogParam.fogStart)
-    );
-
-    color.rgb = lerp(color.rgb, fogParam.fogColor, fogFactor);
-
-    return color;
-}
 
 // メイン
 PixelShaderOutput main(VertexShaderOutput input)
@@ -293,7 +241,6 @@ PixelShaderOutput main(VertexShaderOutput input)
 
     
     // =========-こっからポストエフェクト
-
     
     // 魚眼レンズ
     bool isOutside = false;
@@ -322,7 +269,6 @@ PixelShaderOutput main(VertexShaderOutput input)
     /* 変形したUVでシーン画像サンプリング！！ */ 
     float4 color = texture0.Sample(gSampler, uv);
     
-    
     // ぼかし
     //color = ApplyBlur(uv);
     
@@ -343,22 +289,6 @@ PixelShaderOutput main(VertexShaderOutput input)
 
     // 走査線
     color = ApplyScanLine(uv, color);
-    
-    
-    if (gFogParam.isFog)
-    {
-        // 深度マップ
-        float depth = gDepthTexture.Sample(gSampler, uv);
-        
-        /* 線形Fog */
-        color = ApplyDistanceFog(gFogParam, color, depth);
-    }
-    
-    
-    //=== 最後にBloomを加算
-    float3 bloom = gCompositeTexture.Sample(gSampler, uv).rgb;
-    color.rgb += bloom * gBloom.bloomIntensity;
-    
     
     output.color = color;
     

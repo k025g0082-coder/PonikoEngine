@@ -72,6 +72,11 @@ void PostEffectManager::Initialize() {
 		WinApp::GetInstance()->GetClientWidth(),
 		WinApp::GetInstance()->GetClientHeight());
 
+	// Scene３ｄ空間用
+	sceneRenderTarget_.Initialize(
+		WinApp::GetInstance()->GetClientWidth(),
+		WinApp::GetInstance()->GetClientHeight());
+
 	// 最終的な描画結果
 	finalRenderTarget_.Initialize(
 		WinApp::GetInstance()->GetClientWidth(),
@@ -251,14 +256,18 @@ void PostEffectManager::ApplyScene() {
 		/*
 			描画順序　（こうすればFogとSpriteが混合しない）
 
-			1) シーンの明るいとこ摘出/ぼかす/Bloom処理
-			2) Fog描画（重ね書き）
+			1) シーンの明るいとこ摘出/ぼかす/Bloom処理 
+			2) 3DScene用のPostEffect（Fog,Bloom）
 			3) UI/Spriteびょうが（重ね書き）
 			4) 重ね書きしたoffscreenをfinalRenderTarget/buckBufferに描画する
 
 		*/
 
-		// 1) シーンの明るいとこ摘出/ぼかす/Bloom処理
+
+
+		/*
+				1) シーンの明るいとこ摘出/ぼかす/Bloom処理
+		*/
 		if (bloomModelPropaties_.size() > 0) {
 
 			// 0.5)* 解像度を2/1に ( なんかバグるのでやめ20261103  多分viewPort関連
@@ -276,14 +285,35 @@ void PostEffectManager::ApplyScene() {
 			//bloomRenderTarget_.ChangeViewResolution(1.0f);
 		}
 
-		// 2)Fog描画（重ね書き）
+
+
+		/*
+			2) 3DのScene用のPostEffect（Fog, Bloom）
+		*/
+
+		sceneRenderTarget_.BeginRender(true);
+
+			DrawSceneEffect();
+
+		sceneRenderTarget_.EndRender();
+
+
+
+		/*
+			3) Sprite,UI描画（重ね書き）
+		*/ 
+		sceneRenderTarget_.BeginRender(false);
 		
+			//* UIManagerの描画 *//
+			UIManager::GetInstance()->DrawElements();
 
-		// Sprite,UI描画（重ね書き）
+		sceneRenderTarget_.EndRender();
 
 
 
-		// 3) 最終的な描画。
+		/*
+			4) Sprite,UI描画（重ね書き）
+		*/
 		
 		// 　 Debug版  ・・FinalRenderTargetを描画先にして、blurと既存のポストエフェクト効果を掛け合わせたのを描画
 		DrawCompositeToFinalRenderTarget();
@@ -557,26 +587,15 @@ void PostEffectManager::DrawBloomBlur()
 	//blurRenderTarget_.EndRender();
 }
 
-void PostEffectManager::DrawFog()
+void PostEffectManager::DrawSceneEffect()
 {
-
-
-
-}
-
-
-void PostEffectManager::DrawCompositeToFinalRenderTarget()
-{
-
-	finalRenderTarget_.BeginRender(true, { 0.0f,0.0f,0.0f,0.0f });
-
 
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
 	// RootSignatureを設定。
-	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).rootSignature);
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::ScenePostEffect).rootSignature);
 
 	// PSOを設定
-	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).graphicsPipelineState);
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::ScenePostEffect).graphicsPipelineState);
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = {
 	DirectXCommon::GetSrvHeap().Get()
@@ -591,22 +610,49 @@ void PostEffectManager::DrawCompositeToFinalRenderTarget()
 	/* 合成 */
 	commandList->SetGraphicsRootDescriptorTable(0, offscreenRenderTarget_.GetSRVHandleGPU());
 	commandList->SetGraphicsRootDescriptorTable(1, blurRenderTargets_.back().GetSRVHandleGPU());
-	commandList->SetGraphicsRootDescriptorTable(5, offscreenDepthSRVHandleGPU);
+	commandList->SetGraphicsRootDescriptorTable(2, offscreenDepthSRVHandleGPU);
 
 
 	//// ポストエフェクト　パラメータ値
-	commandList->SetGraphicsRootConstantBufferView(2, postEffectResource->GetGPUVirtualAddress());
 	commandList->SetGraphicsRootConstantBufferView(3, bloomParamResource->GetGPUVirtualAddress());
-
-
 	commandList->SetGraphicsRootConstantBufferView(4, fogParamResource->GetGPUVirtualAddress());
-
 
 	commandList->DrawInstanced(6, 1, 0, 0);
 
+}
 
-	//* UIManagerの描画 *//
-	UIManager::GetInstance()->DrawElements();
+
+void PostEffectManager::DrawCompositeToFinalRenderTarget()
+{
+
+	finalRenderTarget_.BeginRender(true, { 0.0f,0.0f,0.0f,0.0f });
+
+
+	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetCommandList().Get();
+	// RootSignatureを設定。
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::ScreenPostEffect).rootSignature);
+
+	// PSOを設定
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::ScreenPostEffect).graphicsPipelineState);
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = {
+	DirectXCommon::GetSrvHeap().Get()
+	};
+
+	commandList->SetDescriptorHeaps(1, descriptorHeaps);
+
+
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	/* 入力：3dSceneの描画結果のRenderTarget */
+	commandList->SetGraphicsRootDescriptorTable(0, sceneRenderTarget_.GetSRVHandleGPU());
+
+	// ポストエフェクト　パラメータ値
+	commandList->SetGraphicsRootConstantBufferView(1, postEffectResource->GetGPUVirtualAddress());
+
+
+	commandList->DrawInstanced(6, 1, 0, 0);
 
 
 	finalRenderTarget_.EndRender();
@@ -654,10 +700,10 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 
 
 	// RootSignatureを設定。
-	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).rootSignature);
+	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::ScreenPostEffect).rootSignature);
 
 	// PSOを設定
-	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::PostEffect).graphicsPipelineState);
+	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::ScreenPostEffect).graphicsPipelineState);
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = {
 	DirectXCommon::GetSrvHeap().Get()
@@ -669,24 +715,13 @@ void PostEffectManager::DrawCompositeToBackBuffer()
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferViewScreen);
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	/* 合成 */
-	commandList->SetGraphicsRootDescriptorTable(0, offscreenRenderTarget_.GetSRVHandleGPU());
-	commandList->SetGraphicsRootDescriptorTable(1, blurRenderTargets_.back().GetSRVHandleGPU());
-	commandList->SetGraphicsRootDescriptorTable(5, offscreenDepthSRVHandleGPU);
-
-
+	//
+	commandList->SetGraphicsRootDescriptorTable(0, sceneRenderTarget_.GetSRVHandleGPU());
 	//// ポストエフェクト　パラメータ値
-	commandList->SetGraphicsRootConstantBufferView(2, postEffectResource->GetGPUVirtualAddress());
-	commandList->SetGraphicsRootConstantBufferView(3, bloomParamResource->GetGPUVirtualAddress());
-
-
-		commandList->SetGraphicsRootConstantBufferView(4, fogParamResource->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(1, postEffectResource->GetGPUVirtualAddress());
 	
 
 	commandList->DrawInstanced(6, 1, 0, 0);
-
-	//* UIManagerの描画 *//
-	UIManager::GetInstance()->DrawElements();
 
 }
 

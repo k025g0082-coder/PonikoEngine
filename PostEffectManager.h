@@ -169,8 +169,8 @@ private:
 	void DrawBloomBlur();
 
 
-	// Fog描画
-	void DrawFog();
+	// Fog / Bloomなど３ｄ空間用
+	void DrawSceneEffect();
 
 
 	/* FInal シーンと合成 - Debug用 */
@@ -189,6 +189,9 @@ private:
 	/* Blurピラミッドを採用　そのリスト */
 	std::vector<RenderTarget> blurRenderTargets_;
 
+
+	// 重ね掛けする用
+	RenderTarget sceneRenderTarget_;
 
 	// ImGuiのImageに渡す最終的な描画結果のRenderTarget
 	RenderTarget finalRenderTarget_;

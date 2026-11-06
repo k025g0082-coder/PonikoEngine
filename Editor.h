@@ -267,6 +267,7 @@ private:
 	// 今読み込んでるシーンのJsonパス
 	static std::string currentSceneJsonPath;
 	std::string currentSceneName_;
+
 	
 	Vector3 ExtractScale(const Matrix4x4& m);
 	Vector3 ExtractRotation(const Matrix4x4& m, const Vector3& scale);

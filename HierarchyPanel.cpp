@@ -3,19 +3,17 @@
 
 #include "Editor.h"
 
-#include "Scene.h"
+
 #include "GameObject.h"
 
 #include "ImGuiManager.h"
 
 #include "SceneComponentLoader.h"
 
-#include "FileDropManager.h"
-
 #include "UIManager.h"
 
 #include <misc/cpp/imgui_stdlib.h>
-#include <imgui_internal.h>
+
 
 #include <imgui/IconsFontAwesome.h>
 
@@ -140,13 +138,42 @@ void HierarchyPanel::ViewPanel(bool& show)
 
 			ImGui::SetWindowFontScale(1.1f);// 一時的に大きく
 
-
 			//
 			ImGui::AlignTextToFramePadding();
 
 
 			// レイヤー名
 			bool isOpen = ImGui::TreeNodeEx((icon + "  " + layerName).c_str(), ImGuiTreeNodeFlags_SpanLabelWidth);
+
+			//if (previousLayerIsOpen.contains(layerName)) {
+
+			//	// 以前開いていたか
+			//	bool& wasOpen = previousLayerIsOpen[layerName];
+
+			//	/* 開かれた瞬間 */
+			//	if (isOpen && !wasOpen) {
+
+			//		// キャンバスレイヤーだった場合
+			//		if (layerType == (int)HierarchyLayerType::kCanvasLayer) {
+			//			UIManager::GetInstance()->SetViewTimeline(true);// 表示
+			//		}
+
+			//	}
+
+			//	/* 開じた瞬間 */
+			//	if (!isOpen && wasOpen) {
+			//	
+			//		// キャンバスレイヤーだった場合
+			//		if (layerType == (int)HierarchyLayerType::kCanvasLayer) {
+			//			UIManager::GetInstance()->SetViewTimeline(false);// 非表示
+			//		}
+
+			//	}
+			//}
+
+			////
+			//previousLayerIsOpen[layerName] = isOpen;
+
 
 			ImGui::SetWindowFontScale(1.0f);//
 
@@ -194,9 +221,28 @@ void HierarchyPanel::ViewPanel(bool& show)
 			/* 選択中レイヤー変更 */
 			ImGui::PushID(layerCount);
 
+			/*
+				レイヤー変更
+			*/
 			if (ImGui::Button("Select")) {
 				selectedCurrentLayer_ = key;
+				selectedCurrentLayerType_ = layerInfo.layerType_;
 			}
+
+
+			if (!previousLayer_.empty()) {
+
+				// レイヤー変更の瞬間
+				if (previousLayer_ != selectedCurrentLayer_) {
+
+				}
+			}
+
+			//
+			previousLayer_ = selectedCurrentLayer_;
+
+
+
 			ImGui::PopID();
 
 			ImGui::SameLine(0,-4.0f);
@@ -695,7 +741,7 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 
 	/* メインのレイヤー */
 	selectedCurrentLayer_ = "main";// 選択中にしとく
-
+	selectedCurrentLayerType_ = HierarchyLayerType::kModelLayer;
 
 	// == Main探し
 	auto it = std::find_if(
