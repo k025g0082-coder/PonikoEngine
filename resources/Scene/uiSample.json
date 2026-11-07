@@ -12,7 +12,28 @@
                                     "tracks": [
                                         {
                                             "items": [
-                                                {},
+                                                {
+                                                    "keyFrames": [
+                                                        {
+                                                            "easingType": 0,
+                                                            "frame": 0,
+                                                            "value": {
+                                                                "x": 975.1448364257813,
+                                                                "y": 361.7471008300781,
+                                                                "z": 0.0
+                                                            }
+                                                        },
+                                                        {
+                                                            "easingType": 0,
+                                                            "frame": 18,
+                                                            "value": {
+                                                                "x": 975.1448364257813,
+                                                                "y": 361.7471008300781,
+                                                                "z": 0.0
+                                                            }
+                                                        }
+                                                    ]
+                                                },
                                                 {},
                                                 {}
                                             ]
@@ -42,13 +63,14 @@
                                         }
                                     ]
                                 }
-                            ]
+                            ],
+                            "currentTag": "NewAnimetesttt"
                         },
                         "groupName": "Main",
                         "pathID": "resources/keichan.png",
                         "position": [
                             975.1448364257813,
-                            361.7471008300781,
+                            359.9995422363281,
                             0.0
                         ],
                         "rotation": [
@@ -91,6 +113,15 @@
                                                                 "y": 368.73822021484375,
                                                                 "z": 0.0
                                                             }
+                                                        },
+                                                        {
+                                                            "easingType": 0,
+                                                            "frame": 35,
+                                                            "value": {
+                                                                "x": 634.130859375,
+                                                                "y": 370.4063720703125,
+                                                                "z": 0.0
+                                                            }
                                                         }
                                                     ]
                                                 },
@@ -104,14 +135,33 @@
                                             ]
                                         }
                                     ]
+                                },
+                                {
+                                    "animationName": "Anime_1",
+                                    "durationFrames": 60.0,
+                                    "tracks": [
+                                        {
+                                            "items": [
+                                                {},
+                                                {},
+                                                {}
+                                            ]
+                                        },
+                                        {
+                                            "items": [
+                                                {}
+                                            ]
+                                        }
+                                    ]
                                 }
-                            ]
+                            ],
+                            "currentTag": "NewAnimetest"
                         },
                         "groupName": "Main",
                         "pathID": "resources/keichan.png",
                         "position": [
-                            356.5049743652344,
-                            373.98095703125,
+                            634.130859375,
+                            370.4063720703125,
                             0.0
                         ],
                         "rotation": [

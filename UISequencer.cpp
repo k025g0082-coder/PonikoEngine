@@ -279,6 +279,68 @@ void UISequencer::SetDefaultTrackDatas(UIElementAnimation& anime)
 	
 }
 
+void UISequencer::AnimationComboView()
+{
+#ifdef USE_IMGUI
+	
+	if (!selectElementData) return;
+
+	// 1. 現在選択されているタグが空、または存在しない場合はデフォルトを設定
+	if (currentSelectAnimationTag.empty() ||
+		selectElementData->animations_.find(currentSelectAnimationTag) == selectElementData->animations_.end())
+	{
+		if (!selectElementData->animations_.empty()) {
+			currentSelectAnimationTag = selectElementData->animations_.begin()->first;
+		}
+	}
+
+	// 2. コンボボックスの表示開始
+	if (ImGui::BeginCombo("Animation Clip", selectElementData->currentTag_.c_str()))
+	{
+		// Map内の全アニメーションをループして選択肢を作る
+		for (const auto& [name, anime] : selectElementData->animations_)
+		{
+			const bool isSelected = (currentSelectAnimationTag == name);
+
+			// 項目を描画（選択されたら currentSelectAnimationTag を更新）
+			if (ImGui::Selectable(name.c_str(), isSelected))
+			{
+				selectElementData->currentTag_ = name; // タグを直接更新
+
+				currentFrame = 0;
+				currentFloatFrame = 0.0f;
+				currentSelectTrackIndex = -1;
+				currentSelectItemIndex = -1;
+				currentSelectItemKeyIndex = -1;
+			}
+
+			// 現在選択中の項目に初期フォーカスをあてる
+			if (isSelected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+
+	// 新規アニメーション作成ボタン
+	if (ImGui::Button("New Animation"))
+	{
+		std::string newName = "Anime_" + std::to_string(selectElementData->animations_.size());
+
+		UIElementAnimation newAnime;
+		newAnime.animationName = newName;
+		UISequencer::SetDefaultTrackDatas(newAnime);
+
+		selectElementData->animations_[newName] = newAnime;
+		currentSelectAnimationTag = newName;
+		selectElementData->currentTag_ = newName; //
+	}
+
+#endif
+}
+
 /*
 
 
@@ -401,6 +463,7 @@ void to_json(nlohmann::json& j, const SequenceItem& v)
 */
 void from_json(const nlohmann::json& j, SequenceItem& v)
 {
+	v.keyFrames.clear(); //
 
 	if (j.contains("keyFrames")) {
 
@@ -514,7 +577,7 @@ void from_json(const nlohmann::json & j, UIElementAnimation & v)
 	if (j.contains("animationName"))
 		v.animationName = j["animationName"].get<std::string>();
 
-	if (j.contains("animationFrames"))
+	if (j.contains("durationFrames"))
 	v.durationFrames = j["durationFrames"].get<float>();
 
 
@@ -547,6 +610,7 @@ void to_json(nlohmann::json& j, const UIElementAnimationDatas& v)
 
 	j = nlohmann::json::object();
 
+	j["currentTag"] = v.currentTag_;
 	j["animations"] = nlohmann::json::array();
 
 	// 空じゃなけりゃ
@@ -564,6 +628,10 @@ void to_json(nlohmann::json& j, const UIElementAnimationDatas& v)
 */
 void from_json(const nlohmann::json & j, UIElementAnimationDatas & v)
 {
+	if (j.contains("currentTag")) {
+		v.currentTag_ = j.at("currentTag").get<std::string>();
+	}
+
 	if (j.contains("animations")) {
 
 		const auto&animationsJson = j.at("animations");
@@ -577,6 +645,13 @@ void from_json(const nlohmann::json & j, UIElementAnimationDatas & v)
 			// アニメ名で登録
 			v.animations_[anime.animationName] = anime;
 			v.currentTag_ = anime.animationName;
+		}
+
+		// もし currentTag_ が空、またはマップに存在しない場合は最初のアニメーションをタグにする
+		if (v.currentTag_.empty() || v.animations_.find(v.currentTag_) == v.animations_.end()) {
+			if (!v.animations_.empty()) {
+				v.currentTag_ = v.animations_.begin()->first;
+			}
 		}
 	}
 }

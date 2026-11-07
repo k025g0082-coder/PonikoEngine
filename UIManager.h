@@ -130,12 +130,13 @@ private:
 	std::vector<UIData> elementDatas_;
 
 
-	// 現在選択されているレイヤー名
-	//std::string selectedCanvasLayerName_;
+	// 現在選択されているエレメントのアニメーションのタグ名
+	std::string currentSelectAnimationTag;
 
 
 	// 選択中のエレメント
 	UIElement* selectedElemet_ = nullptr;
+
 
 	// 選択中のをドラッグ中か
 	bool isDragSelectedElement_ = false;

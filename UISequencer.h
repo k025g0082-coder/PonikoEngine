@@ -176,6 +176,10 @@ public:
     }
 
 
+    // 
+    void AnimationComboView();
+
+
     const int32_t& GetCurrentFrame() { return currentFrame; }
 
 private:
@@ -192,7 +196,9 @@ private:
 
 	bool isPlaying = false;
 
-  //  std::string currentSelectAnimationTag;
+
+    std::string currentSelectAnimationTag;
+
 
 	int32_t currentSelectTrackIndex = -1;
 	int32_t currentSelectItemIndex = -1;

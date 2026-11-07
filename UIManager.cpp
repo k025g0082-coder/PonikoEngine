@@ -108,22 +108,9 @@ void UIManager::UpdateElements()
 	//
 	SelectedElementAnimationView();
 
+	//
+	sequencer_.AnimationComboView();
 
-	//　ElementData内の表示
-	/*
-	for (UIData& data : elementDatas_) {
-
-		ImGui::Text(data.name_.c_str());
-
-		//
-		for (UIElement& e : data.elements_) {
-
-			std::string text = "   " + e.pathID_;
-
-			ImGui::Text(text.c_str());
-		}
-	}
-	*/
 
 	ImGui::End();
 
@@ -219,6 +206,7 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::AlignTextToFramePadding();
 
 		ImGui::SeparatorText("BaseTransform");
+		ImGui::Dummy(ImVec2{ 0,4.0f });
 
 		if (ImGui::DragFloat3("座標", &selectedElemet_->sprite_.GetScreenTransform().translation_.x, 0.1f)) {
 			selectedElemet_->position_ = selectedElemet_->sprite_.GetScreenTransform().translation_;// ベース座標も同期
@@ -297,6 +285,12 @@ void UIManager::SelectedElementAnimationView()
 			}
 		}
 		ImGui::PopID();
+
+		ImGui::Dummy(ImVec2{ 0,4.0f });
+		ImGui::SeparatorText("Animations");
+		ImGui::Dummy(ImVec2{ 0,4.0f });
+
+		
 
 	}
 
