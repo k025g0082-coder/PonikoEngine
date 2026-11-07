@@ -69,8 +69,8 @@
                         "groupName": "Main",
                         "pathID": "resources/keichan.png",
                         "position": [
-                            975.1448364257813,
-                            359.9995422363281,
+                            1163.8828125,
+                            555.72802734375,
                             0.0
                         ],
                         "rotation": [
@@ -155,13 +155,13 @@
                                     ]
                                 }
                             ],
-                            "currentTag": "NewAnimetest"
+                            "currentTag": "Anime_1"
                         },
                         "groupName": "Main",
                         "pathID": "resources/keichan.png",
                         "position": [
-                            634.130859375,
-                            370.4063720703125,
+                            122.09211730957031,
+                            151.9597930908203,
                             0.0
                         ],
                         "rotation": [
