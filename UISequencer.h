@@ -16,16 +16,19 @@
 */
 
 enum class SequenceItemType {
+
+    /*
+        Transform
+    */
     kPosition,
     kScale,
     kRotation,
-};
-inline const char* kItemTypeTags_[] = {
-    "座標",
-    "拡大",
-    "回転",
-};
 
+    /*  
+        Alpha
+    */
+    kAlpha
+};
 
 template <typename T>
 
@@ -47,11 +50,12 @@ struct KeyFrame {
 
 
 /*
-    シーケンス内のアイテム　（座標,スケール,拡大・・
+    シーケンス内のアイテム　（Transform：座標,スケール,拡大・・
 */
 struct SequenceItem
 {
-    SequenceItemType mType;       // タイプ？
+    SequenceItemType type;//  タイプ
+    std::string name;//  アイテム名
 
     std::vector<KeyFrame<Vector3>> keyFrames;  //　キーたち
 
@@ -62,25 +66,29 @@ void to_json(nlohmann::json& j, const SequenceItem& v);
 void from_json(const nlohmann::json& j, SequenceItem& v);
 
 
-// シーケンスのトラック
-//struct SequenceTrack
-//{
-//    std::vector<SequenceItem> items;  //　アイテムたち
-//
-//};
+/*
+    シーケンス内のトラック　（Transform, Color)  ・・・
+*/
+
+struct SequenceTrack
+{
+    std::string trackName;            //  トラック名
+    std::vector<SequenceItem> items;  //　アイテムたち
+
+    bool isOpen = false; // 開いているか
+};
+
+// 保存 / 読み込み
+void to_json(nlohmann::json& j, const SequenceTrack& v);
+void from_json(const nlohmann::json& j, SequenceTrack& v);
 
 
 /* 
-    UIElementがもつ単体の情報 
+    UIElementがもつ単体のアニメーション情報 
 */
 struct UIElementAnimationData {
 
-    // 予めSRTの３要素を入れとく
-    std::vector<SequenceItem> items = {
-        { SequenceItemType::kPosition },
-        { SequenceItemType::kScale },
-        { SequenceItemType::kRotation },
-    };
+    std::vector<SequenceTrack> tracks;  // 最終的なTrack->Items->keyFramesという入れ子構造のデータ
 
 };
 
@@ -89,7 +97,13 @@ void to_json(nlohmann::json& j, const UIElementAnimationData& v);
 void from_json(const nlohmann::json& j, UIElementAnimationData& v);
 
 
-//
+
+/*
+
+
+    こっからクラス
+
+*/
 class UISequencer
 {
 public:
@@ -100,7 +114,7 @@ public:
 
 
     /* アイテム新規追加 */
-    void AddItem(SequenceItemType type);
+    //void AddItem(SequenceItemType type);
 
     /* キーフレーム挿入 */
     void AddKeyFrame(SequenceItemType type, KeyFrame<Vector3> key);
@@ -108,6 +122,12 @@ public:
     // いつかやる
     //void AddTrack()
     
+
+    /*
+        デフォルトの設定をしたElementAnimationDataを返す
+    */
+    static UIElementAnimationData GetDefaultAnimationData();
+
 
     /* 
         アニメーションデータ登録
@@ -127,13 +147,15 @@ private:
     /// 現在のフレームからキーフレームで補間する
     /// </summary>
     /// 
+    /// <param name="trackIndex">トラックのIndex番号</param>
     /// <param name="itemIndex">アイテムのIndex番号</param>
     /// <param name="keyIndex">キーのIndex番号</param>
-    void LerpKeyFrame(int itemIndex, int keyIndex);
+    void LerpKeyFrame(int trackIndex,int itemIndex, int keyIndex);
 
 
 	bool isPlaying = false;
 
+	int32_t currentSelectTrackIndex = -1;
 	int32_t currentSelectItemIndex = -1;
     int32_t currentSelectItemKeyIndex = -1;
 
@@ -149,7 +171,7 @@ private:
     UIElementAnimationData* selectElementData = nullptr;
 
 
-	bool transformOpen = true;
+//	bool transformOpen = true;
 
 	bool doDelete = false;
 

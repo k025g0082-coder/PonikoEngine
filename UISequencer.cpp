@@ -34,11 +34,12 @@ void UISequencer::Update()
 
 	/* 再生ボタン */
 	const char* icon;
+
 	if (isPlaying) {
-		icon = (char*)ICON_FA_PLAY;
+		icon = (char*)ICON_FA_STOP;
 	}
 	else {
-		icon = (char*)ICON_FA_STOP;
+		icon = (char*)ICON_FA_PLAY;
 	}
 
 	if (ImGui::Button(icon)) {
@@ -47,23 +48,8 @@ void UISequencer::Update()
 		currentFloatFrame = 0;
 	}
 
-	// ざひょうキー追加
-	if (ImGui::Button(icon = (char*)ICON_FA_PLUS)) {
 
-		if (UIManager::GetInstance()->GetSelectedElement()) {
-
-			//座標
-			Vector3 vec = UIManager::GetInstance()->GetSelectedElement()->sprite_.GetScreenTransform().translation_;
-
-			AddKeyFrame(SequenceItemType::kPosition, KeyFrame<Vector3>{
-				currentFrame,
-					vec,
-					EasingType::None
-			});
-		}
-	}
-
-
+	ImGui::Text("currentSelectTrackIndex: %d", currentSelectTrackIndex);
 	ImGui::Text("currentSelectItemIndex: %d", currentSelectItemIndex);
 	ImGui::Text("currentSelectItemKeyIndex: %d", currentSelectItemKeyIndex);
 
@@ -73,76 +59,92 @@ void UISequencer::Update()
 		ImGuiNeoSequencerFlags_Selection_EnableDragging |
 		ImGuiNeoSequencerFlags_Selection_EnableDeletion))
 	{
-		//
-		if (ImGui::BeginNeoGroup("Transform", &transformOpen))
+
+		// 現在選択されているデータのアイテム
+		auto& tracks_ = selectElementData->tracks;
+
+		for (int track = 0; track < tracks_.size(); ++track)
 		{
 
-			// 現在選択されているデータのアイテム
-			auto& items_ = selectElementData->items;
-
-
-			/* 各トラック */
-			for (int i = 0; i < items_.size(); ++i)
+			/*
+				各トラック　　Transform・・Color・・
+			*/
+			if (ImGui::BeginNeoGroup(tracks_.at(track).trackName.c_str(), &tracks_.at(track).isOpen))
 			{
 
-				if (ImGui::BeginNeoTimelineEx(kItemTypeTags_[(int)items_.at(i).mType]))
+				// 現在選択されているトラックのデータのアイテム
+				auto& items_ = selectElementData->tracks.at(track).items;
+
+				if (ImGui::IsNeoTimelineSelected())
 				{
-					/* 現在このトラックが選択されているか判定 */
-					if (ImGui::IsNeoTimelineSelected())
+					currentSelectTrackIndex = track; // 選択されたGroupのインデックス
+				}
+
+				/* 
+					各アイテム　　Transform:座標,拡大,回転　Color:R,G,B,アルファ・・
+				*/
+				for (int i = 0; i < items_.size(); ++i)
+				{
+
+					if (ImGui::BeginNeoTimelineEx(items_.at(i).name.c_str()))
 					{
-						currentSelectItemIndex = i; // 選択中のインデックスを更新
-					}
-
-					// 全てのキー
-					for (int j = 0; j < items_.at(i).keyFrames.size(); ++j) {
-
-						KeyFrame<Vector3>& key = items_.at(i).keyFrames.at(j);
-
-						ImGui::NeoKeyframe(&key.frame);
-
-						if (ImGui::IsNeoKeyframeSelected()) {
-							currentSelectItemKeyIndex = j; // 選択中のインデックスを更新
+						/* 現在このトラックが選択されているか判定 */
+						if (ImGui::IsNeoTimelineSelected())
+						{
+							currentSelectItemIndex = i; // 選択中のインデックスを更新
 						}
 
-						if (!isPlaying && previousFrame == currentFrame) 
-							continue;
+						// 全てのキー
+						for (int j = 0; j < items_.at(i).keyFrames.size(); ++j) {
+
+							KeyFrame<Vector3>& key = items_.at(i).keyFrames.at(j);
+
+							ImGui::NeoKeyframe(&key.frame);
+
+							if (ImGui::IsNeoKeyframeSelected()) {
+								currentSelectItemKeyIndex = j; // 選択中のインデックスを更新
+							}
+
+							if (!isPlaying && previousFrame == currentFrame)
+								continue;
 
 
 
-						/// 補間
-						LerpKeyFrame(i, j);
-						
+							/// 補間
+							LerpKeyFrame(track,i, j);
 
 
-					}
 
-	
-					//ImGui::Text("frame :%d  %f,  %f,   %f",key.frame, key.value.x, key.value.y, key.value.z);
-					ImGui::EndNeoTimeLine();
+						}
 
 
-					// 右クリ - 削除
-					if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-					{
-						// ＊未選択チェック
-						if (currentSelectItemIndex >= 0 && currentSelectItemIndex < items_.size()) {
-							if (currentSelectItemKeyIndex >= 0 && currentSelectItemKeyIndex < items_.at(i).keyFrames.size()) {
+						//ImGui::Text("frame :%d  %f,  %f,   %f",key.frame, key.value.x, key.value.y, key.value.z);
+						ImGui::EndNeoTimeLine();
 
-								items_.at(currentSelectItemIndex).
-									keyFrames.erase(
-										items_.at(currentSelectItemIndex).keyFrames.begin() + currentSelectItemKeyIndex);
 
-								ImGui::EndNeoGroup();
-								ImGui::EndNeoSequencer();
-								return;
+						// 右クリ - 削除
+						if (ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+						{
+							// ＊未選択チェック
+							if (currentSelectItemIndex >= 0 && currentSelectItemIndex < items_.size()) {
+								if (currentSelectItemKeyIndex >= 0 && currentSelectItemKeyIndex < items_.at(i).keyFrames.size()) {
+
+									items_.at(currentSelectItemIndex).
+										keyFrames.erase(
+											items_.at(currentSelectItemIndex).keyFrames.begin() + currentSelectItemKeyIndex);
+
+									ImGui::EndNeoGroup();
+									ImGui::EndNeoSequencer();
+									return;
+								}
 							}
 						}
-					}
-					
-				}
-			}
 
-			ImGui::EndNeoGroup();
+					}
+				}
+
+				ImGui::EndNeoGroup();
+			}
 		}
 
 		ImGui::EndNeoSequencer();
@@ -169,37 +171,38 @@ void UISequencer::Draw()
 
 }
 
-
-void UISequencer:: AddItem(SequenceItemType type)
-{
-
-	if (!selectElementData) return;
-
-	auto& items_ = selectElementData->items;
-
-	/* すでに同じタイプがある場合は追加しない */
-	auto it = std::find_if(
-		items_.begin(),
-		items_.end(),
-		[type](const SequenceItem& t) {
-			return t.mType == type;
-		}
-	);
-
-	if (it != items_.end())return;
-
-	// 追加
-	items_.push_back(SequenceItem{
-		.mType = type
-		});
-}
+//
+//void UISequencer:: AddItem(SequenceItemType type)
+//{
+//
+//	if (!selectElementData) return;
+//
+//	auto& items_ = selectElementData->items;
+//
+//	/* すでに同じタイプがある場合は追加しない */
+//	auto it = std::find_if(
+//		items_.begin(),
+//		items_.end(),
+//		[type](const SequenceItem& t) {
+//			return t.mType == type;
+//		}
+//	);
+//
+//	if (it != items_.end())return;
+//
+//	// 追加
+//	items_.push_back(SequenceItem{
+//		.mType = type
+//		});
+//}
 
 void UISequencer::AddKeyFrame(SequenceItemType type, KeyFrame<Vector3> key)
 {
 
 	if (!selectElementData) return;
+	if (currentSelectTrackIndex == -1) return;
 
-	auto& items_ = selectElementData->items;
+	auto& items_ = selectElementData->tracks.at(currentSelectTrackIndex).items;
 
 
 	/*
@@ -244,6 +247,43 @@ void UISequencer::AddKeyFrame(SequenceItemType type, KeyFrame<Vector3> key)
 
 }
 
+UIElementAnimationData UISequencer::GetDefaultAnimationData()
+{
+
+	return UIElementAnimationData
+
+	{
+
+		// トラック
+		.tracks = {
+
+			/*
+				Transform
+			*/
+			SequenceTrack{
+				.trackName = "Transform",
+				.items =
+				{
+					{ SequenceItemType::kPosition, "座標" },
+					{ SequenceItemType::kScale,    "拡大" },
+					{ SequenceItemType::kRotation, "回転" }
+				}
+			},
+
+			/*
+				Alpha
+			*/
+			SequenceTrack{
+				.trackName = "透明度",
+				.items =
+				{
+					{ SequenceItemType::kAlpha, "Alpha" },
+				}
+			}
+		}
+	};
+}
+
 /*
 
 
@@ -251,11 +291,11 @@ void UISequencer::AddKeyFrame(SequenceItemType type, KeyFrame<Vector3> key)
 
 
 */
-void UISequencer::LerpKeyFrame(int itemIndex, int keyIndex)
+void UISequencer::LerpKeyFrame(int trackIndex ,int itemIndex, int keyIndex)
 {
 	if (!selectElementData) return;
 
-	auto& items_ = selectElementData->items;
+	auto& items_ = selectElementData->tracks[trackIndex].items;
 
 	if (itemIndex < 0 || itemIndex > items_.size())return;
 	if (keyIndex < 0  || keyIndex > items_.at(itemIndex).keyFrames.size()) return;
@@ -343,40 +383,105 @@ void UISequencer::LerpKeyFrame(int itemIndex, int keyIndex)
 
 
 /*
-	SequenceItemのJson化
+	SequenceItemのJson化　・・やり取りするのはキー情報のみ
 */
 void to_json(nlohmann::json& j, const SequenceItem& v)
 {
-	// タイプ
-	j["mType"] = (int)v.mType;
+	j = nlohmann::json::object();
 
-	j["keyFrames"] = nlohmann::json::array();// 空でも保存
+	// 空じゃなけりゃ
+	if (!v.keyFrames.empty()) {
 
-	// 各キーをJSON化
-	for (auto& item : v.keyFrames) {
-		j["keyFrames"].push_back(KeyFrame<Vector3>::ToJson(item));
+		// 各キーをJSON化
+		for (auto& item : v.keyFrames) {
+			j["keyFrames"].push_back(KeyFrame<Vector3>::ToJson(item));
+		}
 	}
 }
 
 /*
-	SequenceItemのJsonから復元
+	SequenceItemのJsonから復元　・・やり取りするのはキー情報のみ
 */
 void from_json(const nlohmann::json& j, SequenceItem& v)
 {
 
-	// タイプ
-	v.mType = (SequenceItemType)j["mType"].get<int>();
+	if (j.contains("keyFrames")) {
 
+		// JSONから各キー復元
+		for (const auto& item : j.at("keyFrames"))
+		{
+			v.keyFrames.push_back(
+				KeyFrame<Vector3>::FromJson(item)
+			);
+		}
 
-	v.keyFrames.clear();
-
-	// JSONから各キー復元
-	for (const auto& item : j.at("keyFrames"))
-	{
-		v.keyFrames.push_back(
-			KeyFrame<Vector3>::FromJson(item)
-		);
 	}
+}
+
+
+/*
+	SequenceTrackのJson化　・・やり取りするのはキー情報のみ
+*/
+void to_json(nlohmann::json& j, const SequenceTrack& v)
+{
+	j = nlohmann::json::object();
+
+	// 空じゃなけりゃ
+	if (!v.items.empty()) {
+
+		// 各トラック内アイテムをJSON化
+		for (const auto& item : v.items)
+		{
+			j["items"].push_back(item);
+		}
+	}
+}
+
+/*
+	SequenceTrackのJsonから復元　・・やり取りするのはキー情報のみ
+*/
+void from_json(const nlohmann::json & j, SequenceTrack & v)
+{
+
+	if (j.contains("items")) {
+
+		// JSONから各アイテム復元
+		const auto& itemsJson = j.at("items");
+
+		// インデックスで直接代入するだけ！
+		for (size_t i = 0; i < itemsJson.size() && i < v.items.size(); ++i) {
+
+			// 上書き
+			itemsJson[i].get_to(v.items[i]);
+
+		}
+	}
+
+	//for (const auto& item : j.at("items"))
+	//{
+	//	SequenceItem s = item.get<SequenceItem>();
+
+	//	// 同じItemTypeが存在するか検索
+	//	auto it = std::find_if(
+	//		v.items.begin(),
+	//		v.items.end(),
+	//		[&s](const SequenceItem& t)
+	//		{
+	//			return t.mType == s.mType;
+	//		}
+	//	);
+
+	//	// 存在するなら上書き
+	//	if (it != v.items.end())
+	//	{
+	//		*it = s;
+	//	}
+	//	// 存在しないなら追加
+	//	else
+	//	{
+	//		v.items.push_back(s);
+	//	}
+	//}
 }
 
 
@@ -388,12 +493,16 @@ void to_json(nlohmann::json& j, const UIElementAnimationData& v)
 
 	j = nlohmann::json::object();
 
-	j["items"] = nlohmann::json::array();
+	j["tracks"] = nlohmann::json::array();
 
-	// 各アイテムをJSON化
-	for (const auto& item : v.items)
-	{
-		j["items"].push_back(item);
+	// 空じゃなけりゃ
+	if (!v.tracks.empty()) {
+
+		// 各アイテムをJSON化
+		for (const auto& item : v.tracks)
+		{
+			j["tracks"].push_back(item);
+		}
 	}
 }
 
@@ -402,31 +511,20 @@ void to_json(nlohmann::json& j, const UIElementAnimationData& v)
 */
 void from_json(const nlohmann::json & j, UIElementAnimationData & v)
 {
+	/*  
+		デフォルトデータを得る
+	*/
+	v = UISequencer::GetDefaultAnimationData();
 
-	// JSONから各アイテム復元
-	for (const auto& item : j.at("items"))
-	{
-		SequenceItem s = item.get<SequenceItem>();
+	if (j.contains("tracks")) {
 
-		// 同じItemTypeが存在するか検索
-		auto it = std::find_if(
-			v.items.begin(),
-			v.items.end(),
-			[&s](const SequenceItem& t)
-			{
-				return t.mType == s.mType;
-			}
-		);
+		const auto& tracksJson = j.at("tracks");
 
-		// 存在するなら上書き
-		if (it != v.items.end())
-		{
-			*it = s;
-		}
-		// 存在しないなら追加
-		else
-		{
-			v.items.push_back(s);
+		// インデックスで直接代入するだけ！
+		for (size_t i = 0; i < tracksJson.size() && i < v.tracks.size(); ++i) {
+
+			// 上書き
+			tracksJson[i].get_to(v.tracks[i]);
 		}
 	}
 }

@@ -215,8 +215,15 @@ void UIManager::SelectedElementAnimationView()
 
 	if (selectedElemet_) {
 
+		//
+		ImGui::AlignTextToFramePadding();
 
-		ImGui::DragFloat3("座標", &selectedElemet_->sprite_.GetScreenTransform().translation_.x, 0.1f);
+		ImGui::SeparatorText("BaseTransform");
+
+		if (ImGui::DragFloat3("座標", &selectedElemet_->sprite_.GetScreenTransform().translation_.x, 0.1f)) {
+			selectedElemet_->position_ = selectedElemet_->sprite_.GetScreenTransform().translation_;// ベース座標も同期
+		}
+
 
 		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
 
@@ -241,7 +248,9 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::PopID();
 
 
-		ImGui::DragFloat3("拡大", &selectedElemet_->sprite_.GetScreenTransform().scale_.x, 0.1f);
+		if (ImGui::DragFloat3("拡大", &selectedElemet_->sprite_.GetScreenTransform().scale_.x, 0.1f)) {
+			selectedElemet_->scale_ = selectedElemet_->sprite_.GetScreenTransform().scale_;// ベース大きさも同期
+		}
 
 		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
 
@@ -264,7 +273,9 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::PopID();
 
 
-		ImGui::DragFloat3("回転", &selectedElemet_->sprite_.GetScreenTransform().rotation_.x, 0.1f);
+		if (ImGui::DragFloat3("回転", &selectedElemet_->sprite_.GetScreenTransform().rotation_.x, 0.1f)) {
+			selectedElemet_->rotation_ = selectedElemet_->sprite_.GetScreenTransform().rotation_;// ベース回転も同期
+		}
 
 
 		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
@@ -371,9 +382,14 @@ void UIManager::MoveSelectElement()
 	float radio = Editor::GetInstance()->GetMainViewRatio();
 
 	if (isDragSelectedElement_ && radio > 0.0f) {
+
 		// マウスの移動量を画面スケールで割って、1280x720のゲーム座標系に変換して加算
 		selectedElemet_->sprite_.GetScreenTransform().translation_.x += mouseDelta.x / radio;
 		selectedElemet_->sprite_.GetScreenTransform().translation_.y += mouseDelta.y / radio;
+
+		// 座標も同期
+		selectedElemet_->position_ = selectedElemet_->sprite_.GetScreenTransform().translation_;
+
 	}
 }
 
@@ -444,6 +460,8 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 	element.sprite_.Initialize(assetPanel_->GethierarchyTextureResourceList()[pathId]);
 	element.sprite_.SetAnchor(Sprite::anchor::Center);
 
+	// とりあえずスケール初期化？
+	element.scale_ = { 1.0f,1.0f,1.0f };
 }
 
 

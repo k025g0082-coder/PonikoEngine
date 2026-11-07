@@ -1,0 +1,135 @@
+{
+    "UI": {
+        "data": [
+            {
+                "elements": [
+                    {
+                        "animationData": {
+                            "items": []
+                        },
+                        "groupName": "Main",
+                        "pathID": "resources/white100x100.png",
+                        "position": [
+                            540.9490356445313,
+                            154.7597198486328,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "type": 0
+                    },
+                    {
+                        "animationData": {
+                            "items": [
+                                {
+                                    "keyFrames": [
+                                        {
+                                            "easingType": 0,
+                                            "frame": 0,
+                                            "value": {
+                                                "x": 337.6389465332031,
+                                                "y": 441.19610595703125,
+                                                "z": 0.0
+                                            }
+                                        },
+                                        {
+                                            "easingType": 0,
+                                            "frame": 25,
+                                            "value": {
+                                                "x": 640.480224609375,
+                                                "y": 354.9565124511719,
+                                                "z": 0.0
+                                            }
+                                        }
+                                    ],
+                                    "mType": 0
+                                },
+                                {
+                                    "keyFrames": [
+                                        {
+                                            "easingType": 0,
+                                            "frame": 0,
+                                            "value": {
+                                                "x": 1.0,
+                                                "y": 1.0,
+                                                "z": 1.0
+                                            }
+                                        },
+                                        {
+                                            "easingType": 0,
+                                            "frame": 26,
+                                            "value": {
+                                                "x": 1.0,
+                                                "y": 1.7000000476837158,
+                                                "z": 1.0
+                                            }
+                                        }
+                                    ],
+                                    "mType": 1
+                                },
+                                {
+                                    "keyFrames": [],
+                                    "mType": 2
+                                }
+                            ]
+                        },
+                        "groupName": "Main",
+                        "pathID": "resources/keichan.png",
+                        "position": [
+                            434.79669189453125,
+                            413.5286560058594,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.2159370183944702,
+                            1.0
+                        ],
+                        "type": 0
+                    },
+                    {
+                        "animationData": {
+                            "items": []
+                        },
+                        "groupName": "Main",
+                        "pathID": "resources/Engine/uvChecker.png",
+                        "position": [
+                            1006.2586669921875,
+                            419.6756591796875,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "type": 0
+                    }
+                ],
+                "name": "Canvas"
+            },
+            {
+                "elements": [],
+                "name": "ee"
+            }
+        ]
+    }
+}
