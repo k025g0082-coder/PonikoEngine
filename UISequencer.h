@@ -69,7 +69,6 @@ void from_json(const nlohmann::json& j, SequenceItem& v);
 /*
     シーケンス内のトラック　（Transform, Color)  ・・・
 */
-
 struct SequenceTrack
 {
     std::string trackName;            //  トラック名
@@ -83,18 +82,56 @@ void to_json(nlohmann::json& j, const SequenceTrack& v);
 void from_json(const nlohmann::json& j, SequenceTrack& v);
 
 
-/* 
-    UIElementがもつ単体のアニメーション情報 
-*/
-struct UIElementAnimationData {
 
-    std::vector<SequenceTrack> tracks;  // 最終的なTrack->Items->keyFramesという入れ子構造のデータ
+/*
+* 
+* 
+    アニメ
+*
+*
+*/
+struct UIElementAnimation {
+    
+    // アニメ名
+    std::string animationName = "NewAnimetesti";
+
+    // アニメ時間
+    float durationFrames = 60.0f;
+
+    // 再生中か
+    bool isPlaying = false;
+
+    // フレーム計測
+    float frame = 0;
+
+    // Transform,色といったトラック群。
+    // 最終的なTrack->Items->keyFramesという入れ子構造のデータ
+    std::vector<SequenceTrack> tracks;
 
 };
 
 // 保存 / 読み込み
-void to_json(nlohmann::json& j, const UIElementAnimationData& v);
-void from_json(const nlohmann::json& j, UIElementAnimationData& v);
+void to_json(nlohmann::json& j, const UIElementAnimation& v);
+void from_json(const nlohmann::json& j, UIElementAnimation& v);
+
+
+
+/* 
+* 
+    UIElementが最終的にもつ,複数のアニメーション情報 
+*
+*/
+struct UIElementAnimationDatas {
+
+    std::unordered_map<std::string, UIElementAnimation> animations_;
+
+    // 現在選択中
+    std::string currentTag_;
+};
+
+// 保存 / 読み込み
+void to_json(nlohmann::json& j, const UIElementAnimationDatas& v);
+void from_json(const nlohmann::json& j, UIElementAnimationDatas& v);
 
 
 
@@ -126,13 +163,13 @@ public:
     /*
         デフォルトの設定をしたElementAnimationDataを返す
     */
-    static UIElementAnimationData GetDefaultAnimationData();
+    static void SetDefaultTrackDatas(UIElementAnimation& anime);
 
 
     /* 
         アニメーションデータ登録
     */
-    void SetUIElementAnimationData(UIElementAnimationData& data) {
+    void SetUIElementAnimationData(UIElementAnimationDatas& data) {
 
         // アドレス登録
         selectElementData = &data;
@@ -155,6 +192,8 @@ private:
 
 	bool isPlaying = false;
 
+  //  std::string currentSelectAnimationTag;
+
 	int32_t currentSelectTrackIndex = -1;
 	int32_t currentSelectItemIndex = -1;
     int32_t currentSelectItemKeyIndex = -1;
@@ -168,7 +207,7 @@ private:
 	int32_t endFrame = 64;
 
     
-    UIElementAnimationData* selectElementData = nullptr;
+    UIElementAnimationDatas* selectElementData = nullptr;
 
 
 //	bool transformOpen = true;

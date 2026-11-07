@@ -1064,7 +1064,7 @@ void SceneComponentLoader::Property(const std::string& name, std::vector< UIData
 					if (item.contains("animationData")) {
 
 						// アニメデータ  (変換時のto_json,from_jsonはヘッダー内に定義してるので使える)
-						element.animationDatas_ = item.at("animationData").get<UIElementAnimationData>();
+						element.animationDatas_ = item.at("animationData").get<UIElementAnimationDatas>();
 					}
 
 					element.position_ = JsonToVector3(item.at("position"));

@@ -60,8 +60,16 @@ void UISequencer::Update()
 		ImGuiNeoSequencerFlags_Selection_EnableDeletion))
 	{
 
-		// 現在選択されているデータのアイテム
-		auto& tracks_ = selectElementData->tracks;
+
+		//currentSelectAnimationTag = "NewAnime";
+
+
+		//if (currentSelectAnimationTag.empty())
+
+
+
+		// 現在選択されているアニメデータのトラックたち
+		auto& tracks_ = selectElementData->animations_[selectElementData->currentTag_].tracks;
 
 		for (int track = 0; track < tracks_.size(); ++track)
 		{
@@ -73,7 +81,7 @@ void UISequencer::Update()
 			{
 
 				// 現在選択されているトラックのデータのアイテム
-				auto& items_ = selectElementData->tracks.at(track).items;
+				auto& items_ = tracks_.at(track).items;
 
 				if (ImGui::IsNeoTimelineSelected())
 				{
@@ -200,23 +208,14 @@ void UISequencer::AddKeyFrame(SequenceItemType type, KeyFrame<Vector3> key)
 {
 
 	if (!selectElementData) return;
+
+	//if (currentSelectAnimationTag.empty()) return;
 	if (currentSelectTrackIndex == -1) return;
 
-	auto& items_ = selectElementData->tracks.at(currentSelectTrackIndex).items;
 
-
-	/*
-		もしitems_にそのタイプのアイテムが存在しない場合、新しくアイテムを追加する
-	*/
-	//auto itt = std::find_if(
-	//	items_.begin(),
-	//	items_.end(),
-	//	[type](const SequenceItem& t) {
-	//		return t.mType == type;
-	//	}
-	//);
-
-	//if (itt == items_.end()) AddItem(type);
+	// 現在選択中のアニメーションの、現在選んでいるIndexの、アイテムｓ
+	auto& items_ = 
+		selectElementData->animations_[selectElementData->currentTag_].tracks.at(currentSelectTrackIndex).items;
 
 
 
@@ -247,41 +246,37 @@ void UISequencer::AddKeyFrame(SequenceItemType type, KeyFrame<Vector3> key)
 
 }
 
-UIElementAnimationData UISequencer::GetDefaultAnimationData()
+void UISequencer::SetDefaultTrackDatas(UIElementAnimation& anime)
 {
 
-	return UIElementAnimationData
+	// トラックのみ操作
+	anime.tracks = {
 
-	{
+		/*
+			Transform
+		*/
+		SequenceTrack{
+			.trackName = "Transform",
+			.items =
+			{
+				{ SequenceItemType::kPosition, "座標" },
+				{ SequenceItemType::kScale,    "拡大" },
+				{ SequenceItemType::kRotation, "回転" }
+			}
+		},
 
-		// トラック
-		.tracks = {
-
-			/*
-				Transform
-			*/
-			SequenceTrack{
-				.trackName = "Transform",
-				.items =
-				{
-					{ SequenceItemType::kPosition, "座標" },
-					{ SequenceItemType::kScale,    "拡大" },
-					{ SequenceItemType::kRotation, "回転" }
-				}
-			},
-
-			/*
-				Alpha
-			*/
-			SequenceTrack{
-				.trackName = "透明度",
-				.items =
-				{
-					{ SequenceItemType::kAlpha, "Alpha" },
-				}
+		/*
+			Alpha
+		*/
+		SequenceTrack{
+			.trackName = "透明度",
+			.items =
+			{
+				{ SequenceItemType::kAlpha, "Alpha" },
 			}
 		}
 	};
+	
 }
 
 /*
@@ -295,7 +290,9 @@ void UISequencer::LerpKeyFrame(int trackIndex ,int itemIndex, int keyIndex)
 {
 	if (!selectElementData) return;
 
-	auto& items_ = selectElementData->tracks[trackIndex].items;
+
+	auto& items_ = selectElementData->animations_[selectElementData->currentTag_].tracks[trackIndex].items;
+
 
 	if (itemIndex < 0 || itemIndex > items_.size())return;
 	if (keyIndex < 0  || keyIndex > items_.at(itemIndex).keyFrames.size()) return;
@@ -485,20 +482,23 @@ void from_json(const nlohmann::json & j, SequenceTrack & v)
 }
 
 
-/*
-	UIElementAnimationDataのJson化
-*/
-void to_json(nlohmann::json& j, const UIElementAnimationData& v)
-{
 
+
+
+/*
+	UIElementAnimationのJson化
+*/
+void to_json(nlohmann::json& j, const UIElementAnimation& v)
+{
 	j = nlohmann::json::object();
 
-	j["tracks"] = nlohmann::json::array();
+	j["animationName"] = v.animationName;
+	j["durationFrames"] = v.durationFrames;
 
 	// 空じゃなけりゃ
 	if (!v.tracks.empty()) {
 
-		// 各アイテムをJSON化
+		// 各トラックをJSON化
 		for (const auto& item : v.tracks)
 		{
 			j["tracks"].push_back(item);
@@ -507,14 +507,22 @@ void to_json(nlohmann::json& j, const UIElementAnimationData& v)
 }
 
 /*
-	UIElementAnimationDataのJsonから復元
+	UIElementAnimationのJsonから復元
 */
-void from_json(const nlohmann::json & j, UIElementAnimationData & v)
+void from_json(const nlohmann::json & j, UIElementAnimation & v)
 {
-	/*  
-		デフォルトデータを得る
+	if (j.contains("animationName"))
+		v.animationName = j["animationName"].get<std::string>();
+
+	if (j.contains("animationFrames"))
+	v.durationFrames = j["durationFrames"].get<float>();
+
+
+	/*
+		Track情報は、デフォルトデータをセットする（Transformの文字列とかは固定のため・・）
 	*/
-	v = UISequencer::GetDefaultAnimationData();
+	UISequencer::SetDefaultTrackDatas(v);
+
 
 	if (j.contains("tracks")) {
 
@@ -525,6 +533,50 @@ void from_json(const nlohmann::json & j, UIElementAnimationData & v)
 
 			// 上書き
 			tracksJson[i].get_to(v.tracks[i]);
+		}
+	}
+
+}
+
+
+/*
+	UIElementAnimationDataのJson化
+*/
+void to_json(nlohmann::json& j, const UIElementAnimationDatas& v)
+{
+
+	j = nlohmann::json::object();
+
+	j["animations"] = nlohmann::json::array();
+
+	// 空じゃなけりゃ
+	if (!v.animations_.empty()) {
+
+		// 各アイテムをJSON化
+		for (const auto& [name, anime] : v.animations_) {
+			j["animations"].push_back(anime);
+		}
+	}
+}
+
+/*
+	UIElementAnimationDataのJsonから復元
+*/
+void from_json(const nlohmann::json & j, UIElementAnimationDatas & v)
+{
+	if (j.contains("animations")) {
+
+		const auto&animationsJson = j.at("animations");
+
+		// アニメーションを新規登録する
+		for (const auto& animeJson : animationsJson) {
+
+			// 復元
+			UIElementAnimation anime = animeJson.get<UIElementAnimation>();
+
+			// アニメ名で登録
+			v.animations_[anime.animationName] = anime;
+			v.currentTag_ = anime.animationName;
 		}
 	}
 }

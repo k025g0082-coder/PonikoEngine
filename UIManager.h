@@ -31,7 +31,7 @@ struct UIElement {
 	std::string pathID_;			   //   アセット参照用
 	std::string groupName_ = "Main";   //   グループの名前。
 
-	UIElementAnimationData animationDatas_; // アニメーションのデータ？
+	UIElementAnimationDatas animationDatas_; // アニメーションのデータ？
 
 	// SRT
 	Vector3 position_;

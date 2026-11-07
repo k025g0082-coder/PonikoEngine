@@ -5,17 +5,41 @@
                 "elements": [
                     {
                         "animationData": {
-                            "tracks": [
+                            "animations": [
                                 {
-                                    "items": [
-                                        {},
-                                        {},
-                                        {}
+                                    "animationName": "NewAnimetesttt",
+                                    "durationFrames": 60.0,
+                                    "tracks": [
+                                        {
+                                            "items": [
+                                                {},
+                                                {},
+                                                {}
+                                            ]
+                                        },
+                                        {
+                                            "items": [
+                                                {}
+                                            ]
+                                        }
                                     ]
                                 },
                                 {
-                                    "items": [
-                                        {}
+                                    "animationName": "NewAnimetesddt",
+                                    "durationFrames": 60.0,
+                                    "tracks": [
+                                        {
+                                            "items": [
+                                                {},
+                                                {},
+                                                {}
+                                            ]
+                                        },
+                                        {
+                                            "items": [
+                                                {}
+                                            ]
+                                        }
                                     ]
                                 }
                             ]
@@ -23,8 +47,8 @@
                         "groupName": "Main",
                         "pathID": "resources/keichan.png",
                         "position": [
-                            581.94140625,
-                            293.5921936035156,
+                            975.1448364257813,
+                            361.7471008300781,
                             0.0
                         ],
                         "rotation": [
@@ -41,17 +65,44 @@
                     },
                     {
                         "animationData": {
-                            "tracks": [
+                            "animations": [
                                 {
-                                    "items": [
-                                        {},
-                                        {},
-                                        {}
-                                    ]
-                                },
-                                {
-                                    "items": [
-                                        {}
+                                    "animationName": "NewAnimetest",
+                                    "durationFrames": 60.0,
+                                    "tracks": [
+                                        {
+                                            "items": [
+                                                {
+                                                    "keyFrames": [
+                                                        {
+                                                            "easingType": 0,
+                                                            "frame": 0,
+                                                            "value": {
+                                                                "x": 356.5049743652344,
+                                                                "y": 373.98095703125,
+                                                                "z": 0.0
+                                                            }
+                                                        },
+                                                        {
+                                                            "easingType": 0,
+                                                            "frame": 22,
+                                                            "value": {
+                                                                "x": 763.6895751953125,
+                                                                "y": 368.73822021484375,
+                                                                "z": 0.0
+                                                            }
+                                                        }
+                                                    ]
+                                                },
+                                                {},
+                                                {}
+                                            ]
+                                        },
+                                        {
+                                            "items": [
+                                                {}
+                                            ]
+                                        }
                                     ]
                                 }
                             ]
@@ -59,8 +110,8 @@
                         "groupName": "Main",
                         "pathID": "resources/keichan.png",
                         "position": [
-                            379.2232666015625,
-                            284.85430908203125,
+                            356.5049743652344,
+                            373.98095703125,
                             0.0
                         ],
                         "rotation": [
