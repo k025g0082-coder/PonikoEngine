@@ -4,14 +4,18 @@
 #include "Editor.h"
 
 #include "Input.h"
+
+#include "Timer.h"
+
 #include "SceneComponentLoader.h"
 
 #include <imgui/IconsFontAwesome.h>
 
-
-
-
 #include "AssetsPanel.h"
+
+
+std::vector<UIData> UIManager::elementDatas_;
+
 
 UIManager* UIManager::GetInstance()
 {
@@ -59,9 +63,19 @@ void UIManager::LoadElementData()
 		loder->LoadGroup("UI");
 	}
 
-	/* Spriteの一斉読み込み */
+	int count = 0;
 	for (UIData& data : elementDatas_) {
 		for (UIElement& e : data.elements_) {
+
+			// 名前がない場合付ける
+			if (e.name_.empty()) {
+				e.name_ = "element_" + std::to_string(count);
+				count++;//
+			}
+
+			/*
+				Spriteの一斉読み込み
+			*/
 
 			// AssetPanelからテキスチャを貰う
 			e.sprite_.Initialize(assetPanel_->GethierarchyTextureResourceList()[e.pathID_]);
@@ -103,7 +117,6 @@ void UIManager::UpdateElements()
 		SaveElementData();
 	
 	}
-
 	
 	//
 	SelectedElementAnimationView();
@@ -119,13 +132,18 @@ void UIManager::UpdateElements()
 	//　ElementDataの更新
 	for (UIData& data : elementDatas_) {
 
-	
 		//
 		deleteElementIndex_ = -1;
 
 		for (int i = 0; i < data.elements_.size(); i++)
 		{
 			UIElement& e = data.elements_.at(i);
+
+			/*
+				再生中のアニメの更新
+			*/
+			UpdateElementAnimation(e.animationDatas_);
+
 
 			// もし現在開いてるレイヤー以外のエレメントは、選択できないようにする
 			if (data.name_ != hierarchyPanel_->GetSelectedCurrentLayerName()) {
@@ -142,9 +160,6 @@ void UIManager::UpdateElements()
 				マウス座標と大きさをもとにElementを選択したり削除したり
 			*/
 			JudgeMouseSelectElement(e,i);
-
-			// 当たったか
-			//ImGui::Text(" inside: %s", inside ? "true":"false" );
 
 #endif
 
@@ -195,6 +210,98 @@ void UIManager::DrawElements()
 
 }
 
+void UIManager::UpdateElementAnimation(UIElementAnimationDatas& animeDatas)
+{
+	// 現在設定されている、タグのアニメ
+	auto& anime_ = animeDatas.animations_[animeDatas.currentTag_];
+
+	/*
+		アニメーション時間を加算
+	*/ 
+	if (anime_.isPlaying) {
+
+		const float kRate = 60.0f;// 60fps
+		anime_.frame += Timer::GetDeltaTime() * kRate;
+
+	}
+	else {
+		return;// 再生されてなければ抜ける
+	}
+
+
+	// UIElementのアニメデータのトラックたち
+	auto& tracks_ = anime_.tracks;
+
+	for (int track = 0; track < tracks_.size(); ++track)
+	{
+
+		// トラックのデータのアイテム
+		auto& items_ = tracks_.at(track).items;
+
+		/*
+			各アイテム　　Transform:座標,拡大,回転　Color:R,G,B,アルファ・・
+		*/
+		for (int i = 0; i < items_.size(); ++i)
+		{
+			// 全てのキー
+			for (int j = 0; j < items_.at(i).keyFrames.size(); ++j) {
+
+				KeyFrame<Vector3>& key = items_.at(i).keyFrames.at(j);
+
+				/// 補間
+				UISequencer::LerpKeyFrame(
+					&animeDatas,
+					animeDatas.animations_[animeDatas.currentTag_].frame,// 現在の経過時間。
+					track,
+					i,
+					j
+				);
+
+			}
+			
+		}
+	}
+}
+
+// ゴミ　じゃあ何？登録時にマップとかでアクセスできた方がいいんか？？？？？？？
+void UIManager::PlayAnimationElement(std::string canvasName, std::string elementName, std::string elementAnimationTag)
+{
+
+	//該当レイヤー検索
+	auto it = std::find_if(
+		elementDatas_.begin(),
+		elementDatas_.end(),
+		[canvasName](const UIData& data_) {
+			return data_.name_ == canvasName;
+		}
+	);
+	if (it != elementDatas_.end()) {
+
+		// 該当エレメント検索
+		auto itt = std::find_if(
+			it->elements_.begin(),
+			it->elements_.end(),
+			[elementName](const UIElement& data_) {
+				return data_.name_ == elementName;
+			}
+		);
+
+		if (itt != it->elements_.end()) {
+
+			// 現在のアニメを指定
+			itt->animationDatas_.currentTag_ = elementAnimationTag;
+
+			// 再生時間リセット
+			itt->animationDatas_.animations_[elementAnimationTag].frame = 0.0f;
+
+			// 再生開始
+			itt->animationDatas_.animations_[elementAnimationTag].isPlaying = true;
+
+		}
+	}
+
+}
+
 void UIManager::SelectedElementAnimationView()
 {
 #ifdef USE_IMGUI
@@ -204,6 +311,9 @@ void UIManager::SelectedElementAnimationView()
 
 		//
 		ImGui::AlignTextToFramePadding();
+
+		ImGui::Text("エレメント名：%s", selectedElemet_->name_.c_str());
+
 
 		ImGui::SeparatorText("BaseTransform");
 		ImGui::Dummy(ImVec2{ 0,4.0f });

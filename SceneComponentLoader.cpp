@@ -1017,6 +1017,8 @@ void SceneComponentLoader::Property(const std::string& name, std::vector< UIData
 					json e;
 					
 					e["type"] = (int)element.type_;
+
+					e["name"] = element.name_;
 					e["pathID"] = element.pathID_;
 					e["groupName"] = element.groupName_;
 					
@@ -1057,6 +1059,10 @@ void SceneComponentLoader::Property(const std::string& name, std::vector< UIData
 					UIElement& element = data_.elements_.emplace_back();
 
 					element.type_   = item.at("type").get<UIType>();
+
+					if (item.contains("name"))
+						element.name_ = item.at("name").get<std::string>();
+
 					element.pathID_ = item.at("pathID").get<std::string>();
 					element.groupName_ = item.at("groupName").get<std::string>();
 

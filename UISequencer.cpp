@@ -116,10 +116,8 @@ void UISequencer::Update()
 							if (!isPlaying && previousFrame == currentFrame)
 								continue;
 
-
-
 							/// 補間
-							LerpKeyFrame(track,i, j);
+							LerpKeyFrame(selectElementData,currentFloatFrame,track,i, j);
 
 
 
@@ -348,12 +346,10 @@ void UISequencer::AnimationComboView()
 
 
 */
-void UISequencer::LerpKeyFrame(int trackIndex ,int itemIndex, int keyIndex)
+void UISequencer::LerpKeyFrame(UIElementAnimationDatas* animeDatas, float animationFrame, int trackIndex ,int itemIndex, int keyIndex)
 {
-	if (!selectElementData) return;
 
-
-	auto& items_ = selectElementData->animations_[selectElementData->currentTag_].tracks[trackIndex].items;
+	auto& items_ = animeDatas->animations_[animeDatas->currentTag_].tracks[trackIndex].items;
 
 
 	if (itemIndex < 0 || itemIndex > items_.size())return;
@@ -371,14 +367,16 @@ void UISequencer::LerpKeyFrame(int trackIndex ,int itemIndex, int keyIndex)
 	// 現在のフレーム数から補完するキーフレームを探す
 	KeyFrame<Vector3>& nextKey = items_.at(itemIndex).keyFrames.at(keyIndex + 1);// 次のキー
 
-	if (currentFrame >= key.frame && currentFrame <= nextKey.frame) {
+	//if (currentFrame >= key.frame && currentFrame <= nextKey.frame) {
+	if (animationFrame >= static_cast<float>(key.frame) && animationFrame <= static_cast<float>(nextKey.frame)) {
 
 		float frameRange = static_cast<float>(nextKey.frame - key.frame);
 
 		if (frameRange != 0.0f) {
 
 			// t = 現在 / 全体
-			float t = (currentFloatFrame - static_cast<float>(key.frame)) / frameRange;
+	//		float t = (currentFloatFrame - static_cast<float>(key.frame)) / frameRange;
+			float t = (animationFrame - static_cast<float>(key.frame)) / frameRange;
 
 			// 範囲外参照を防ぐために 0.0f 〜 1.0f にクランプ（安全策）
 			t = std::clamp(t, 0.0f, 1.0f);

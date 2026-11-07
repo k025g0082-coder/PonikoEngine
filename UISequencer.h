@@ -74,7 +74,7 @@ struct SequenceTrack
     std::string trackName;            //  トラック名
     std::vector<SequenceItem> items;  //　アイテムたち
 
-    bool isOpen = false; // 開いているか
+    bool isOpen = true; // 開いているか
 };
 
 // 保存 / 読み込み
@@ -93,7 +93,7 @@ void from_json(const nlohmann::json& j, SequenceTrack& v);
 struct UIElementAnimation {
     
     // アニメ名
-    std::string animationName = "NewAnimetesti";
+    std::string animationName = "NewAnime";
 
     // アニメ時間
     float durationFrames = 60.0f;
@@ -115,10 +115,9 @@ void to_json(nlohmann::json& j, const UIElementAnimation& v);
 void from_json(const nlohmann::json& j, UIElementAnimation& v);
 
 
-
-/* 
-* 
-    UIElementが最終的にもつ,複数のアニメーション情報 
+/*
+*
+    UIElementが最終的にもつ,複数のアニメーション情報
 *
 */
 struct UIElementAnimationDatas {
@@ -132,6 +131,7 @@ struct UIElementAnimationDatas {
 // 保存 / 読み込み
 void to_json(nlohmann::json& j, const UIElementAnimationDatas& v);
 void from_json(const nlohmann::json& j, UIElementAnimationDatas& v);
+
 
 
 
@@ -176,6 +176,24 @@ public:
     }
 
 
+    /// <summary>
+    /// 現在のフレームからキーフレームで補間する
+    /// </summary>
+    /// 
+    /// <param name="animeDatas">アニメのデータたち</param>
+    /// <param name="animationFramee">アニメの再生フレーム時間</param>
+    /// <param name="trackIndex">トラックのIndex番号</param>
+    /// <param name="itemIndex">アイテムのIndex番号</param>
+    /// <param name="keyIndex">キーのIndex番号</param>
+    static void LerpKeyFrame(
+        UIElementAnimationDatas* animeDatas,
+        float animationFrame,
+        int trackIndex,
+        int itemIndex,
+        int keyIndex
+    );
+
+
     // 
     void AnimationComboView();
 
@@ -184,14 +202,7 @@ public:
 
 private:
 
-    /// <summary>
-    /// 現在のフレームからキーフレームで補間する
-    /// </summary>
-    /// 
-    /// <param name="trackIndex">トラックのIndex番号</param>
-    /// <param name="itemIndex">アイテムのIndex番号</param>
-    /// <param name="keyIndex">キーのIndex番号</param>
-    void LerpKeyFrame(int trackIndex,int itemIndex, int keyIndex);
+   
 
 
 	bool isPlaying = false;
@@ -200,7 +211,7 @@ private:
     std::string currentSelectAnimationTag;
 
 
-	int32_t currentSelectTrackIndex = -1;
+	int32_t currentSelectTrackIndex = 0;
 	int32_t currentSelectItemIndex = -1;
     int32_t currentSelectItemKeyIndex = -1;
 
@@ -209,7 +220,7 @@ private:
 
 	int32_t previousFrame = 0;
 
-	int32_t startFrame = -10;
+	int32_t startFrame = 0;
 	int32_t endFrame = 64;
 
     

@@ -32,6 +32,8 @@ struct UIElement {
 	Sprite sprite_;				   //	スプライト
 
 	std::string pathID_;			   //   アセット参照用
+
+	std::string name_;                 //   エレメントの名前。
 	std::string groupName_ = "Main";   //   グループの名前。
 
 	UIElementAnimationDatas animationDatas_; // アニメーションのデータ？
@@ -40,6 +42,7 @@ struct UIElement {
 	Vector3 position_;
 	Vector3 scale_;
 	Vector3 rotation_;
+
 };
 
 /* 一つのキャンバス内全てのUIデータ */
@@ -88,7 +91,22 @@ public:
 	// UIの描画。- PonikoEngine.cppの方にかいてる（Spriteの描画順の都合上20261105）
 	void DrawElements();
 
+
 	
+	// アニメーション補間
+	void UpdateElementAnimation(UIElementAnimationDatas& animeDatas);
+
+
+
+	// 指定タグのアニメ再生
+	static void PlayAnimationElement(
+		std::string canvasName,
+		std::string elementName,
+		std::string elementAnimationTag
+	);
+
+
+
 	// 選択されているUIElementのアニメーションビュー
 	void SelectedElementAnimationView();
 
@@ -116,9 +134,6 @@ private:
 	UISequencer sequencer_;
 
 
-
-
-
 	// マウスからエレメントを選択
 	void JudgeMouseSelectElement(UIElement& e,int index);
 
@@ -130,7 +145,7 @@ private:
 		UIElementのリストを含む、UIData
 	*/
 	// UIDataのリスト
-	std::vector<UIData> elementDatas_;
+	static std::vector<UIData> elementDatas_;
 
 
 	// 現在選択されているエレメントのアニメーションのタグ名
@@ -154,6 +169,7 @@ private:
 
 	//
 	bool inside = false;
+
 
 	HierarchyPanel* hierarchyPanel_ = nullptr;
 	AssetsPanel* assetPanel_ = nullptr;

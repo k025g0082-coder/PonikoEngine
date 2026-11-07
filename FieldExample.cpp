@@ -9,6 +9,7 @@
 #include "PostEffectManager.h"
 
 #include "ImGuiManager.h"
+#include "UIManager.h"
 
 #include <utility>
 
@@ -92,7 +93,21 @@ void FieldExample::Update(Input * input)
 
 	//if (ImGui::DragFloat3("playerVelocity", &player_->velocity_.x, 0.1f)) {
 	//	// なんかあれば
-	//}
+	//}]
+
+
+	/*
+		てすとUI あにめ
+	*/
+	if (ImGui::Button("アニメ")) {
+
+		UIManager::PlayAnimationElement(
+			"Canvas",
+			"element_1",
+			"NewAnimetest"
+		);
+	};
+
 
 	if (ImGui::Button("Reload")) {
 
