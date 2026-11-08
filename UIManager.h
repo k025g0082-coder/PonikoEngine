@@ -12,6 +12,10 @@
 #include "UISequencer.h"
 
 
+/* ここに必要な構造体があります */
+#include "UIData.h"
+
+
 #include "Vector.h"
 
 #include <vector>
@@ -19,45 +23,6 @@
 
 
 //	UIを組み立てするクラス。
-
-
-enum class UIType {
-	kNone,
-	kButton,
-};
-
-struct UIElement {
-
-	UIType type_ = UIType::kNone;  //	タイプ
-	Sprite sprite_;				   //	スプライト
-
-	std::string pathID_;			   //   アセット参照用
-
-	std::string name_;                 //   エレメントの名前。
-	std::string groupName_ = "Main";   //   グループの名前。
-
-	UIElementAnimationDatas animationDatas_; // アニメーションのデータ？
-
-	// SRT
-	Vector3 position_;
-	Vector3 scale_;
-	Vector3 rotation_;
-
-};
-
-/* 一つのキャンバス内全てのUIデータ */
-struct UIData {
-
-	// 名前　キャンバスレイヤーの名前からもらう（予定）
-	std::string name_;
-
-	// 表示非表示
-	bool isView_ = true;		  
-
-	// UIElementたち
-	std::vector<UIElement> elements_;
-
-};
 
 
 /*  
@@ -116,7 +81,7 @@ public:
 
 	
 	// アニメーション補間
-	void UpdateElementAnimation(UIElementAnimationDatas& animeDatas);
+	void UpdateElementAnimation(UIElement* element);
 
 
 

@@ -21,10 +21,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 {
 	PonikoEngine::Initialize(L"ぽにこエンジン");
 
-	//Game::GetInstance()->StartGameScene("FieldExample");
+	Game::GetInstance()->StartGameScene("FieldExample");
 	
 	// 初期Gameシーンの登録
-	Game::GetInstance()->StartGameScene("TestScene");
+	//Game::GetInstance()->StartGameScene("TestScene");
 
 
 

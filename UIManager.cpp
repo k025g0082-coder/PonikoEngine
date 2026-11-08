@@ -189,7 +189,7 @@ void UIManager::UpdateElements()
 			/*
 				再生中のアニメの更新
 			*/
-			UpdateElementAnimation(e.animationDatas_);
+			UpdateElementAnimation(&e);
 
 
 			// もし現在開いてるレイヤー以外のエレメントは、選択できないようにする
@@ -257,10 +257,10 @@ void UIManager::DrawElements()
 
 }
 
-void UIManager::UpdateElementAnimation(UIElementAnimationDatas& animeDatas)
+void UIManager::UpdateElementAnimation(UIElement* element)
 {
 	// 現在設定されている、タグのアニメ
-	auto& anime_ = animeDatas.animations_[animeDatas.currentTag_];
+	auto& anime_ = element->animationDatas_.animations_[element->animationDatas_.currentTag_];
 
 	/*
 		アニメーション時間を加算
@@ -297,8 +297,8 @@ void UIManager::UpdateElementAnimation(UIElementAnimationDatas& animeDatas)
 
 				/// 補間
 				UISequencer::LerpKeyFrame(
-					&animeDatas,
-					animeDatas.animations_[animeDatas.currentTag_].frame,// 現在の経過時間。
+					element,
+					element->animationDatas_.animations_[element->animationDatas_.currentTag_].frame,// 現在の経過時間。
 					track,
 					i,
 					j
@@ -501,7 +501,7 @@ void UIManager::JudgeMouseSelectElement(UIElement& e,int index)
 			/*
 				新たに選択されたので、アニメーションのデータを受け渡す
 			*/
-			currentSceneUIData_->sequencer_.SetUIElementAnimationData(selectedElemet_->animationDatas_);
+			currentSceneUIData_->sequencer_.SetUIElementAnimationData(*selectedElemet_);
 
 		}
 	}

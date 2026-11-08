@@ -321,6 +321,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneComponentLoader.cpp" />
     <ClCompile Include="SceneViewport.cpp" />
+    <ClCompile Include="SequencerData.cpp" />
     <ClCompile Include="ShadowManager.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <ClCompile Include="SpotLight.cpp">
@@ -339,6 +340,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="UIData.cpp" />
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UISequencer.cpp" />
     <ClCompile Include="WinApp.cpp" />
@@ -423,6 +425,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="SceneFactory.h" />
     <ClInclude Include="SceneViewport.h" />
     <ClInclude Include="ScreenTransform.h" />
+    <ClInclude Include="SequencerData.h" />
     <ClInclude Include="ShadowManager.h" />
     <ClInclude Include="SoundManager.h" />
     <ClInclude Include="Sphere.h" />
@@ -435,6 +438,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="timer.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Triangle.h" />
+    <ClInclude Include="UIData.h" />
     <ClInclude Include="UIManager.h" />
     <ClInclude Include="UISequencer.h" />
     <ClInclude Include="Vector.h" />

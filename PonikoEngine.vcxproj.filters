@@ -328,6 +328,12 @@
     <ClCompile Include="EditorGrid.cpp">
       <Filter>Engine\Source\ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="UIData.cpp">
+      <Filter>Engine\Source\ソース ファイル\Editor\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="SequencerData.cpp">
+      <Filter>Engine\Source\ソース ファイル\Editor\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -607,6 +613,12 @@
     </ClInclude>
     <ClInclude Include="SceneFactory.h">
       <Filter>Engine\Source\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="UIData.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Editor\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="SequencerData.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Editor\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
