@@ -731,7 +731,7 @@ void SceneComponentLoader::Property(
 //{}
 
 
-void SceneComponentLoader::Property(const std::string& name, std::vector<std::unique_ptr<Hierarchy< Model >>> &value) {
+void SceneComponentLoader::Property(const std::string& name, std::vector<std::unique_ptr<HierarchyNode>> &value) {
 
 	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
 
@@ -743,31 +743,33 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<std::un
 
 			for (const auto& hierarchy : value) {
 
-				json item;
+				group[name].push_back(hierarchy->ToJson());
 
-				item["type"] = hierarchy->type_;
-				item["name"] = hierarchy->name_;
-				item["layerName"] = hierarchy->layerName_;
+				//json item;
 
-				item["id"] = hierarchy->id_;
+				//item["type"] = hierarchy->type_;
+				//item["name"] = hierarchy->name_;
+				//item["layerName"] = hierarchy->layerName_;
 
-
-				// ヒエラルキのトランスフォーム情報を（強引に）ワールドのにして保存
-				item["transform"] = WorldToJson(
-					*static_cast<WorldTransform*>(hierarchy->transform_.get())
-				);
+				//item["id"] = hierarchy->id_;
 
 
-				item["aabb"] = AABBToJson(hierarchy->aabb_);
+				//// ヒエラルキのトランスフォーム情報を（強引に）ワールドのにして保存
+				//item["transform"] = WorldToJson(
+				//	*static_cast<WorldTransform*>(hierarchy->transform_.get())
+				//);
+
+
+				//item["aabb"] = AABBToJson(hierarchy->aabb_);
+				//
+
+				//// シーン内のカスタム設定。空じゃなけりゃ保存
+				//if (!hierarchy->json_.empty()) {
+				//	item["propaties"] = hierarchy->json_;
+				//}
 				
 
-				// シーン内のカスタム設定。空じゃなけりゃ保存
-				if (!hierarchy->json_.empty()) {
-					item["propaties"] = hierarchy->json_;
-				}
-
-
-				group[name].push_back(item);
+				
 
 			}
 		},
@@ -782,27 +784,19 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<std::un
 
 			for (const auto& item : group.at(name)) {
 
-				auto hierarchy = std::make_unique<Hierarchy<Model>>();
+				// type を読み取って適切なクラスをインスタンス化する
+				auto type = (HierarchyType)item.at("type").get<int>();
 
-				hierarchy->name_ = item.at("name").get<std::string>();
-				hierarchy->layerName_ = item.at("layerName").get<std::string>();
 
-				hierarchy->id_ = item.at("id").get<std::string>();
+				std::unique_ptr<HierarchyNode> hierarchy;
 
-				// ワールドトランスフォーム初期化　makeUniqueで生成！
-				auto world = JsonToWorld(item.at("transform"));
-
-				hierarchy->transform_ =
-					std::make_unique<WorldTransform>(world);
-				
-				if (item.contains("aabb")) {
-					hierarchy->aabb_ = JsonToAABB(item.at("aabb"));
+				if (type == HierarchyType::kModel) {
+					hierarchy = std::make_unique<ModelNode>();
 				}
 
-				//
-				if (item.contains("propaties")) {
-					hierarchy->json_ = item.at("propaties");
-				}
+
+				// 仮想関数経由で FromJson を呼び出す
+				hierarchy->FromJson(item);
 
 				// リストに追加
 				value.push_back(std::move(hierarchy));

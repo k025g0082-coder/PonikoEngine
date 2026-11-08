@@ -27,6 +27,8 @@
 
 #include "DemoPlayer.h"
 
+#include "HierarchyNode.h"
+
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
@@ -48,7 +50,7 @@ public:
 
 
     /* 　オブジェクトの生成　 */
-    void CreateGameObject(const uint32_t& type, const uint32_t& subType, Hierarchy<Model>& hierarchy);
+    void CreateGameObject(const uint32_t& type, const uint32_t& subType, ModelNode& hierarchy);
 
 
     /* エディタで生成などされた際のラムダ式関数の登録 */
@@ -119,7 +121,7 @@ private:
     template<typename T>
     bool DeleteObject(
         std::vector<std::unique_ptr<T>>& objects,
-        const Hierarchy<Model>& hierarchy) {
+        const ModelNode& hierarchy) {
 
         auto it = std::find_if(
             objects.begin(),

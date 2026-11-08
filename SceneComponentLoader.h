@@ -28,6 +28,8 @@
 
 #include "UIManager.h"
 
+#include "HierarchyNode.h"
+
 
 using json = nlohmann::json;
 
@@ -181,7 +183,7 @@ public:
 
 
 	// モデルの登録
-	void Property(const std::string& name, std::vector<std::unique_ptr<Hierarchy< Model >>> &value);
+	void Property(const std::string& name, std::vector<std::unique_ptr<HierarchyNode>> &value);
 
 	//* モデルのIDやパスの登録
 	void Property(const std::string& name, std::vector< ModelResource >& value);
@@ -204,6 +206,18 @@ public:
 	// Property内で設定したもののImGUIセーブボタン配置
 	void SetImGuiSaveButton(std::string jsonPath);
 
+	// Json->Vector3の形式に変換
+	static WorldTransform JsonToWorld(const json& value);
+	// Json->Vector2の形式に変換
+	static ScreenTransform JsonToScreen(const json& value);
+
+	static AABB JsonToAABB(const json& value);
+	static json AABBToJson(const AABB& data);
+
+	// WorldTransform->Jsonの形式に変換
+	static json WorldToJson(const WorldTransform& world);
+	// WorldTransform->Jsonの形式に変換
+	static json ScreenToJson(const ScreenTransform& screen);
 
 private:
 
@@ -212,22 +226,13 @@ private:
 	
 
 
-	// WorldTransform->Jsonの形式に変換
-	json WorldToJson(const WorldTransform& world);
-	// WorldTransform->Jsonの形式に変換
-	json ScreenToJson(const ScreenTransform& screen);
 
-	// Json->Vector3の形式に変換
-	WorldTransform JsonToWorld(const json& value);
-	// Json->Vector2の形式に変換
-	ScreenTransform JsonToScreen(const json& value);
 
 	// Json <-> TextDatas
 	TextDatas JsonToTextDatas(const json& value);
 	json TextDatasToJson(const TextDatas& data);
 
-	AABB JsonToAABB(const json& value);
-	json AABBToJson(const AABB& data);
+	
 
 
 	/* ラムダ式。 */

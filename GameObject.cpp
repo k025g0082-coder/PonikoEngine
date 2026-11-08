@@ -50,13 +50,13 @@ void GameObject::Draw()
 	model_->Draw(worldTransform, *camera_);
 }
 
-GameObjectData GameObject::ConvertGameData(Hierarchy<Model>& hierarchy)
+GameObjectData GameObject::ConvertGameData(ModelNode& hierarchy)
 {
 	/* ヒエラルキーから,ゲームオブジェクトにデータを設定する */
 	GameObjectData data_;
 
 	// モデルももらう
-	data_.model = hierarchy.object;
+	data_.model = hierarchy.modelResource_;
 
 	// 判定用AABB
 	data_.aabb_ = hierarchy.aabb_;

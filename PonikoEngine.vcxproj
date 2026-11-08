@@ -295,6 +295,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="FileDropManager.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="HierarchyNode.cpp" />
     <ClCompile Include="HierarchyPanel.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="ImGuiManager.cpp" />
@@ -403,6 +404,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="FileDropManager.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="HierarchyNode.h" />
     <ClInclude Include="HierarchyPanel.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="ImGuiManager.h" />

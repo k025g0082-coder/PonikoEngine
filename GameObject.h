@@ -8,6 +8,7 @@
 #include "WorldTransform.h"
 
 #include "HierarchyPanel.h"
+#include "HierarchyNode.h"
 
 /* ゲームのオブジェクトの基本データ（初期化時などに値を引き渡す用） */
 struct GameObjectData {
@@ -23,7 +24,7 @@ struct GameObjectData {
     uint32_t objectID = 0;    // 識別ID
     uint32_t subObjectID = 0; // サブ識別ID
 
-	Hierarchy<Model>* hierarchy = nullptr; // 連携してるヒエラルキのポインタ
+	HierarchyNode* hierarchy = nullptr; // 連携してるヒエラルキのポインタ
 
 };
 
@@ -47,7 +48,7 @@ public:
     WorldTransform& GetWorldTransform(){ return worldTransform; } 
     AABB& GetAABB() { return aabb_; }
 
-	const Hierarchy<Model>* GetHierarchy() const { return hierarchy; }
+	const HierarchyNode* GetHierarchy() const { return hierarchy; }
 
     const uint32_t& GetId() const { return objectID_; }
     const uint32_t& GetSubId() const { return objectSubID_; }
@@ -56,7 +57,7 @@ public:
 
 
     // ヒエラルキーモデルからゲームデータに変換
-    static GameObjectData ConvertGameData(Hierarchy<Model>& hierarchy);
+    static GameObjectData ConvertGameData(ModelNode& hierarchy);
 
 
     /* === 派生クラスで引き継げる機能 === */
@@ -74,7 +75,7 @@ protected:
     Model* model_ = nullptr;
     Camera* camera_ = nullptr;
 
-	Hierarchy<Model>* hierarchy = nullptr; // 連携してるヒエラルキのポインタ
+    HierarchyNode* hierarchy = nullptr; // 連携してるヒエラルキのポインタ
 
     WorldTransform worldTransform;// WorldTransform情報
 

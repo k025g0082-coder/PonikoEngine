@@ -55,6 +55,13 @@ class AssetsPanel
 {
 public:
 
+	// ｼﾝｸﾞﾙﾄﾝ
+	static AssetsPanel* GetInstance();
+
+	AssetsPanel(const AssetsPanel&) = delete;            // コピー禁止
+	AssetsPanel& operator=(const AssetsPanel&) = delete; // コピー代入禁止
+
+
 	void Initialize();
 	void PanelView(bool& show);
 
@@ -106,6 +113,10 @@ public:
 
 
 private:
+
+	AssetsPanel() = default;
+	~AssetsPanel() = default;
+
 
 	// 画面上にドロップされたobjの読み取り,ヒエラルキとしてついでに追加
 	void AddDropModel();

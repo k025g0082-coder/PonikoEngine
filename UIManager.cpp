@@ -97,7 +97,7 @@ void UIManager::LoadElementData(std::string sceneName)
 			*/
 
 			// AssetPanelからテキスチャを貰う
-			e.sprite_.Initialize(assetPanel_->GethierarchyTextureResourceList()[e.pathID_]);
+			e.sprite_.Initialize(AssetsPanel::GetInstance()->GethierarchyTextureResourceList()[e.pathID_]);
 			e.sprite_.SetAnchor(Sprite::anchor::Center);
 
 			// SRT
@@ -608,7 +608,7 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 	element.pathID_ = pathId;
 
 	/* Assetパネルからテクスチャのリソースを受けとり、スプライトを初期化 */
-	element.sprite_.Initialize(assetPanel_->GethierarchyTextureResourceList()[pathId]);
+	element.sprite_.Initialize(AssetsPanel::GetInstance()->GethierarchyTextureResourceList()[pathId]);
 	element.sprite_.SetAnchor(Sprite::anchor::Center);
 
 	// とりあえずスケール初期化？

@@ -109,7 +109,7 @@ public:
 	/// </summary>
 	/// <param name="layerName">レイヤー名</param>
 	/// <returns></returns>
-	static std::vector<Hierarchy<Model>*>& GetHierarchyModelLayer(std::string layerName) {
+	static std::vector<HierarchyNode*>& GetHierarchyModelLayer(std::string layerName) {
 		return currentSceneData_->hierarchyPanel_->GetHierarchyModelLayer(layerName);
 	}
 
@@ -217,12 +217,6 @@ private:
 	// 非選択時のカメラ移動
 	void FreeMoveCamera();
 
-
-	/* 
-		各パネル
-	*/
-	//static HierarchyPanel hierarchyPanel_;
-	AssetsPanel assetsPanel_;
 
 	static EditorGrid grid;
 	

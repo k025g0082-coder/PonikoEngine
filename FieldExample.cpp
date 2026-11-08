@@ -169,10 +169,14 @@ void FieldExample::FieldLayerLoad(std::string layerName)
 	if (hierarchys.empty()) return;
 
 	/* エディター側ー＞ゲーム側に　データを受け渡す！！！！ */
-	for (Hierarchy<Model>*h : hierarchys) {
+	for (HierarchyNode*h : hierarchys) {
+
+		if (h->type_ != HierarchyType::kModel) return;
+
+		auto model = dynamic_cast<ModelNode*>(h);
 
 		/* ヒエラルキーから,転送用データに変換する */
-		GameObjectData data_ = GameObject::ConvertGameData(*h);
+		GameObjectData data_ = GameObject::ConvertGameData(*model);
 
 	
 		uint32_t value;
@@ -180,18 +184,18 @@ void FieldExample::FieldLayerLoad(std::string layerName)
 		uint32_t defaultType = static_cast<uint32_t>(DemoFieldObject::Type::kBlock);
 
 		/* ファクトリーに登録された、クラス生成の型である識別idを、ヒエラルキーJSONから取得 */
-		if (!h->json_.contains("objectType")) {
+		if (!model->json_.contains("objectType")) {
 			
 			/*** 無い場合デフォルトでブロック ***/
 			value = defaultType;
 
-			h->json_["objectType"] = defaultType;
+			model->json_["objectType"] = defaultType;
 	
 		}
 		else {
 
 			// タイプ名取得
-			value = h->json_["objectType"].get<uint32_t>();
+			value = model->json_["objectType"].get<uint32_t>();
 
 			// nullなら（しつこい）
 			if (value == (int)DemoFieldObject::Type::Null)
@@ -204,15 +208,15 @@ void FieldExample::FieldLayerLoad(std::string layerName)
 		value = 0;
 
 		// ==読込２
-		if (!h->json_.contains("subObjectType")) {
+		if (!model->json_.contains("subObjectType")) {
 
 			// なければ０番
-			h->json_["subObjectType"] = 0;
+			model->json_["subObjectType"] = 0;
 
 		}
 		else {
 			// タイプ名取得
-			value = h->json_["subObjectType"].get<uint32_t>();
+			value = model->json_["subObjectType"].get<uint32_t>();
 		}
 
 		// サブタイプを記録しとく
@@ -220,7 +224,7 @@ void FieldExample::FieldLayerLoad(std::string layerName)
 
 
 		/* 生成！！！！ */
-		CreateGameObject(data_.objectID,data_.subObjectID, *h);
+		CreateGameObject(data_.objectID,data_.subObjectID, *model);
 
 		
 	}
@@ -231,7 +235,7 @@ void FieldExample::FieldLayerLoad(std::string layerName)
 /*   ゲームオブジェクト生成   */
 /*                            */
 
-void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subType, Hierarchy<Model>& hierarchy)
+void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subType, ModelNode& hierarchy)
 {
 	//
 	if (type == (uint32_t)DemoFieldObject::Type::Null)
@@ -326,7 +330,7 @@ void FieldExample::CreateFunctionRegion()
 	auto& createFunc = Editor::GetInstance()->GetHierarchyPanel().gameObjectAdd_;
 
 	//
-	createFunc = [this](const uint32_t& type, const uint32_t& subType, Hierarchy<Model>& hierarchy) {
+	createFunc = [this](const uint32_t& type, const uint32_t& subType,ModelNode& hierarchy) {
 
 		CreateGameObject(type,subType, hierarchy);
 
@@ -342,7 +346,7 @@ void FieldExample::DeleteFunctionRegion()
 	auto& deleteFunc = Editor::GetInstance()->GetHierarchyPanel().gameObjectDelete_;
 
 	//
-	deleteFunc = [this](const Hierarchy<Model>& hierarchy) {
+	deleteFunc = [this](ModelNode& hierarchy) {
 
 		// テンプレート削除関数をつかって検索
 		if (DeleteObject(blocks_, hierarchy))return;

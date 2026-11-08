@@ -4,6 +4,10 @@
 #include "Model.h"
 #include "Transform.h"
 
+//
+#include "HierarchyNode.h"
+
+
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
@@ -17,47 +21,44 @@
 
 /* エディタのヒエラルキパネル */
 
-// タイプ
-enum class HierarchyType {
-	kModel
-};
+
 
 class GameObject;
 class AssetsPanel;
-
-template <typename Type>
-
-/*  Hierarchyのひな型  */
-struct Hierarchy {
-
-	HierarchyType type_;
-	
-	std::string name_;
-	std::string layerName_; // 属してるレイヤーの名前
-
-	std::string id_;   // IDなどあれば。モデルは↓のと連携する
-
-	
-	// オブジェクトのアドレスのポインタ
-	Type* object = nullptr;
-
-	// 判定用
-	AABB aabb_; 
-
-	// ゲームオブジェクトのポインタ（持つ場合）
-	GameObject* gameObject_ = nullptr;
-
-	// gameObjectが持つデータ。名前変えたいけど短いからこれでいいや
-	nlohmann::json json_;
-
-
-	// WorldTransform, ScreenTransformクラスの始祖。newしてキャストして使うw
-	std::unique_ptr<BaseTransform> transform_ = nullptr;
-
-	// 見えるか
-	bool isView_ = false;
-
-};
+//
+//template <typename Type>
+//
+///*  Hierarchyのひな型  */
+//struct Hierarchy {
+//
+//	HierarchyType type_;
+//	
+//	std::string name_;
+//	std::string layerName_; // 属してるレイヤーの名前
+//
+//	std::string id_;   // IDなどあれば。モデルは↓のと連携する
+//
+//	
+//	// オブジェクトのアドレスのポインタ
+//	Type* object = nullptr;
+//
+//	// 判定用
+//	AABB aabb_; 
+//
+//	// ゲームオブジェクトのポインタ（持つ場合）
+//	GameObject* gameObject_ = nullptr;
+//
+//	// gameObjectが持つデータ。名前変えたいけど短いからこれでいいや
+//	nlohmann::json json_;
+//
+//
+//	// WorldTransform, ScreenTransformクラスの始祖。newしてキャストして使うw
+//	std::unique_ptr<BaseTransform> transform_ = nullptr;
+//
+//	// 見えるか
+//	bool isView_ = false;
+//
+//};
 
 /*
 	モデルは管理idと登録されたヒエラルキのモデルとで繋げることにする
@@ -109,18 +110,21 @@ public:
 	void ViewPanel(bool& show);
 
 
-	// 選択中のモデルのIndex.  nullが使いたいだけ
-	void SetSelectedHierarchyModelIndex(std::optional<int> index) {
-		if (index.has_value()) {
-			selectedModelIndex_ = index;
+	// 選択中のヒエラルキセット  nullが使いたいだけ
+	void SetSelectedHierarchyModelIndex(std::optional<HierarchyNode*> modelNode) {
+
+		if (modelNode.has_value()) {
+			selectedHierarchyNode_ = modelNode;
 		}
 		else {
-			selectedModelIndex_ = std::nullopt;
+			selectedHierarchyNode_ = std::nullopt;
 		}
 	}
-	Hierarchy<Model>* GetSelectedHierarchyModel() {
-		if (selectedModelIndex_.has_value()) {
-			return hierarchyModels_.at(selectedModelIndex_.value()).get();
+
+	// 選択中のヒエラルキ
+	HierarchyNode* GetSelectedHierarchy() {
+		if (selectedHierarchyNode_.has_value()) {
+			return selectedHierarchyNode_.value();
 		}
 		else {
 			return nullptr;
@@ -135,14 +139,14 @@ public:
 
 
 	/* 読み取り専用 */
-	const std::vector<std::unique_ptr<Hierarchy<Model>>>& GetHierarchyModels() const { return hierarchyModels_; }
+	const std::vector<std::unique_ptr<HierarchyNode>>& GetHierarchys() const { return hierarchys_; }
 
 	/// <summary>
 	/// 対象のレイヤー名からヒエラルキをレイヤーから一覧取得. ないとき/SetUseGameObjectLayer()がされていない場合は空
 	/// </summary>
 	/// <param name="layerName">レイヤー名</param>
 	/// <returns></returns>
-	std::vector<Hierarchy<Model>*>& GetHierarchyModelLayer(std::string layerName){ 
+	std::vector<HierarchyNode*>& GetHierarchyModelLayer(std::string layerName){ 
 
 		// 該当レイヤー検索
 		auto it = std::find_if(
@@ -155,14 +159,14 @@ public:
 
 		// みつかんなかった
 		if (it == hierarchyLayers_.end()) {
-			static std::vector<Hierarchy<Model>*> empty;
+			static std::vector<HierarchyNode*> empty;
 			return empty;
 		}
 
-		auto itt = hierarchyModelToLayer_.find(layerName);
+		auto itt = hierarchyToLayer_.find(layerName);
 
-		if (itt == hierarchyModelToLayer_.end()) {
-			static std::vector<Hierarchy<Model>*> empty;
+		if (itt == hierarchyToLayer_.end()) {
+			static std::vector<HierarchyNode*> empty;
 			return empty;
 		}
 
@@ -209,17 +213,18 @@ public:
 	const std::vector<HierarchyLayer>& GetHierarchyLayers()const  { return hierarchyLayers_; }	
 
 
-	/* レイヤー名->属しているモデルヒエラルキーのアドレス群 */
+	/* レイヤー名->属しているヒエラルキーのアドレス群 */
 	std::unordered_map<
 		std::string,
-		std::vector<Hierarchy<Model>*>> hierarchyModelToLayer_;
+		std::vector<HierarchyNode*>> hierarchyToLayer_;
 
 
-	// ヒエラルキー - モデル追加. レイヤー名とヒエラルキ
-	void AddHierarchyModel(std::string layerName, Hierarchy<Model>& h);
+	// ヒエラルキー - 追加. レイヤー名とヒエラルキ
+	void AddHierarchy(std::string layerName, std::unique_ptr<HierarchyNode> h);
+
 
 	// ヒエラルキー - モデル削除
-	void DeleteHierarchyModel(int index = -1);
+	bool DeleteHierarchyNode(HierarchyNode* target);
 
 	// レイヤーとそれに紐づいたヒエラルキの削除 - (モデルしか対応してない)
 	void DeleteHierarchyLayer(const std::string& layerName);
@@ -227,12 +232,12 @@ public:
 
 	/*
 	　シーン側との連携。
-	 　シーン側で、ヒエラルキの追加や削除を行う場合、ゲーム側で予め登録する関数のラムダ式を登録しておくと、ヒエラルキパネル側で自動的に呼ばれる
+	 　シーン側で、モデルヒエラルキの追加や削除を行う場合、ゲーム側で予め登録する関数のラムダ式を登録しておくと、ヒエラルキパネル側で自動的に呼ばれる
 	   これによりヒエラルキーリストが更新された際の、シーン側のゲームオブジェクト生成削除処理をエディタ側で発火できる！
 	*/
 
-	std::function<void (const uint32_t& type, const uint32_t& subType, Hierarchy<Model>& hierarchy)> gameObjectAdd_ = nullptr;
-	std::function<void (const Hierarchy<Model>& hierarchy)> gameObjectDelete_ = nullptr;
+	std::function<void (const uint32_t& type, const uint32_t& subType, ModelNode& hierarchy)> gameObjectAdd_ = nullptr;
+	std::function<void (ModelNode& hierarchy)> gameObjectDelete_ = nullptr;
 
 	// ADD とかー＞　std::function createGameObject(type,subType)    
 	// けす　　ー＞　std::function deleteGameObject(ヒエラルキ
@@ -241,7 +246,7 @@ public:
 
 	// ゲームオブジェクトの追加をチェックする
 	void GameObjectAddCheck();
-	void GameObjectDeleteCheck(Hierarchy<Model>* hierarchy);
+	void GameObjectDeleteCheck(HierarchyNode* hierarchy);
 
 
 	// ヒエラルキー - モデルのペースト ペーストされたヒエラルキモデルのワールドのポインタを返す
@@ -258,11 +263,13 @@ public:
 	/// <returns>
 	/// 削除成功ならtrue。GameObject連携があればfalse
 	/// </returns>
-	bool DeleteHierarchyResouce(int index);
+	//void 
+	// 
+	// Hierarchy(int index);
 
 	// モデル　表示非表示切り替え
 	void ChangeHierarchyModelView(bool b, int index);
-	void ChangeHierarchyModelLayer(bool b, std::string layerName);
+	void ChangeHierarchyLayer(bool b, std::string layerName);
 
 	/// <summary>
 	/// 連携を宣言したレイヤー名一覧のリストを取得
@@ -273,9 +280,6 @@ public:
 	// いま選択されてるレイヤー名
 	std::string GetSelectedCurrentLayerName() { return selectedCurrentLayer_; }
 	HierarchyLayerType GetSelectedCurrentLayerType() { return selectedCurrentLayerType_; }
-
-	// アセットパネルのアドレスをセット
-	void SetAssetsPanel(AssetsPanel* h) { assetsPanel_ = h; }
 
 private:
 
@@ -290,11 +294,16 @@ private:
 	void HierarchyClear();
 
 
-	// 選択中のヒエラルキモデル番号
-	std::optional<int> selectedModelIndex_;
+	// 選択しているヒエラルキIndex
+	std::optional<int> selectedHierarchyIndex_;
 
-	// モデル
-	std::vector<std::unique_ptr<Hierarchy<Model>>> hierarchyModels_;
+
+	// 選択中のヒエラルキ
+	std::optional<HierarchyNode*> selectedHierarchyNode_;
+
+
+	// ヒエラルキーｓ
+	std::vector<std::unique_ptr<HierarchyNode>> hierarchys_;
 
 
 
@@ -313,8 +322,6 @@ private:
 
 	// エディターのグリッド
 	EditorGrid* grid = nullptr;
-
-	AssetsPanel* assetsPanel_ = nullptr;
 
 };
 

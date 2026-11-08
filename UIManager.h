@@ -12,6 +12,7 @@
 #include "UISequencer.h"
 
 
+
 /* ここに必要な構造体があります */
 #include "UIData.h"
 
@@ -99,7 +100,6 @@ public:
 
 
 	//
-	void SetAssetPanel(AssetsPanel* instance) { assetPanel_ = instance; }
 	void SetHierarchyPanel(HierarchyPanel* instance) { hierarchyPanel_ = instance; }
 
 
@@ -163,7 +163,6 @@ private:
 
 
 	HierarchyPanel* hierarchyPanel_ = nullptr;
-	AssetsPanel* assetPanel_ = nullptr;
 
 };
 

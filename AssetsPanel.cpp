@@ -10,9 +10,16 @@
 
 #include <algorithm>
 #include <memory>
+#include <utility>
 
 #include "SceneComponentLoader.h"
 
+
+AssetsPanel* AssetsPanel::GetInstance()
+{
+	static AssetsPanel instance;
+	return &instance;
+}
 
 void AssetsPanel::Initialize()
 {
@@ -295,24 +302,24 @@ void AssetsPanel::AddDropModel()
 			AddModelResource(resource);
 
 			/* モデルのヒエラルキ追加 */
-			Hierarchy<Model> h;
+			auto h = std::make_unique<ModelNode>();
 
-			h.type_ = HierarchyType::kModel; // タイプ
-			h.id_ = resource.pathId_;
-			h.name_ = resource.name_;
-			h.layerName_ = hierarchyPanel_->GetSelectedCurrentLayerName();
+			h->type_ = HierarchyType::kModel; // タイプ
+			h->modelId_ = resource.pathId_;
+			h->name_ = resource.name_;
+			h->layerName_ = hierarchyPanel_->GetSelectedCurrentLayerName();
 
-			h.object = resource.model_;
+			h->modelResource_ = resource.model_;
 
-			h.isView_ = true;
+			h->isView_ = true;
 
 			// WorldTransform初期化
-			h.transform_ = std::make_unique<WorldTransform>();
-			h.transform_->Initialize();
+			h->transform_ = std::make_unique<WorldTransform>();
+			h->transform_->Initialize();
 
 			/* 初期座標とかあったらその都度っここに　今は０，０，０  */
 
-			hierarchyPanel_->AddHierarchyModel(hierarchyPanel_->GetSelectedCurrentLayerName(), h);
+			hierarchyPanel_->AddHierarchy(hierarchyPanel_->GetSelectedCurrentLayerName(), std::move(h));
 
 
 			/* シーン側のGameObjectに干渉してたら一緒に増やす */
@@ -629,7 +636,7 @@ void AssetsPanel::ViewModelTreeNode()
 
 					// もしレイヤー名が同じであるリソースであれば
 					if (resource.folderName_ == folder) {
-						del = hierarchyPanel_->DeleteHierarchyResouce(i);// 削除
+						//del = hierarchyPanel_->DeleteHierarchy(i);// 削除
 						break;
 					}
 					
@@ -883,7 +890,7 @@ void AssetsPanel::ViewModelLeafTreeNode(int index, const ModelResource& resource
 	if (ImGui::Button((char*)ICON_FA_XMARK)) {
 
 		// 削除
-		hierarchyPanel_->DeleteHierarchyResouce(index);
+		//hierarchyPanel_->DeleteHierarchy(index);
 
 		// ボタンのスタイルおわり
 		PopButtonStyle();
@@ -1061,23 +1068,26 @@ void AssetsPanel::AddModelLayerPopupWindow()
 void AssetsPanel::AddHierarchyModel(const ModelResource& resource)
 {
 
-	Hierarchy<Model> h;
+	/* モデルのヒエラルキ追加 */
+	auto h = std::make_unique<ModelNode>();
 
-	h.type_ = HierarchyType::kModel; // タイプ
-	h.id_ = resource.pathId_;
-	h.name_ = resource.name_;// 表示名 拡張子を抜いたのを設定する
-	h.layerName_ = hierarchyPanel_->GetSelectedCurrentLayerName();
+	h->type_ = HierarchyType::kModel; // タイプ
+	h->modelId_ = resource.pathId_;
+	h->name_ = resource.name_;
+	h->layerName_ = hierarchyPanel_->GetSelectedCurrentLayerName();
 
-	h.object = resource.model_;
+	h->modelResource_ = resource.model_;
+
+	h->isView_ = true;
 
 	// WorldTransform初期化
-	h.transform_ = std::make_unique<WorldTransform>();
-	h.transform_->Initialize();
+	h->transform_ = std::make_unique<WorldTransform>();
+	h->transform_->Initialize();
 
-	h.isView_ = true;
+	h->isView_ = true;
 
 	/* ヒエラルキ追加 */
-	hierarchyPanel_->AddHierarchyModel(hierarchyPanel_->GetSelectedCurrentLayerName(), h);
+	hierarchyPanel_->AddHierarchy(hierarchyPanel_->GetSelectedCurrentLayerName(), std::move(h));
 
 
 	/* シーン側のGameObjectに干渉してたら一緒に増やす */

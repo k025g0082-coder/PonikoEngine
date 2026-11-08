@@ -86,13 +86,19 @@ void DemoPlayer::CollisionToAllBlock()
 		/* ヒエラルキ内の、シーン内の連携された全てのとAABB */
 		for (auto& hierarchy : Editor::GetHierarchyModelLayer(name)) {
 
-			if (hierarchy->gameObject_ == nullptr) continue;
+			if (hierarchy->type_ != HierarchyType::kModel)
+				continue;
 
-				auto type = hierarchy->gameObject_->GetId();
+			auto* model = dynamic_cast<ModelNode*>(hierarchy);
+
+
+			if (model->gameObject_ == nullptr) continue;
+
+				auto type = model->gameObject_->GetId();
 				if (type != (uint32_t)DemoFieldObject::Type::kBlock) continue;// ブロックじゃなければReturn
 
 				// FieldObjectのAABBを取得
-				const AABB& targetAABB = hierarchy->gameObject_->GetAABB();
+				const AABB& targetAABB = model->gameObject_->GetAABB();
 
 				// AABB同士の衝突判定と押し戻し処理
 				CollisionResult collisionResult = ResolveAABBCollision(aabb_, worldTransform.translation_, targetAABB, true);

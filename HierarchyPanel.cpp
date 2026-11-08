@@ -41,24 +41,11 @@ void HierarchyPanel::Initialize(const std::string sceneName, EditorGrid& g)
 
 void HierarchyPanel::Update()
 {
-	//// モデル更新
-	//for (int i = 0; i < hierarchyModelResouces_.size(); i++)
-	//{
-	//	hierarchyModelResouces_.at(i).model_->Update();
-	//}
 
 	// ヒエラルキの更新
-	for (int i = 0; i < hierarchyModels_.size(); i++)
-	{
-		// キャ・・・キャスト
-		if (auto* world = dynamic_cast<WorldTransform*>( hierarchyModels_.at(i)->transform_.get())) {
+	for (auto& hierarchy : hierarchys_) {
 
-			/* AABB更新 */
-			hierarchyModels_.at(i)->aabb_.UpdatePosition(world->translation_);
-
-			// 更新
-			world->UpdateMatrix();
-		}
+		hierarchy.get()->Update();
 
 	}
 }
@@ -68,19 +55,12 @@ void HierarchyPanel::ViewPanel(bool& show)
 
 #ifdef USE_IMGUI
 
-	/* もし選択中のヒエラルキある場合 */
-	if (selectedModelIndex_.has_value()) {
+	/*
+		選択ヒエラルキーのImGui表示
+	*/
+	if (selectedHierarchyNode_.has_value()) {
 
-		/* 選択中のヒエラルキのAABB画面 */
-		hierarchyModels_.at(selectedModelIndex_.value()).get()->aabb_.ImGuiView();
-
-		auto* it =hierarchyModels_.at(selectedModelIndex_.value()).get()->gameObject_;
-
-		if (it != nullptr) {
-
-			// それに登録されたIMGUI表示！！
-			it->ImGuiView();
-		}
+		selectedHierarchyNode_.value()->ImGuiView();
 
 	}
 
@@ -119,10 +99,10 @@ void HierarchyPanel::ViewPanel(bool& show)
 			const std::string& key = layerInfo.layerName_;
 
 			// マップ内に存在しない場合はスキップ
-			if (!hierarchyModelToLayer_.contains(key)) continue;
+			if (!hierarchyToLayer_.contains(key)) continue;
 
 			// マップから該当レイヤーのモデルリストを取得
-			auto& value = hierarchyModelToLayer_[key];
+			auto& value = hierarchyToLayer_[key];
 
 
 			/* 選択中は色変え */
@@ -192,7 +172,7 @@ void HierarchyPanel::ViewPanel(bool& show)
 				if (ImGui::Button("ON")) {
 
 					hierarchyLayers_.at(layerCount).isView_ = true;
-					ChangeHierarchyModelLayer(true,key);
+					ChangeHierarchyLayer(true,key);
 
 					ImGui::PopID();
 					// ツリーが開いていた場合は TreePop を呼んでから抜ける
@@ -206,7 +186,7 @@ void HierarchyPanel::ViewPanel(bool& show)
 				if (ImGui::Button("OFF")) {
 
 					hierarchyLayers_.at(layerCount).isView_ = false;
-					ChangeHierarchyModelLayer(false, key);
+					ChangeHierarchyLayer(false, key);
 
 					ImGui::PopID();
 					// ツリーが開いていた場合は TreePop を呼んでから抜ける
@@ -272,14 +252,20 @@ void HierarchyPanel::ViewPanel(bool& show)
 					
 					auto& hierarchy = value.at(i);
 
-					// 選択中のは色変え
-					if (selectedModelIndex_.has_value() && selectedModelIndex_.value() == i) {
-						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
-						ImGui::BulletText(hierarchy->name_.c_str());
-						ImGui::PopStyleColor();
-					}
-					else {
-						ImGui::BulletText(hierarchy->name_.c_str());
+					if (selectedHierarchyIndex_.has_value()) {
+
+						// 選択中のは色変え
+						if (selectedHierarchyIndex_.value() == i)
+						{
+
+							ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
+							ImGui::BulletText(hierarchy->name_.c_str());
+							ImGui::PopStyleColor();
+						}
+						else {
+							ImGui::BulletText(hierarchy->name_.c_str());
+						}
+
 					}
 
 
@@ -292,19 +278,19 @@ void HierarchyPanel::ViewPanel(bool& show)
 
 						// また検索
 						auto it = std::find_if(
-							hierarchyModels_.begin(),
-							hierarchyModels_.end(),
-							[hierarchy](const std::unique_ptr<Hierarchy<Model>>& h) {
+							hierarchys_.begin(),
+							hierarchys_.end(),
+							[hierarchy](const auto& h) {
 								return h.get() == hierarchy;
 							}
 						);
 
-						if (it != hierarchyModels_.end()) {
+						if (it != hierarchys_.end()) {
 
 							// イテレータから番号を取得 (..神?)
-							int index = static_cast<int>(std::distance(hierarchyModels_.begin(), it));
+							int index = static_cast<int>(std::distance(hierarchys_.begin(), it));
 
-							DeleteHierarchyModel(index);
+							//DeleteHierarchy(index);
 						}
 
 						ImGui::PopID();
@@ -342,88 +328,104 @@ void HierarchyPanel::Draw()
 
 
 
-// ヒエラルキー - モデル追加. レイヤー名とヒエラルキ
-void HierarchyPanel::AddHierarchyModel(std::string layerName, Hierarchy<Model>& h) {
+// ヒエラルキー - 追加. レイヤー名とヒエラルキ
+void HierarchyPanel::AddHierarchy(std::string layerName, std::unique_ptr<HierarchyNode> h) {
 
 	if (layerName.empty()) return;
 
-	auto it = hierarchyModelToLayer_.find(layerName);
-	if (it == hierarchyModelToLayer_.end()) return;
+	auto it = hierarchyToLayer_.find(layerName);
+	if (it == hierarchyToLayer_.end()) return;
 
 	// 1. unique_ptr を生成（所有権を移動）
-	auto newHierarchy = std::make_unique<Hierarchy<Model>>(std::move(h));
+	auto newHierarchy = std::move(h);
 
 	// 2. 移動する前に、確定した安定したアドレスを取得しておく
-	Hierarchy<Model>* rawPtr = newHierarchy.get();
+	HierarchyNode* rawPtr = newHierarchy.get();
 
 	// 3. vector（unique_ptrの配列）に追加
-	hierarchyModels_.push_back(std::move(newHierarchy));
+	hierarchys_.push_back(std::move(newHierarchy));
 
 	// 4. メモリ領域が絶対に移動しないポインタをレイヤーマップに登録
 	it->second.push_back(rawPtr);
 }
 
-void HierarchyPanel::DeleteHierarchyModel(int index)
-{
-		// 引数無しの場合は、今選択しているヒエラルキモデル番号で
-		if (index == -1) {
-			if (selectedModelIndex_.has_value()) {
-				index = selectedModelIndex_.value();
-			}
-			else {
-				return; // 選択してもない場合はサヨナラ
-			}
-		}
+//
+//
+//// ヒエラルキ　削除
+//void HierarchyPanel::DeleteHierarchy(int index)
+//{
+//	// 引数無しの場合は、今選択しているヒエラルキ番号で
+//	if (index == -1) {
+//		if (selectedHierarchyNode_.has_value()) {
+//			index = selectedHierarchyIndex_.value();
+//		}
+//		else {
+//			return; // 選択してもない場合はサヨナラ
+//		}
+//	}
+//
+//	// 生ポインタを取得しておく
+//	HierarchyNode* rawTarget = hierarchys_.at(index).get();
+//
+//
+//	/* ModelHierarchyで、なおかつGameObjectと紐づいてる場合は消す */
+//	if (rawTarget->type_ == HierarchyType::kModel) {
+//
+//		GameObjectDeleteCheck(dynamic_cast<HierarchyNode*>(rawTarget));
+//
+//	}
+//
+//
+//	// 削除対象のレイヤーからポインタを外す
+//	auto& layer = hierarchyToLayer_[rawTarget->layerName_];
+//	auto it = std::find(layer.begin(), layer.end(), rawTarget);
+//	if (it != layer.end()) {
+//		layer.erase(it);
+//	}
+//
+//	// vector から unique_ptr ごと削除
+//	hierarchys_.erase(hierarchys_.begin() + index);
+//
+//	selectedHierarchyNode_ = std::nullopt;
+//}
 
-		// 生ポインタを取得しておく
-		Hierarchy<Model>* rawTarget = hierarchyModels_.at(index).get();
-
-		/* GameObjectと紐づいてる場合は消す */
-		GameObjectDeleteCheck(rawTarget);
 
 
-		// 削除対象のレイヤーからポインタを外す
-		auto& layer = hierarchyModelToLayer_[rawTarget->layerName_];
-		auto it = std::find(layer.begin(), layer.end(), rawTarget);
-		if (it != layer.end()) {
-			layer.erase(it);
-		}
-
-		// vector から unique_ptr ごと削除
-		hierarchyModels_.erase(hierarchyModels_.begin() + index);
-
-		selectedModelIndex_ = std::nullopt;
-}
+/* レイヤーごと消した処理 */
 void HierarchyPanel::DeleteHierarchyLayer(const std::string& layerName)
 {
 	if (layerName == "main") return;
 
-	auto it = hierarchyModelToLayer_.find(layerName);
-	if (it == hierarchyModelToLayer_.end()) return;
+	auto it = hierarchyToLayer_.find(layerName);
+	if (it == hierarchyToLayer_.end()) return;
 
 	// 登録されている Hierarchy を hierarchyModels_ から削除
-	for (Hierarchy<Model>* target : it->second) {
+	for (HierarchyNode* target : it->second) {
 
 		auto hierarchyIt = std::find_if(
-			hierarchyModels_.begin(),
-			hierarchyModels_.end(),
-			[target](const std::unique_ptr<Hierarchy<Model>>& hierarchy) {
+			hierarchys_.begin(),
+			hierarchys_.end(),
+			[target](const std::unique_ptr<HierarchyNode>& hierarchy) {
+
 				// unique_ptr が保持する生ポインタ(get())と target を比較する
 				return hierarchy.get() == target;
 			}
 		);
 
 		/* GameObjectと紐づいてる場合は消す */
-		GameObjectDeleteCheck(target);
+		if (target->type_ == HierarchyType::kModel) {
 
+			GameObjectDeleteCheck(dynamic_cast<HierarchyNode*>(target));
 
-		if (hierarchyIt != hierarchyModels_.end()) {
-			hierarchyModels_.erase(hierarchyIt);
+		}
+
+		if (hierarchyIt != hierarchys_.end()) {
+			hierarchys_.erase(hierarchyIt);
 		}
 	}
 
 	// レイヤー側のマップ要素を削除
-	hierarchyModelToLayer_.erase(it);
+	hierarchyToLayer_.erase(it);
 
 	// hierarchyLayers_（レイヤー情報リスト）からの削除
 	auto itt = std::find_if(
@@ -477,7 +479,7 @@ void HierarchyPanel::GameObjectAddCheck()
 			gameObjectAdd_(
 				2,
 				0,
-				*GetHierarchyModels().back().get()
+				*dynamic_cast<ModelNode*>(GetHierarchys().back().get())
 			);
 
 		}
@@ -485,7 +487,9 @@ void HierarchyPanel::GameObjectAddCheck()
 
 }
 
-void HierarchyPanel::GameObjectDeleteCheck(Hierarchy<Model>* hierarchy)
+
+/* ゲームオブジェクト */
+void HierarchyPanel::GameObjectDeleteCheck(HierarchyNode* hierarchy)
 {
 	// 今開いてるレイヤー検索
 	auto it = std::find_if(
@@ -502,7 +506,7 @@ void HierarchyPanel::GameObjectDeleteCheck(Hierarchy<Model>* hierarchy)
 		if (gameObjectDelete_ != nullptr) {
 
 			// kesu
-			gameObjectDelete_(*hierarchy);
+			gameObjectDelete_(*dynamic_cast<ModelNode*>(hierarchy));
 
 		}
 	}
@@ -511,37 +515,13 @@ void HierarchyPanel::GameObjectDeleteCheck(Hierarchy<Model>* hierarchy)
 WorldTransform* HierarchyPanel::PasteHierarchyModel()
 {
 
-	///* モデルのヒエラルキ追加 */
-	Hierarchy<Model> h;
+	/* 
+		ペースト元のヒエラルキの型に合わせたクローンを生成 
+	*/
+	auto h = selectedHierarchyNode_.value()->Clone();
 
-	// セレクト中のから各コピー
-	h.type_ = hierarchyModels_.at(selectedModelIndex_.value())->type_;
-	h.id_ = hierarchyModels_.at(selectedModelIndex_.value())->id_;
-	h.name_ = hierarchyModels_.at(selectedModelIndex_.value())->name_;
-
-	h.object = hierarchyModels_.at(selectedModelIndex_.value())->object;
-
-	h.aabb_ = hierarchyModels_.at(selectedModelIndex_.value())->aabb_;
-
-	h.layerName_ = hierarchyModels_.at(selectedModelIndex_.value())->layerName_;
-
-	h.isView_ = hierarchyModels_.at(selectedModelIndex_.value())->isView_;
-
-	// WorldTransform座標決定
-	h.transform_ = std::make_unique<WorldTransform>();
-
-	h.transform_->Initialize();
-	h.transform_->translation_ = hierarchyModels_.at(selectedModelIndex_.value())->transform_->translation_;
-	h.transform_->rotation_ = hierarchyModels_.at(selectedModelIndex_.value())->transform_->rotation_;
-	h.transform_->scale_ = hierarchyModels_.at(selectedModelIndex_.value())->transform_->scale_;
-
-	WorldTransform* world = static_cast<WorldTransform*>(h.transform_.get());
-
-	// 位置更新
-	world->UpdateMatrix();
-
-	/* ヒエラルキ-モデル - 追加 */
-	AddHierarchyModel(selectedCurrentLayer_, h);
+	/* ヒエラルキ- 追加 */
+	AddHierarchy(selectedCurrentLayer_, std::move(h));
 
 
 	/* シーン側のGameObjectに干渉してたら一緒に増やす */
@@ -549,79 +529,84 @@ WorldTransform* HierarchyPanel::PasteHierarchyModel()
 
 
 	// セレクト中のインデックスを末尾のに変更
-	selectedModelIndex_.value() = (int)hierarchyModels_.size() - 1;
+	selectedHierarchyIndex_.value() = (int)hierarchys_.size() - 1;
 
 
 	//*  BaseTransform -> WorldTransform
-	WorldTransform* rworld = dynamic_cast<WorldTransform*>(hierarchyModels_.back()->transform_.get());
+	WorldTransform* rworld = dynamic_cast<WorldTransform*>(hierarchys_.back()->transform_.get());
 
 	// ついかしたヒエラルキのワールド
 	return rworld;
 }
 
-
-bool HierarchyPanel::DeleteHierarchyResouce(int index)
+bool HierarchyPanel::DeleteHierarchyNode(HierarchyNode* target)
 {
-	/*
-		GameObjectを含んでるか探索
-	*/
-	for (int i = 0; i < hierarchyModels_.size(); i++)
-	{
-		std::unique_ptr<Hierarchy<Model>>& model = hierarchyModels_.at(i);
-		
-		if (model->gameObject_ != nullptr)
-			return false;// 見つかった場合 失敗.  False
+	if (!target) return false;
+
+	// 1. GameObjectと紐づいている場合の削除チェック
+	if (target->type_ == HierarchyType::kModel) {
+		GameObjectDeleteCheck(target);
 	}
 
-
-	// リソースに紐づけられたIDのモデルを全て削除
-	for (int i = 0; i < hierarchyModels_.size(); i++)
-	{
-
-		std::unique_ptr<Hierarchy<Model>>& model = hierarchyModels_.at(i);
-
-		if (model->id_ == assetsPanel_->GetHierarchyModelResources().at(index).pathId_) {
-			hierarchyModels_.erase(hierarchyModels_.begin() + i);
-			i--;
+	// 2. hierarchyToLayer_ (参照用マップ) からポインタを除去
+	auto layerIt = hierarchyToLayer_.find(target->layerName_);
+	if (layerIt != hierarchyToLayer_.end()) {
+		auto& layerVector = layerIt->second;
+		auto it = std::find(layerVector.begin(), layerVector.end(), target);
+		if (it != layerVector.end()) {
+			layerVector.erase(it);
 		}
 	}
 
-	//　アセットの方も削除
-	assetsPanel_->DeleteModelResource(index);
-	
-	// 先にモデルと紐づけたマップを削除
-	//hierarchyModelResourceList_.erase(hierarchyModelResouces_.at(index).pathId_);
+	// 3. hierarchys_ (本体のunique_ptr配列) から削除
+	auto it = std::find_if(
+		hierarchys_.begin(),
+		hierarchys_.end(),
+		[target](const std::unique_ptr<HierarchyNode>& h) {
+			return h.get() == target;
+		}
+	);
 
-	//// モデルのリソース情報削除
-	//hierarchyModelResouces_.erase(hierarchyModelResouces_.begin() + index);
-	return true;
+	if (it != hierarchys_.end()) {
+		hierarchys_.erase(it);
+		return true;
+	}
+
+	return false;
 }
+
 
 void HierarchyPanel::ChangeHierarchyModelView(bool b, int assetIndex)
 {
 
-	assetsPanel_->GetHierarchyModelResources().at(assetIndex).isView_ = b;
+	AssetsPanel::GetInstance()->GetHierarchyModelResources().at(assetIndex).isView_ = b;
 
-	// 対応したアセットが紐づけられたヒエラルキモデル表示・非表示切り替え
-	for (int i = 0; i < hierarchyModels_.size(); i++)
+	/* 
+		対応したアセットが紐づけられたヒエラルキモデル表示・非表示切り替え。
+		..もしモデルで、かつ対応するIDなら非表示表示きりかえ
+	*/
+	for (int i = 0; i < hierarchys_.size(); i++)
 	{
-		std::unique_ptr<Hierarchy<Model>>& model = hierarchyModels_.at(i);
+		
+		if (hierarchys_.at(i).get()->type_ != HierarchyType::kModel)
+			continue;
 
-		if (model->id_ == assetsPanel_->GetHierarchyModelResources().at(assetIndex).pathId_) {
+		ModelNode* model = dynamic_cast<ModelNode*>(hierarchys_.at(i).get());
+
+		if (model->modelId_ == AssetsPanel::GetInstance()->GetHierarchyModelResources().at(assetIndex).pathId_) {
 			model->isView_ = b;
 		}
 	}
 }
 
-void HierarchyPanel::ChangeHierarchyModelLayer(bool b, std::string layerName)
+void HierarchyPanel::ChangeHierarchyLayer(bool b, std::string layerName)
 {
-	for (Hierarchy<Model>* model : hierarchyModelToLayer_[layerName]) {
-		
-		model->isView_ = b;
+	// レイヤー名のヒエラルキをリストから全て取得
+	for (HierarchyNode* h: hierarchyToLayer_[layerName]) {
 
-		if (model->gameObject_) {
-			model->gameObject_->SetView(b);
-		}
+		// 切り替え
+		h->ChangeHierarchyLayer(b);
+
 	}
 }
 
@@ -654,9 +639,9 @@ void HierarchyPanel::AddLayerPopupWindow()
 			if (!inputLayerName.empty()) {
 
 				// 追加
-				if (!hierarchyModelToLayer_.contains(inputLayerName)) {
+				if (!hierarchyToLayer_.contains(inputLayerName)) {
 
-					hierarchyModelToLayer_.try_emplace(inputLayerName);
+					hierarchyToLayer_.try_emplace(inputLayerName);
 
 					// レイヤー
 					hierarchyLayers_.push_back(HierarchyLayer{
@@ -678,7 +663,7 @@ void HierarchyPanel::AddLayerPopupWindow()
 
 void HierarchyPanel::HierarchyClear()
 {
-	hierarchyModels_.clear();
+	hierarchys_.clear();
 }
 
 
@@ -752,7 +737,7 @@ void HierarchyPanel::HierarchyLoad(const std::string sceneName) {
 		//loder->Property("ModelResources", hierarchyModelResouces_);
 
 		// ヒエラルキのモデル情報リスト 登録
-		loder->Property("ModelProperties", hierarchyModels_);
+		loder->Property("ModelProperties", hierarchys_);
 
 
 
@@ -780,7 +765,7 @@ void HierarchyPanel::HierarchyLoad(const std::string sceneName) {
 	// 無ければ
 	if ( it== hierarchyLayers_.end() ) {
 
-		hierarchyModelToLayer_.try_emplace("main");
+		hierarchyToLayer_.try_emplace("main");
 
 		hierarchyLayers_.push_back(HierarchyLayer{
 			.layerName_ = "main"
@@ -789,10 +774,10 @@ void HierarchyPanel::HierarchyLoad(const std::string sceneName) {
 
 
 	// 読み込んだリソースのモデルを表示/非表示設定
-	for (int i = 0; i < assetsPanel_->GetHierarchyModelResources().size(); i++)
+	for (int i = 0; i < AssetsPanel::GetInstance()->GetHierarchyModelResources().size(); i++)
 	{
 		
-		ModelResource& r = assetsPanel_->GetHierarchyModelResources().at(i);
+		ModelResource& r = AssetsPanel::GetInstance()->GetHierarchyModelResources().at(i);
 
 		/* 読み込んだ表示非表示の切り替え */
 		ChangeHierarchyModelView(r.isView_,i);
@@ -804,23 +789,31 @@ void HierarchyPanel::HierarchyLoad(const std::string sceneName) {
 
 		auto name = hierarchyLayers_.at(i).layerName_;
 
-		hierarchyModelToLayer_.try_emplace(name);
+		hierarchyToLayer_.try_emplace(name);
 
 	}
 	
-	// 読み込んだレイヤーに、モデルのアドレス追加
-	for (std::unique_ptr<Hierarchy<Model>>& model : hierarchyModels_) {
+	// 読み込んだレイヤーに、ヒエラルキのアドレス追加
+	for (std::unique_ptr<HierarchyNode>& h : hierarchys_) {
 
-		hierarchyModelToLayer_[model->layerName_].push_back(model.get());
+		hierarchyToLayer_[h->layerName_].push_back(h.get());
+
+		if (h.get()->type_ != HierarchyType::kModel) 
+			continue;
+
+		/* 
+			もでる専用処理
+		*/
+		auto* model = dynamic_cast<ModelNode*>(h.get());
 
 		// ついでにアドレスも追加
-		model->object = assetsPanel_->GethierarchyModelResourceList()[model->id_];
+		model->modelResource_ = AssetsPanel::GetInstance()->GethierarchyModelResourceList()[model->modelId_];
 
 	}
 	//
 	for (int i = 0; i < hierarchyLayers_.size(); i++) {
 
-		ChangeHierarchyModelLayer(hierarchyLayers_.at(i).isView_, hierarchyLayers_.at(i).layerName_);
+		ChangeHierarchyLayer(hierarchyLayers_.at(i).isView_, hierarchyLayers_.at(i).layerName_);
 	}
 
 }

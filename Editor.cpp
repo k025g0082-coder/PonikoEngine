@@ -98,16 +98,13 @@ void Editor::PanelInit(std::string sceneName)
 	*/ 
 
 	// モデルなどアセット読み込み
-	assetsPanel_.Initialize();
-	assetsPanel_.SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
+	AssetsPanel::GetInstance()->Initialize();
+	AssetsPanel::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
 
 	// アセットをもとにヒエラルキ生成
-	currentSceneData_->hierarchyPanel_.get()->SetAssetsPanel(&assetsPanel_);
 	currentSceneData_->hierarchyPanel_.get()->Initialize(sceneName,grid);
 
-
 	/* UIManagerにセット */
-	UIManager::GetInstance()->SetAssetPanel(&assetsPanel_);
 	UIManager::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
 
 	/* UIManagerの初期化 */
@@ -172,7 +169,7 @@ void Editor::Update()
 	// 現在のシーンのヒエラルキー
 	currentSceneData_->hierarchyPanel_->Update();
 
-	assetsPanel_.Update();
+	AssetsPanel::GetInstance()->Update();
 
 
 #ifdef USE_IMGUI
@@ -318,7 +315,7 @@ ImGui::End();
 
 		// アセットパネル
 		if (showAssets) {
-			assetsPanel_.PanelView(showAssets);
+			AssetsPanel::GetInstance()->PanelView(showAssets);
 		}
 
 		// ポストエフェクトパネル
@@ -405,7 +402,7 @@ void Editor::Draw() {
 
 		grid.Update();
 
-		assetsPanel_.Draw();
+		AssetsPanel::GetInstance()->Draw();
 
 		if (selectedModelWorldTransform_) {
 
@@ -436,39 +433,20 @@ void Editor::Draw() {
 
 		// 選択中のヒエラルキのAABB描画
 		if (isDrawAABB_ && selectedModelWorldTransform_ != nullptr) {
-			DebugLine::DrawAABB(currentSceneData_->hierarchyPanel_->GetSelectedHierarchyModel()->aabb_, { 0.0f,1,1,0.5f });
+
+			auto* model = dynamic_cast<ModelNode*>(currentSceneData_->hierarchyPanel_->GetSelectedHierarchy());
+
+			DebugLine::DrawAABB(model->aabb_, { 0.0f,1,1,0.5f });
 		}
 
 		/* ヒエラルキーモデルの描画 */
-		for (const std::unique_ptr<Hierarchy<Model>>& hierarchy : currentSceneData_->hierarchyPanel_->GetHierarchyModels()) {
+		for (const std::unique_ptr<HierarchyNode>& hierarchy : currentSceneData_->hierarchyPanel_->GetHierarchys()) {
 
 			// 非表示なら描画スキップ
 			if (!hierarchy->isView_) continue;
 
-			WorldTransform* world = static_cast<WorldTransform*>(hierarchy->transform_.get());
-
-			// マップで登録されたidと連携したモデルで描画
-			if (isEditorMode_) {
-
-				assetsPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, camera_);
-				
-			}
-
-			
-			// エディターモードじゃなければ、シーンのカメラで描画する
-			else {
-
-				// 判定用のAABB描画
-				//if (isDrawAABB_) {
-				//	DebugLine::DrawAABB(hierarchy->aabb_, { 0.0f,1,1,0.5f });
-				//}
-
-				/* 【重要？】もしシーン内のオブジェクトと共有していたら、描画をスキップする */
-				if (hierarchy->gameObject_)continue;
-
-				assetsPanel_.GethierarchyModelResourceList()[hierarchy->id_]->Draw(*world, *Scene::GetSceneCamera());
-
-			}
+			/* 各ノードの描画 */
+			hierarchy->Draw(camera_);
 			
 			
 
@@ -785,32 +763,37 @@ void Editor::OperationLeftClick()
 		case ModelHierarchyMode::kSelectMode:
 
 			// すべてのモデル
-			for (int i = 0; i < hierarchyPanel_->GetHierarchyModels().size(); i++)
+			for (int i = 0; i < hierarchyPanel_->GetHierarchys().size(); i++)
 			{
+				if (hierarchyPanel_->GetHierarchys().at(i)->type_ != HierarchyType::kModel)
+					continue;
+
+				auto* model = dynamic_cast<ModelNode*>(hierarchyPanel_->GetHierarchys().at(i).get());
+
 
 				// もし選択中のモデルアセットがあった場合
-				if (!assetsPanel_.selectedHierarchyResource_.pathId_.empty()) {
+				if (!AssetsPanel::GetInstance()->selectedHierarchyResource_.pathId_.empty()) {
 
 					/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
-					if (hierarchyPanel_->GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+					if (model->modelId_ != AssetsPanel::GetInstance()->selectedHierarchyResource_.pathId_)
 						continue;
 				}
 
 				// 非表示なら選択もスキップ
-				if (!hierarchyPanel_->GetHierarchyModels().at(i)->isView_)
+				if (!model->isView_)
 					continue;
 
 				// ヒエラルキからワールドのポインタ取得！
-				WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_->GetHierarchyModels().at(i)->transform_.get());
+				WorldTransform* world = static_cast<WorldTransform*>(model->transform_.get());
 
 
 				// そのヒエラルキが持つAABB？
-				AABB* aabb = &hierarchyPanel_->GetHierarchyModels().at(i)->aabb_;
+				AABB* aabb = &model->aabb_;
 
 				// モデルのAABBと判定
 				if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
 
-					hierarchyPanel_->SetSelectedHierarchyModelIndex(i);
+					hierarchyPanel_->SetSelectedHierarchyModelIndex(model);
 					selectedModelWorldTransform_ = world;
 
 					// ビューポートにモデルを追加
@@ -827,7 +810,7 @@ void Editor::OperationLeftClick()
 			//* 一気に配置モード
 		case ModelHierarchyMode::kCreateMode:
 
-			if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
+			if (AssetsPanel::GetInstance()->selectedHierarchyResource_.pathId_.empty()) break;
 
 			// グリッドのplaneと判定
 			std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
@@ -841,10 +824,12 @@ void Editor::OperationLeftClick()
 				bool break_ = false;
 
 				//* もしすでに同じ座標にあるヒエラルキーがある場合、配置せず引き返す（重複する配置の対策）
-				for (const std::unique_ptr<Hierarchy<Model>>& model : hierarchyPanel_->GetHierarchyModels()) {
+				for (const std::unique_ptr<HierarchyNode>& h : hierarchyPanel_->GetHierarchys()) {
+
+					auto* model = dynamic_cast<ModelNode*>(h.get());
 
 					/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
-					if (model->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+					if (model->modelId_ != AssetsPanel::GetInstance()->selectedHierarchyResource_.pathId_)
 						continue;
 
 					if (
@@ -859,29 +844,29 @@ void Editor::OperationLeftClick()
 				if (break_) break;// breakの場合ここで
 
 				///* モデルのヒエラルキ追加 */
-				Hierarchy<Model> h;
+				auto model = std::make_unique <ModelNode>();
 
-				h.type_ = HierarchyType::kModel; // タイプ
-				h.id_ = assetsPanel_.selectedHierarchyResource_.pathId_;
-				h.name_ = assetsPanel_.selectedHierarchyResource_.name_;
+				model->type_ = HierarchyType::kModel; // タイプ
+				model->modelId_ = AssetsPanel::GetInstance()->selectedHierarchyResource_.pathId_;
+				model->name_ = AssetsPanel::GetInstance()->selectedHierarchyResource_.name_;
 
-				h.object = assetsPanel_.selectedHierarchyResource_.model_;
+				model->modelResource_ = AssetsPanel::GetInstance()->selectedHierarchyResource_.model_;
 
 				// WorldTransform座標決定
-				h.transform_ = std::make_unique<WorldTransform>();
+				model->transform_ = std::make_unique<WorldTransform>();
 
-				h.transform_->Initialize();
-				h.transform_->translation_ = { subPosition.x,subPosition.y,subPosition.z };
+				model->transform_->Initialize();
+				model->transform_->translation_ = { subPosition.x,subPosition.y,subPosition.z };
 
-				WorldTransform* world = static_cast<WorldTransform*>(h.transform_.get());
+				WorldTransform* world = static_cast<WorldTransform*>(model->transform_.get());
 					
-				h.isView_ = true;
+				model->isView_ = true;
 
 				// 位置更新
 				world->UpdateMatrix();
 
 				/* ヒエラルキ-モデル - 追加 */
-				hierarchyPanel_->AddHierarchyModel(hierarchyPanel_->GetSelectedCurrentLayerName(), h);
+				hierarchyPanel_->AddHierarchy(hierarchyPanel_->GetSelectedCurrentLayerName(), std::move(model));
 
 
 				/* シーン側のGameObjectに干渉してたら一緒に増やす */
@@ -911,6 +896,7 @@ void Editor::OperationRightClick()
 
 		float distance = 0.0f;
 
+		HierarchyNode* selectedNode = nullptr;
 
 		//* モード別の処理　*//
 		switch (currentModelHierarchyMode_) {
@@ -920,17 +906,25 @@ void Editor::OperationRightClick()
 
 			if (!selectedModelWorldTransform_) break;
 
-			hierarchyPanel_->DeleteHierarchyModel();
 
+			// なんか気分で 消しとく
 
-				
-			selectedModelWorldTransform_ = nullptr;
+			selectedNode = hierarchyPanel_->GetSelectedHierarchy();
+
+			if (selectedNode) {
+
+				// 選択中のノードを削除
+				hierarchyPanel_->DeleteHierarchyNode(selectedNode);
+				hierarchyPanel_->SetSelectedHierarchyModelIndex(std::nullopt);
+				selectedModelWorldTransform_ = nullptr;
+
+			}
 
 			break;
 		//* 配置モード
 		case ModelHierarchyMode::kCreateMode:
 
-			if (assetsPanel_.selectedHierarchyResource_.pathId_.empty()) break;
+			if (AssetsPanel::GetInstance()->selectedHierarchyResource_.pathId_.empty()) break;
 
 			// グリッドのplaneと判定
 			std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
@@ -939,15 +933,19 @@ void Editor::OperationRightClick()
 			if (hit.has_value()) {
 
 				// すべてのモデル
-				for (int i = 0; i < hierarchyPanel_->GetHierarchyModels().size(); i++)
+				for (int i = 0; i < hierarchyPanel_->GetHierarchys().size(); i++)
 				{
-					
+					if (hierarchyPanel_->GetHierarchys().at(i).get()->type_ != HierarchyType::kModel)continue;
+
+					auto* model = dynamic_cast<ModelNode*>(hierarchyPanel_->GetHierarchys().at(i).get());
+
+
 					/* 選択中以外の、アセット以外のIDのヒエラルキーは選択しない */
-					if (hierarchyPanel_->GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+					if (model->modelId_ != AssetsPanel::GetInstance()->selectedHierarchyResource_.pathId_)
 						continue;
 
 					// ヒエラルキからワールドのポインタ取得！
-					WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_->GetHierarchyModels().at(i)->transform_.get());
+					WorldTransform* world = static_cast<WorldTransform*>(model->transform_.get());
 
 					// だいたいの中心
 					//float size = 3.0f;
@@ -957,13 +955,13 @@ void Editor::OperationRightClick()
 					//aabb.max = Vector3{ size,  size,  size } + world->translation_;
 
 					// そのヒエラルキが持つAABB？
-					AABB* aabb = &hierarchyPanel_->GetHierarchyModels().at(i)->aabb_;
+					AABB* aabb = &model->aabb_;
 
 					// モデルのAABBと判定
 					if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
 
 						/* 当たったヒエラルキモデルを削除 */
-						hierarchyPanel_->DeleteHierarchyModel(i);
+						hierarchyPanel_->DeleteHierarchyNode(model);
 
 						break;
 					}
@@ -1082,15 +1080,19 @@ void Editor::DrawArrowToSelectedTransform()
 
 				}
 
-				/* 同期させる */
-				if (hierarchyPanel_->GetSelectedHierarchyModel()->gameObject_ != nullptr) {
+				if (hierarchyPanel_->GetSelectedHierarchy()->type_ == HierarchyType::kModel) {
 
-					hierarchyPanel_->GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().translation_ = selectedModelWorldTransform_->translation_;
-					hierarchyPanel_->GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().rotation_ = selectedModelWorldTransform_->rotation_;
-					hierarchyPanel_->GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().scale_ = selectedModelWorldTransform_->scale_;
+					auto* model = dynamic_cast<ModelNode*>(hierarchyPanel_->GetSelectedHierarchy());
 
+					/* 同期させる */
+					if (model->gameObject_ != nullptr) {
+
+						model->gameObject_->GetWorldTransform().translation_ = selectedModelWorldTransform_->translation_;
+						model->gameObject_->GetWorldTransform().rotation_ = selectedModelWorldTransform_->rotation_;
+						model->gameObject_->GetWorldTransform().scale_ = selectedModelWorldTransform_->scale_;
+
+					}
 				}
-
 				selectedModelWorldTransform_->UpdateMatrix();
 			}
 		}
@@ -1142,7 +1144,7 @@ void Editor::SwitchActiveScene(std::string sceneName,bool firstInit)
 		currentSceneData_ = &(*it);
 
 		// 現在のシーンのデータをセット・読み込み
-		assetsPanel_.SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
+		AssetsPanel::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
 
 		UIManager::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
 		UIManager::GetInstance()->SwitchSceneUIData(sceneName);
@@ -1174,10 +1176,9 @@ void Editor::SwitchActiveScene(std::string sceneName,bool firstInit)
 
 			if (!firstInit) {
 
-				sceneData.hierarchyPanel_.get()->SetAssetsPanel(&assetsPanel_);
 				sceneData.hierarchyPanel_.get()->Initialize(sceneName, grid);
 
-				assetsPanel_.SetHierarchyPanel(sceneData.hierarchyPanel_.get());
+				AssetsPanel::GetInstance()->SetHierarchyPanel(sceneData.hierarchyPanel_.get());
 
 				UIManager::GetInstance()->SetHierarchyPanel(sceneData.hierarchyPanel_.get());
 				UIManager::GetInstance()->SwitchSceneUIData(sceneName);
@@ -1312,7 +1313,7 @@ void Editor::PropartyTab()
 		if (ImGui::Button("Save")) {
 
 			hierarchyPanel_->HierarchySave();
-			assetsPanel_.AssetsSave();
+			AssetsPanel::GetInstance()->AssetsSave();
 
 			UIManager::GetInstance()->SaveElementData();
 
