@@ -15,6 +15,9 @@ class TestScene :
     public Scene
 {
 public:
+
+	TestScene(): Scene("TestScene"){}
+
 	void Init();
 	void Update(Input* input);
 	void Draw();

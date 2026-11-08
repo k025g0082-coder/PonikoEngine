@@ -63,9 +63,6 @@ namespace PonikoEngine {
 		/*　Editor初期化　*/
 		Editor::GetInstance()->Initialize();
 
-		/* UIManagerの初期化 */
-		UIManager::GetInstance()->Initialize();
-
 
 		// Gameシステムの方の初期化
 		Game::GetInstance()->Init();

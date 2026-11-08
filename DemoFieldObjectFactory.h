@@ -8,7 +8,7 @@
 */
 
 // ブロック等
-class DemoFieldObjectFactory : public BaseFactory<DemoFieldObject::BlockType, DemoFieldObject>
+class DemoFieldObjectFactory : public BaseFactory < DemoFieldObject::BlockType, DemoFieldObject, const GameObjectData&, nlohmann::json* >
 {
 public:
 	// 初期登録
@@ -19,7 +19,7 @@ public:
 };
 
 // ギミック
-class DemoGimmickFactory : public BaseFactory<DemoGimmick::GimmickType,DemoGimmick>
+class DemoGimmickFactory : public BaseFactory<DemoGimmick::GimmickType,DemoGimmick, const GameObjectData&, nlohmann::json* >
 {
 public:
 	// 初期登録

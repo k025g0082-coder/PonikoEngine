@@ -11,9 +11,7 @@ public:
 	static Game* GetInstance();
 
 	// 最初に実行するSceneのとうろく
-	void StartGameScene(Scene* scene) {
-		Scene::RequestChange(scene);
-	}
+	void StartGameScene(std::string sceneName);
 
 	void Init();
 	void Update();
@@ -61,8 +59,26 @@ public:
 
 	static Fade& GetFade() { return fade; }
 
+	/// <summary>
+	/// 現在開いているシーン名
+	/// </summary>
+	static const std::string& GetCurrentSceneName() { return currentSceneName; }
+
+
+	/// <summary>
+	/// 現在開いているシーン名の更新
+	/// </summary>
+	/// <param name="sceneName"></param>
+	static void SetCurrentSceneName(std::string sceneName) { currentSceneName = sceneName; }
+
 private:
-	
+
+	/// <summary>
+	/// 現在開いているシーン名
+	/// </summary>
+	static std::string currentSceneName;
+
+
 	// 画面もーど
 	static WindowViewMode currentViewMode_;
 

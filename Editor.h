@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Model.h"
-#include "Transform.h"
+#include "Scene.h"
 
 #include <imgui.h>
 
@@ -12,6 +12,8 @@
 
 
 #include "Camera.h"
+
+#include "EditorGrid.h"
 
 // 各パネル
 #include "HierarchyPanel.h"
@@ -33,44 +35,20 @@
 #include <memory>
 #include <unordered_map>
 
+/*
+	シーンのデータとそれに基づくヒエラルキーのデータ
+*/
+struct SceneData {
 
-/* グリッドの設定まとめ */
-class Grid {
+	// シーン名
+	std::string sceneName_; 
 
-public:
+	// シーンのインスタンス（保持しておく）
+	Scene* scene_ = nullptr;
 
-	Matrix4x4 rotationMatrix = MakeIdentity4x4();
-
-	// 縦
-	int vertical_   = 10;
-
-	// 横
-	int horizontal_ = 10;
-
-	static float gridWidth_;
-	static float gridHeight_;
-
-	//　？？
-	static float gridDepth_;
-
-	static Vector3 translation_;
-
-
-Vector3 rotation_;
-
-	bool isSnap_ = false;
-	static bool isCenter_;
-
-	// 判定用のplane(縦横)
-	PlaneArea plane_;
-
-	void Update();
-	void AddLine();
-
-	void ImGuiView();
-
-	// マスの大きさで割ったのを返す
-	static Vector3 snapGrid(Vector3 v);
+	// シーン内の各ヒエラルキーなどの情報
+	std::unique_ptr<HierarchyPanel> hierarchyPanel_;
+	Camera DebugCamera_;
 
 };
 
@@ -89,6 +67,11 @@ public:
 	// エンジン内のSceneの描画
 	void Draw();
 
+
+	/* 各パネルの初期化 */
+	void PanelInit(std::string sceneName);
+
+
 	/* モデル選択モード */
 	enum class ModelHierarchyMode {
 		kSelectMode, // 個別にサイズを調整できる
@@ -96,7 +79,7 @@ public:
 	};
 
 
-	HierarchyPanel& GetHierarchyPanel() { return hierarchyPanel_; }
+	HierarchyPanel& GetHierarchyPanel() { return *currentSceneData_->hierarchyPanel_.get(); }
 
 
 	// エンジン閉じる際の設定
@@ -106,8 +89,8 @@ public:
 	/// <summary>
 	/// 特定のシーンのヒエラルキー情報を読み込む
 	/// </summary>
-	/// <param name="path">シーンの相対パス。例 resources/scene/OOXX.json</param>
-	static void LoadScene(std::string path);
+	/// <param name="path">シーンの名前　</param>
+	static void LoadScene(std::string sceneName);
 
 
 	/* ラッパパパァｯｯ!!!　 */
@@ -118,7 +101,7 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	static std::vector<std::string>* GetAlignHierarchyLayerNames() {
-		return hierarchyPanel_.getAlignHierarchyLayerNames();
+		return currentSceneData_->hierarchyPanel_->getAlignHierarchyLayerNames();
 	}
 
 	/// <summary>
@@ -127,7 +110,7 @@ public:
 	/// <param name="layerName">レイヤー名</param>
 	/// <returns></returns>
 	static std::vector<Hierarchy<Model>*>& GetHierarchyModelLayer(std::string layerName) {
-		return hierarchyPanel_.GetHierarchyModelLayer(layerName);
+		return currentSceneData_->hierarchyPanel_->GetHierarchyModelLayer(layerName);
 	}
 
 
@@ -148,7 +131,49 @@ public:
 	// 1280pxを基にした時の現在の画面比率をかえす
 	float GetMainViewRatio()  { return mainViewSize.x / 1280.0f; };
 	
+
+	/*
+		Editor内のシーンタブの切り替え
+	*/
+	void SwitchActiveScene(std::string sceneName, bool firstInit = false);
+
+	/*
+		現在アクティブなシーンのアドレスを返す
+	*/
+	Scene* GetActiveSceneInstance() { return currentSceneData_->scene_; }
+
+
+	/*
+		今エディターモードか
+	*/
+	static const bool& IsEditorMode() { return isEditorMode_; }
+
+
 private:
+
+	// エディターモードか
+	static bool isEditorMode_;
+
+
+	/*
+		シーン一覧
+	*/
+	std::vector<SceneData> sceneDatas_;
+
+	// 今のシーンデータ（のポインタ）
+	static SceneData* currentSceneData_;
+
+
+	/*
+		今読み込んでるシーン名
+	*/
+	std::string currentSceneName_;
+
+	/* 
+		今読み込んでるシーンのJsonパス
+	*/
+	static std::string currentSceneJsonPath;
+	
 
 
 	ModelHierarchyMode currentModelHierarchyMode_ = ModelHierarchyMode::kSelectMode;
@@ -156,9 +181,6 @@ private:
 	//* モデルSRT操作モード
 	ImGuizmo::OPERATION operation_ = ImGuizmo::TRANSLATE;
 
-
-	// エディターモードか
-	bool isEditorMode_ = false;
 
 	// 判定用のAABB描画するか
 	bool isDrawAABB_ = true;
@@ -199,10 +221,10 @@ private:
 	/* 
 		各パネル
 	*/
-	static HierarchyPanel hierarchyPanel_;
+	//static HierarchyPanel hierarchyPanel_;
 	AssetsPanel assetsPanel_;
 
-	static Grid grid;
+	static EditorGrid grid;
 	
 
 	/*
@@ -211,6 +233,10 @@ private:
 
 	// ウインドウ上部
 	void TopMenuVar();
+
+
+	// メイン画面の描画
+	void DrawMainImageView();
 
 
 	// 矢印描画＆選択しているののWorldTransformを変形
@@ -262,11 +288,6 @@ private:
 	// との球面座標系の色イロ
 	float selectedSphereTheta_;
 	float selectedSpherePhi_;
-
-
-	// 今読み込んでるシーンのJsonパス
-	static std::string currentSceneJsonPath;
-	std::string currentSceneName_;
 
 	
 	Vector3 ExtractScale(const Matrix4x4& m);

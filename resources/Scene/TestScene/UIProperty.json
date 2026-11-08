@@ -1,0 +1,55 @@
+{
+    "UI": {
+        "data": [
+            {
+                "elements": [
+                    {
+                        "animationData": {
+                            "animations": [
+                                {
+                                    "animationName": "NewAnime",
+                                    "durationFrames": 60.0,
+                                    "tracks": [
+                                        {
+                                            "items": [
+                                                {},
+                                                {},
+                                                {}
+                                            ]
+                                        },
+                                        {
+                                            "items": [
+                                                {}
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "currentTag": "NewAnime"
+                        },
+                        "groupName": "Main",
+                        "name": "element_0",
+                        "pathID": "resources/keichan.png",
+                        "position": [
+                            246.16973876953125,
+                            716.298095703125,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "type": 0
+                    }
+                ],
+                "name": "w"
+            }
+        ]
+    }
+}

@@ -59,6 +59,21 @@ struct UIData {
 
 };
 
+
+/*  
+	シーン内UIやシーケンサ情報 
+*/
+struct SceneUIData {
+
+	// UIElementのリストを含む、UIDataのリスト
+	std::vector<UIData> elementDatas_;
+
+	// シーケンサー
+	UISequencer sequencer_;
+
+};
+
+
 //
 class UIManager
 {
@@ -75,14 +90,21 @@ public:
 
 
 	// 初期化
-	void Initialize();
+	void Initialize(std::string sceneName);
 
 
 	// Elementロード
-	void LoadElementData();
+	void LoadElementData(std::string sceneName);
 
 	// Elementセーブ
 	void SaveElementData();
+
+	/// <summary>
+	/// シーン切り替えの際に
+	/// </summary>
+	/// <param name="sceneName">シーン名</param>
+	void SwitchSceneUIData(std::string sceneName);
+
 
 
 	// UIの更新。- PonikoEngine.cppの方にかいてる
@@ -115,7 +137,6 @@ public:
 	void SetAssetPanel(AssetsPanel* instance) { assetPanel_ = instance; }
 	void SetHierarchyPanel(HierarchyPanel* instance) { hierarchyPanel_ = instance; }
 
-	
 
 	// 選択中のエレメント
 	UIElement* GetSelectedElement() {
@@ -127,12 +148,23 @@ public:
 
 private:
 
+	// データを読み書きするＪｓｏｎＰａｔｈ
 	std::string jsonPath;
+
+
+	// 現在のシーンのUIData
+	static SceneUIData* currentSceneUIData_;
+
+
+	/*
+		シーン名ー＞シーンのUIデータ のマップ
+	*/
+	std::unordered_map <
+		std::string, SceneUIData> sceneUIDatas_;
+
 
 	// エディタータイムライン表示
 	void UIEditorTimeLine();
-	UISequencer sequencer_;
-
 
 	// マウスからエレメントを選択
 	void JudgeMouseSelectElement(UIElement& e,int index);
@@ -140,12 +172,6 @@ private:
 	// 選択しているエレメントを移動
 	void MoveSelectElement();
 
-
-	/*
-		UIElementのリストを含む、UIData
-	*/
-	// UIDataのリスト
-	static std::vector<UIData> elementDatas_;
 
 
 	// 現在選択されているエレメントのアニメーションのタグ名

@@ -39,9 +39,12 @@
 #include <format>
 #include <optional>
 
-HierarchyPanel Editor::hierarchyPanel_;
-Grid Editor::grid;
+//HierarchyPanel Editor::hierarchyPanel_;
+EditorGrid Editor::grid;
 std::string Editor::currentSceneJsonPath;
+SceneData* Editor::currentSceneData_;
+
+bool Editor::isEditorMode_ = false;
 
 Editor* Editor::GetInstance() {
 	static Editor instance;
@@ -72,23 +75,8 @@ void Editor::Initialize() {
 		Game::GetInstance()->SetWindowViewMode(Game::WindowViewMode::kFullScreenMode);
 	}
 
-	/*
-		各パネルの初期化
-	*/ 
-
-	// モデルなどアセット読み込み
-	assetsPanel_.Initialize();
-	assetsPanel_.SetHierarchyPanel(&hierarchyPanel_);
-
-	// アセットをもとにヒエラルキ生成
-	hierarchyPanel_.SetAssetsPanel(&assetsPanel_);
-	hierarchyPanel_.Initialize(currentSceneJsonPath,grid);
-
-
-	/* UIManager初期化 */
-	UIManager::GetInstance()->SetAssetPanel(&assetsPanel_);
-	UIManager::GetInstance()->SetHierarchyPanel(&hierarchyPanel_);
-
+	/// .. 各パネルの処理はSceneのStartGameSceneのメソッド内に描きました
+	/// 　 理由：main.cppのStartの書く位置がEditorのここの初期化より後のせいで読み込めなかったから
 
 	effectSequencer_.mFrameMin = -100;
 	effectSequencer_.mFrameMax = 1000;
@@ -97,6 +85,33 @@ void Editor::Initialize() {
 	effectSequencer_.items_.push_back(EffectSequencer::SequenceItem{ 3, 12, 60 });
 	effectSequencer_.items_.push_back(EffectSequencer::SequenceItem{ 2, 61, 90 });
 	effectSequencer_.items_.push_back(EffectSequencer::SequenceItem{ 4, 90, 99 });
+
+}
+
+void Editor::PanelInit(std::string sceneName)
+{
+	//
+	currentSceneName_ = sceneName;
+
+	/*
+		各パネルの初期化
+	*/ 
+
+	// モデルなどアセット読み込み
+	assetsPanel_.Initialize();
+	assetsPanel_.SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
+
+	// アセットをもとにヒエラルキ生成
+	currentSceneData_->hierarchyPanel_.get()->SetAssetsPanel(&assetsPanel_);
+	currentSceneData_->hierarchyPanel_.get()->Initialize(sceneName,grid);
+
+
+	/* UIManagerにセット */
+	UIManager::GetInstance()->SetAssetPanel(&assetsPanel_);
+	UIManager::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
+
+	/* UIManagerの初期化 */
+	UIManager::GetInstance()->Initialize(sceneName);
 
 }
 
@@ -129,8 +144,8 @@ void Editor::Update()
 		/* 
 			ここにエフェクト用のjsonだかを識別する何かをいつかかく
 		*/
-		LoadScene(relativePath);
-		currentSceneJsonPath = relativePath;
+		//LoadScene(relativePath);
+		//currentSceneJsonPath = relativePath;
 	}
 
 
@@ -150,8 +165,13 @@ void Editor::Update()
 	};
 
 
-	/* 常に更新するパネルの内容 */
-	hierarchyPanel_.Update();
+	/* 
+		常に更新するパネルの内容
+	*/
+
+	// 現在のシーンのヒエラルキー
+	currentSceneData_->hierarchyPanel_->Update();
+
 	assetsPanel_.Update();
 
 
@@ -159,33 +179,54 @@ void Editor::Update()
 
 	ImGui::Begin("Game View");
 
-	mainViewPos = ImGui::GetCursorScreenPos();   // ウィンドウ内の描画開始位置（左上のスクリーン座標）
-	mainViewSize = ImGui::GetContentRegionAvail(); // 利用可能な幅と高さ
 
-	/*
-		縦横比固定
+
+	/* 
+		タブバーの開始
 	*/
+	if (ImGui::BeginTabBar("SceneTabs", ImGuiTabBarFlags_Reorderable | ImGuiTabBarFlags_AutoSelectNewTabs)) {
 
-	// 元のアスペクト比
-	constexpr float aspectRatio = 1280.0f / 720.0f;
+		// エディターで開いているシーンの数だけタブを作成
+		for (int i = 0; i < sceneDatas_.size(); i++) {
+			auto& data = sceneDatas_[i];
 
-	// 利用可能な領域
-	float width = mainViewSize.x;
-	float height = width / aspectRatio;
+			// タブが開いているかどうか（xボタン対応）
+			bool open = true;
 
-	// 高さが足りなければ高さ基準にする
-	if (height > mainViewSize.y) {
-		height = mainViewSize.y;
-		width = height * aspectRatio;
+			// タブの描画（選択されたら true）
+			if (ImGui::BeginTabItem(data.sceneName_.c_str(), &open)) {
+
+				// ★ タブが切り替わったら、アクティブなシーンを変更する
+				if (currentSceneData_ != &data) {
+					currentSceneData_ = &data;
+
+					/*
+						シーンのインスタンスを置き換える
+					*/
+					Scene::SetActiveInstanceReference(data.scene_);
+
+					/* データ等も切り替え */
+					SwitchActiveScene(currentSceneData_->sceneName_);
+
+				}
+
+				// --- ゲーム画面の描画 ---
+				
+				DrawMainImageView();
+
+
+				ImGui::EndTabItem();
+			}
+
+			// タブの 'x' ボタンが押されたら閉じる処理
+			if (!open) {
+				//CloseTab(i); // sceneDatas_ から削除
+				break;
+			}
+		}
+
+		ImGui::EndTabBar();
 	}
-
-	mainViewSize = ImVec2(width, height);
-
-	// オフスクリーンのレンダーターゲットテクスチャをImGui上で表示する
-	ImGui::Image(
-		(ImTextureID)PostEffectManager::GetInstance()->GetOffscreenFinalSRVHandleGPU().ptr,
-		mainViewSize
-	);
 
 
 
@@ -204,7 +245,7 @@ void Editor::Update()
 			/*
 				UIElementを生成
 			*/
-			UIManager::GetInstance()->AddUIElement( hierarchyPanel_.GetSelectedCurrentLayerName(), resource.pathId );
+			UIManager::GetInstance()->AddUIElement(currentSceneData_->hierarchyPanel_->GetSelectedCurrentLayerName(), resource.pathId);
 				
 		}
 
@@ -262,7 +303,7 @@ ImGui::End();
 
 		// ヒエラルキーパネル
 		if (showHierarchy) {
-			hierarchyPanel_.ViewPanel(showHierarchy);
+			currentSceneData_->hierarchyPanel_->ViewPanel(showHierarchy);
 		}
 
 		/* エフェクトタイムライン */
@@ -395,11 +436,11 @@ void Editor::Draw() {
 
 		// 選択中のヒエラルキのAABB描画
 		if (isDrawAABB_ && selectedModelWorldTransform_ != nullptr) {
-			DebugLine::DrawAABB(hierarchyPanel_.GetSelectedHierarchyModel()->aabb_, { 0.0f,1,1,0.5f });
+			DebugLine::DrawAABB(currentSceneData_->hierarchyPanel_->GetSelectedHierarchyModel()->aabb_, { 0.0f,1,1,0.5f });
 		}
 
 		/* ヒエラルキーモデルの描画 */
-		for (const std::unique_ptr<Hierarchy<Model>>& hierarchy : hierarchyPanel_.GetHierarchyModels()) {
+		for (const std::unique_ptr<Hierarchy<Model>>& hierarchy : currentSceneData_->hierarchyPanel_->GetHierarchyModels()) {
 
 			// 非表示なら描画スキップ
 			if (!hierarchy->isView_) continue;
@@ -604,6 +645,41 @@ void Editor::TopMenuVar()
 
 }
 
+void Editor::DrawMainImageView()
+{
+#ifdef USE_IMGUI
+
+	mainViewPos = ImGui::GetCursorScreenPos();   // ウィンドウ内の描画開始位置（左上のスクリーン座標）
+	mainViewSize = ImGui::GetContentRegionAvail(); // 利用可能な幅と高さ
+
+	/*
+		縦横比固定
+	*/
+
+	// 元のアスペクト比
+	constexpr float aspectRatio = 1280.0f / 720.0f;
+
+	// 利用可能な領域
+	float width = mainViewSize.x;
+	float height = width / aspectRatio;
+
+	// 高さが足りなければ高さ基準にする
+	if (height > mainViewSize.y) {
+		height = mainViewSize.y;
+		width = height * aspectRatio;
+	}
+
+	mainViewSize = ImVec2(width, height);
+
+	// オフスクリーンのレンダーターゲットテクスチャをImGui上で表示する
+	ImGui::Image(
+		(ImTextureID)PostEffectManager::GetInstance()->GetOffscreenFinalSRVHandleGPU().ptr,
+		mainViewSize
+	);
+
+#endif
+}
+
 void Editor::DrawViewManipulate()
 {
 
@@ -673,7 +749,7 @@ void Editor::OperationKeyBoard()
 		// ペースト
 		if (Input::GetInstance()->TriggerKey(DIK_V)) {
 
-			selectedModelWorldTransform_ = hierarchyPanel_.PasteHierarchyModel();
+			selectedModelWorldTransform_ = currentSceneData_->hierarchyPanel_->PasteHierarchyModel();
 
 			// コピー処理が成功したタイミングで呼ぶ
 			notification_.PopText("Model Pasted!!", ImVec2(170.0f, 30.0f));
@@ -684,6 +760,12 @@ void Editor::OperationKeyBoard()
 
 void Editor::OperationLeftClick()
 {
+	/*
+		現在開かれているシーンのヒエラルキー
+	*/
+	auto hierarchyPanel_ = currentSceneData_->hierarchyPanel_.get();
+
+
 	/* 左クリックを押された際の処理 */
 	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 
@@ -692,7 +774,7 @@ void Editor::OperationLeftClick()
 
 		float distance = 0.0f;
 
-		hierarchyPanel_.SetSelectedHierarchyModelIndex(std::nullopt);
+		hierarchyPanel_->SetSelectedHierarchyModelIndex(std::nullopt);
 		selectedModelWorldTransform_ = nullptr;
 
 		//* モード別の処理　*//
@@ -703,32 +785,32 @@ void Editor::OperationLeftClick()
 		case ModelHierarchyMode::kSelectMode:
 
 			// すべてのモデル
-			for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
+			for (int i = 0; i < hierarchyPanel_->GetHierarchyModels().size(); i++)
 			{
 
 				// もし選択中のモデルアセットがあった場合
 				if (!assetsPanel_.selectedHierarchyResource_.pathId_.empty()) {
 
 					/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
-					if (hierarchyPanel_.GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+					if (hierarchyPanel_->GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
 						continue;
 				}
 
 				// 非表示なら選択もスキップ
-				if (!hierarchyPanel_.GetHierarchyModels().at(i)->isView_)
+				if (!hierarchyPanel_->GetHierarchyModels().at(i)->isView_)
 					continue;
 
 				// ヒエラルキからワールドのポインタ取得！
-				WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
+				WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_->GetHierarchyModels().at(i)->transform_.get());
 
 
 				// そのヒエラルキが持つAABB？
-				AABB* aabb = &hierarchyPanel_.GetHierarchyModels().at(i)->aabb_;
+				AABB* aabb = &hierarchyPanel_->GetHierarchyModels().at(i)->aabb_;
 
 				// モデルのAABBと判定
 				if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
 
-					hierarchyPanel_.SetSelectedHierarchyModelIndex(i);
+					hierarchyPanel_->SetSelectedHierarchyModelIndex(i);
 					selectedModelWorldTransform_ = world;
 
 					// ビューポートにモデルを追加
@@ -754,12 +836,12 @@ void Editor::OperationLeftClick()
 			if (hit.has_value()) {
 
 				// マスの大きさで割ったのを設定する
-				Vector3 subPosition = Grid::snapGrid(hit.value());
+				Vector3 subPosition = EditorGrid::snapGrid(hit.value());
 
 				bool break_ = false;
 
 				//* もしすでに同じ座標にあるヒエラルキーがある場合、配置せず引き返す（重複する配置の対策）
-				for (const std::unique_ptr<Hierarchy<Model>>& model : hierarchyPanel_.GetHierarchyModels()) {
+				for (const std::unique_ptr<Hierarchy<Model>>& model : hierarchyPanel_->GetHierarchyModels()) {
 
 					/* 選択中以外の、アセット以外のIDのヒエラルキーはとばす */
 					if (model->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
@@ -799,11 +881,11 @@ void Editor::OperationLeftClick()
 				world->UpdateMatrix();
 
 				/* ヒエラルキ-モデル - 追加 */
-				hierarchyPanel_.AddHierarchyModel(hierarchyPanel_.GetSelectedCurrentLayerName(), h);
+				hierarchyPanel_->AddHierarchyModel(hierarchyPanel_->GetSelectedCurrentLayerName(), h);
 
 
 				/* シーン側のGameObjectに干渉してたら一緒に増やす */
-				hierarchyPanel_.GameObjectAddCheck();
+				hierarchyPanel_->GameObjectAddCheck();
 			}
 
 			break;
@@ -814,7 +896,13 @@ void Editor::OperationLeftClick()
 
 void Editor::OperationRightClick()
 {
-/* ImGuiの枠にかさならないよう右クリックを押された際の処理 */
+	/*
+		現在開かれているシーンのヒエラルキー
+	*/
+	auto hierarchyPanel_ = currentSceneData_->hierarchyPanel_.get();
+
+
+	/* ImGuiの枠にかさならないよう右クリックを押された際の処理 */
 	if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
 
 
@@ -832,7 +920,7 @@ void Editor::OperationRightClick()
 
 			if (!selectedModelWorldTransform_) break;
 
-			hierarchyPanel_.DeleteHierarchyModel();
+			hierarchyPanel_->DeleteHierarchyModel();
 
 
 				
@@ -851,15 +939,15 @@ void Editor::OperationRightClick()
 			if (hit.has_value()) {
 
 				// すべてのモデル
-				for (int i = 0; i < hierarchyPanel_.GetHierarchyModels().size(); i++)
+				for (int i = 0; i < hierarchyPanel_->GetHierarchyModels().size(); i++)
 				{
 					
 					/* 選択中以外の、アセット以外のIDのヒエラルキーは選択しない */
-					if (hierarchyPanel_.GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
+					if (hierarchyPanel_->GetHierarchyModels().at(i)->id_ != assetsPanel_.selectedHierarchyResource_.pathId_)
 						continue;
 
 					// ヒエラルキからワールドのポインタ取得！
-					WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_.GetHierarchyModels().at(i)->transform_.get());
+					WorldTransform* world = static_cast<WorldTransform*>(hierarchyPanel_->GetHierarchyModels().at(i)->transform_.get());
 
 					// だいたいの中心
 					//float size = 3.0f;
@@ -869,13 +957,13 @@ void Editor::OperationRightClick()
 					//aabb.max = Vector3{ size,  size,  size } + world->translation_;
 
 					// そのヒエラルキが持つAABB？
-					AABB* aabb = &hierarchyPanel_.GetHierarchyModels().at(i)->aabb_;
+					AABB* aabb = &hierarchyPanel_->GetHierarchyModels().at(i)->aabb_;
 
 					// モデルのAABBと判定
 					if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
 
 						/* 当たったヒエラルキモデルを削除 */
-						hierarchyPanel_.DeleteHierarchyModel(i);
+						hierarchyPanel_->DeleteHierarchyModel(i);
 
 						break;
 					}
@@ -936,6 +1024,12 @@ void Editor::DrawArrowToSelectedTransform()
 {
 	if (isEditorMode_) {
 
+		/*
+			現在開かれているシーンのヒエラルキー
+		*/
+		auto hierarchyPanel_ = currentSceneData_->hierarchyPanel_.get();
+
+
 		// 選択中のモデルがあるときだけ操作
 		if (selectedModelWorldTransform_) {
 
@@ -964,7 +1058,7 @@ void Editor::DrawArrowToSelectedTransform()
 					worldMat.m[3][2],
 				};
 
-				selectedModelWorldTransform_->translation_ = Grid::snapGrid(translation);
+				selectedModelWorldTransform_->translation_ = EditorGrid::snapGrid(translation);
 
 			}
 
@@ -989,11 +1083,11 @@ void Editor::DrawArrowToSelectedTransform()
 				}
 
 				/* 同期させる */
-				if (hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_ != nullptr) {
+				if (hierarchyPanel_->GetSelectedHierarchyModel()->gameObject_ != nullptr) {
 
-					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().translation_ = selectedModelWorldTransform_->translation_;
-					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().rotation_ = selectedModelWorldTransform_->rotation_;
-					hierarchyPanel_.GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().scale_ = selectedModelWorldTransform_->scale_;
+					hierarchyPanel_->GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().translation_ = selectedModelWorldTransform_->translation_;
+					hierarchyPanel_->GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().rotation_ = selectedModelWorldTransform_->rotation_;
+					hierarchyPanel_->GetSelectedHierarchyModel()->gameObject_->GetWorldTransform().scale_ = selectedModelWorldTransform_->scale_;
 
 				}
 
@@ -1007,12 +1101,95 @@ void Editor::DrawArrowToSelectedTransform()
 
 
 
-void Editor::LoadScene(std::string path)
+void Editor::LoadScene(std::string sceneName)
 {
 
-	currentSceneJsonPath = path;
+	//currentSceneJsonPath = path;
 
-	hierarchyPanel_.Initialize(path, grid);
+	/*
+		現在開かれているシーンのヒエラルキー
+	*/
+
+	currentSceneData_->hierarchyPanel_.get()->Initialize(sceneName, grid);
+}
+
+/*
+
+	シーン切り替え
+
+*/
+void Editor::SwitchActiveScene(std::string sceneName,bool firstInit)
+{
+	//
+	// *設定
+	selectedModelWorldTransform_ = nullptr;
+
+	// 同一シーン名のシーンがあるか検索
+	auto it = std::find_if(
+		sceneDatas_.begin(),
+		sceneDatas_.end(),
+		[sceneName](const SceneData& s) {
+			return s.sceneName_ == sceneName;
+		}
+	);
+
+	
+	if (it != sceneDatas_.end()) {
+
+		currentSceneName_ = sceneName;
+
+		// 見つかった場合、現在のシーンデータに
+		currentSceneData_ = &(*it);
+
+		// 現在のシーンのデータをセット・読み込み
+		assetsPanel_.SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
+
+		UIManager::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
+		UIManager::GetInstance()->SwitchSceneUIData(sceneName);
+
+
+	}
+	else {
+
+		/* 
+			無かった場合、新たにシーンを生成し、タブを（あれば）切り替える　つまりなかったら新しく作る
+		*/
+		
+		// 新規シーン生成。初期化まで行う
+		auto scene = SceneFactory::Create(sceneName);
+
+		/* 読み込めた */
+		if (scene) {
+
+			// 追加
+			auto& sceneData = sceneDatas_.emplace_back();
+
+			sceneData.scene_ = scene.release();// 移動
+	
+			// 名前登録
+			sceneData.sceneName_ = sceneName;
+
+			// ヒエラルキパネル生成
+			sceneData.hierarchyPanel_ = std::make_unique<HierarchyPanel>();
+
+			if (!firstInit) {
+
+				sceneData.hierarchyPanel_.get()->SetAssetsPanel(&assetsPanel_);
+				sceneData.hierarchyPanel_.get()->Initialize(sceneName, grid);
+
+				assetsPanel_.SetHierarchyPanel(sceneData.hierarchyPanel_.get());
+
+				UIManager::GetInstance()->SetHierarchyPanel(sceneData.hierarchyPanel_.get());
+				UIManager::GetInstance()->SwitchSceneUIData(sceneName);
+
+			}
+			// 現在のシーンに登録
+			currentSceneData_ = &sceneDatas_.back();
+
+			// 名前設定
+			currentSceneName_ = sceneName;
+		}
+	}
 }
 
 
@@ -1098,6 +1275,11 @@ void Editor::FreeMoveCamera()
 
 void Editor::PropartyTab()
 {
+	/*
+		現在開かれているシーンのヒエラルキー
+	*/
+	auto hierarchyPanel_ = currentSceneData_->hierarchyPanel_.get();
+
 	// プロパティー
 	if (showProperty) {
 
@@ -1114,13 +1296,13 @@ void Editor::PropartyTab()
 		ImGui::SameLine();
 
 
-		ImGui::InputText(" ", &currentSceneJsonPath);
+		//ImGui::InputText(" ", &currentSceneJsonPath);
 
 
 		// ロードボタン
-		if (ImGui::Button("Load(バグ)")) {
-			hierarchyPanel_.HierarchyLoad(currentSceneJsonPath);
-		}
+		//if (ImGui::Button("Load(バグ)")) {
+		//	//hierarchyPanel_->HierarchyLoad(currentSceneJsonPath);
+		//}
 
 		ImGui::SameLine();
 
@@ -1129,7 +1311,7 @@ void Editor::PropartyTab()
 		*/
 		if (ImGui::Button("Save")) {
 
-			hierarchyPanel_.HierarchySave(currentSceneJsonPath);
+			hierarchyPanel_->HierarchySave();
 			assetsPanel_.AssetsSave();
 
 			UIManager::GetInstance()->SaveElementData();
@@ -1597,193 +1779,6 @@ Vector3 Editor::ExtractRotation(const Matrix4x4& m, const Vector3& scale)
 	return { rx, ry, rz };
 }
 
-float Grid::gridWidth_  = 1.0f;
-float Grid::gridHeight_ = 1.0f;
-float Grid::gridDepth_  = 1.0f;
-
-void Grid::Update()
-{
-
-	// オイラー角->回転行列->ベクトル変換
-	rotationMatrix = MakeRotationMatrix(rotation_);
-
-
-	// 初期状態の法線（水平な平面の上方向）
-	Vector3 normal = { 0.0f, 1.0f, 0.0f };
-
-
-	// 判定用のplaneもグリッドに同期させる
-
-	plane_.width = gridWidth_ *  static_cast<float>(horizontal_);
-	plane_.height = gridHeight_ * static_cast<float>(vertical_);
-
-
-	// グリッドの中心（ローカル座標）
-	Vector3 localCenter = {
-		gridWidth_ * horizontal_ * 0.5f,
-		0.0f,
-		gridHeight_ * vertical_ * 0.5f
-	};
-
-	Vector3 offset;
-	//if (isCenter_) {
-
-	//		offset = {
-	//			-gridWidth_ / 2.0f,
-	//			-gridHeight_ / 2.0f,
-	//			0
-	//		};
-
-	//}
-
-	// 回転させてワールド座標へ
-		plane_.point =
-			TransformNormal(localCenter, rotationMatrix) + (translation_ + offset);
-
-	// 法線を回転させる
-	plane_.normal = Normalize(
-		TransformNormal(normal, rotationMatrix)
-	);
-
-
-	plane_.width = gridWidth_ * static_cast<float>(horizontal_);
-	plane_.height = gridHeight_ * static_cast<float>(vertical_);
-
-}
-
-void Grid::AddLine()
-{
-	
-	if (!isSnap_) return;
-
-	/* 升目描画 */
-		const Vector4 color = { 0.0f, 1.0f, 0.0f, 1.0f };
-
-		
-		Vector3 offset = {
-			0.0f,
-			0.0f,
-			0.0f
-		};
-		//if (isCenter_) {
-		//	offset = {
-		//		-gridWidth_ / 2.0f,
-		//		
-		//		0,-gridHeight_ / 2.0f,
-		//	};
-		//}
-
-		// ローカル座標からワールド座標へ変換するラムÐ式
-		auto TransformGridPoint = [&](const Vector3& point) {
-
-			Vector3 local = point + offset;
-
-			// ローカル座標を回転させる
-			return TransformNormal(local, rotationMatrix) + translation_;
-			};
-
-		// X方向の線
-		for (int x = 0; x <= horizontal_; ++x) {
-			float posX = x * gridWidth_;
-
-			Vector3 start = { posX, 0.0f, 0.0f };
-			Vector3 end = { posX, 0.0f, vertical_ * gridHeight_ };
-
-			DebugLine::AddLine(
-				TransformGridPoint(start),
-				TransformGridPoint(end),
-				color
-			);
-		}
-
-		// Z方向の線
-		for (int z = 0; z <= vertical_; ++z) {
-			float posZ = z * gridHeight_;
-
-			Vector3 start = { 0.0f, 0.0f, posZ };
-			Vector3 end = { horizontal_ * gridWidth_, 0.0f, posZ };
-
-			DebugLine::AddLine(
-				TransformGridPoint(start),
-				TransformGridPoint(end),
-				color
-			);
-		}
-
-		// 判定用-平面描画　傾きはGridの傾きを回転行列として使う
-		DebugLine::DrawPlane(plane_, rotation_, { 1.0f,0,0,1.0f });
-
-
-}
-
-void Grid::ImGuiView()
-{
-#ifdef USE_IMGUI
-
-	ImGui::DragInt("Grid-Vertical", &vertical_,1,1,500);
-	ImGui::DragInt("Grid-Horizontal", &horizontal_,1,1,500);
-
-	ImGui::DragFloat("Grid-width", &gridWidth_, 0.1f, 1.0f, 500.0f);
-	ImGui::DragFloat("Grid-height", &gridHeight_, 0.1f, 1.0f, 500.0f);
-	ImGui::DragFloat("Grid-Depth", &gridDepth_, 0.1f, 1.0f, 500.0f);
-
-	ImGui::DragFloat3("Grid Translation", &translation_.x, 0.1f);
-	ImGui::DragFloat3("plane point", &plane_.point.x, 0.1f);
-	ImGui::Separator();
-
-	ImGui::Checkbox("isSnap", &isSnap_);
-	ImGui::Checkbox("isCenter", &isCenter_);
-
-	ImGui::SeparatorText("RotateGrid");
-
-	if (ImGui::Button("x")) {
-		rotation_.x -= std::numbers::pi_v<float> / 2.0f;
-	}
-
-	ImGui::SameLine();
-
-	// 横に
-	if (ImGui::Button("y")) {
-		rotation_.y -= std::numbers::pi_v<float> / 2.0f;
-	}
-
-	ImGui::SameLine();
-
-	// 横に
-	if (ImGui::Button("z")) {
-		rotation_.z -= std::numbers::pi_v<float> / 2.0f;
-	}
-
-	ImGui::SameLine();
-
-#endif
-}
-Vector3  Grid::translation_ = {0,0,0};
-bool Grid::isCenter_ = false;
-
-Vector3  Grid::snapGrid(Vector3 v) {
-
-	Vector3 result;
-	Vector3 offset;
-
-	if (isCenter_) {
-		offset = {
-			-gridWidth_ / 2.0f,
-			-gridHeight_ / 2.0f,
-			-gridHeight_ / 2.0f
-		};
-	};
-
-	result.x = std::floor(v.x / gridWidth_) * gridWidth_ + gridWidth_ / 2.0f,
-	result.y = std::floor(v.y / gridHeight_) * gridHeight_ + gridHeight_ / 2.0f;
-	result.z = std::floor(v.z / gridDepth_) * gridDepth_ + gridDepth_ / 2.0f;
-
-	result = result + offset;
-
-	// マスの大きさで割って配置
-	return result;
-
-}
 bool Editor::ToggleSwitch(const char* label, bool* value)
 {
 	ImVec2 p = ImGui::GetCursorScreenPos();

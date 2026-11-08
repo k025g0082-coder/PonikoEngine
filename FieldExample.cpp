@@ -15,6 +15,10 @@
 
 std::unordered_map<uint32_t, DemoFieldObject*> FieldExample::uniqueIdMap_;
 
+/*
+	シーンを登録する
+*/
+REGISTER_SCENE(FieldExample);
 
 void FieldExample::Init()
 {

@@ -5,6 +5,8 @@
 
 #include "PostEffectManager.h"
 
+#include "SceneFactory.h"
+
 Fade Game::fade;
 
 uint32_t Game::kGameScreenWidth;
@@ -35,7 +37,7 @@ Game::WindowViewParam Game::windowViewParams_[(int)WindowViewMode::count] = {
 
 }; 
 
-
+std::string Game::currentSceneName;
 
 // シングルトン
 Game* Game::GetInstance() {
@@ -43,7 +45,12 @@ Game* Game::GetInstance() {
 	return &game;
 };
 
-void Game::Init() { 
+void Game::StartGameScene(std::string sceneName)
+{
+	Scene::StartGameScene(sceneName);
+}
+
+void Game::Init() {
 
 	//SetWindowViewMode(currentViewMode_);
 

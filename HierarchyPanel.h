@@ -93,13 +93,13 @@ struct HierarchyLayer {
 
 
 
-class Grid;
+class EditorGrid;
 
 class HierarchyPanel
 {
 public:
 
-	void Initialize(const std::string jsonPath ,Grid& g);
+	void Initialize(const std::string sceneName ,EditorGrid& g);
 
 	// 常に更新
 	void Update();
@@ -127,11 +127,11 @@ public:
 		}
 	}
 
-	// シーンのJsonパスで保存
-	void HierarchySave(const std::string jsonPath);
+	// 設定されたJsonパスで保存
+	void HierarchySave();
 
-	// シーンのJsonパスで読込
-	void HierarchyLoad(const std::string jsonPath);
+	// シーン名から読込
+	void HierarchyLoad(const std::string sceneName);
 
 
 	/* 読み取り専用 */
@@ -279,6 +279,10 @@ public:
 
 private:
 
+	// ロードセーブ行うパス
+	std::string jsonPath_;
+
+
 	// レイヤー追加時のウインドウ
 	void AddLayerPopupWindow();
 
@@ -308,7 +312,7 @@ private:
 
 
 	// エディターのグリッド
-	Grid* grid = nullptr;
+	EditorGrid* grid = nullptr;
 
 	AssetsPanel* assetsPanel_ = nullptr;
 

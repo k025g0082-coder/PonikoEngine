@@ -36,6 +36,8 @@ class FieldExample :
 {
 public:
 
+    FieldExample() : Scene("FieldExample") {}
+
     void Init();
     void Update(Input* input);
     void Draw();

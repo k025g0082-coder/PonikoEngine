@@ -3,9 +3,25 @@
 #include "Input.h"
 #include "Camera.h"
 
+#include "SceneFactory.h"
+
+#include <string>
+
 class Scene {
 
 public:
+
+	/// <summary>
+	/// コンストラクタ
+	/// </summary>
+	/// <param name="sceneName">シーン名( 必須 )</param>
+	explicit Scene(const std::string& sceneName)
+		: sceneName_(sceneName)
+	{}
+
+	virtual ~Scene() = default;
+
+
 	/// <summary>
 	/// 各Sceneクラス内の初期化
 	/// </summary>
@@ -21,13 +37,31 @@ public:
 	/// </summary>
 	virtual void Draw() = 0;
 
-	virtual ~Scene() = default;
+
+	// ゲーム開始時
+	static void StartGameScene(std::string sceneName);
+
 
 	/// <summary>
-	/// 別Sceneに切り替え
+	/// 現在のSceneのポインタを置き換える
 	/// </summary>
-	static void RequestChange(Scene* d) {
-		nextInstance = d;
+	/// <param name="activeScene"></param>
+	static void SetActiveInstanceReference(Scene* activeScene) {
+
+		// 旧 instance の delete は行わない。
+		// ポインタを置き換えるだけ。SceneのInitializeはEditor側で行う
+		instance = activeScene;
+
+	}
+
+	
+
+	/// <summary>
+	/// 別のシーンに切り替え
+	/// </summary>
+	/// <param name="sceneName">シーン名</param>
+	static void RequestChange(std::string sceneName) {
+		nextSceneName = sceneName;
 		isChanging = true;
 	}
 
@@ -47,9 +81,20 @@ public:
 	}
 	static Camera* GetSceneCamera() { return camera_; }
 
+protected:
+
+	/// <summary>
+	/// シーン名
+	/// </summary>
+	std::string sceneName_;
+
+
 private:
+
+	static std::string nextSceneName;
+
 	static Scene* instance;
-	static Scene* nextInstance;
+
 	static bool isChanging;
 
 	static Camera* camera_;

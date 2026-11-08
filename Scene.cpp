@@ -9,8 +9,12 @@
 #include "Particle.h"
 #include "EffectManager.h"
 
+#include "Editor.h"
+
+
 Scene* Scene::instance = nullptr;
-Scene* Scene::nextInstance = nullptr;
+std::string Scene::nextSceneName;
+
 bool Scene::isChanging = false;
 
 Camera* Scene::camera_ = nullptr;
@@ -21,6 +25,24 @@ void Scene::Update(Input* gamepad){
 
 void Scene::Draw(){
 
+}
+
+void Scene::StartGameScene(std::string sceneName)
+{
+	/*  　Editor側の切り替え処理 　 */
+	Editor::GetInstance()->SwitchActiveScene(sceneName,true);
+
+	// 各パネルの初期化
+	Editor::GetInstance()->PanelInit(sceneName);
+
+
+	/* 　Editorからインスタンスをもらう　 */
+	instance = Editor::GetInstance()->GetActiveSceneInstance();
+
+	/*
+		ここで初めてScene初期化
+	*/
+	instance->Init();
 }
 
 void Scene::ProcessChange() {
@@ -36,11 +58,45 @@ void Scene::ProcessChange() {
 		// nullを代入
 		Particle::GetInstance()->SetCamera(nullptr);
 
-		delete instance;
+		/*
+			Editorモードの場合、Editorから提供されたＳｃｅｎｅを設定する
+		*/
+		if (Editor::IsEditorMode()) {
 
-		instance = nextInstance;
+			/*  　Editor側の切り替え処理 　 */
+			Editor::GetInstance()->SwitchActiveScene(nextSceneName);
+	
+			/* 　Editorからインスタンスをもらう　 */
+			instance = Editor::GetInstance()->GetActiveSceneInstance();
+
+		}
+		else
+		{
+			// 通常　releaseモードの場合
+
+			/*
+				現在のインスタンスを破棄
+			*/
+			delete instance;
+
+			auto scene = SceneFactory::Create(nextSceneName);
+
+			/* 読み込めた */
+			if (scene) {
+
+				instance = scene.release();// 移動
+				instance->Init();
+
+				
+			}
+		}
+
+		// 読み込みの有無にかかわらずfade終わったか切り替え
 		isChanging = false;
 
-		instance->Init();
+		if (instance) {
+			// 現在開いているシーン名を更新
+			Game::SetCurrentSceneName(instance->sceneName_);
+		}
 	}
 }

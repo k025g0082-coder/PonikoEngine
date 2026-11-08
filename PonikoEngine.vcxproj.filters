@@ -325,6 +325,9 @@
     <ClCompile Include="UISequencer.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor\UI</Filter>
     </ClCompile>
+    <ClCompile Include="EditorGrid.cpp">
+      <Filter>Engine\Source\ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -598,6 +601,12 @@
     </ClInclude>
     <ClInclude Include="Easing.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorGrid.h">
+      <Filter>Engine\Source\ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneFactory.h">
+      <Filter>Engine\Source\ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

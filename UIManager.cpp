@@ -13,8 +13,7 @@
 
 #include "AssetsPanel.h"
 
-
-std::vector<UIData> UIManager::elementDatas_;
+SceneUIData* UIManager::currentSceneUIData_;
 
 
 UIManager* UIManager::GetInstance()
@@ -23,27 +22,47 @@ UIManager* UIManager::GetInstance()
 	return &instance;
 }
 
-void UIManager::Initialize()
+void UIManager::Initialize(std::string sceneName)
 {
+	// 新しく生成して　それをターゲットにする
+	currentSceneUIData_ = &sceneUIDatas_[sceneName];
+
 	/*
 		ElementData読み込み
 	*/
-	LoadElementData();
-
-
-	/*sequencer_.mFrameMin = -100;
-	sequencer_.mFrameMax = 1000;*/
-	//sequencer_.items_.push_back(UISequencer::SequenceItem{ 0, 10, 30 });
-	//sequencer_.items_.push_back(UISequencer::SequenceItem{ 1, 20, 30 });
-	//sequencer_.items_.push_back(UISequencer::SequenceItem{ 2, 12, 60 });
-	//sequencer_.items_.push_back(UISequencer::SequenceItem{ 1, 61, 90 });
-	//sequencer_.items_.push_back(UISequencer::SequenceItem{ 2, 90, 99 });
+	LoadElementData(sceneName);
 
 }
 
-void UIManager::LoadElementData()
+void UIManager::LoadElementData(std::string sceneName)
 {
-	jsonPath = "resources/Scene/uiSample.json";
+
+	/*
+		読み込むjsonのパスをここで設定
+	*/
+
+	jsonPath = "resources/Scene/" + sceneName + "/UIProperty.json";
+
+
+	/*
+		もし存在しない場合つくる
+	*/
+	std::filesystem::path path(jsonPath);
+
+	if (!std::filesystem::exists(path)) {
+
+		// 親ディレクトリを作成
+		std::filesystem::create_directories(path.parent_path());
+
+		// JSONファイルを新規作成
+		std::ofstream file(path);
+
+		if (!file.is_open()) return;
+
+		file << "{}";
+		file.close();
+	}
+
 
 	// 読込み
 	if (SceneComponentLoader::GetInstance()->Load(jsonPath)) {
@@ -54,7 +73,7 @@ void UIManager::LoadElementData()
 		loder->BeginGroup("UI");
 
 		// UIData一覧
-		loder->Property("data", elementDatas_);
+		loder->Property("data", currentSceneUIData_->elementDatas_);
 
 
 		loder->EndGroup();
@@ -64,7 +83,7 @@ void UIManager::LoadElementData()
 	}
 
 	int count = 0;
-	for (UIData& data : elementDatas_) {
+	for (UIData& data : currentSceneUIData_->elementDatas_) {
 		for (UIElement& e : data.elements_) {
 
 			// 名前がない場合付ける
@@ -105,6 +124,34 @@ void UIManager::SaveElementData()
 	}
 }
 
+void UIManager::SwitchSceneUIData(std::string sceneName)
+{
+
+
+
+	// もし既に読み込んでいたら
+	if (sceneUIDatas_.contains(sceneName)) {
+
+		// 切り替え
+		currentSceneUIData_ = &sceneUIDatas_[sceneName];
+
+		/* データを読み書きする、JsonPathを更新 */
+		jsonPath = "resources/Scene/" + sceneName + "/UIProperty.json";
+
+		
+	}
+	else {
+
+		// 空を生成して切り替えしておく
+		currentSceneUIData_ = &sceneUIDatas_[sceneName];
+
+		// 新規ロード
+		LoadElementData(sceneName);
+
+	}
+
+}
+
 void UIManager::UpdateElements()
 {
 #ifdef USE_IMGUI
@@ -122,7 +169,7 @@ void UIManager::UpdateElements()
 	SelectedElementAnimationView();
 
 	//
-	sequencer_.AnimationComboView();
+	currentSceneUIData_->sequencer_.AnimationComboView();
 
 
 	ImGui::End();
@@ -130,7 +177,7 @@ void UIManager::UpdateElements()
 #endif
 
 	//　ElementDataの更新
-	for (UIData& data : elementDatas_) {
+	for (UIData& data : currentSceneUIData_->elementDatas_) {
 
 		//
 		deleteElementIndex_ = -1;
@@ -197,7 +244,7 @@ void UIManager::DrawElements()
 {
 
 	//　ElementDataの描画
-	for (UIData& data : elementDatas_) {
+	for (UIData& data : currentSceneUIData_->elementDatas_) {
 
 		if (!data.isView_)continue;
 
@@ -269,13 +316,13 @@ void UIManager::PlayAnimationElement(std::string canvasName, std::string element
 
 	//該当レイヤー検索
 	auto it = std::find_if(
-		elementDatas_.begin(),
-		elementDatas_.end(),
+		currentSceneUIData_->elementDatas_.begin(),
+		currentSceneUIData_->elementDatas_.end(),
 		[canvasName](const UIData& data_) {
 			return data_.name_ == canvasName;
 		}
 	);
-	if (it != elementDatas_.end()) {
+	if (it != currentSceneUIData_->elementDatas_.end()) {
 
 		// 該当エレメント検索
 		auto itt = std::find_if(
@@ -335,8 +382,8 @@ void UIManager::SelectedElementAnimationView()
 				Vector3 vec = selectedElemet_->sprite_.GetScreenTransform().translation_;
 
 				// キーフレーム追加
-				sequencer_.AddKeyFrame(SequenceItemType::kPosition, KeyFrame<Vector3>{
-					sequencer_.GetCurrentFrame(),
+				currentSceneUIData_->sequencer_.AddKeyFrame(SequenceItemType::kPosition, KeyFrame<Vector3>{
+					currentSceneUIData_->sequencer_.GetCurrentFrame(),
 						vec,
 						EasingType::None
 				});
@@ -361,8 +408,8 @@ void UIManager::SelectedElementAnimationView()
 				Vector3	scale = selectedElemet_->sprite_.GetScreenTransform().scale_;
 
 				// キーフレーム追加
-				sequencer_.AddKeyFrame(SequenceItemType::kScale, KeyFrame<Vector3>{
-					sequencer_.GetCurrentFrame(),
+				currentSceneUIData_->sequencer_.AddKeyFrame(SequenceItemType::kScale, KeyFrame<Vector3>{
+					currentSceneUIData_->sequencer_.GetCurrentFrame(),
 						scale,
 						EasingType::None
 				});
@@ -387,8 +434,8 @@ void UIManager::SelectedElementAnimationView()
 				Vector3 rot = selectedElemet_->sprite_.GetScreenTransform().rotation_;
 
 				// キーフレーム追加
-				sequencer_.AddKeyFrame(SequenceItemType::kRotation, KeyFrame<Vector3>{
-					sequencer_.GetCurrentFrame(),
+				currentSceneUIData_->sequencer_.AddKeyFrame(SequenceItemType::kRotation, KeyFrame<Vector3>{
+					currentSceneUIData_->sequencer_.GetCurrentFrame(),
 						rot,
 						EasingType::None
 				});
@@ -454,7 +501,7 @@ void UIManager::JudgeMouseSelectElement(UIElement& e,int index)
 			/*
 				新たに選択されたので、アニメーションのデータを受け渡す
 			*/
-			sequencer_.SetUIElementAnimationData(selectedElemet_->animationDatas_);
+			currentSceneUIData_->sequencer_.SetUIElementAnimationData(selectedElemet_->animationDatas_);
 
 		}
 	}
@@ -527,8 +574,8 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 
 	// elementData内に同じレイヤー名があるかチェック
 	auto it = std::find_if(
-		elementDatas_.begin(),
-		elementDatas_.end(),
+		currentSceneUIData_->elementDatas_.begin(),
+		currentSceneUIData_->elementDatas_.end(),
 		[canvasLayerName](const UIData& data_) {
 			return data_.name_ == canvasLayerName;
 		}
@@ -538,24 +585,24 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 	// 見つからなかった
 	int index = 0;
 
-	if (it == elementDatas_.end()) {
+	if (it == currentSceneUIData_->elementDatas_.end()) {
 
-		elementDatas_.push_back(UIData{
+		currentSceneUIData_->elementDatas_.push_back(UIData{
 			.name_ = canvasLayerName
 			});
 
-		index = static_cast<int>(elementDatas_.size()) - 1;
+		index = static_cast<int>(currentSceneUIData_->elementDatas_.size()) - 1;
 
 	}
 	else {
 
 		index = static_cast<int>(
-			std::distance(elementDatas_.begin(), it)
+			std::distance(currentSceneUIData_->elementDatas_.begin(), it)
 			);
 	}
 
 	/* emplace_back で末尾に直接要素を作成して参照を受け取る */
-	UIElement& element = elementDatas_.at(index).elements_.emplace_back();
+	UIElement& element = currentSceneUIData_->elementDatas_.at(index).elements_.emplace_back();
 
 	// 
 	element.pathID_ = pathId;
@@ -576,7 +623,7 @@ void UIManager::UIEditorTimeLine()
 	ImGui::Begin("UIView");
 
 	// シーケンサー更新
-	sequencer_.Update();
+	currentSceneUIData_->sequencer_.Update();
 
 	ImGui::End();
 #endif

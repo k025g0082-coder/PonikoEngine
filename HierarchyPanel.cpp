@@ -31,12 +31,12 @@ const char* kLayerTypeNames[] = {
 	(char*)ICON_FA_PEN  "  CanvasLayer"
 };
 
-void HierarchyPanel::Initialize(const std::string jsonPath, Grid& g)
+void HierarchyPanel::Initialize(const std::string sceneName, EditorGrid& g)
 {	
 	grid = &g;
 
 	/* 初期化で読込んどく */
-	HierarchyLoad(jsonPath);
+	HierarchyLoad(sceneName);
 }
 
 void HierarchyPanel::Update()
@@ -683,15 +683,39 @@ void HierarchyPanel::HierarchyClear()
 
 
 
-void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
+void HierarchyPanel::HierarchyLoad(const std::string sceneName) {
 
-	if (jsonPath.empty()) return;
+	if (sceneName.empty()) return;
 
-	/* 前のヒエラルキ画面は初期化 */
-	HierarchyClear();
+	/* 
+		読み込むjsonのパスをここで設定
+	*/
+	
+	jsonPath_ = "resources/Scene/" + sceneName + "/hierarchy.json";
+	
+
+	/* 
+		もし存在しない場合つくる
+	*/  
+	std::filesystem::path path(jsonPath_);
+
+	if (!std::filesystem::exists(path)) {
+
+		// 親ディレクトリを作成
+		std::filesystem::create_directories(path.parent_path());
+
+		// JSONファイルを新規作成
+		std::ofstream file(path);
+
+		if (!file.is_open()) return;
+
+		file << "{}";
+		file.close();
+	}
+
 
 	// 読込み
-	if (SceneComponentLoader::GetInstance()->Load(jsonPath)) {
+	if (SceneComponentLoader::GetInstance()->Load(jsonPath_)) {
 
 		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
 
@@ -735,6 +759,7 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 		loder->EndGroup();
 		loder->LoadGroup("Hierarchy");
 	}
+
 
 	grid->Update();
 
@@ -800,14 +825,14 @@ void HierarchyPanel::HierarchyLoad(const std::string jsonPath) {
 
 }
 
-void HierarchyPanel::HierarchySave(const std::string jsonPath) {
+void HierarchyPanel::HierarchySave() {
 
-	if (jsonPath.empty()) return;
+	if (jsonPath_.empty()) return;
 
 	// ※注　ポインタ
 	auto loder = SceneComponentLoader::GetInstance();
 
-	if (loder->SaveSwitchJson(jsonPath)) {
+	if (loder->SaveSwitchJson(jsonPath_)) {
 
 		// ライト配置のセーブ
 		SceneComponentLoader::GetInstance()->LightSave();
@@ -815,6 +840,6 @@ void HierarchyPanel::HierarchySave(const std::string jsonPath) {
 		loder->SaveGroup("Grid");
 		loder->SaveGroup("Hierarchy");
 
-		SceneComponentLoader::GetInstance()->Save(jsonPath);
+		SceneComponentLoader::GetInstance()->Save(jsonPath_);
 	}
 }

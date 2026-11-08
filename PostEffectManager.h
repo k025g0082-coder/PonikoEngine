@@ -107,13 +107,21 @@ public:
 	}
 
 
-	/* Bloomさせるモデルを追加 */
+	/* 
+		Bloomさせるモデルを追加
+	*/
 	void AddBloomModel(Model* model, WorldTransform* worldTransform) {
 
 		// 対象モデルのワールド座標を追加
 		bloomModelPropaties_[model].push_back(worldTransform);
 
 	}
+
+	// リセット
+	void Reset() {
+		bloomModelPropaties_.clear();
+	}
+
 
 	/// <summary>
 	/// ポストエフェクト用DSVテキスチャーの作成
@@ -213,6 +221,7 @@ private:
 
 	/* bloom対象のモデルー＞それに紐づけられたワールド座標のリスト。 みたいな感じで管理  */
 	std::unordered_map < Model*, std::vector<WorldTransform*> > bloomModelPropaties_;
+
 
 	// 定数バッファ
 	BloomParam* bloomParamData_ = nullptr;

@@ -269,6 +269,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="DxcCompiler.cpp" />
     <ClCompile Include="EasingVec.cpp" />
     <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="EditorGrid.cpp" />
     <ClCompile Include="EffeckseerManager.cpp" />
     <ClCompile Include="Effect.cpp" />
     <ClCompile Include="EffectManager.cpp" />
@@ -373,6 +374,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Easing.h" />
     <ClInclude Include="EasingVec.h" />
     <ClInclude Include="Editor.h" />
+    <ClInclude Include="EditorGrid.h" />
     <ClInclude Include="Effect.h" />
     <ClInclude Include="EffectManager.h" />
     <ClInclude Include="EffectSequencer.h" />
@@ -418,6 +420,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneComponentLoader.h" />
+    <ClInclude Include="SceneFactory.h" />
     <ClInclude Include="SceneViewport.h" />
     <ClInclude Include="ScreenTransform.h" />
     <ClInclude Include="ShadowManager.h" />

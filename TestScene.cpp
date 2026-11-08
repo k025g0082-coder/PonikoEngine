@@ -26,6 +26,11 @@
 
 #include "Game.h"
 
+/*
+	シーンを登録する
+*/
+REGISTER_SCENE(TestScene);
+
 
 void TestScene::Init() {
 
@@ -48,7 +53,7 @@ void TestScene::Init() {
 	/* 必）シーンカメラ設定 */
 	Scene::SetSceneCamera(&camera);
 
-	Game::GetFade().Start(Fade::Status::FadeIn, 1.0f, Fade::FadeColor::kWhite);
+	//Game::GetFade().Start(Fade::Status::FadeIn, 1.0f, Fade::FadeColor::kWhite);
 
 
 	PointLightParam pLightParam;
@@ -149,6 +154,10 @@ void TestScene::Init() {
 };
 
 void TestScene::Update(Input* input) {
+
+	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		Scene::RequestChange("FieldExample");
+	}
 
 	model->Update();
 	model2->Update();
@@ -322,7 +331,7 @@ void TestScene::Draw() {
 	
 	//text.drawString("test", {(float)testCombo ,(float)testCombo}, Text::TextAnchor::Center);
 
-	text2.drawString("textTest", TextAnchor::LeftTop);
+	//text2.drawString("textTest", TextAnchor::LeftTop);
 
 
 	// telop
