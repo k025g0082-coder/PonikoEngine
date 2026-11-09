@@ -529,8 +529,8 @@ WorldTransform* HierarchyPanel::PasteHierarchyModel()
 
 
 	// セレクト中のインデックスを末尾のに変更
-	selectedHierarchyIndex_.value() = (int)hierarchys_.size() - 1;
-
+	//selectedHierarchyIndex_.value() = (int)hierarchys_.size() - 1;
+	selectedHierarchyNode_ = hierarchys_.back().get();
 
 	//*  BaseTransform -> WorldTransform
 	WorldTransform* rworld = dynamic_cast<WorldTransform*>(hierarchys_.back()->transform_.get());

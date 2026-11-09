@@ -447,8 +447,30 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::SeparatorText("Animations");
 		ImGui::Dummy(ImVec2{ 0,4.0f });
 
-		
+		/*
+			キー補間タイプ
+		*/
+		static int type = (int)EasingType::None;
 
+		if (ImGui::BeginCombo("Easing", Easing::GetEasingTag()[type]))
+		{
+			for (int i = 0; i < IM_ARRAYSIZE(Easing::GetEasingTag()); i++)
+			{
+				bool isSelected = (type == i);
+
+				if (ImGui::Selectable(Easing::GetEasingTag()[i], isSelected))
+				{
+					type = i;
+				}
+
+				if (isSelected)
+				{
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+
+			ImGui::EndCombo();
+		}
 	}
 
 #endif
@@ -613,6 +635,17 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 
 	// とりあえずスケール初期化？
 	element.scale_ = { 1.0f,1.0f,1.0f };
+
+	//
+	UIElementAnimation newAnime;
+	newAnime.animationName = "NewAnime";
+	UISequencer::SetDefaultTrackDatas(newAnime);
+
+	// アニメ情報もセットしておく
+	element.animationDatas_.animations_["NewAnime"] = newAnime;
+	currentSelectAnimationTag = "NewAnime";
+	element.animationDatas_.currentTag_ = "NewAnime"; //
+
 }
 
 

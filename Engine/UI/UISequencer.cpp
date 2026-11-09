@@ -395,7 +395,7 @@ void UISequencer::LerpKeyFrame(UIElement* element, float animationFrame, int tra
 
 				// 補間
 				element->sprite_.GetScreenTransform().translation_ =
-					Lerp(key.value, nextKey.value, Easing::Get(t, EasingType::None));
+					Lerp(key.value, nextKey.value, Easing::Get(t, key.easingType));
 
 				break;
 
@@ -404,7 +404,7 @@ void UISequencer::LerpKeyFrame(UIElement* element, float animationFrame, int tra
 
 				// 補間
 				element->sprite_.GetScreenTransform().scale_ =
-					Lerp(key.value, nextKey.value, Easing::Get(t, EasingType::None));
+					Lerp(key.value, nextKey.value, Easing::Get(t, key.easingType));
 
 				break;
 
@@ -413,7 +413,7 @@ void UISequencer::LerpKeyFrame(UIElement* element, float animationFrame, int tra
 
 				// 補間
 				element->sprite_.GetScreenTransform().rotation_ =
-					Lerp(key.value, nextKey.value, Easing::Get(t, EasingType::None));
+					Lerp(key.value, nextKey.value, Easing::Get(t, key.easingType));
 
 				break;
 			}

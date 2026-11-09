@@ -114,128 +114,128 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WinApp.cpp">
+    <ClCompile Include="Engine\Core\WinApp.cpp">
       <Filter>Engine\Source\ソース ファイル\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXCommon.cpp">
+    <ClCompile Include="Engine\Core\DirectXCommon.cpp">
       <Filter>Engine\Source\ソース ファイル\base</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXUtility.cpp">
+    <ClCompile Include="Engine\Core\DirectXUtility.cpp">
       <Filter>Engine\Source\ソース ファイル\base</Filter>
     </ClCompile>
-    <ClCompile Include="PipelineStateManager.cpp">
+    <ClCompile Include="Engine\Core\PipelineStateManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="DxcCompiler.cpp">
+    <ClCompile Include="Engine\Core\DxcCompiler.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Matrix.cpp">
+    <ClCompile Include="Engine\Utility\Matrix.cpp">
       <Filter>Engine\Source\ソース ファイル\math</Filter>
     </ClCompile>
-    <ClCompile Include="TextureLoader.cpp">
+    <ClCompile Include="Engine\Texture\TextureLoader.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiManager.cpp">
+    <ClCompile Include="Engine\ExtarnalManager\ImGuiManager.cpp">
       <Filter>Engine\Source\ソース ファイル\base</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
+    <ClCompile Include="Engine\Scene\Camera.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="ModelLoader.cpp">
+    <ClCompile Include="Engine\Model\ModelLoader.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
+    <ClCompile Include="Engine\Model\Model.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="Sprite.cpp">
+    <ClCompile Include="Engine\Texture\Sprite.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
+    <ClCompile Include="Engine\Texture\Texture.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="Triangle.cpp">
+    <ClCompile Include="Engine\Texture\Triangle.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="Text.cpp">
+    <ClCompile Include="Engine\Texture\Text.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="PonikoEngine.cpp">
+    <ClCompile Include="Engine\Core\PonikoEngine.cpp">
       <Filter>Engine\Adapter</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Bone.cpp">
+    <ClCompile Include="Engine\Animation\Bone.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Input.cpp">
+    <ClCompile Include="Engine\Utility\Input.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="EffeckseerManager.cpp">
+    <ClCompile Include="Engine\ExtarnalManager\EffeckseerManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="SoundManager.cpp">
+    <ClCompile Include="Engine\Game\SoundManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Fade.cpp">
+    <ClCompile Include="Engine\Scene\Fade.cpp">
       <Filter>Engine\Source\ソース ファイル\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
+    <ClCompile Include="Engine\Game\Game.cpp">
       <Filter>Engine\Source\ソース ファイル\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Scene.cpp">
+    <ClCompile Include="Engine\Scene\Scene.cpp">
       <Filter>Engine\Source\ソース ファイル\Game</Filter>
     </ClCompile>
-    <ClCompile Include="TestScene.cpp">
+    <ClCompile Include="Engine\Scene\TestScene.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="DirectionalLight.cpp">
+    <ClCompile Include="Engine\Lighting\DirectionalLight.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics\Light</Filter>
     </ClCompile>
-    <ClCompile Include="SpotLight.cpp">
+    <ClCompile Include="Engine\Lighting\SpotLight.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics\Light</Filter>
     </ClCompile>
-    <ClCompile Include="PointLight.cpp">
+    <ClCompile Include="Engine\Lighting\PointLight.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics\Light</Filter>
     </ClCompile>
-    <ClCompile Include="LightingManager.cpp">
+    <ClCompile Include="Engine\Lighting\LightingManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics\Light</Filter>
     </ClCompile>
-    <ClCompile Include="SceneComponentLoader.cpp">
+    <ClCompile Include="Engine\Scene\SceneComponentLoader.cpp">
       <Filter>Engine\Source\ソース ファイル\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Particle.cpp">
+    <ClCompile Include="Engine\Vfx\Particle.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="EasingVec.cpp">
+    <ClCompile Include="Engine\Utility\EasingVec.cpp">
       <Filter>Engine\Source\ソース ファイル\math</Filter>
     </ClCompile>
-    <ClCompile Include="timer.cpp">
+    <ClCompile Include="Engine\Utility\timer.cpp">
       <Filter>Engine\Source\ソース ファイル\Game</Filter>
     </ClCompile>
-    <ClCompile Include="EffectManager.cpp">
+    <ClCompile Include="Engine\Vfx\EffectManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Game\Effect</Filter>
     </ClCompile>
-    <ClCompile Include="Effect.cpp">
+    <ClCompile Include="Engine\Vfx\Effect.cpp">
       <Filter>Engine\Source\ソース ファイル\Game\Effect</Filter>
     </ClCompile>
-    <ClCompile Include="ExampleEffect.cpp">
+    <ClCompile Include="Engine\Vfx\ExampleEffect.cpp">
       <Filter>test</Filter>
     </ClCompile>
-    <ClCompile Include="ShadowManager.cpp">
+    <ClCompile Include="Engine\Scene\ShadowManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Coordinate.cpp">
+    <ClCompile Include="Engine\Shapes\Coordinate.cpp">
       <Filter>Engine\Source\ソース ファイル\math</Filter>
     </ClCompile>
-    <ClCompile Include="DebugLine.cpp">
+    <ClCompile Include="Engine\Debug\DebugLine.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="PostEffectManager.cpp">
+    <ClCompile Include="Engine\Vfx\PostEffectManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="AABB.cpp">
+    <ClCompile Include="Engine\Shapes\AABB.cpp">
       <Filter>Engine\Source\ソース ファイル\math</Filter>
     </ClCompile>
-    <ClCompile Include="Collision.cpp">
+    <ClCompile Include="Engine\Shapes\Collision.cpp">
       <Filter>Engine\Source\ソース ファイル\math</Filter>
     </ClCompile>
     <ClCompile Include="externals\imGuizmo\GraphEditor.cpp">
@@ -268,49 +268,49 @@
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp">
       <Filter>Engine\Source\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Editor.cpp">
+    <ClCompile Include="Engine\Editor\Editor.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="EffectSequencer.cpp">
+    <ClCompile Include="Engine\Vfx\EffectSequencer.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor</Filter>
     </ClCompile>
-    <ClCompile Include="RenderTarget.cpp">
+    <ClCompile Include="Engine\Core\RenderTarget.cpp">
       <Filter>Engine\Source\ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="SceneViewport.cpp">
+    <ClCompile Include="Engine\Scene\SceneViewport.cpp">
       <Filter>Engine\Source\ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="FieldExample.cpp">
+    <ClCompile Include="Engine\Demo\FieldExample.cpp">
       <Filter>test\FactoryObjectDemo\src</Filter>
     </ClCompile>
-    <ClCompile Include="DemoFieldObject.cpp">
+    <ClCompile Include="Engine\Demo\DemoFieldObject.cpp">
       <Filter>test\FactoryObjectDemo\src</Filter>
     </ClCompile>
-    <ClCompile Include="DemoGimmick.cpp">
+    <ClCompile Include="Engine\Demo\DemoGimmick.cpp">
       <Filter>test\FactoryObjectDemo\src</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject.cpp">
+    <ClCompile Include="Engine\Game\GameObject.cpp">
       <Filter>Engine\Source\ソース ファイル\Game</Filter>
     </ClCompile>
-    <ClCompile Include="BaseFactory.cpp">
+    <ClCompile Include="Engine\Utility\BaseFactory.cpp">
       <Filter>Engine\Source\ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="DemoFieldObjectFactory.cpp">
+    <ClCompile Include="Engine\Demo\DemoFieldObjectFactory.cpp">
       <Filter>test\FactoryObjectDemo\src</Filter>
     </ClCompile>
-    <ClCompile Include="DemoPlayer.cpp">
+    <ClCompile Include="Engine\Demo\DemoPlayer.cpp">
       <Filter>test\FactoryObjectDemo\src</Filter>
     </ClCompile>
-    <ClCompile Include="AssetsPanel.cpp">
+    <ClCompile Include="Engine\Editor\Panel\AssetsPanel.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor\Panel</Filter>
     </ClCompile>
-    <ClCompile Include="HierarchyPanel.cpp">
+    <ClCompile Include="Engine\Editor\Panel\HierarchyPanel.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor\Panel</Filter>
     </ClCompile>
-    <ClCompile Include="FileDropManager.cpp">
+    <ClCompile Include="Engine\Utility\FileDropManager.cpp">
       <Filter>Engine\Source\ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="UIManager.cpp">
+    <ClCompile Include="Engine\UI\UIManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor\UI</Filter>
     </ClCompile>
     <ClCompile Include="externals\imgui\misc\cpp\imgui_stdlib.cpp">
@@ -322,20 +322,23 @@
     <ClCompile Include="externals\im-neo-sequencer\imgui_neo_sequencer.cpp">
       <Filter>Engine\Source\im-neo-sequencer</Filter>
     </ClCompile>
-    <ClCompile Include="UISequencer.cpp">
+    <ClCompile Include="Engine\UI\UISequencer.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor\UI</Filter>
     </ClCompile>
-    <ClCompile Include="EditorGrid.cpp">
+    <ClCompile Include="Engine\Editor\EditorGrid.cpp">
       <Filter>Engine\Source\ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="UIData.cpp">
+    <ClCompile Include="Engine\UI\UIData.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor\UI</Filter>
     </ClCompile>
-    <ClCompile Include="SequencerData.cpp">
+    <ClCompile Include="Engine\Editor\Panel\SequencerData.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor\UI</Filter>
     </ClCompile>
-    <ClCompile Include="HierarchyNode.cpp">
+    <ClCompile Include="Engine\Editor\Panel\HierarchyNode.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor\Panel</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Utility\Easing.cpp">
+      <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -365,55 +368,55 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WinApp.h">
+    <ClInclude Include="Engine\Core\WinApp.h">
       <Filter>Engine\Source\ヘッダー ファイル\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXCommon.h">
+    <ClInclude Include="Engine\Core\DirectXCommon.h">
       <Filter>Engine\Source\ヘッダー ファイル\base</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXUtility.h">
+    <ClInclude Include="Engine\Core\DirectXUtility.h">
       <Filter>Engine\Source\ヘッダー ファイル\base</Filter>
     </ClInclude>
-    <ClInclude Include="DxcCompiler.h">
+    <ClInclude Include="Engine\Core\DxcCompiler.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="PipelineStateManager.h">
+    <ClInclude Include="Engine\Core\PipelineStateManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Matrix.h">
+    <ClInclude Include="Engine\Utility\Matrix.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="TextureLoader.h">
+    <ClInclude Include="Engine\Texture\TextureLoader.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="ImGuiManager.h">
+    <ClInclude Include="Engine\ExtarnalManager\ImGuiManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\base</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
+    <ClInclude Include="Engine\Scene\Camera.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
+    <ClInclude Include="Engine\Model\Model.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader.h">
+    <ClInclude Include="Engine\Model\ModelLoader.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Sprite.h">
+    <ClInclude Include="Engine\Texture\Sprite.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
+    <ClInclude Include="Engine\Texture\Texture.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="Triangle.h">
+    <ClInclude Include="Engine\Texture\Triangle.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="Animation.h">
+    <ClInclude Include="Engine\Model\Animation.h">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Text.h">
+    <ClInclude Include="Engine\Texture\Text.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="PonikoEngine.h">
+    <ClInclude Include="Engine\Core\PonikoEngine.h">
       <Filter>Engine\Adapter</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -428,100 +431,100 @@
     <ClInclude Include="externals\imgui\imstb_truetype.h">
       <Filter>Engine\Source\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Bone.h">
+    <ClInclude Include="Engine\Animation\Bone.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Input.h">
+    <ClInclude Include="Engine\Utility\Input.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Vector.h">
+    <ClInclude Include="Engine\Utility\Vector.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="WorldTransform.h">
+    <ClInclude Include="Engine\Utility\WorldTransform.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="ScreenTransform.h">
+    <ClInclude Include="Engine\Utility\ScreenTransform.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="Transform.h">
+    <ClInclude Include="Engine\Utility\Transform.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="EffekseerManager.h">
+    <ClInclude Include="Engine\ExtarnalManager\EffekseerManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="SoundManager.h">
+    <ClInclude Include="Engine\Game\SoundManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Fade.h">
+    <ClInclude Include="Engine\Scene\Fade.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Game.h">
+    <ClInclude Include="Engine\Game\Game.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
+    <ClInclude Include="Engine\Scene\Scene.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
-    <ClInclude Include="TestScene.h">
+    <ClInclude Include="Engine\Scene\TestScene.h">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="DirectionalLight.h">
+    <ClInclude Include="Engine\Lighting\DirectionalLight.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
     </ClInclude>
-    <ClInclude Include="SpotLight.h">
+    <ClInclude Include="Engine\Lighting\SpotLight.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
     </ClInclude>
-    <ClInclude Include="PointLight.h">
+    <ClInclude Include="Engine\Lighting\PointLight.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
     </ClInclude>
-    <ClInclude Include="LightingManager.h">
+    <ClInclude Include="Engine\Lighting\LightingManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics\Light</Filter>
     </ClInclude>
-    <ClInclude Include="SceneComponentLoader.h">
+    <ClInclude Include="Engine\Scene\SceneComponentLoader.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Particle.h">
+    <ClInclude Include="Engine\Vfx\Particle.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="ParticleEmit.h">
+    <ClInclude Include="Engine\Vfx\ParticleEmit.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="EasingVec.h">
+    <ClInclude Include="Engine\Utility\EasingVec.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="timer.h">
+    <ClInclude Include="Engine\Utility\timer.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Effect.h">
+    <ClInclude Include="Engine\Vfx\Effect.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game\Effect</Filter>
     </ClInclude>
-    <ClInclude Include="EffectManager.h">
+    <ClInclude Include="Engine\Vfx\EffectManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game\Effect</Filter>
     </ClInclude>
-    <ClInclude Include="ExampleEffect.h">
+    <ClInclude Include="Engine\Vfx\ExampleEffect.h">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="ShadowManager.h">
+    <ClInclude Include="Engine\Scene\ShadowManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Coordinate.h">
+    <ClInclude Include="Engine\Shapes\Coordinate.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="DebugLine.h">
+    <ClInclude Include="Engine\Debug\DebugLine.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="PostEffectManager.h">
+    <ClInclude Include="Engine\Vfx\PostEffectManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="AABB.h">
+    <ClInclude Include="Engine\Shapes\AABB.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="Sphere.h">
+    <ClInclude Include="Engine\Shapes\Sphere.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="LineSegment.h">
+    <ClInclude Include="Engine\Shapes\LineSegment.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="Collision.h">
+    <ClInclude Include="Engine\Shapes\Collision.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
     <ClInclude Include="externals\imGuizmo\GraphEditor.h">
@@ -545,55 +548,55 @@
     <ClInclude Include="externals\imgui\imgui_impl_win32.h">
       <Filter>Engine\Source\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Editor.h">
+    <ClInclude Include="Engine\Editor\Editor.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="FileDropManager.h">
+    <ClInclude Include="Engine\Utility\FileDropManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="EffectSequencer.h">
+    <ClInclude Include="Engine\Vfx\EffectSequencer.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="RenderTarget.h">
+    <ClInclude Include="Engine\Core\RenderTarget.h">
       <Filter>Engine\Source\ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="SceneViewport.h">
+    <ClInclude Include="Engine\Scene\SceneViewport.h">
       <Filter>Engine\Source\ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Plane.h">
+    <ClInclude Include="Engine\Shapes\Plane.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="FieldExample.h">
+    <ClInclude Include="Engine\Demo\FieldExample.h">
       <Filter>test\FactoryObjectDemo\.h</Filter>
     </ClInclude>
-    <ClInclude Include="DemoGimmick.h">
+    <ClInclude Include="Engine\Demo\DemoGimmick.h">
       <Filter>test\FactoryObjectDemo\.h</Filter>
     </ClInclude>
-    <ClInclude Include="DemoFieldObject.h">
+    <ClInclude Include="Engine\Demo\DemoFieldObject.h">
       <Filter>test\FactoryObjectDemo\.h</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="BaseFactory.h">
+    <ClInclude Include="Engine\Utility\BaseFactory.h">
       <Filter>Engine\Source\ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="DemoFieldObjectFactory.h">
+    <ClInclude Include="Engine\Demo\DemoFieldObjectFactory.h">
       <Filter>test\FactoryObjectDemo\.h</Filter>
     </ClInclude>
-    <ClInclude Include="GameObject.h">
+    <ClInclude Include="Engine\Game\GameObject.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
-    <ClInclude Include="DemoPlayer.h">
+    <ClInclude Include="Engine\Demo\DemoPlayer.h">
       <Filter>test\FactoryObjectDemo\.h</Filter>
     </ClInclude>
-    <ClInclude Include="AssetsPanel.h">
+    <ClInclude Include="Engine\Editor\Panel\AssetsPanel.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor\Panel</Filter>
     </ClInclude>
-    <ClInclude Include="HierarchyPanel.h">
+    <ClInclude Include="Engine\Editor\Panel\HierarchyPanel.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor\Panel</Filter>
     </ClInclude>
-    <ClInclude Include="UIManager.h">
+    <ClInclude Include="Engine\UI\UIManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor\UI</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\misc\cpp\imgui_stdlib.h">
@@ -605,25 +608,25 @@
     <ClInclude Include="externals\im-neo-sequencer\imgui_neo_sequencer.h">
       <Filter>Engine\Source\im-neo-sequencer</Filter>
     </ClInclude>
-    <ClInclude Include="UISequencer.h">
+    <ClInclude Include="Engine\Vfx\UISequencer.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="Easing.h">
+    <ClInclude Include="Engine\Utility\Easing.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="EditorGrid.h">
+    <ClInclude Include="Engine\Editor\EditorGrid.h">
       <Filter>Engine\Source\ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="SceneFactory.h">
+    <ClInclude Include="Engine\Scene\SceneFactory.h">
       <Filter>Engine\Source\ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="UIData.h">
+    <ClInclude Include="Engine\UI\UIData.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="SequencerData.h">
+    <ClInclude Include="Engine\Editor\Panel\SequencerData.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="HierarchyNode.h">
+    <ClInclude Include="Engine\Editor\Panel\HierarchyNode.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor\Panel</Filter>
     </ClInclude>
   </ItemGroup>

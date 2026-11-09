@@ -73,7 +73,7 @@ public:
 
 
 	/*
-		実装するかは選べる。　【 基底で書いた関数は必ず子で呼ばれたとき実行される 】
+		実装するかは選べる
 	*/
 	virtual void ChangeHierarchyLayer(bool b); // レイヤーを切り替えた際の処理
 

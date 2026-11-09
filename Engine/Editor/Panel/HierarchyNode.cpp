@@ -65,6 +65,8 @@ void ModelNode::ImGuiView()
 
 void ModelNode::ChangeHierarchyLayer(bool b)
 {
+    //
+    HierarchyNode::ChangeHierarchyLayer(b);
 
     // もしゲームオブジェクトと連携してたらそっちも
     if (gameObject_) {
@@ -86,6 +88,7 @@ std::unique_ptr<HierarchyNode> ModelNode::Clone() const
     newNode->isView_ = this->isView_;
 
     // 3D特有データの複製
+    newNode->modelId_ = this->modelId_;
     newNode->modelResource_ = this->modelResource_;
     newNode->aabb_ = this->aabb_;
 

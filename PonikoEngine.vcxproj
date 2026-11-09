@@ -91,7 +91,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\Debug;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir)externals;$(ProjectDir);$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
@@ -131,7 +131,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Debug\resources
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\Debug;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir)externals;$(ProjectDir);$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -175,7 +175,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Release\resourc
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\Debug;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir)externals;$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -213,7 +213,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Debug\resources
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\Debug;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir);$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <SupportJustMyCode>false</SupportJustMyCode>
@@ -245,36 +245,37 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AABB.cpp" />
-    <ClCompile Include="AssetsPanel.cpp" />
-    <ClCompile Include="BaseFactory.cpp" />
-    <ClCompile Include="Bone.cpp">
+    <ClCompile Include="Engine\Shapes\AABB.cpp" />
+    <ClCompile Include="Engine\Editor\Panel\AssetsPanel.cpp" />
+    <ClCompile Include="Engine\Utility\BaseFactory.cpp" />
+    <ClCompile Include="Engine\Animation\Bone.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Collision.cpp" />
-    <ClCompile Include="Coordinate.cpp" />
-    <ClCompile Include="DebugLine.cpp" />
-    <ClCompile Include="DemoFieldObject.cpp" />
-    <ClCompile Include="DemoGimmick.cpp" />
-    <ClCompile Include="DemoFieldObjectFactory.cpp" />
-    <ClCompile Include="DemoPlayer.cpp" />
-    <ClCompile Include="DirectionalLight.cpp">
+    <ClCompile Include="Engine\Scene\Camera.cpp" />
+    <ClCompile Include="Engine\Shapes\Collision.cpp" />
+    <ClCompile Include="Engine\Shapes\Coordinate.cpp" />
+    <ClCompile Include="Engine\Debug\DebugLine.cpp" />
+    <ClCompile Include="Engine\Demo\DemoFieldObject.cpp" />
+    <ClCompile Include="Engine\Demo\DemoGimmick.cpp" />
+    <ClCompile Include="Engine\Demo\DemoFieldObjectFactory.cpp" />
+    <ClCompile Include="Engine\Demo\DemoPlayer.cpp" />
+    <ClCompile Include="Engine\Lighting\DirectionalLight.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="DirectXCommon.cpp" />
-    <ClCompile Include="DirectXUtility.cpp" />
-    <ClCompile Include="DxcCompiler.cpp" />
-    <ClCompile Include="EasingVec.cpp" />
-    <ClCompile Include="Editor.cpp" />
-    <ClCompile Include="EditorGrid.cpp" />
-    <ClCompile Include="EffeckseerManager.cpp" />
-    <ClCompile Include="Effect.cpp" />
-    <ClCompile Include="EffectManager.cpp" />
-    <ClCompile Include="EffectSequencer.cpp" />
-    <ClCompile Include="ExampleEffect.cpp" />
+    <ClCompile Include="Engine\Core\DirectXCommon.cpp" />
+    <ClCompile Include="Engine\Core\DirectXUtility.cpp" />
+    <ClCompile Include="Engine\Core\DxcCompiler.cpp" />
+    <ClCompile Include="Engine\Utility\Easing.cpp" />
+    <ClCompile Include="Engine\Utility\EasingVec.cpp" />
+    <ClCompile Include="Engine\Editor\Editor.cpp" />
+    <ClCompile Include="Engine\Editor\EditorGrid.cpp" />
+    <ClCompile Include="Engine\ExtarnalManager\EffeckseerManager.cpp" />
+    <ClCompile Include="Engine\Vfx\Effect.cpp" />
+    <ClCompile Include="Engine\Vfx\EffectManager.cpp" />
+    <ClCompile Include="Engine\Vfx\EffectSequencer.cpp" />
+    <ClCompile Include="Engine\Vfx\ExampleEffect.cpp" />
     <ClCompile Include="externals\im-neo-sequencer\imgui_neo_internal.cpp" />
     <ClCompile Include="externals\im-neo-sequencer\imgui_neo_sequencer.cpp" />
     <ClCompile Include="externals\imGuizmo\GraphEditor.cpp" />
@@ -290,16 +291,16 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="externals\imgui\misc\cpp\imgui_stdlib.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Fade.cpp" />
-    <ClCompile Include="FieldExample.cpp" />
-    <ClCompile Include="FileDropManager.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameObject.cpp" />
-    <ClCompile Include="HierarchyNode.cpp" />
-    <ClCompile Include="HierarchyPanel.cpp" />
-    <ClCompile Include="Input.cpp" />
-    <ClCompile Include="ImGuiManager.cpp" />
-    <ClCompile Include="LightingManager.cpp">
+    <ClCompile Include="Engine\Scene\Fade.cpp" />
+    <ClCompile Include="Engine\Demo\FieldExample.cpp" />
+    <ClCompile Include="Engine\Utility\FileDropManager.cpp" />
+    <ClCompile Include="Engine\Game\Game.cpp" />
+    <ClCompile Include="Engine\Game\GameObject.cpp" />
+    <ClCompile Include="Engine\Editor\Panel\HierarchyNode.cpp" />
+    <ClCompile Include="Engine\Editor\Panel\HierarchyPanel.cpp" />
+    <ClCompile Include="Engine\Utility\Input.cpp" />
+    <ClCompile Include="Engine\ExtarnalManager\ImGuiManager.cpp" />
+    <ClCompile Include="Engine\Lighting\LightingManager.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
     </ClCompile>
@@ -307,44 +308,44 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Matrix.cpp" />
-    <ClCompile Include="Model.cpp" />
-    <ClCompile Include="ModelLoader.cpp" />
-    <ClCompile Include="Particle.cpp" />
-    <ClCompile Include="PipelineStateManager.cpp" />
-    <ClCompile Include="PointLight.cpp">
+    <ClCompile Include="Engine\Utility\Matrix.cpp" />
+    <ClCompile Include="Engine\Model\Model.cpp" />
+    <ClCompile Include="Engine\Model\ModelLoader.cpp" />
+    <ClCompile Include="Engine\Vfx\Particle.cpp" />
+    <ClCompile Include="Engine\Core\PipelineStateManager.cpp" />
+    <ClCompile Include="Engine\Lighting\PointLight.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="PonikoEngine.cpp" />
-    <ClCompile Include="PostEffectManager.cpp" />
-    <ClCompile Include="RenderTarget.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SceneComponentLoader.cpp" />
-    <ClCompile Include="SceneViewport.cpp" />
-    <ClCompile Include="SequencerData.cpp" />
-    <ClCompile Include="ShadowManager.cpp" />
-    <ClCompile Include="SoundManager.cpp" />
-    <ClCompile Include="SpotLight.cpp">
+    <ClCompile Include="Engine\Core\PonikoEngine.cpp" />
+    <ClCompile Include="Engine\Vfx\PostEffectManager.cpp" />
+    <ClCompile Include="Engine\Core\RenderTarget.cpp" />
+    <ClCompile Include="Engine\Scene\Scene.cpp" />
+    <ClCompile Include="Engine\Scene\SceneComponentLoader.cpp" />
+    <ClCompile Include="Engine\Scene\SceneViewport.cpp" />
+    <ClCompile Include="Engine\Editor\Panel\SequencerData.cpp" />
+    <ClCompile Include="Engine\Scene\ShadowManager.cpp" />
+    <ClCompile Include="Engine\Game\SoundManager.cpp" />
+    <ClCompile Include="Engine\Lighting\SpotLight.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Sprite.cpp" />
-    <ClCompile Include="TestScene.cpp" />
-    <ClCompile Include="Text.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="TextureLoader.cpp" />
-    <ClCompile Include="timer.cpp" />
-    <ClCompile Include="Triangle.cpp">
+    <ClCompile Include="Engine\Texture\Sprite.cpp" />
+    <ClCompile Include="Engine\Scene\TestScene.cpp" />
+    <ClCompile Include="Engine\Texture\Text.cpp" />
+    <ClCompile Include="Engine\Texture\Texture.cpp" />
+    <ClCompile Include="Engine\Texture\TextureLoader.cpp" />
+    <ClCompile Include="Engine\Utility\timer.cpp" />
+    <ClCompile Include="Engine\Texture\Triangle.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="UIData.cpp" />
-    <ClCompile Include="UIManager.cpp" />
-    <ClCompile Include="UISequencer.cpp" />
-    <ClCompile Include="WinApp.cpp" />
+    <ClCompile Include="Engine\UI\UIData.cpp" />
+    <ClCompile Include="Engine\UI\UIManager.cpp" />
+    <ClCompile Include="Engine\UI\UISequencer.cpp" />
+    <ClCompile Include="Engine\Core\WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -357,32 +358,32 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <None Include="resources\Engine\Shader\Sprite.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AABB.h" />
-    <ClInclude Include="Animation.h" />
-    <ClInclude Include="AssetsPanel.h" />
-    <ClInclude Include="BaseFactory.h" />
-    <ClInclude Include="Bone.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="Collision.h" />
-    <ClInclude Include="Coordinate.h" />
-    <ClInclude Include="DebugLine.h" />
-    <ClInclude Include="DemoFieldObject.h" />
-    <ClInclude Include="DemoGimmick.h" />
-    <ClInclude Include="DemoFieldObjectFactory.h" />
-    <ClInclude Include="DemoPlayer.h" />
-    <ClInclude Include="DirectionalLight.h" />
-    <ClInclude Include="DirectXCommon.h" />
-    <ClInclude Include="DirectXUtility.h" />
-    <ClInclude Include="DxcCompiler.h" />
-    <ClInclude Include="Easing.h" />
-    <ClInclude Include="EasingVec.h" />
-    <ClInclude Include="Editor.h" />
-    <ClInclude Include="EditorGrid.h" />
-    <ClInclude Include="Effect.h" />
-    <ClInclude Include="EffectManager.h" />
-    <ClInclude Include="EffectSequencer.h" />
-    <ClInclude Include="EffekseerManager.h" />
-    <ClInclude Include="ExampleEffect.h" />
+    <ClInclude Include="Engine\Shapes\AABB.h" />
+    <ClInclude Include="Engine\Model\Animation.h" />
+    <ClInclude Include="Engine\Editor\Panel\AssetsPanel.h" />
+    <ClInclude Include="Engine\Utility\BaseFactory.h" />
+    <ClInclude Include="Engine\Animation\Bone.h" />
+    <ClInclude Include="Engine\Scene\Camera.h" />
+    <ClInclude Include="Engine\Shapes\Collision.h" />
+    <ClInclude Include="Engine\Shapes\Coordinate.h" />
+    <ClInclude Include="Engine\Debug\DebugLine.h" />
+    <ClInclude Include="Engine\Demo\DemoFieldObject.h" />
+    <ClInclude Include="Engine\Demo\DemoGimmick.h" />
+    <ClInclude Include="Engine\Demo\DemoFieldObjectFactory.h" />
+    <ClInclude Include="Engine\Demo\DemoPlayer.h" />
+    <ClInclude Include="Engine\Lighting\DirectionalLight.h" />
+    <ClInclude Include="Engine\Core\DirectXCommon.h" />
+    <ClInclude Include="Engine\Core\DirectXUtility.h" />
+    <ClInclude Include="Engine\Core\DxcCompiler.h" />
+    <ClInclude Include="Engine\Utility\Easing.h" />
+    <ClInclude Include="Engine\Utility\EasingVec.h" />
+    <ClInclude Include="Engine\Editor\Editor.h" />
+    <ClInclude Include="Engine\Editor\EditorGrid.h" />
+    <ClInclude Include="Engine\Vfx\Effect.h" />
+    <ClInclude Include="Engine\Vfx\EffectManager.h" />
+    <ClInclude Include="Engine\Vfx\EffectSequencer.h" />
+    <ClInclude Include="Engine\ExtarnalManager\EffekseerManager.h" />
+    <ClInclude Include="Engine\Vfx\ExampleEffect.h" />
     <ClInclude Include="externals\im-neo-sequencer\imgui_neo_internal.h" />
     <ClInclude Include="externals\im-neo-sequencer\imgui_neo_sequencer.h" />
     <ClInclude Include="externals\imGuizmo\GraphEditor.h" />
@@ -399,53 +400,53 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="externals\imgui\misc\cpp\imgui_stdlib.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="Fade.h" />
-    <ClInclude Include="FieldExample.h" />
-    <ClInclude Include="FileDropManager.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameObject.h" />
-    <ClInclude Include="HierarchyNode.h" />
-    <ClInclude Include="HierarchyPanel.h" />
-    <ClInclude Include="Input.h" />
-    <ClInclude Include="ImGuiManager.h" />
-    <ClInclude Include="LightingManager.h" />
-    <ClInclude Include="LineSegment.h" />
-    <ClInclude Include="Matrix.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="ModelLoader.h" />
-    <ClInclude Include="Particle.h" />
-    <ClInclude Include="ParticleEmit.h" />
-    <ClInclude Include="PipelineStateManager.h" />
-    <ClInclude Include="Plane.h" />
-    <ClInclude Include="PointLight.h" />
-    <ClInclude Include="PonikoEngine.h" />
-    <ClInclude Include="PostEffectManager.h" />
-    <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="Engine\Scene\Fade.h" />
+    <ClInclude Include="Engine\Demo\FieldExample.h" />
+    <ClInclude Include="Engine\Utility\FileDropManager.h" />
+    <ClInclude Include="Engine\Game\Game.h" />
+    <ClInclude Include="Engine\Game\GameObject.h" />
+    <ClInclude Include="Engine\Editor\Panel\HierarchyNode.h" />
+    <ClInclude Include="Engine\Editor\Panel\HierarchyPanel.h" />
+    <ClInclude Include="Engine\Utility\Input.h" />
+    <ClInclude Include="Engine\ExtarnalManager\ImGuiManager.h" />
+    <ClInclude Include="Engine\Lighting\LightingManager.h" />
+    <ClInclude Include="Engine\Shapes\LineSegment.h" />
+    <ClInclude Include="Engine\Utility\Matrix.h" />
+    <ClInclude Include="Engine\Model\Model.h" />
+    <ClInclude Include="Engine\Model\ModelLoader.h" />
+    <ClInclude Include="Engine\Vfx\Particle.h" />
+    <ClInclude Include="Engine\Vfx\ParticleEmit.h" />
+    <ClInclude Include="Engine\Core\PipelineStateManager.h" />
+    <ClInclude Include="Engine\Shapes\Plane.h" />
+    <ClInclude Include="Engine\Lighting\PointLight.h" />
+    <ClInclude Include="Engine\Core\PonikoEngine.h" />
+    <ClInclude Include="Engine\Vfx\PostEffectManager.h" />
+    <ClInclude Include="Engine\Core\RenderTarget.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="SceneComponentLoader.h" />
-    <ClInclude Include="SceneFactory.h" />
-    <ClInclude Include="SceneViewport.h" />
-    <ClInclude Include="ScreenTransform.h" />
-    <ClInclude Include="SequencerData.h" />
-    <ClInclude Include="ShadowManager.h" />
-    <ClInclude Include="SoundManager.h" />
-    <ClInclude Include="Sphere.h" />
-    <ClInclude Include="SpotLight.h" />
-    <ClInclude Include="Sprite.h" />
-    <ClInclude Include="TestScene.h" />
-    <ClInclude Include="Text.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="TextureLoader.h" />
-    <ClInclude Include="timer.h" />
-    <ClInclude Include="Transform.h" />
-    <ClInclude Include="Triangle.h" />
-    <ClInclude Include="UIData.h" />
-    <ClInclude Include="UIManager.h" />
-    <ClInclude Include="UISequencer.h" />
-    <ClInclude Include="Vector.h" />
-    <ClInclude Include="WinApp.h" />
-    <ClInclude Include="WorldTransform.h" />
+    <ClInclude Include="Engine\Scene\Scene.h" />
+    <ClInclude Include="Engine\Scene\SceneComponentLoader.h" />
+    <ClInclude Include="Engine\Scene\SceneFactory.h" />
+    <ClInclude Include="Engine\Scene\SceneViewport.h" />
+    <ClInclude Include="Engine\Utility\ScreenTransform.h" />
+    <ClInclude Include="Engine\Editor\Panel\SequencerData.h" />
+    <ClInclude Include="Engine\Scene\ShadowManager.h" />
+    <ClInclude Include="Engine\Game\SoundManager.h" />
+    <ClInclude Include="Engine\Shapes\Sphere.h" />
+    <ClInclude Include="Engine\Lighting\SpotLight.h" />
+    <ClInclude Include="Engine\Texture\Sprite.h" />
+    <ClInclude Include="Engine\Scene\TestScene.h" />
+    <ClInclude Include="Engine\Texture\Text.h" />
+    <ClInclude Include="Engine\Texture\Texture.h" />
+    <ClInclude Include="Engine\Texture\TextureLoader.h" />
+    <ClInclude Include="Engine\Utility\timer.h" />
+    <ClInclude Include="Engine\Utility\Transform.h" />
+    <ClInclude Include="Engine\Texture\Triangle.h" />
+    <ClInclude Include="Engine\UI\UIData.h" />
+    <ClInclude Include="Engine\UI\UIManager.h" />
+    <ClInclude Include="Engine\Vfx\UISequencer.h" />
+    <ClInclude Include="Engine\Utility\Vector.h" />
+    <ClInclude Include="Engine\Core\WinApp.h" />
+    <ClInclude Include="Engine\Utility\WorldTransform.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

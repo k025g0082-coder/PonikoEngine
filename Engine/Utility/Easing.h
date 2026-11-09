@@ -16,7 +16,9 @@ enum class EasingType
     OutBounce,
     BouncyMountain,
     SmoothTrapezoid,
-    Jump
+    Jump,
+
+    count
 };
 
 class Easing
@@ -120,4 +122,11 @@ public:
 
         return time;
     }
+
+    // タグ一覧ゲット
+    static const char** GetEasingTag() { return easingTags_; }
+
+    //　..cppに。
+    static const char* easingTags_[(int)EasingType::count];
+
 };
