@@ -95,7 +95,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\Debug;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir)externals;$(ProjectDir);$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\DebugLine;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir)externals;$(ProjectDir);$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
@@ -135,7 +135,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Debug\resources
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\Debug;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir)externals;$(ProjectDir);$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\DebugLine;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir)externals;$(ProjectDir);$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -179,7 +179,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Release\resourc
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\Debug;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir)externals;$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)externals\;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\src;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\DebugLine;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir)externals;$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -217,7 +217,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "$(ProjectDir)exe\Debug\resources
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\Debug;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir);$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals;$(ProjectDir)externals\DirectXTex;$(ProjectDir)externals\freeType\include;$(ProjectDir)externals\effekseer\include;$(ProjectDir)externals\assimp;$(ProjectDir)externals\imgui;$(ProjectDir)externals\imGuizmo;%(AdditionalIncludeDirectories);$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Core;$(ProjectDir)Engine\Demo;$(ProjectDir)Engine\DebugLine;$(ProjectDir)Engine\Editor;$(ProjectDir)Engine\ExtarnalManager;$(ProjectDir)Engine\Game;$(ProjectDir)Engine\Lighting;$(ProjectDir)Engine\Model;$(ProjectDir)Engine\Scene;$(ProjectDir)Engine\Shapes;$(ProjectDir)Engine\Texture;$(ProjectDir)Engine\UI;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Vfx;$(ProjectDir);$(ProjectDir)Engine\Editor\Panel</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <SupportJustMyCode>false</SupportJustMyCode>
@@ -259,7 +259,12 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Engine\Scene\Camera.cpp" />
     <ClCompile Include="Engine\Shapes\Collision.cpp" />
     <ClCompile Include="Engine\Shapes\Coordinate.cpp" />
-    <ClCompile Include="Engine\Debug\DebugLine.cpp" />
+    <ClCompile Include="Engine\DebugLine\DebugLine.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Engine\Demo\DemoFieldObject.cpp" />
     <ClCompile Include="Engine\Demo\DemoGimmick.cpp" />
     <ClCompile Include="Engine\Demo\DemoFieldObjectFactory.cpp" />
@@ -370,7 +375,12 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Engine\Scene\Camera.h" />
     <ClInclude Include="Engine\Shapes\Collision.h" />
     <ClInclude Include="Engine\Shapes\Coordinate.h" />
-    <ClInclude Include="Engine\Debug\DebugLine.h" />
+    <ClInclude Include="Engine\DebugLine\DebugLine.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Engine\Demo\DemoFieldObject.h" />
     <ClInclude Include="Engine\Demo\DemoGimmick.h" />
     <ClInclude Include="Engine\Demo\DemoFieldObjectFactory.h" />
