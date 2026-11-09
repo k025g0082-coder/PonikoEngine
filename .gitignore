@@ -362,4 +362,11 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+
+# obj類。いらない
 generated/
+
+# exe類。除外
+project/exe/
+project/imgui.ini
+
