@@ -37,6 +37,10 @@ struct SceneUIData {
 	// シーケンサー
 	UISequencer sequencer_;
 
+
+	/* エレメントに名前が無かった場合にグローバルに加算されるカウンター*/
+	int nameRegisterCount_ = 0;
+
 };
 
 
@@ -108,8 +112,14 @@ public:
 		return selectedElemet_;
 	}
 
-	//// タイムライン表示非表示
-	//void SetViewTimeline(bool b) { isShowTimeline_ = b; }
+
+	/* 
+		現在のシーンのUIデータ一覧リストのアドレスのを返す
+	*/
+	const std::vector<UIData>* const GetCurrentSceneUIData() { 
+		return &currentSceneUIData_->elementDatas_;
+	}
+
 
 private:
 
@@ -153,7 +163,8 @@ private:
 
 	// 削除予定エレメントのindex
 	int deleteElementIndex_ = -1;
-	
+
+
 	//
 	Vector2 mousePos;
 	Vector2 oldMousePos;

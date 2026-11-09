@@ -82,14 +82,15 @@ void UIManager::LoadElementData(std::string sceneName)
 		loder->LoadGroup("UI");
 	}
 
-	int count = 0;
 	for (UIData& data : currentSceneUIData_->elementDatas_) {
 		for (UIElement& e : data.elements_) {
 
 			// 名前がない場合付ける
 			if (e.name_.empty()) {
-				e.name_ = "element_" + std::to_string(count);
-				count++;//
+
+				e.name_ = "element_" + std::to_string( currentSceneUIData_->nameRegisterCount_ );
+
+				currentSceneUIData_->nameRegisterCount_++;//
 			}
 
 			/*
@@ -626,6 +627,12 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 	/* emplace_back で末尾に直接要素を作成して参照を受け取る */
 	UIElement& element = currentSceneUIData_->elementDatas_.at(index).elements_.emplace_back();
 
+
+	// 名前はデフォルトとする
+	element.name_ = "element_" + std::to_string(currentSceneUIData_->nameRegisterCount_);
+
+	element.groupName_ = "Main";
+
 	// 
 	element.pathID_ = pathId;
 
@@ -646,6 +653,8 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 	currentSelectAnimationTag = "NewAnime";
 	element.animationDatas_.currentTag_ = "NewAnime"; //
 
+	/* 選択中にしとく */
+	selectedElemet_ = &element;
 }
 
 

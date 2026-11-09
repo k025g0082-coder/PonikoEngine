@@ -110,7 +110,10 @@ public:
 	void ViewPanel(bool& show);
 
 
-	// 選択中のヒエラルキセット  nullが使いたいだけ
+	/*
+		選択中のヒエラルキー
+		未選択はopt::null
+	*/
 	void SetSelectedHierarchyModelIndex(std::optional<HierarchyNode*> modelNode) {
 
 		if (modelNode.has_value()) {
@@ -120,6 +123,7 @@ public:
 			selectedHierarchyNode_ = std::nullopt;
 		}
 	}
+
 
 	// 選択中のヒエラルキ
 	HierarchyNode* GetSelectedHierarchy() {
@@ -219,11 +223,11 @@ public:
 		std::vector<HierarchyNode*>> hierarchyToLayer_;
 
 
-	// ヒエラルキー - 追加. レイヤー名とヒエラルキ
+	// 追加. レイヤー名とヒエラルキ
 	void AddHierarchy(std::string layerName, std::unique_ptr<HierarchyNode> h);
 
 
-	// ヒエラルキー - モデル削除
+	// 削除. 該当のヒエラルキー
 	bool DeleteHierarchyNode(HierarchyNode* target);
 
 	// レイヤーとそれに紐づいたヒエラルキの削除 - (モデルしか対応してない)
@@ -289,6 +293,14 @@ private:
 
 	// レイヤー追加時のウインドウ
 	void AddLayerPopupWindow();
+
+
+	// ヒエラルキータイプが モデルの場合のView
+	void ModelTypeOpenView(HierarchyLayer& h);
+
+	// ヒエラルキータイプが キャンバスの場合のView
+	void CanvasTypeOpenView(HierarchyLayer& h);
+
 
 	// ロード時にクリア
 	void HierarchyClear();

@@ -91,17 +91,20 @@ void HierarchyPanel::ViewPanel(bool& show)
 		int layerCount = 0;
 
 
-
 		/* ヒエラルキーレイヤーによって分ける */
 		for (int layerCount = 0; layerCount < hierarchyLayers_.size(); layerCount++) {
 
 			auto& layerInfo = hierarchyLayers_.at(layerCount);
+
+
+			//* レイヤー名
 			const std::string& key = layerInfo.layerName_;
+
 
 			// マップ内に存在しない場合はスキップ
 			if (!hierarchyToLayer_.contains(key)) continue;
 
-			// マップから該当レイヤーのモデルリストを取得
+			// マップから該当レイヤーのヒエラルキリストを取得
 			auto& value = hierarchyToLayer_[key];
 
 
@@ -111,7 +114,9 @@ void HierarchyPanel::ViewPanel(bool& show)
 			}
 
 
+			//* レイヤータイプ
 			int layerType = (int)hierarchyLayers_.at(layerCount).layerType_;
+
 
 			std::string icon = kLayerTypeIcons[layerType];
 			std::string layerName = key.c_str();
@@ -122,37 +127,9 @@ void HierarchyPanel::ViewPanel(bool& show)
 			ImGui::AlignTextToFramePadding();
 
 
-			// レイヤー名
+			// レイヤー名表示
 			bool isOpen = ImGui::TreeNodeEx((icon + "  " + layerName).c_str(), ImGuiTreeNodeFlags_SpanLabelWidth);
 
-			//if (previousLayerIsOpen.contains(layerName)) {
-
-			//	// 以前開いていたか
-			//	bool& wasOpen = previousLayerIsOpen[layerName];
-
-			//	/* 開かれた瞬間 */
-			//	if (isOpen && !wasOpen) {
-
-			//		// キャンバスレイヤーだった場合
-			//		if (layerType == (int)HierarchyLayerType::kCanvasLayer) {
-			//			UIManager::GetInstance()->SetViewTimeline(true);// 表示
-			//		}
-
-			//	}
-
-			//	/* 開じた瞬間 */
-			//	if (!isOpen && wasOpen) {
-			//	
-			//		// キャンバスレイヤーだった場合
-			//		if (layerType == (int)HierarchyLayerType::kCanvasLayer) {
-			//			UIManager::GetInstance()->SetViewTimeline(false);// 非表示
-			//		}
-
-			//	}
-			//}
-
-			////
-			//previousLayerIsOpen[layerName] = isOpen;
 
 
 			ImGui::SetWindowFontScale(1.0f);//
@@ -247,64 +224,28 @@ void HierarchyPanel::ViewPanel(bool& show)
 			
 			if (isOpen){
 
-				/* ヒエラルキー小分け */
-				for (int i = 0; i < value.size(); i++) {
-					
-					auto& hierarchy = value.at(i);
+				if (layerInfo.layerType_ == HierarchyLayerType::kModelLayer) {
 
-					if (selectedHierarchyIndex_.has_value()) {
+					/*
 
-						// 選択中のは色変え
-						if (selectedHierarchyIndex_.value() == i)
-						{
+						モデルヒエラルキー一覧表示
 
-							ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
-							ImGui::BulletText(hierarchy->name_.c_str());
-							ImGui::PopStyleColor();
-						}
-						else {
-							ImGui::BulletText(hierarchy->name_.c_str());
-						}
-
-					}
-
-
-					ImGui::SameLine(ImGui::GetWindowWidth() - 200.0f);
-
-					ImGui::PushID(i);
-
-					// 削除ボタンを右寄りに配置（↑のおかげ
-					if (ImGui::Button("Del")) {
-
-						// また検索
-						auto it = std::find_if(
-							hierarchys_.begin(),
-							hierarchys_.end(),
-							[hierarchy](const auto& h) {
-								return h.get() == hierarchy;
-							}
-						);
-
-						if (it != hierarchys_.end()) {
-
-							// イテレータから番号を取得 (..神?)
-							int index = static_cast<int>(std::distance(hierarchys_.begin(), it));
-
-							//DeleteHierarchy(index);
-						}
-
-						ImGui::PopID();
-						break;
-					}
-					
-
-					ImGui::PopID();
+					*/
+					ModelTypeOpenView(layerInfo);
 
 				}
+				else if (layerInfo.layerType_ == HierarchyLayerType::kCanvasLayer) {
 
-				
+					/*
+
+						キャンバス内一覧表示
+
+					*/
+					CanvasTypeOpenView(layerInfo);
+				}
 
 				ImGui::TreePop();
+
 			}
 		}
 
@@ -660,6 +601,118 @@ void HierarchyPanel::AddLayerPopupWindow()
 	}
 
 }
+
+void HierarchyPanel::ModelTypeOpenView(HierarchyLayer& h)
+{
+#ifdef USE_IMGUI
+
+	// レイヤー名
+	const std::string& key = h.layerName_;
+
+
+	// マップから該当レイヤーのヒエラルキリストを取得
+	auto& value = hierarchyToLayer_[key];
+
+	for (int i = 0; i < value.size(); i++) {
+
+		auto& hierarchy = value.at(i);
+
+		if (selectedHierarchyIndex_.has_value()) {
+
+			// 選択中のは色変え
+			if (selectedHierarchyIndex_.value() == i)
+			{
+
+				ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 100, 50, 255));
+				ImGui::BulletText(hierarchy->name_.c_str());
+				ImGui::PopStyleColor();
+			}
+			else {
+				ImGui::BulletText(hierarchy->name_.c_str());
+			}
+
+		}
+
+
+		ImGui::SameLine(ImGui::GetWindowWidth() - 200.0f);
+
+		ImGui::PushID(i);
+
+		// 削除ボタンを右寄りに配置（↑のおかげ
+		if (ImGui::Button("Del")) {
+
+			// また検索
+			auto it = std::find_if(
+				hierarchys_.begin(),
+				hierarchys_.end(),
+				[hierarchy](const auto& h) {
+					return h.get() == hierarchy;
+				}
+			);
+
+			if (it != hierarchys_.end()) {
+
+				// イテレータから番号を取得 (..神?)
+				//int index = static_cast<int>(std::distance(hierarchys_.begin(), it));
+
+				//DeleteHierarchyNode(it);
+			}
+
+			ImGui::PopID();
+			break;
+		}
+
+
+		ImGui::PopID();
+
+	}
+
+
+
+
+#endif
+
+}
+
+void HierarchyPanel::CanvasTypeOpenView(HierarchyLayer& h)
+{
+#ifdef USE_IMGUI
+
+	//
+	if (UIManager::GetInstance()->GetCurrentSceneUIData() == nullptr) 
+		return;
+
+	/*
+		現在のシーン内のUIデータ一覧
+	*/
+	for (int i = 0; i < UIManager::GetInstance()->GetCurrentSceneUIData()->size(); i++)
+	{
+		
+		auto& canvasData = UIManager::GetInstance()->GetCurrentSceneUIData()->at(i);
+		
+
+		// もし現在のレイヤー名のUIであれば、そのキャンバス内のエレメントの数だけエレメントの詳細バー表示
+		if (canvasData.name_ == h.layerName_) {
+
+
+			//
+			for (int e = 0; e < canvasData.elements_.size(); e++)
+			{
+				auto& element = canvasData.elements_.at(e);
+
+				/*
+					名前表示
+				*/
+				ImGui::BulletText(element.name_.c_str());
+			}
+
+		}
+	}
+
+#endif
+
+}
+
 
 void HierarchyPanel::HierarchyClear()
 {
