@@ -8,17 +8,31 @@
                             "animations": [
                                 {
                                     "animationName": "NewAnime",
-                                    "durationFrames": 60.0
+                                    "durationFrames": 60.0,
+                                    "tracks": [
+                                        {
+                                            "items": [
+                                                {},
+                                                {},
+                                                {}
+                                            ]
+                                        },
+                                        {
+                                            "items": [
+                                                {}
+                                            ]
+                                        }
+                                    ]
                                 }
                             ],
-                            "currentTag": ""
+                            "currentTag": "NewAnime"
                         },
                         "groupName": "Main",
-                        "name": "",
+                        "name": "element_1",
                         "pathID": "resources/keichan.png",
                         "position": [
-                            251.72238159179688,
-                            377.5836181640625,
+                            753.48828125,
+                            362.79071044921875,
                             0.0
                         ],
                         "rotation": [

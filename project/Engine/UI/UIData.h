@@ -83,6 +83,10 @@ struct UIElement {
     Vector3 scale_;
     Vector3 rotation_;
 
+
+    // 親のアドレス
+    UIElement* parent_ = nullptr;
+
 };
 
 /* 一つのキャンバス内全てのUIデータ */

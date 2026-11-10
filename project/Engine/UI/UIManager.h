@@ -142,7 +142,11 @@ private:
 	void UIEditorTimeLine();
 
 	// マウスからエレメントを選択
-	void JudgeMouseSelectElement(UIElement& e,int index);
+	void JudgeMouseSelectElement(UIElement& e,int index, bool& anyInside);
+
+	// 親エレメントを選択するかウインドウ
+	void ParentSelectPopupWindow();
+
 
 	// 選択しているエレメントを移動
 	void MoveSelectElement();
@@ -155,6 +159,14 @@ private:
 
 	// 選択中のエレメント
 	UIElement* selectedElemet_ = nullptr;
+
+
+	// Ctrl時の、親子選択の対象ウインドウ
+	bool isShowParentWindow_ = false;
+
+	UIElement* selectedParentElemet_ = nullptr;
+	UIElement* selectedChildElemet_ = nullptr;
+
 
 
 	// 選択中のをドラッグ中か

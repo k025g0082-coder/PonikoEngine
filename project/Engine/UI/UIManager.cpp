@@ -177,6 +177,9 @@ void UIManager::UpdateElements()
 
 #endif
 
+	// 一度でも各エレメントの矩形内でクリックされたか
+	bool anyInside = false;
+
 	//　ElementDataの更新
 	for (UIData& data : currentSceneUIData_->elementDatas_) {
 
@@ -207,7 +210,7 @@ void UIManager::UpdateElements()
 			/*
 				マウス座標と大きさをもとにElementを選択したり削除したり
 			*/
-			JudgeMouseSelectElement(e,i);
+			JudgeMouseSelectElement(e,i,anyInside);
 
 #endif
 
@@ -220,6 +223,24 @@ void UIManager::UpdateElements()
 			data.elements_.erase(data.elements_.begin() + deleteElementIndex_);
 		}
 	}
+	
+	/*
+		もし一度も各エレメントの矩形内でクリックされていない場合リセット
+	*/
+	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !anyInside) {
+
+		// モーダルが開いていない時のみリセット
+		if (!ImGui::IsPopupOpen("ParentElementPopup")) {
+			selectedElemet_ = nullptr;
+			selectedParentElemet_ = nullptr;
+			selectedChildElemet_ = nullptr;
+		}
+	}
+
+
+	//
+	ParentSelectPopupWindow();
+
 
 	// もしキャンバスレイヤーじゃなきゃここで抜ける
 	if (hierarchyPanel_->GetSelectedCurrentLayerType() != HierarchyLayerType::kCanvasLayer) return;
@@ -354,6 +375,23 @@ void UIManager::SelectedElementAnimationView()
 {
 #ifdef USE_IMGUI
 
+	if (selectedParentElemet_) {
+		ImGui::Text("親選択：%s", selectedParentElemet_->name_.c_str());
+	}
+	else {
+		ImGui::Text("親選択：なし");
+	}
+
+
+	if (selectedChildElemet_) {
+		ImGui::Text("子選択：%s", selectedChildElemet_->name_.c_str());
+	}
+	else {
+		ImGui::Text("子選択：なし");
+	}
+
+
+
 
 	if (selectedElemet_) {
 
@@ -362,6 +400,12 @@ void UIManager::SelectedElementAnimationView()
 
 		ImGui::Text("エレメント名：%s", selectedElemet_->name_.c_str());
 
+		if (selectedElemet_->parent_) {
+			ImGui::Text("親：%s", selectedElemet_->parent_->name_.c_str());
+		}
+		else {
+			ImGui::Text("親：なし");
+		}
 
 		ImGui::SeparatorText("BaseTransform");
 		ImGui::Dummy(ImVec2{ 0,4.0f });
@@ -478,7 +522,7 @@ void UIManager::SelectedElementAnimationView()
 
 }
 
-void UIManager::JudgeMouseSelectElement(UIElement& e,int index)
+void UIManager::JudgeMouseSelectElement(UIElement& e,int index,bool& anyInside)
 {
 	// 現在のEditorのMainViewの比率を得る
 	float radio = Editor::GetInstance()->GetMainViewRatio();
@@ -515,17 +559,58 @@ void UIManager::JudgeMouseSelectElement(UIElement& e,int index)
 	*/
 	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 
-		if (inside) {
+		/*  
+			コントロールキーが押されていた場合 親エレメントの選択とする
+		*/
+		if (ImGui::IsKeyDown(ImGuiKey_ReservedForModCtrl)) {
 
-			// 対象を選択
-			selectedElemet_ = &e; 
-			isDragSelectedElement_ = true; // ドラッグ中
+			if (inside) {
+				// 矩形内
 
-			/*
-				新たに選択されたので、アニメーションのデータを受け渡す
+				anyInside = true;
+
+				if (!selectedParentElemet_) {
+					// 1回目のCtrl+クリック：親に指定
+					selectedParentElemet_ = &e;
+				}
+				// ※もし親が選択元の自分でなかったら
+				else if (selectedParentElemet_->name_ != e.name_) {
+
+					if (!isShowParentWindow_) {
+
+						isShowParentWindow_ = true;
+
+						// 子を設定
+						selectedChildElemet_ = &e;
+
+							
+
+					}
+
+				}
+
+			}
+
+		}
+		else {
+
+			/*  
+				ドラッグの対象の選択
 			*/
-			currentSceneUIData_->sequencer_.SetUIElementAnimationData(*selectedElemet_);
+			if (inside) {
 
+				anyInside = true;
+
+				// 対象を選択
+				selectedElemet_ = &e;
+				isDragSelectedElement_ = true; // ドラッグ中
+
+				/*
+					新たに選択されたので、アニメーションのデータを受け渡す
+				*/
+				currentSceneUIData_->sequencer_.SetUIElementAnimationData(*selectedElemet_);
+
+			}
 		}
 	}
 	/*
@@ -535,6 +620,55 @@ void UIManager::JudgeMouseSelectElement(UIElement& e,int index)
 		if (inside) {
 			deleteElementIndex_ = index;
 		}
+	}
+
+}
+
+void UIManager::ParentSelectPopupWindow()
+{
+	// ポップアップ開く要求フラグが立っていたら1度だけ実行
+	if (isShowParentWindow_) {
+		ImGui::OpenPopup("ParentElementPopup");
+		isShowParentWindow_ = false; // 処理したので戻す
+	}
+
+	// ポップアップ描画
+	if (ImGui::BeginPopupModal("ParentElementPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+		if (selectedParentElemet_ && selectedChildElemet_) {
+			ImGui::Text("指定エレメントを子要素として親子関係にします");
+			ImGui::Text("よろしいですか？");
+			ImGui::Dummy(ImVec2{ 0, 4.0f });
+
+			ImGui::Text("親：%s", selectedParentElemet_->name_.c_str());
+			ImGui::Text("子：%s", selectedChildElemet_->name_.c_str());
+			ImGui::Dummy(ImVec2{ 0, 4.0f });
+
+			if (ImGui::Button("OK", ImVec2(80, 0))) {
+
+				/* 親設定 */
+				selectedChildElemet_->parent_ = selectedParentElemet_;
+
+				// ポインタクリア
+				selectedParentElemet_ = nullptr;
+				selectedChildElemet_ = nullptr;
+
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("キャンセル", ImVec2(80, 0))) {
+				// 親選択状態もリセットしたい場合はクリアする
+				selectedChildElemet_ = nullptr;
+				ImGui::CloseCurrentPopup();
+			}
+		}
+		else {
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
 	}
 }
 
@@ -624,6 +758,9 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 			);
 	}
 
+	selectedElemet_ = nullptr;
+	selectedParentElemet_ = nullptr;
+
 	/* emplace_back で末尾に直接要素を作成して参照を受け取る */
 	UIElement& element = currentSceneUIData_->elementDatas_.at(index).elements_.emplace_back();
 
@@ -650,11 +787,15 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 
 	// アニメ情報もセットしておく
 	element.animationDatas_.animations_["NewAnime"] = newAnime;
+
 	currentSelectAnimationTag = "NewAnime";
 	element.animationDatas_.currentTag_ = "NewAnime"; //
 
 	/* 選択中にしとく */
 	selectedElemet_ = &element;
+
+	// シーケンサー側の参照も最新の安全な参照に更新する
+	currentSceneUIData_->sequencer_.SetUIElementAnimationData(*selectedElemet_);
 }
 
 
