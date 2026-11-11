@@ -7,15 +7,51 @@
 #include "Input.h"
 #include "Collision.h"
 
+#include "SceneComponentLoader.h"
+
+#include "EffectManager.h"
+#include "ExampleEffect.h"
+
+#include "timer.h"
+
+
 void DemoPlayer::Initialize()
-{}
+{
+	// 赤
+	model_->ModelColor({ 1.0f,1.0f,0,1.0f });
+
+
+	// パーチクル用 - テキスチャ読込
+	Particle::GetInstance()->RegionParticleModel("plane", "resources/Engine/plane.obj");
+	Particle::GetInstance()->RegionParticleTexture("smoke", "resources/EffectTexture/smoke.png");
+
+
+
+
+	//  パーチクル用 -　データ読込
+	if (SceneComponentLoader::GetInstance()->Load("resources/Effect/ParticleProp.json")) {
+
+		// ※注　ポインタ
+		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+
+		loder->BeginGroup("particle");
+
+		loder->Property("playerMoveEmit", moveEmitParam);
+		loder->Property("playerGetEmit", getEmitParam);
+		
+		loder->EndGroup();
+
+		/* 読込 */
+		loder->LoadGroup("particle");
+	}
+}
 
 void DemoPlayer::Update()
 {
 	// 共通
 	DemoFieldObject::Update();
 
-	float speed = 0.1f;
+	float speed = 0.2f;
 	Vector3 move{ 0,0,0 };
 
 	/* 左右 */
@@ -34,7 +70,46 @@ void DemoPlayer::Update()
 		move.z -= speed;
 	}
 
+	/*
+		動いた
+	*/
+	if (move.x != 0.0f || move.z != 0.0f) {
 
+		/* エフェクト用のプレイヤーの下ら辺を設定 */
+
+		// 大きさはスケール基準
+		float w = 1.0f;
+		float h = 1.0f;
+		float d = 1.0f;
+
+
+		float footY = worldTransform.translation_.y - worldTransform.scale_.y / 2.0f;
+
+
+		AABB frontAABB;
+
+		frontAABB.min = {
+				worldTransform.translation_.x - w / 2.0f,
+				footY,
+				worldTransform.translation_.z - d / 2.0f
+		};
+
+		frontAABB.max = {
+			worldTransform.translation_.x + w / 2.0f,
+			footY + h,
+			worldTransform.translation_.z + d / 2.0f
+		};
+
+		//
+		emitElapsedTimer += Timer::GetDeltaTime();
+
+		/*  動いたら一定間隔エミット */
+		if (emitElapsedTimer >= emitDistance) {
+			Particle::GetInstance()->MakeNewParticle("plane", "smoke", frontAABB, 1, moveEmitParam);
+			emitElapsedTimer -= emitDistance;
+		}
+
+	}
 	// ジャンプ
 	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 
@@ -128,8 +203,47 @@ void DemoPlayer::onCollisionToGimmick(DemoGimmick* gimmick,CollisionResult resul
 
 }
 
+void DemoPlayer::onCollisionToItem(DemoFieldItem* item, CollisionResult result)
+{
+	(void)result;
+	uint32_t id = item->GetSubId();
+
+	switch ((DemoFieldItem::ItemType)id) {
+
+	case DemoFieldItem::ItemType::kCoin:
+		// コインに当たった
+
+		// エフェクト
+		Particle::GetInstance()->MakeNewParticle("plane", "symbol_02", worldTransform.translation_, 6, getEmitParam);
+
+		break;
+
+	}
+}
+
 void DemoPlayer::ImGuiView()
 {
+
+	//moveEmitParam.ImGuiView();
+	getEmitParam.ImGuiView();
+	if (ImGui::Button("getVfx")) {
+		//Particle::GetInstance()->MakeNewParticle("plane", "symbol_02", worldTransform.translation_, 6, getEmitParam);
+		EffectManager::AddEffect(new ExampleEffect, worldTransform.translation_);
+	}
+	if (ImGui::Button("Save")) {
+
+		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+
+		// jsonに
+		if (loder->SaveSwitchJson("resources/Effect/ParticleProp.json")) {
+
+			/* 登録 */
+			loder->SaveGroup("particle");
+
+			// JSONファイルに保存する
+			loder->Save("resources/Effect/ParticleProp.json");
+		}
+	}
 	//
-	DemoFieldObject::ImGuiView();
+	//DemoFieldObject::ImGuiView();
 }

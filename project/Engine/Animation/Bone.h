@@ -1,5 +1,6 @@
 #pragma once
 #include "Matrix.h"
+#include "Vector.h"
 #include <string>
 
 #include "DirectXUtility.h"
@@ -23,6 +24,14 @@ struct Bone {
 
 	aiMatrix4x4 finalMatrix;// 親子関係などの計算を経て、最終的にシェーダーに送る行列
 };
+
+// ボーンのTransform
+struct BoneTransform {
+	Vector3 translation_;
+	Vector3 scale_;
+	Vector4 rotation_;
+};
+
 
 // ボーン情報
 struct VertexBoneWeightData {

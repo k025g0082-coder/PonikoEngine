@@ -752,8 +752,21 @@ void Editor::OperationLeftClick()
 
 		float distance = 0.0f;
 
-		hierarchyPanel_->SetSelectedHierarchyModelIndex(std::nullopt);
-		selectedModelWorldTransform_ = nullptr;
+		/*
+			もしクリック時、mainView上の表示にマウスが乗っていればnull
+			(他ウインドウはビュー外にあってmainView外なので解除しない)
+		*/
+		/* ビュー上にあるか */
+		bool insideSceneMainView =
+			mouse.x >= mainViewPos.x &&
+			mouse.x <= (mainViewPos.x + mainViewSize.x) &&
+			mouse.y >= mainViewPos.y &&
+			mouse.y <= (mainViewPos.y + mainViewSize.y);
+		
+		if (insideSceneMainView) {
+			hierarchyPanel_->SetSelectedHierarchyModelIndex(std::nullopt);
+			selectedModelWorldTransform_ = nullptr;
+		}
 
 		//* モード別の処理　*//
 		switch (currentModelHierarchyMode_) {

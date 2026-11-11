@@ -32,4 +32,12 @@ void DemoGimmickFactory::Initialize()
 	});
 }
 
+void DemoItemFactory::Initialize()
+{
+	/* 事前に必要な処理を登録 */
 
+	Register(DemoFieldItem::ItemType::kCoin, [](const GameObjectData& data, nlohmann::json* json) {
+		return std::make_unique<  DemoCoin  >(data.model, Scene::GetSceneCamera(), data, json);
+		});
+
+}

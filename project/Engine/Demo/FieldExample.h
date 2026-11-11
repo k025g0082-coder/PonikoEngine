@@ -24,6 +24,7 @@
 
 #include "DemoFieldObject.h"
 #include "DemoGimmick.h"
+#include "DemoFieldItem.h"
 
 #include "DemoPlayer.h"
 
@@ -73,8 +74,8 @@ private:
     Camera camera_;
 
     Model* playerModel_ = nullptr;
+    Model* itemModel_ = nullptr;
     Model* blockModel_ = nullptr;
-    Model* goalModel_ = nullptr;
 
     // プレイヤー
     std::unique_ptr <DemoPlayer> player_;
@@ -94,6 +95,10 @@ private:
 
     // ギミックのリスト
     std::vector<std::unique_ptr<DemoGimmick>> gimmicks_;
+
+    // アイテムのリスト
+    std::vector<std::unique_ptr<DemoFieldItem>> items_;
+
 
     // リスト削除用のテンプレート
     //template <typename T>

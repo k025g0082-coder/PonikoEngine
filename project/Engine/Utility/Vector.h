@@ -19,6 +19,7 @@ struct Vector4 {
     float w = 0.0f;
 };
 
+
 /* Vector2 */ 
 
 // 加算

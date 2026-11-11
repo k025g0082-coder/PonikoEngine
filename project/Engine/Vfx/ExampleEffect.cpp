@@ -8,11 +8,8 @@ void ExampleEffect::Initialize(Vector3 position) {
 	// 素材登録
 	Particle::GetInstance()->RegionParticleModel("plane", "resources/Engine/plane.obj");
 
-	Particle::GetInstance()->RegionParticleTexture("texture", "resources/Engine/uvChecker.png");
-	Particle::GetInstance()->RegionParticleTexture("texture2", "resources/Engine/default.png");
-	Particle::GetInstance()->RegionParticleTexture("texture3", "resources/white100x100.png");
-
-	Particle::GetInstance()->RegionParticleTexture("star04", "resources/Engine/texture/emits/kennyParticles/star_04.png");
+	Particle::GetInstance()->RegionParticleTexture("circle_05", "resources/Engine/texture/emits/kennyParticles/circle_05.png");
+	Particle::GetInstance()->RegionParticleTexture("star06", "resources/Engine/texture/emits/kennyParticles/star_06.png");
 
 }
 

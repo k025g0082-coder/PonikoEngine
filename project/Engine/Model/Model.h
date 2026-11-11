@@ -17,6 +17,7 @@
 #include "Bone.h"
 #include "Animation.h"
 
+#include <vector>
 #include <string>
 #include <d3d12.h>
 
@@ -104,67 +105,6 @@ public:
 	// アニメ更新
 	void UpdateAnimation();
 
-	// キーを探してLerpで補完する
-	Vector3 SampleTransition(NodeAnimation& nodeAnim, float currentTick);
-	Vector3 SampleScale(NodeAnimation& nodeAnim, float currentTick);
-	Vector4 SampleRotation(NodeAnimation& nodeAnim, float currentTick);
-
-	Vector4 Slerp(const Vector4& q0, const Vector4& q1, float t)
-	{
-		Vector4 q1Copy = q1;
-
-		// 内積
-		float dot =
-			q0.x * q1.x +
-			q0.y * q1.y +
-			q0.z * q1.z +
-			q0.w * q1.w;
-
-		// 反対向きQuaternionなら短い方を使う
-		if (dot < 0.0f)
-		{
-			q1Copy.x = -q1Copy.x;
-			q1Copy.y = -q1Copy.y;
-			q1Copy.z = -q1Copy.z;
-			q1Copy.w = -q1Copy.w;
-
-			dot = -dot;
-		}
-
-		// ほぼ同じならLerpでOK
-		if (dot > 0.9995f)
-		{
-			Vector4 result{
-				q0.x + (q1Copy.x - q0.x) * t,
-				q0.y + (q1Copy.y - q0.y) * t,
-				q0.z + (q1Copy.z - q0.z) * t,
-				q0.w + (q1Copy.w - q0.w) * t
-			};
-
-			return Normalize(result);
-		}
-
-		// 角度
-		float theta = acosf(dot);
-
-		float sinTheta = sinf(theta);
-
-		float weight0 =
-			sinf((1.0f - t) * theta) / sinTheta;
-
-		float weight1 =
-			sinf(t * theta) / sinTheta;
-
-
-		Vector4 result{
-			q0.x * weight0 + q1Copy.x * weight1,
-			q0.y * weight0 + q1Copy.y * weight1,
-			q0.z * weight0 + q1Copy.z * weight1,
-			q0.w * weight0 + q1Copy.w * weight1
-		};
-
-		return result;
-	}
 
 	// LightingManagerから空間すべてのライトを取得して、設定する
 	void SetLightSets() {
@@ -177,42 +117,8 @@ public:
 		materialData->enableLighting = true;
 	}
 
-	//// 光源登録
-	//void SetDirectionalLight(DirectionalLight* light) { 
-
-	//	directionalLight_ = light;
-
-	//	// ライト設定をONに
-	//	materialData->enableLighting = true;
-	//}
-
-	//// 光源登録
-	//void SetPointLight(PointLight* light) {
-
-	//	pointLight_ = light;
-
-	//	// ライト設定をONに
-	//	materialData->enableLighting = true;
-	//}
-
-	//// 光源登録
-	//void SetSpotLight(SpotLight* light) {
-
-	//	spotLight_ = light;
-
-	//	// ライト設定をONに
-	//	materialData->enableLighting = true;
-	//}
-
 	// アニメ番号変更
-	void ChangeAnimeIndex(int index,bool isloop = true) {
-		
-		if (index < modelData.animations.size()) {
-			animationIndex_ = index;
-			animationTime_ = 0;
-			isLoop_ = isloop;
-		};
-	}
+	void ChangeAnimeIndex(int index, bool isloop = true);
 
 	// アニメ一時停止か
 	void AnimationStop() { isAnimation_ = false; }
@@ -234,6 +140,12 @@ public:
 		materialData->color = { rgba.x,rgba.y,rgba.z,rgba.w };
 	};
 
+
+	// テクスチャーをセット
+	void SetTexture(Texture* t) {
+		texture = t;
+	}
+
 	// モデルデータ読み取り関数
 	static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
@@ -252,6 +164,14 @@ public:
 	void SetBloomToWorldTransform(WorldTransform* worldTransform);
 	
 private:
+
+	// キーを探してLerpで補完する
+	Vector3 SampleTransition(NodeAnimation& nodeAnim, float currentTick);
+	Vector3 SampleScale(NodeAnimation& nodeAnim, float currentTick);
+	Vector4 SampleRotation(NodeAnimation& nodeAnim, float currentTick);
+
+	Vector4 Slerp(const Vector4& q0, const Vector4& q1, float t);
+
 
 	// マテリアル読み取り関数
 	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
@@ -278,6 +198,18 @@ private:
 	bool isAnimation_ = true;
 	
 	bool isLoop_ = true;
+
+
+	/*
+		次のポーズへの切り替え用。
+		切り替え時に前状態の全ボーンTransform情報をセットし、Blendフラグ中に、最終結果と補完させる。
+	*/
+	std::vector<BoneTransform> previousPose_;  // 前のポーズのボーン情報
+	std::vector<BoneTransform> currentPose_;   // 今のポーズのボーン情報
+
+	bool isBlending_ = false;
+
+	float blendTimer_ = 0.0f;
 
 
 	std::vector<Matrix4x4> boneMatrices_;

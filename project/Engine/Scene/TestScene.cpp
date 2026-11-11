@@ -68,8 +68,8 @@ void TestScene::Init() {
 	//lightAddress = &LightingManager::GetInstance()->AddLight(dLightParam);
 
 
-//	model = Model::CreateOBJ("resources/Models/player/player.fbx");
-	model = Model::CreateOBJ("resources/Models/cube/cube.obj");
+	model = Model::CreateOBJ("resources/Models/player/player.fbx");
+	//model = Model::CreateOBJ("resources/Models/cube/cube.obj");
 	model2 = Model::CreateOBJ("resources/Models/field/field.obj");
 
 
@@ -237,9 +237,6 @@ void TestScene::Update(Input* input) {
 
 	if (ImGui::Button("Effect")) {
 
-
-		Particle::GetInstance()->SetCamera(&camera);
-
 		// とうろく
 		EffectManager::AddEffect(new ExampleEffect, {0,0,0});
 
@@ -276,6 +273,13 @@ void TestScene::Update(Input* input) {
 	if (ImGui::DragFloat("LightShadowShadowRange ", &ShadowManager::GetInstance()->shadowRange, 0.1f)) {
 		ShadowManager::GetInstance()->UpdateShadow();
 	}
+
+	int anmIndex;
+
+	if (ImGui::DragInt("modelAnime", &anmIndex,0)){
+		model->ChangeAnimeIndex(anmIndex);
+	}
+	
 #endif
 
 	telopSprite.UpdateScreenTransform();
@@ -306,8 +310,8 @@ void TestScene::Draw() {
 	//model->Draw(camera);f
 
 	model->Draw(camera);
-	model2->Draw(camera);
-	fieldModel->Draw(backWorld2,camera);
+	// model2->Draw(camera);
+	//fieldModel->Draw(backWorld2,camera);
 
 	// 複数テスト用
 	//sprite.Draw(spworld1);

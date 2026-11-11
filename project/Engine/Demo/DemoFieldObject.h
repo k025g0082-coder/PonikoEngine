@@ -13,6 +13,7 @@
 
 class DemoPlayer;
 class DemoGimmick;
+class DemoFieldItem;
 
 /// <summary>
 /// フィールド上のオブジェクトとしての基底クラス
@@ -31,6 +32,7 @@ public:
         kPlayer,
         kBlock,
         kGimmick,
+        kItem,
 
         count
     };
@@ -98,7 +100,8 @@ public:
     // 　ダブルディスパッチ（Visitorパターン） OOP設計　というらしい。　
     //   *このクラスを継承した子は、下の当たった相手の方のplayer,gimmickなどの関数を選んでそのクラスで実行できるので、という
     virtual void onCollisionToPlayer(DemoPlayer* player, CollisionResult result)           { /* プレイヤーに当たった時 */ };
-    virtual void onCollisionToGimmick(DemoGimmick* gimmick, CollisionResult result)        { /* ギミックに当たった時. */ };
+    virtual void onCollisionToGimmick(DemoGimmick* gimmick, CollisionResult result) { /* ギミックに当たった時. */ };
+    virtual void onCollisionToItem(DemoFieldItem* gimmick, CollisionResult result) { /* アイテムに当たった時. */ };
 
     //
     
@@ -118,7 +121,11 @@ public:
     void UpdateObjectTypeJson();
 
 
+    const bool& IsDelete()  const { return isDelete; }
+
+
     const uint32_t& GetUniqueID() const { return uniqueID_; }
+
 
     /* ギミック種類名を取得 */
     static const char* GetFieldObjectTypeName(Type type) {
@@ -127,7 +134,7 @@ public:
 
 protected:
 
-    // ギミックの種類名
+    // フィールドオブジェクトの種類名
     static const char* fieldObjectTypeName[(int)Type::count];
 
 
@@ -143,7 +150,12 @@ protected:
     uint32_t subType_;
 
     // fieldObjectのインスタンス識別ID
-    uint32_t uniqueID_ = 0;           
+    uint32_t uniqueID_ = 0;   
+
+
+    // 削除フラグ
+    bool isDelete = false;
+
 
     /* 
         ヒエラルキーのJSONのアドレス。データ管理よう。神.
@@ -156,7 +168,9 @@ private:
 };
 
 
-/* ブロックなど静的なもの */
+/* 
+    ブロックなど静的なもの
+*/
 class DemoBlock : public DemoFieldObject {
 public:
     

@@ -6,7 +6,6 @@
 
 #include "FileDropManager.h"
 
-#include "Particle.h"
 #include "EffectManager.h"
 
 #include "Editor.h"
@@ -55,8 +54,6 @@ void Scene::ProcessChange() {
 		// エフェクト全削除
 		EffectManager::ResetEffect();
 
-		// nullを代入
-		Particle::GetInstance()->SetCamera(nullptr);
 
 		/*
 			Editorモードの場合、Editorから提供されたＳｃｅｎｅを設定する

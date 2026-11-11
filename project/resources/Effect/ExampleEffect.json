@@ -1,33 +1,7 @@
 {
     "EffectParticleCompornents": {
         "particle": {
-            "num": 4,
-            "param": {
-                "color": [
-                    0.0,
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "gravity": 0.0,
-                "isBilliboard": false,
-                "isDilute": true,
-                "life": 20,
-                "scaleAmpMax": 1.0,
-                "scaleAmpMin": 1.0,
-                "speed": 0.4000000059604645,
-                "speedAmp": 0.0
-            },
-            "particleTag": "plane",
-            "position": [
-                0.0,
-                3.799999952316284,
-                0.0
-            ],
-            "textureTag": "texture"
-        },
-        "test": {
-            "num": 9,
+            "num": 1,
             "param": {
                 "color": [
                     1.0,
@@ -41,16 +15,16 @@
                 "life": 20,
                 "scaleAmpMax": 1.0,
                 "scaleAmpMin": 1.0,
-                "speed": 0.15000000596046448,
+                "speed": 0.1899999976158142,
                 "speedAmp": 0.0
             },
             "particleTag": "plane",
             "position": [
-                0.0,
+                -2.0,
                 0.0,
                 0.0
             ],
-            "textureTag": "star04"
+            "textureTag": "circle_05"
         }
     }
 }

@@ -145,6 +145,14 @@ Model* Model::CreateOBJ(const std::string& modelPath) {
 
 void Model::Initialize(){
 
+	/* 
+		ボーン数にあわせて初期化時にリサイズ
+	*/
+	if (modelData.isSkinning) {
+		previousPose_.resize(modelData.bones.size());
+		currentPose_.resize(modelData.bones.size());
+	}
+
 	// マテリアル用のリソース
 	materialResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(Material));
 
@@ -291,6 +299,9 @@ void Model::UpdateAnimation() {
 		currentTick = std::min(currentTick, animation.duration);
 	}
 
+	// 次アニメーションへの転移時間（ヘッダーに描くとビルドがウザいのでローカル変数にした）
+	const float kBlendDuration_ = 0.2f;
+
 
 	// SRT、それぞれ取り出して計算
 	// arm, leg, など各部位ひとつづつ取り出し更新
@@ -327,6 +338,45 @@ void Model::UpdateAnimation() {
 
 		if (!nodeAnim.scales.empty())
 			scale = SampleScale(nodeAnim, currentTick);
+
+
+		/*
+			もしブレンド中（次ポーズへの転移）なら、次ポーズのボーンのTransform情報に、↑の結果を補間させる
+		*/
+		if (isBlending_) {
+
+			float t = 0.0f;
+		
+
+			if (blendTimer_ > 0.0f) { // ０対策
+
+				// ０～１．０ｆ以内に
+				t = std::clamp(
+					blendTimer_ / kBlendDuration_,
+					0.0f,
+					1.0f
+				);
+			}
+
+			/* 各補間 */
+			position = Lerp(previousPose_[boneIndex].translation_, position, t);
+			scale = Lerp(previousPose_[boneIndex].scale_, scale, t);
+			rotation = Slerp(previousPose_[boneIndex].rotation_, rotation, t);
+			
+		}
+
+		/*
+			アニメがあれば、いまのポーズの情報を保存
+		*/
+		if (modelData.isSkinning) {
+
+			currentPose_[boneIndex] = {
+				.translation_ = position,
+				.scale_ = scale,
+				.rotation_ = rotation
+			};
+
+		}
 
 		aiMatrix4x4 scaleAiMatrix;
 		aiMatrix4x4 rotateAiMatrix;
@@ -394,120 +444,37 @@ void Model::UpdateAnimation() {
 				modelData.bones[i].finalMatrix),
 			ModelLoader::ConvertYZ());
 	}
-		
-//	}
-//auto& b = modelData.bones[0]; // 親
-//
-//
-//DirectXUtility::Log("GLOBAL\n");
-//for (int i = 0; i < 3; i++)
-//{
-//	DirectXUtility::Log(
-//		"%f %f %f\n",
-//		b.globalMatrix.m[i][0],
-//		b.globalMatrix.m[i][1],
-//		b.globalMatrix.m[i][2]);
-//}
-//
-//DirectXUtility::Log("FINAL\n");
-//for (int i = 0; i < 3; i++)
-//{
-//	DirectXUtility::Log(
-//		"%f %f %f\n",
-//		b.finalMatrix.m[i][0],
-//		b.finalMatrix.m[i][1],
-//		b.finalMatrix.m[i][2]);
-//}
-//DirectXUtility::Log("OFFSET\n");
-//
-//for (int i = 0; i < 3; i++)
-//{
-//	DirectXUtility::Log(
-//		"%f %f %f\n",
-//		b.offsetMatrix.m[i][0],
-//		b.offsetMatrix.m[i][1],
-//		b.offsetMatrix.m[i][2]);
-//}
-//DirectXUtility::Log("Local\n");
-//
-//for (int i = 0; i < 3; i++)
-//{
-//	DirectXUtility::Log(
-//		"%f %f %f\n",
-//		b.localMatrix.m[i][0],
-//		b.localMatrix.m[i][1],
-//		b.localMatrix.m[i][2]);
-//}
-//	//auto& b0 = modelData.bones[0]; // 親
-	//auto& b1 = modelData.bones[1]; // 子
+	
+	// ブレンドちゅうなら　タイマー加算
+	if (isBlending_) {
 
-	//DirectXUtility::Log("===== Bone0 =====\n");
-	//DirectXUtility::Log(
-	//	"GLOBAL pos : %f %f %f\n",
-	//	b0.globalMatrix.m[3][0],
-	//	b0.globalMatrix.m[3][1],
-	//	b0.globalMatrix.m[3][2]
-	//);
+		blendTimer_ += Timer::GetDeltaTime();
 
-	//DirectXUtility::Log("===== Bone1 =====\n");
-	//DirectXUtility::Log(
-	//	"LOCAL pos : %f %f %f\n",
-	//	b1.localMatrix.m[3][0],
-	//	b1.localMatrix.m[3][1],
-	//	b1.localMatrix.m[3][2]
-	//);
+		// 終了
+		if (blendTimer_ >= kBlendDuration_) {
+			blendTimer_ = 0;
+			isBlending_ = false;// 解除
+		}
+	}
+}
 
-	//DirectXUtility::Log(
-	//	"GLOBAL pos : %f %f %f\n",
-	//	b1.globalMatrix.m[3][0],
-	//	b1.globalMatrix.m[3][1],
-	//	b1.globalMatrix.m[3][2]
-	//);
-	//// 毎回コピーする
-	//for (size_t i = 0; i < modelData.bones.size(); i++)
-	//{
-	//	//boneMatrices_[i] = modelData.bones[i].finalMatrix;
+void Model::ChangeAnimeIndex(int index, bool isloop)
+{
+	if (index < modelData.animations.size()) {
 
-	//	skinningData_->boneMatrices[i] =
-	//		modelData.bones[i].finalMatrix;
+		// 変更
+		animationIndex_ = index;
+		animationTime_ = 0;
 
+		// 現在の全ボーンのポーズ情報をセット
+		previousPose_ = currentPose_;
 
-	//	auto PrintMatrix = [](const char* name, const Matrix4x4& mat)
-	//		{
-	//			DirectXUtility::Log("%s\n", name);
+		// ブレンド（次ポーズまでの補間）開始
+		isBlending_ = true;
 
-	//			for (int row = 0; row < 4; row++)
-	//			{
-	//				DirectXUtility::Log(
-	//					"[ %7.3f %7.3f %7.3f %7.3f ]\n",
-	//					mat.m[row][0],
-	//					mat.m[row][1],
-	//					mat.m[row][2],
-	//					mat.m[row][3]
-	//				);
-	//			}
-
-	//			DirectXUtility::Log("\n");
-	//		};
-
-
-	//	auto& m = modelData.bones[i];
-
-	//	DirectXUtility::Log("=====================================\n");
-	//	DirectXUtility::Log("Bone[%d] %s\n", (int)i, m.name.c_str());
-
-
-	//	PrintMatrix("LOCAL", m.localMatrix);
-	//	PrintMatrix("GLOBAL", m.globalMatrix);
-	//	PrintMatrix("OFFSET", m.offsetMatrix);
-	//	PrintMatrix("FINAL", m.finalMatrix);
-	//	// test
-	//	//skinningData_->boneMatrices[i] =
-	//	//	MakeIdentity4x4();
-
-	//	
-	//}
-
+		//
+		isLoop_ = isloop;
+	};
 }
 
 
@@ -586,6 +553,7 @@ Vector3 Model::SampleTransition(NodeAnimation& nodeAnim, float currentTick) {
 
 	return vec;
 }
+
 Vector3 Model::SampleScale(NodeAnimation& nodeAnim, float currentTick) {
 
 	if (nodeAnim.scales.empty())
@@ -696,6 +664,63 @@ Vector4 Model::SampleRotation(NodeAnimation& nodeAnim, float currentTick)
 	// result = Normalize(result);
 	return result;
 }
+
+Vector4  Model::Slerp(const Vector4& q0, const Vector4& q1, float t)
+{
+		Vector4 q1Copy = q1;
+
+		// 内積
+		float dot =
+			q0.x * q1.x +
+			q0.y * q1.y +
+			q0.z * q1.z +
+			q0.w * q1.w;
+
+		// 反対向きQuaternionなら短い方を使う
+		if (dot < 0.0f)
+		{
+			q1Copy.x = -q1Copy.x;
+			q1Copy.y = -q1Copy.y;
+			q1Copy.z = -q1Copy.z;
+			q1Copy.w = -q1Copy.w;
+
+			dot = -dot;
+		}
+
+		// ほぼ同じならLerpでOK
+		if (dot > 0.9995f)
+		{
+			Vector4 result{
+				q0.x + (q1Copy.x - q0.x) * t,
+				q0.y + (q1Copy.y - q0.y) * t,
+				q0.z + (q1Copy.z - q0.z) * t,
+				q0.w + (q1Copy.w - q0.w) * t
+			};
+
+			return Normalize(result);
+		}
+
+		// 角度
+		float theta = acosf(dot);
+
+		float sinTheta = sinf(theta);
+
+		float weight0 =
+			sinf((1.0f - t) * theta) / sinTheta;
+
+		float weight1 =
+			sinf(t * theta) / sinTheta;
+
+
+		Vector4 result{
+			q0.x * weight0 + q1Copy.x * weight1,
+			q0.y * weight0 + q1Copy.y * weight1,
+			q0.z * weight0 + q1Copy.z * weight1,
+			q0.w * weight0 + q1Copy.w * weight1
+		};
+
+		return result;
+	}
 
 
 void Model::Draw(Camera camera) {

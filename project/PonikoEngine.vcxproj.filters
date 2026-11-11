@@ -112,6 +112,9 @@
     <Filter Include="Engine\Source\im-neo-sequencer">
       <UniqueIdentifier>{de3de441-2822-4919-9503-b8a1cee151c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="test\FactoryObjectDemo\.h\fieldObject">
+      <UniqueIdentifier>{2bf6d36b-0273-462b-98fc-65b6a446a73e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Core\WinApp.cpp">
@@ -339,6 +342,9 @@
     </ClCompile>
     <ClCompile Include="Engine\Utility\Easing.cpp">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
+    </ClCompile>
+    <ClCompile Include="DemoFieldItem.cpp">
+      <Filter>test\FactoryObjectDemo\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -569,12 +575,6 @@
     <ClInclude Include="Engine\Demo\FieldExample.h">
       <Filter>test\FactoryObjectDemo\.h</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Demo\DemoGimmick.h">
-      <Filter>test\FactoryObjectDemo\.h</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Demo\DemoFieldObject.h">
-      <Filter>test\FactoryObjectDemo\.h</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>test</Filter>
     </ClInclude>
@@ -586,9 +586,6 @@
     </ClInclude>
     <ClInclude Include="Engine\Game\GameObject.h">
       <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Demo\DemoPlayer.h">
-      <Filter>test\FactoryObjectDemo\.h</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Editor\Panel\AssetsPanel.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor\Panel</Filter>
@@ -628,6 +625,18 @@
     </ClInclude>
     <ClInclude Include="Engine\Editor\Panel\HierarchyNode.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor\Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Demo\DemoFieldObject.h">
+      <Filter>test\FactoryObjectDemo\.h\fieldObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Demo\DemoGimmick.h">
+      <Filter>test\FactoryObjectDemo\.h\fieldObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Demo\DemoPlayer.h">
+      <Filter>test\FactoryObjectDemo\.h</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoFieldItem.h">
+      <Filter>test\FactoryObjectDemo\.h\fieldObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -682,10 +691,10 @@
     <FxCompile Include="resources\Engine\Shader\ModelBloom.VS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="resources\Engine\Shader\ScenePostEffect.PS.hlsl">
+    <FxCompile Include="resources\Engine\Shader\ScenePostEffect.VS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="resources\Engine\Shader\ScenePostEffect.VS.hlsl">
+    <FxCompile Include="resources\Engine\Shader\ScenePostEffect.PS.hlsl">
       <Filter>Engine\リソース ファイル</Filter>
     </FxCompile>
   </ItemGroup>

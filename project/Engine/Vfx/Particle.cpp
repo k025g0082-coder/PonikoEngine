@@ -11,6 +11,8 @@
 
 #include "Matrix.h"
 
+#include "Scene.h"
+
 #define _USE_MATH_DEFINES
 #include "math.h"
 
@@ -332,7 +334,11 @@ void Particle::RegionParticleTexture(std::string tag, std::string path) {
 
 void Particle::Update() {
 
-    if (camera_ == nullptr) return;
+    if (!Scene::getInstance()->GetSceneCamera()) return;
+
+    //
+    auto camera_ = Scene::getInstance()->GetSceneCamera();
+
 
     for (auto& [tag, data] : particleModelDatas_) {
         // ブレンド範囲をクリア
@@ -428,7 +434,7 @@ void Particle::Update() {
 void Particle::Draw()
 {
 
-    if (camera_ == nullptr) return;
+    if (!Scene::getInstance()->GetSceneCamera()) return;
 
     ID3D12GraphicsCommandList* commandList =
         DirectXCommon::GetInstance()->GetCommandList().Get();

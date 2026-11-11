@@ -3,6 +3,8 @@
 
 #include "DemoFieldObject.h"
 #include "DemoGimmick.h"
+#include "DemoFieldItem.h"
+
 /*
 	フィールド上の登録関数
 */
@@ -27,3 +29,12 @@ public:
 
 };
 
+
+// アイテム
+class DemoItemFactory : public BaseFactory<DemoFieldItem::ItemType, DemoFieldItem, const GameObjectData&, nlohmann::json* >
+{
+public:
+	// 初期登録
+	static void Initialize();
+
+};

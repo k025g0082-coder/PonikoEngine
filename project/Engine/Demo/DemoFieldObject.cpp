@@ -5,18 +5,20 @@
 
 #include "DemoPlayer.h"
 #include "DemoGimmick.h"
+#include "DemoFieldItem.h"
 
 #include "Collision.h"
 
 
-// ギミックの種類名
+// フィールドの種類名
 const char* DemoFieldObject::fieldObjectTypeName[(int)Type::count] = {
 	"null",
 
 	"Player",
 
 	"Block",
-	"Gimmick"
+	"Gimmick",
+	"Item",
 
 };
 
@@ -48,8 +50,11 @@ void DemoFieldObject::Collision(DemoFieldObject* a, DemoFieldObject* b)
 
 	CollisionResult result = ResolveAABBCollision( a->GetAABB(), a->GetWorldTransform().translation_, b->GetAABB(),push);
 
-	a->onCollision(b, result);
-	b->onCollision(a, result);
+	// 接触していれば
+	if (result.isCollision) {
+		a->onCollision(b, result);
+		b->onCollision(a, result);
+	}
 
 }
 
@@ -95,6 +100,9 @@ void DemoFieldObject::BeginImGui()
 		break;
 	case Type::kGimmick:
 		ImGui::Text("subType_: %s", DemoGimmick::GetGimmickTypeName(static_cast<DemoGimmick::GimmickType>(subType_)));
+		break;
+	case Type::kItem:
+		ImGui::Text("subType_: %s", DemoFieldItem::GetItemTypeName(static_cast<DemoFieldItem::ItemType>(subType_)));
 		break;
 	}
 

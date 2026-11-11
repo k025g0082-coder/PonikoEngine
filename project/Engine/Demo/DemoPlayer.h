@@ -2,10 +2,13 @@
 
 #include "GameObject.h"
 #include "DemoFieldObject.h"
+#include "DemoFieldItem.h"
 
 #include "HierarchyPanel.h"
 
 #include "Collision.h"
+
+#include "Particle.h"
 
 #include <vector>
 
@@ -32,6 +35,7 @@ public:
     }
 
     void onCollisionToGimmick(DemoGimmick* gimmick, CollisionResult result) override;
+    void onCollisionToItem(DemoFieldItem* gimmick, CollisionResult result) override;
 
     void ImGuiView() override;
 
@@ -48,5 +52,17 @@ private:
     // ジャンプ初速(上方向)
     static inline float kJumpAcceleration = 0.3f;
 
+
+    float emitDistance = 0.05f; // 間隔？
+    float emitElapsedTimer = 0.0f;
+
+    // 動いた時の煙
+    ParticleParam moveEmitParam;
+
+    // ジャンプ時
+    ParticleParam jumpEmitParam;
+
+    // 取得時
+    ParticleParam getEmitParam;
 };
 

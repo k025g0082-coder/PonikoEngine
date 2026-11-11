@@ -233,9 +233,6 @@ public:
 
 	void Draw(std::string tag);
 
-	// 描画に使うカメラをセットする
-	void SetCamera(Camera* camera) { camera_ = camera; }
-
 	// パーティクル用モデル辞典
 	std::map<std::string, ParticleModelData> particleModelDatas_;
 
@@ -290,8 +287,5 @@ private:
 
 	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
-
-	// 描画する際のカメラ
-	Camera* camera_ = nullptr;
 
 };

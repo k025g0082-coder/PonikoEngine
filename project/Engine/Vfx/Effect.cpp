@@ -64,7 +64,7 @@ ParticleCompornent* Effect::GetParticleCompornent(std::string tag) {
 // ImGui表示用
 void Effect::ImGuiViewParticleCompornent() {
 
-	if (particleEmitParams_.size() == 0) return;
+	//if (particleEmitParams_.size() == 0) return;
 
 	// デバッグでなければ帰る
 	if (!isDebugMode_) return;

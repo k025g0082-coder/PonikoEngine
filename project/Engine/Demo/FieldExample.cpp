@@ -12,6 +12,7 @@
 #include "UIManager.h"
 
 #include <utility>
+#include <algorithm>
 
 std::unordered_map<uint32_t, DemoFieldObject*> FieldExample::uniqueIdMap_;
 
@@ -27,14 +28,17 @@ void FieldExample::Init()
 	// カメラセット
 	Scene::SetSceneCamera(&camera_);
 
-	/* モデル（仮） */
-	playerModel_ = Model::CreateOBJ("resources/Models/cube/cube.obj");
-	blockModel_  = Model::CreateOBJ("resources/Models/cube/cube.obj");
-	goalModel_   = Model::CreateOBJ("resources/Models/cube/cube.obj");
+	/* モデル */
+	playerModel_ = Model::CreateOBJ("resources/Models/block/cube.obj");
+
+	// 赤
+	playerModel_->ModelColor({ 1.0f,0,0,1.0f });
+
 
 	// factoryら 初期化
 	DemoFieldObjectFactory::Initialize();
 	DemoGimmickFactory::Initialize();
+	DemoItemFactory::Initialize();
 
 	/* 増やした / 消されたときのラムダ関数を登録しておく */
 	CreateFunctionRegion();
@@ -48,6 +52,7 @@ void FieldExample::Init()
 
 	// ロード
 	FieldLoad();
+
 
 
 }
@@ -92,18 +97,40 @@ void FieldExample::Update(Input * input)
 			DemoFieldObject::Collision(player_.get(), gmk.get());
 	}
 
+	for (const std::unique_ptr<DemoFieldItem>& obj : items_) {
+
+		obj->Update();
+
+		// プレイヤーと当たり判定判定
+		if (player_)
+			DemoFieldObject::Collision(player_.get(), obj.get());
+	}
+
+
+	// もしdeleteフラグがtrueなら削除
+	std::erase_if(
+		blocks_, [](std::unique_ptr<DemoFieldObject>& obj) {
+			return obj.get()->IsDelete();
+		}
+	);
+	std::erase_if(
+		gimmicks_, [](std::unique_ptr<DemoGimmick>& obj) {
+			return obj.get()->IsDelete();
+		}
+	);
+	std::erase_if(
+		items_, [](std::unique_ptr<DemoFieldItem>& obj) {
+			return obj.get()->IsDelete();
+		}
+	);
+
+
 #ifdef USE_IMGUI
 	ImGui::Begin("FieldExample");
 
-	//if (ImGui::DragFloat3("playerVelocity", &player_->velocity_.x, 0.1f)) {
-	//	// なんかあれば
-	//}]
 
+	player_->ImGuiView();
 
-	//
-	if (ImGui::Button("vfx")) {
-		s
-	}
 
 
 	/*
@@ -148,6 +175,9 @@ void FieldExample::Draw()
 		gmk->Draw();
 	}
 
+	for (const std::unique_ptr<DemoFieldItem>& itm : items_) {
+		itm->Draw();
+	}
 }
 void FieldExample::FieldLoad() {
 
@@ -249,8 +279,12 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 
 
 	/* ヒエラルキーから,転送用データに変換する */
-	GameObjectData data_ = 
+	GameObjectData data_ =
 		GameObject::ConvertGameData(hierarchy);
+
+	/* クローンを生成 */
+	data_.model = data_.model->Clone();
+
 
 	data_.objectID = type;
 	data_.subObjectID = subType;
@@ -258,17 +292,17 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 	//
 	// シーン側に,それぞれのタイプに登録された、SubIDで振り分けられたラムダ式をまとめて実行して生成！！！	
 	//
-	
+
 	// キー
 	DemoFieldObject::Type type_ = static_cast<DemoFieldObject::Type>(type);
-	
+
 	DemoFieldObject* object = nullptr;
 
 	switch (type_) {
 
-	//
-	//  * プレイヤー *
-	//
+		//
+		//  * プレイヤー *
+		//
 	case DemoFieldObject::Type::kPlayer:
 
 		/* もうすでにいる場合 */
@@ -276,10 +310,12 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 			player_.release();
 		}
 
-		player_ = std::make_unique<DemoPlayer>(playerModel_, &camera_, data_,&hierarchy.json_);
+		player_ = std::make_unique<DemoPlayer>(playerModel_, &camera_, data_, &hierarchy.json_);
+		player_->Initialize();
+
 
 		/* bloomテスト */
-		PostEffectManager::GetInstance()->AddBloomModel(playerModel_, &player_->GetWorldTransform());
+		///PostEffectManager::GetInstance()->AddBloomModel(playerModel_, &player_->GetWorldTransform());
 
 		// ヒエラルキ側にも登録
 		hierarchy.gameObject_ = player_.get();
@@ -287,9 +323,9 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 
 		break;
 
-	//
-	//    ブロック
-	//
+		//
+		//    ブロック
+		//
 	case DemoFieldObject::Type::kBlock:
 
 		blocks_.push_back(
@@ -303,9 +339,9 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 
 		break;
 
-	//
-	//    ギミック
-	//
+		//
+		//    ギミック
+		//
 	case DemoFieldObject::Type::kGimmick:
 
 		gimmicks_.push_back(
@@ -319,7 +355,26 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 
 		break;
 
+		//
+		//    アイテム
+		//
+	case DemoFieldObject::Type::kItem:
+
+		items_.push_back(
+			std::move(
+				DemoItemFactory::Create(
+					static_cast<DemoFieldItem::ItemType>(data_.subObjectID), data_, &hierarchy.json_)));
+
+		// ヒエラルキ側にも登録
+		hierarchy.gameObject_ = items_.back().get();
+		object = items_.back().get();
+
+		break;
 	}
+
+	//
+	object->Initialize();
+
 
 	// 各FieldObjectの、uniqueIDを記録
 	RecordUniqueId(object);
