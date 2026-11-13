@@ -136,6 +136,7 @@ public:
 		animationSpeed = s;
 	}
 
+	Vector4& GetModelColor() { return materialData->color; }
 	void ModelColor(Vector4 rgba) {
 		materialData->color = { rgba.x,rgba.y,rgba.z,rgba.w };
 	};

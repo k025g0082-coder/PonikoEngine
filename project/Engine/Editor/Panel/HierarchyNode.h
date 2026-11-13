@@ -102,6 +102,9 @@ public:
 	// シーン側と連携するゲームオブジェクトのポインタ（持つ場合）
 	GameObject* gameObject_ = nullptr;
 
+	// ゲームオブジェクト側のモデルの色
+	Vector4 modelColor_ = { 1.0f,1.0f,1.0f,1.0f };
+
 
 	// gameObjectが持つデータ。名前変えたいけど短いからこれでいいや
 	nlohmann::json json_;

@@ -69,6 +69,10 @@ void DemoFieldObject::BeginImGui()
 #ifdef USE_IMGUI
 	ImGui::Begin("FieldObject", &showImGuiView);
 
+	if (ImGui::ColorPicker4("modelColor", &model_->GetModelColor().x)) {
+		hierarchy->modelColor_ = model_->GetModelColor();
+	}
+
 	/* 種類名など */
 	int v = static_cast<int>(type_);
 

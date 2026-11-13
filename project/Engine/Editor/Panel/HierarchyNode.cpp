@@ -145,7 +145,12 @@ nlohmann::json ModelNode::ToJson() const
     nlohmann::json item = HierarchyNode::ToJson();
 
     item["id"] = modelId_;
+
     item["aabb"] = SceneComponentLoader::AABBToJson(aabb_);
+
+
+    item["modelColor"] = Vector4ToJson(modelColor_);
+
 
      // シーン内のカスタム設定。空じゃなけりゃ保存
      if (!json_.empty()) {
@@ -159,11 +164,14 @@ void ModelNode::FromJson(const nlohmann::json& j)
 {
     /* まずはヒエラルキの基本情報をJSON化 */
     HierarchyNode::FromJson(j);
-
+    
     modelId_ = j.at("id").get<std::string>();
 
     if (j.contains("aabb")) {
        aabb_ = SceneComponentLoader::JsonToAABB(j.at("aabb"));
+    }
+    if (j.contains("modelColor")) {
+        modelColor_ = JsonToVector4(j.at("modelColor"));
     }
 
     if (j.contains("propaties")) {

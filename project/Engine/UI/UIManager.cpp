@@ -224,6 +224,7 @@ void UIManager::UpdateElements()
 		}
 	}
 	
+#ifdef USE_IMGUI
 	/*
 		もし一度も各エレメントの矩形内でクリックされていない場合リセット
 	*/
@@ -241,6 +242,7 @@ void UIManager::UpdateElements()
 	//
 	ParentSelectPopupWindow();
 
+#endif
 
 	// もしキャンバスレイヤーじゃなきゃここで抜ける
 	if (hierarchyPanel_->GetSelectedCurrentLayerType() != HierarchyLayerType::kCanvasLayer) return;

@@ -434,7 +434,7 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 
 	/* クローンを生成 */
 	data_.model = data_.model->Clone();
-
+	data_.model->GetModelColor() = hierarchy.modelColor_;// モデルのクローン後、個別にModelNodeで保存された色を設定
 
 	data_.objectID = type;
 	data_.subObjectID = subType;
