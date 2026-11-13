@@ -30,14 +30,14 @@ void DemoFieldMeteo::Initialize(Model* model, Vector3 pos, ParticleParam& meteoE
 	float s = Random(1.0f, 3.0f);
 	world_.scale_ = { s,s,s };
 
+	// 判定用の大きさも設定する
+	aabb_.width_ = s;
+	aabb_.height_ = s;
+	aabb_.depth_ = s;
+
 
 	world_.Initialize();
 	world_.translation_ = pos;
-
-	// 判定用AABBの大きさ
-	aabb_.width_  = 1.0f;
-	aabb_.height_ = 1.0f;
-	aabb_.depth_  = 1.0f;
 
 
 	/* 

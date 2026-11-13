@@ -132,7 +132,7 @@ void FieldExample::Update(Input * input)
 	/*
 		定期的に隕石落下
 	*/
-	float emitDistance = 0.5f;
+	float emitDistance = 0.3f;
 
 	if (emitMeteoElapsedTimer >= emitDistance) {
 		
@@ -205,6 +205,8 @@ void FieldExample::Update(Input * input)
 		}
 	);
 
+	static Vector3 emitMeteoPosition;
+	emitMeteoRangeAABB.UpdatePosition(emitMeteoPosition);
 
 #ifdef USE_IMGUI
 	ImGui::Begin("FieldExample");
@@ -220,9 +222,7 @@ void FieldExample::Update(Input * input)
 
 	emitMeteoRangeAABB.ImGuiView();
 
-	static Vector3 emitMeteoPosition;
-	emitMeteoRangeAABB.UpdatePosition(emitMeteoPosition);
-	
+
 	/*
 		パーティクルIMGUI
 	*/

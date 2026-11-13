@@ -24,7 +24,7 @@ struct GameObjectData {
     uint32_t objectID = 0;    // 識別ID
     uint32_t subObjectID = 0; // サブ識別ID
 
-	HierarchyNode* hierarchy = nullptr; // 連携してるモデルヒエラルキのポインタ
+	ModelNode* hierarchy = nullptr; // 連携してるモデルヒエラルキのポインタ
 
 };
 
@@ -50,8 +50,8 @@ public:
     void SetAABB(const AABB& aabb) { aabb_ = aabb; }
     AABB& GetAABB() { return aabb_; }
    
-    void SetHierarchy(HierarchyNode* h) { hierarchy = h; }
-    HierarchyNode* GetHierarchy() { return hierarchy; }
+    void SetHierarchy(ModelNode* h) { hierarchy = h; }
+    ModelNode* GetHierarchy() { return hierarchy; }
 
     const uint32_t& GetId() const { return objectID_; }
     const uint32_t& GetSubId() const { return objectSubID_; }
@@ -78,7 +78,7 @@ protected:
     Model* model_ = nullptr;
     Camera* camera_ = nullptr;
 
-    HierarchyNode* hierarchy = nullptr; // 連携してるヒエラルキのポインタ
+    ModelNode* hierarchy = nullptr; // 連携してるヒエラルキのポインタ
 
     WorldTransform worldTransform;// WorldTransform情報
 

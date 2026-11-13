@@ -249,8 +249,8 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DemoFieldItem.cpp" />
-    <ClCompile Include="DemoFieldMeteo.cpp" />
+    <ClCompile Include="Engine\Demo\DemoFieldItem.cpp" />
+    <ClCompile Include="Engine\Demo\DemoFieldMeteo.cpp" />
     <ClCompile Include="Engine\Shapes\AABB.cpp" />
     <ClCompile Include="Engine\Editor\Panel\AssetsPanel.cpp" />
     <ClCompile Include="Engine\Utility\BaseFactory.cpp" />
@@ -357,21 +357,19 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Engine\UI\UIManager.cpp" />
     <ClCompile Include="Engine\UI\UISequencer.cpp" />
     <ClCompile Include="Engine\Core\WinApp.cpp" />
-    <ClCompile Include="Random.cpp" />
+    <ClCompile Include="Engine\Utility\Random.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="externals\imGuizmo\LICENSE" />
-    <None Include="ModelBloom.hlsli" />
-    <None Include="Particle.hlsli" />
     <None Include="resources\Engine\Shader\Model.hlsli" />
     <None Include="resources\Engine\Shader\Object3d.hlsli" />
     <None Include="resources\Engine\Shader\PostEffect.hlsli" />
     <None Include="resources\Engine\Shader\Sprite.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DemoFieldItem.h" />
-    <ClInclude Include="DemoFieldMeteo.h" />
+    <ClInclude Include="Engine\Demo\DemoFieldItem.h" />
+    <ClInclude Include="Engine\Demo\DemoFieldMeteo.h" />
     <ClInclude Include="Engine\Shapes\AABB.h" />
     <ClInclude Include="Engine\Model\Animation.h" />
     <ClInclude Include="Engine\Editor\Panel\AssetsPanel.h" />
@@ -441,7 +439,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Engine\Core\PonikoEngine.h" />
     <ClInclude Include="Engine\Vfx\PostEffectManager.h" />
     <ClInclude Include="Engine\Core\RenderTarget.h" />
-    <ClInclude Include="Random.h" />
+    <ClInclude Include="Engine\Utility\Random.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Engine\Scene\Scene.h" />
     <ClInclude Include="Engine\Scene\SceneComponentLoader.h" />

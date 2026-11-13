@@ -1,0 +1,207 @@
+{
+    "DirectionalLights": {
+        "count": 0
+    },
+    "Grid": {
+        "gridDepth": 1.0,
+        "gridHeight": 1.0,
+        "gridWidth": 1.0,
+        "horizontal": 10,
+        "isSnap": false,
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "translation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "vertical": 10
+    },
+    "Hierarchy": {
+        "Layers": [
+            {
+                "isView": true,
+                "name": "main",
+                "type": 0
+            },
+            {
+                "isView": true,
+                "name": "test",
+                "type": 0
+            }
+        ],
+        "ModelProperties": [
+            {
+                "aabb": {
+                    "depth": 45.29999923706055,
+                    "height": 1.100000023841858,
+                    "max": [
+                        24.28319549560547,
+                        -6.347638130187988,
+                        14.230224609375
+                    ],
+                    "min": [
+                        -30.616806030273438,
+                        -7.447638511657715,
+                        -31.069774627685547
+                    ],
+                    "offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "width": 54.900001525878906
+                },
+                "id": "resources/Models/block/cube.obj",
+                "layerName": "test",
+                "modelColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "name": "cube",
+                "propaties": {
+                    "objectType": 2,
+                    "subObjectType": 0,
+                    "uniqueID": 1
+                },
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        54.45460891723633,
+                        1.6237688064575195,
+                        44.96604537963867
+                    ],
+                    "translation": [
+                        -3.1668059825897217,
+                        -6.897638320922852,
+                        -8.419775009155273
+                    ]
+                },
+                "type": 0
+            },
+            {
+                "aabb": {
+                    "depth": 1.0,
+                    "height": 1.0,
+                    "max": [
+                        0.31880664825439453,
+                        -7.936159133911133,
+                        -1.6764335632324219
+                    ],
+                    "min": [
+                        -0.6811933517456055,
+                        -8.936159133911133,
+                        -2.676433563232422
+                    ],
+                    "offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "width": 1.0
+                },
+                "id": "resources/Models/block/cube.obj",
+                "layerName": "test",
+                "modelColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "name": "cube",
+                "propaties": {
+                    "objectType": 1,
+                    "subObjectType": 0,
+                    "uniqueID": 2
+                },
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "translation": [
+                        -0.18119335174560547,
+                        -8.436159133911133,
+                        -2.176433563232422
+                    ]
+                },
+                "type": 0
+            },
+            {
+                "aabb": {
+                    "depth": 2.0,
+                    "height": 2.0,
+                    "max": [
+                        1.0,
+                        13.459943771362305,
+                        1.0
+                    ],
+                    "min": [
+                        -1.0,
+                        11.459943771362305,
+                        -1.0
+                    ],
+                    "offset": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "width": 2.0
+                },
+                "id": "resources/Models/block/cube.obj",
+                "layerName": "test",
+                "modelColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "name": "cube",
+                "propaties": {
+                    "objectType": 1,
+                    "subObjectType": 0,
+                    "uniqueID": 3
+                },
+                "transform": {
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        2.0,
+                        2.0,
+                        2.0
+                    ],
+                    "translation": [
+                        0.0,
+                        12.459943771362305,
+                        0.0
+                    ]
+                },
+                "type": 0
+            }
+        ]
+    },
+    "PointLights": {
+        "count": 0
+    },
+    "SpotLights": {
+        "count": 0
+    }
+}
