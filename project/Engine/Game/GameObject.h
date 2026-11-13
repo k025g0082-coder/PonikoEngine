@@ -46,8 +46,10 @@ public:
     virtual void ImGuiView() = 0;
 
     WorldTransform& GetWorldTransform(){ return worldTransform; } 
-    AABB& GetAABB() { return aabb_; }
 
+    void SetAABB(const AABB& aabb) { aabb_ = aabb; }
+    AABB& GetAABB() { return aabb_; }
+   
 	const HierarchyNode* GetHierarchy() const { return hierarchy; }
 
     const uint32_t& GetId() const { return objectID_; }

@@ -122,6 +122,7 @@ public:
 	void ChangeHierarchyLayer(bool b) override;
 
 
+	
 	std::unique_ptr<HierarchyNode> Clone() const override;
 };
 

@@ -432,6 +432,8 @@ void SceneComponentLoader::Property(const std::string& name, AABB& value)
 				json_["height"] = value.height_;
 				json_["depth"] = value.depth_;
 
+				json_["offset"] = Vector3ToJson(value.offset);
+
 				group[name] = json_;
 			},
 
@@ -445,6 +447,10 @@ void SceneComponentLoader::Property(const std::string& name, AABB& value)
 			value.width_ = group[name].value("width", 1.0f);
 			value.height_ = group[name].value("height", 1.0f);
 			value.depth_ = group[name].value("depth", 1.0f);
+
+			if (group[name].contains("offset")) {
+				value.offset = JsonToVector3(group[name]["offset"]);
+			}
 		}
 	}
 	};
@@ -1400,6 +1406,10 @@ AABB SceneComponentLoader::JsonToAABB(const json& value)
 	aabb_.width_ = value.value("width", 1.0f);
 	aabb_.height_ = value.value("height", 1.0f);
 	aabb_.depth_ = value.value("depth", 1.0f);
+
+	if (value.contains("offset"))
+		aabb_.offset = JsonToVector3(value["offset"]);
+
 	return aabb_;
 }
 
@@ -1413,6 +1423,8 @@ json SceneComponentLoader::AABBToJson(const AABB& data)
 	json_["width"] = data.width_;
 	json_["height"] = data.height_;
 	json_["depth"] = data.depth_;
+
+	json_["offset"] = Vector3ToJson(data.offset);
 
 	return json_;
 }

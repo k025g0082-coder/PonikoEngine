@@ -29,6 +29,13 @@ Vector2 Follow(Vector2 value, Vector2 target, float speed, float deltaTime);
 // targetがvalueにゆっくり追従(線形補完
 Vector3 Follow(Vector3 value, Vector3 target, float speed, float deltaTime);
 
+//
+float FollowAngle(
+    float current,
+    float target,
+    float interpolationRate,
+    float deltaTime);
+
 
     // 行列の計算とか
 Matrix4x4 Multiply(const Matrix4x4& a, const Matrix4x4& b);

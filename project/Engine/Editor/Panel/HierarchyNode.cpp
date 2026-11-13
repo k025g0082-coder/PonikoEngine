@@ -24,6 +24,12 @@ void ModelNode::Update()
 
 void ModelNode::Draw(Camera& camera)
 {
+    /* 
+    【重要】もしシーン内のオブジェクトと共有していたら、描画はシーン側で行うものとして、描画をスキップする
+    */
+    if (gameObject_)return;
+
+
     WorldTransform* world = static_cast<WorldTransform*>(transform_.get());
 
     // マップで登録されたidと連携したモデルで描画
@@ -36,10 +42,6 @@ void ModelNode::Draw(Camera& camera)
     // エディターモードじゃなければ、シーンのカメラで描画する
     else {
 
-
-        /* 【重要？】もしシーン内のオブジェクトと共有していたら、描画をスキップする */
-        if (gameObject_)return;
-
         AssetsPanel::GetInstance()->GethierarchyModelResourceList()[modelId_]->Draw(*world, *Scene::GetSceneCamera());
 
     }
@@ -49,15 +51,29 @@ void ModelNode::ImGuiView()
 {
 #ifdef USE_IMGUI
 
-    /* 選択中のモデルヒエラルキのAABB画面 */
+    /*
+        選択中のモデル画面
+    */
+    ImGui::Begin(name_.c_str());
+    /* 
+        選択中のモデルヒエラルキのAABB画面
+    */
+
     aabb_.ImGuiView();
 
     if (gameObject_) {
-
-        // それに登録されたIMGUI表示！！
-        gameObject_->ImGuiView();
+        gameObject_->SetAABB(aabb_);// GameObjectと連携場合、AABBも同期させる
     }
 
+
+    ImGui::SeparatorText("GameObject");
+
+
+    // それに登録されたIMGUI表示！！
+    gameObject_->ImGuiView();
+    
+
+    ImGui::End();
 #endif
 }
 

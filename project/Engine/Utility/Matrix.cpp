@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include <cassert>
+#include <numbers>
 
 float Lerp(const float& a, const float& b, float t) {
 	return a + (b - a) * t;
@@ -76,6 +77,19 @@ Vector3 Follow(Vector3 value, Vector3 target, float speed, float deltaTime) {
 	float t = std::clamp(speed * deltaTime, 0.0f, 1.0f);
 
 	return value + (target - value) * t;
+}
+
+float FollowAngle(float current, float target, float interpolationRate, float deltaTime)
+{
+	// 角度の差分（最短回転方向）
+	float diff = std::remainder(
+		target - current,
+		2.0f * std::numbers::pi_v<float>
+	);
+
+	// 補間
+	return current + diff * interpolationRate * deltaTime;
+
 };
 
 

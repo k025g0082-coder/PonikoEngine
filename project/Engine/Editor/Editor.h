@@ -149,6 +149,10 @@ public:
 	static const bool& IsEditorMode() { return isEditorMode_; }
 
 
+	const ImVec2& GetMousePos() { return mouse; }
+	const ImVec2& GetMainViewPos() { return mainViewPos; }
+	const ImVec2& GetMainViewSize() { return mainViewSize; }
+
 private:
 
 	// エディターモードか
@@ -194,6 +198,7 @@ private:
 
 	// 利用可能な幅と高さ
 	ImVec2 mainViewSize;  
+
 
 	// ウインドウの｛０，０｝から見たローカル座標
 	float maiViewLocalMouseX;

@@ -87,11 +87,13 @@ public:
 	/// <summary>
 	/// ある原点中心にカメラ回す. カメラ内蔵用　camera.Updateはよばない
 	/// </summary>
-	void SphericalCameraUpdate(Vector3 targetPos);
+	/// <param name="targetPos">ターゲット座標</param>
+	/// <param name="Follow">Followでゆっくり補間時間</param>
+	void SphericalCameraUpdate(Vector3 targetPos,float interpolation = 0.2f);
 
 	void SphericalImGuiView();
 
-	Spherical& GetSpherical() { return spherical; }
+	Spherical& GetSpherical() { return targetSpherical; }
 
 	// ワールド座標 → スクリーン座標
 	Vector2 WorldToScreen(const Vector3& worldPosition) const;
@@ -134,12 +136,23 @@ private:
 	// エディターモードか？
 	bool isEditorMode_ = false;
 
-	// 球面座標系よう
-	Spherical spherical	{
+	/*
+		SphericalをFollow補間
+	*/
+	void FollowSpherical();
+
+
+	// 球面座標系。補間対象のターゲット用
+	Spherical targetSpherical	{
 			6.0f, // どれくらい原点から離れるか
 			0,
 			-std::numbers::pi_v<float> / 2.0f
 	};
 
+	// 補間する方
+	Spherical spherical;
+
+	// Follow補完時間
+	float followInterpolation_ = 0.0f;
 };
 

@@ -6,6 +6,8 @@ struct AABB {
 	Vector3 min = { 0,0,1.0f }; // 最小点
 	Vector3 max = { 1.0f,1.0f,1.0f }; // 最大点
 
+	Vector3 offset; // オフセット
+
 	/* 縦横幅 */
 	float width_  = 1.0f;
 	float height_ = 1.0f;

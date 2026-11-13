@@ -1,11 +1,15 @@
 #include "Camera.h"
 #include "WinApp.h"
 
+#include "Timer.h"
+
 void Camera::Initialize() {
 
 	float startZ = -50.0f;
 	worldTransform_.translation_.z = startZ;
 	worldTransform_.Initialize();
+
+	spherical = targetSpherical;
 
 	// 計算
 	UpdateMatrix();
@@ -77,7 +81,16 @@ void Camera::SphericalCameraUpdate(Vector3 targetPos, float offset, float theta,
 	viewMatrix = Inverse(cameraMatrix);
 }
 
-void Camera::SphericalCameraUpdate(Vector3 targetPos) {
+void Camera::SphericalCameraUpdate(Vector3 targetPos, float interpolation) {
+
+	followInterpolation_ = interpolation;
+
+	/*
+		設定されたSphericalにFollow補間
+	*/
+
+	FollowSpherical();
+
 
 	// カメラの位置
 	Vector3 offsett = ToCartesian(spherical);
@@ -111,16 +124,16 @@ void Camera::SphericalCameraUpdate(Vector3 targetPos) {
 
 	worldTransform_.rotation_ = { rotationX, rotationY, 0.0f };
 	
-	/*worldTransform_.translation_ = eye;*/
+	worldTransform_.translation_ = eye;
 
 }
 
 void Camera::SphericalImGuiView() {
 
 #ifdef USE_IMGUI
-	ImGui::DragFloat("CameraOffset", &spherical.radius, 0.01f);
-	ImGui::DragFloat("CameraTheta", &spherical.theta, 0.01f);
-	ImGui::DragFloat("CameraPhi", &spherical.phi, 0.01f);
+	ImGui::DragFloat("CameraOffset", &targetSpherical.radius, 0.01f);
+	ImGui::DragFloat("CameraTheta", &targetSpherical.theta, 0.01f);
+	ImGui::DragFloat("CameraPhi", &targetSpherical.phi, 0.01f);
 #endif
 
 }
@@ -352,4 +365,34 @@ std::optional<Vector3> Camera::IntersectRayPlaneArea(const Camera::Ray& ray, con
 	}
 
 	return hitPoint;
+}
+
+void Camera::FollowSpherical()
+{
+	// 現在の球面座標を目標に近づける
+
+	// 大きさ
+	spherical.radius = Follow(
+		spherical.radius,
+		targetSpherical.radius,
+		followInterpolation_,
+		Timer::GetDeltaTime()
+	);
+
+	// 方位核（横
+	spherical.phi = Follow(
+		spherical.phi,
+		targetSpherical.phi,
+		followInterpolation_,
+		Timer::GetDeltaTime()
+	);
+
+	// 方位核（縦
+	spherical.theta = FollowAngle(
+		spherical.theta,
+		targetSpherical.theta,
+		followInterpolation_,
+		Timer::GetDeltaTime()
+	);
+
 }

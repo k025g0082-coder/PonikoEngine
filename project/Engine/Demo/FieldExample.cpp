@@ -32,7 +32,7 @@ void FieldExample::Init()
 	playerModel_ = Model::CreateOBJ("resources/Models/block/cube.obj");
 
 	// 赤
-	playerModel_->ModelColor({ 1.0f,0,0,1.0f });
+	//playerModel_->ModelColor({ 1.0f,0,0,1.0f });
 
 
 	// factoryら 初期化
@@ -61,26 +61,31 @@ void FieldExample::Update(Input * input)
 {
 	input;
 	
+	//if (player_) {
+
+	//	// カメラ
+	//	Vector3 targetPosition = player_->GetWorldTransform().translation_;
+	//	Vector3 targetRotation = player_->GetWorldTransform().rotation_;
+
+	//	Vector3 targetOffsetPos = { -6.487f,9.148f,-24.729f };
+	//	Vector3 targetOffsetRot = { 0.300f,0.171f,-0.000f };
+
+	//	// プレイヤーに追跡
+	//	camera_.GetWorldTransform().translation_ = targetPosition + targetOffsetPos;
+	//	camera_.GetWorldTransform().rotation_ = targetRotation + targetOffsetRot;
+
+	
+	//}
 	if (player_) {
 
-		// カメラ
-		Vector3 targetPosition = player_->GetWorldTransform().translation_;
-		Vector3 targetRotation = player_->GetWorldTransform().rotation_;
-
-		Vector3 targetOffsetPos = { -6.487f,9.148f,-24.729f };
-		Vector3 targetOffsetRot = { 0.300f,0.171f,-0.000f };
-
-		// プレイヤーに追跡
-		camera_.GetWorldTransform().translation_ = targetPosition + targetOffsetPos;
-		camera_.GetWorldTransform().rotation_ = targetRotation + targetOffsetRot;
-
-		/* 
+		/*
 			プレイヤー更新
 		*/
 		player_->Update();
-	}
 
-	camera_.Update();
+		camera_.Update();
+		//camera_.SphericalCameraUpdate(player_->GetWorldTransform().translation_,10.0f);
+	}
 
 
 	/* 更新 */
@@ -129,7 +134,9 @@ void FieldExample::Update(Input * input)
 	ImGui::Begin("FieldExample");
 
 
-	player_->ImGuiView();
+	//ImGui::Text("mousePosX:%f mousePosY:%f", Input::GetInstance()->GetMousePosition().x, Input::GetInstance()->GetMousePosition().y);
+	camera_.SphericalImGuiView();
+	//player_->ImGuiView();
 
 
 

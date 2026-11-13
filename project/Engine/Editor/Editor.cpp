@@ -792,9 +792,14 @@ void Editor::OperationLeftClick()
 						continue;
 				}
 
+				// いま選択されているレイヤー以外なら選択もスキップ
+				if (hierarchyPanel_->GetSelectedCurrentLayerName() != model->layerName_)
+					continue;
+
 				// 非表示なら選択もスキップ
 				if (!model->isView_)
 					continue;
+
 
 				// ヒエラルキからワールドのポインタ取得！
 				WorldTransform* world = static_cast<WorldTransform*>(model->transform_.get());

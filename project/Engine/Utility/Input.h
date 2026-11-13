@@ -62,14 +62,7 @@ public:
 			prevState_.Gamepad.wButtons == 0;
 	}
 
-	void SetMousePosition(int x, int y) {
-
-		mousePositionX_ = x;
-		mousePositionY_ = y;
-
-		tmpMousePositionX_ = x;
-		tmpMousePositionY_ = y;
-	}
+	void SetMousePosition(int x, int y);
 
 	// マウス座標取得
 	Vector2 GetMousePosition() {
@@ -142,6 +135,10 @@ private:
 
 	bool rightTriggerButton_ = false;// 押された瞬間
 	bool rightReleaseButton_ = false;// 離された瞬間
+
+
+	// エディター内のメインビューに合わせた座標
+	void EditorViewAspectPosition();
 
 
 	int mouseWheel_ = 0;
