@@ -152,10 +152,10 @@ nlohmann::json ModelNode::ToJson() const
     item["modelColor"] = Vector4ToJson(modelColor_);
 
 
-     // シーン内のカスタム設定。空じゃなけりゃ保存
-     if (!json_.empty()) {
-         item["propaties"] = json_;
-     }
+    //　GameObjectの設定。空じゃなけりゃ保存
+    if (!json_.empty() && gameObject_) {
+        item["propaties"] = json_;
+    }
 
      return item;
 }

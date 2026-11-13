@@ -70,7 +70,7 @@ void DemoFieldObject::BeginImGui()
 	ImGui::Begin("FieldObject", &showImGuiView);
 
 	if (ImGui::ColorPicker4("modelColor", &model_->GetModelColor().x)) {
-		hierarchy->modelColor_ = model_->GetModelColor();
+	//	hierarchy->modelColor_ = model_->GetModelColor();
 	}
 
 	/* 種類名など */
