@@ -23,6 +23,8 @@ public:
     void Update() override;
     void Draw() override;
 
+    void Respown();
+
     // フィールド上の全部と判定
     void CollisionToAllBlock();
 
@@ -40,6 +42,10 @@ public:
     void ImGuiView() override;
 
 private:
+
+    // ステージ開始時の座標
+    Vector3 beginPosition_;
+
 
     Vector3 velocity_;// 移動量
 

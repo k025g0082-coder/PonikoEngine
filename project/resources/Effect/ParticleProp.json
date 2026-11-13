@@ -1,5 +1,39 @@
 {
     "particle": {
+        "meteoBreakEmit": {
+            "blendMode": 0,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "gravity": 0.14000000059604645,
+            "isBilliboard": false,
+            "isDilute": true,
+            "life": 20,
+            "scaleAmpMax": 1.0,
+            "scaleAmpMin": 1.0,
+            "speed": 1.0,
+            "speedAmp": 0.0
+        },
+        "meteoEmit": {
+            "blendMode": 0,
+            "color": [
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "gravity": 0.0,
+            "isBilliboard": false,
+            "isDilute": true,
+            "life": 20,
+            "scaleAmpMax": 0.5699999928474426,
+            "scaleAmpMin": 0.2800000011920929,
+            "speed": 0.12999999523162842,
+            "speedAmp": 0.0
+        },
         "playerGetEmit": {
             "blendMode": 4,
             "color": [

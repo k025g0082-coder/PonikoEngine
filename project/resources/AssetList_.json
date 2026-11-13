@@ -24,10 +24,6 @@
             },
             {
                 "folderName": "Main",
-                "pathId": "resources/keichan.png"
-            },
-            {
-                "folderName": "Main",
                 "pathId": "resources/Engine/uvChecker.png"
             }
         ]

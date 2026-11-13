@@ -250,6 +250,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DemoFieldItem.cpp" />
+    <ClCompile Include="DemoFieldMeteo.cpp" />
     <ClCompile Include="Engine\Shapes\AABB.cpp" />
     <ClCompile Include="Engine\Editor\Panel\AssetsPanel.cpp" />
     <ClCompile Include="Engine\Utility\BaseFactory.cpp" />
@@ -356,6 +357,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Engine\UI\UIManager.cpp" />
     <ClCompile Include="Engine\UI\UISequencer.cpp" />
     <ClCompile Include="Engine\Core\WinApp.cpp" />
+    <ClCompile Include="Random.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -369,6 +371,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DemoFieldItem.h" />
+    <ClInclude Include="DemoFieldMeteo.h" />
     <ClInclude Include="Engine\Shapes\AABB.h" />
     <ClInclude Include="Engine\Model\Animation.h" />
     <ClInclude Include="Engine\Editor\Panel\AssetsPanel.h" />
@@ -438,6 +441,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Engine\Core\PonikoEngine.h" />
     <ClInclude Include="Engine\Vfx\PostEffectManager.h" />
     <ClInclude Include="Engine\Core\RenderTarget.h" />
+    <ClInclude Include="Random.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Engine\Scene\Scene.h" />
     <ClInclude Include="Engine\Scene\SceneComponentLoader.h" />

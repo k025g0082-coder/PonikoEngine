@@ -346,6 +346,12 @@
     <ClCompile Include="DemoFieldItem.cpp">
       <Filter>test\FactoryObjectDemo\src</Filter>
     </ClCompile>
+    <ClCompile Include="DemoFieldMeteo.cpp">
+      <Filter>test\FactoryObjectDemo\src</Filter>
+    </ClCompile>
+    <ClCompile Include="Random.cpp">
+      <Filter>Engine\Source\ソース ファイル\math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -637,6 +643,12 @@
     </ClInclude>
     <ClInclude Include="DemoFieldItem.h">
       <Filter>test\FactoryObjectDemo\.h\fieldObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DemoFieldMeteo.h">
+      <Filter>test\FactoryObjectDemo\.h\fieldObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Random.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

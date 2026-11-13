@@ -6,10 +6,16 @@
 
 #include "GameObject.h"
 #include "DemoFieldObjectFactory.h"
-#include "PostEffectManager.h"
+
+#include "SceneComponentLoader.h"
 
 #include "ImGuiManager.h"
 #include "UIManager.h"
+
+#include "Timer.h"
+
+#include "Random.h"
+#include "DebugLine.h"
 
 #include <utility>
 #include <algorithm>
@@ -32,7 +38,22 @@ void FieldExample::Init()
 	playerModel_ = Model::CreateOBJ("resources/Models/block/cube.obj");
 
 	// 赤
-	//playerModel_->ModelColor({ 1.0f,0,0,1.0f });
+	playerModel_->ModelColor({ 1.0f,0,0,1.0f });
+
+
+	meteoModel_ = Model::CreateOBJ("resources/Models/block/cube.obj");
+	// 赤
+	meteoModel_->ModelColor({ 1.0f,0,0,1.0f });
+
+
+	emitMeteoRangeAABB.offset  = { 2.9f,13.2f,-16.7f };
+
+	emitMeteoRangeAABB.width_  = 63.2f;
+	emitMeteoRangeAABB.height_ = 2.0f;
+	emitMeteoRangeAABB.depth_  = 40.9f;
+
+	naviText.Init();
+	naviText.setFont("default");
 
 
 	// factoryら 初期化
@@ -54,6 +75,22 @@ void FieldExample::Init()
 	FieldLoad();
 
 
+	//  パーチクル用 -　データ読込
+	if (SceneComponentLoader::GetInstance()->Load("resources/Effect/ParticleProp.json")) {
+
+		// ※注　ポインタ
+		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+
+		loder->BeginGroup("particle");
+
+		loder->Property("meteoEmit", meteoEmitParam);
+		loder->Property("meteoBreakEmit", meteoBreakEmitParam);
+
+		loder->EndGroup();
+
+		/* 読込 */
+		loder->LoadGroup("particle");
+	}
 
 }
 
@@ -61,36 +98,70 @@ void FieldExample::Update(Input * input)
 {
 	input;
 	
-	//if (player_) {
-
-	//	// カメラ
-	//	Vector3 targetPosition = player_->GetWorldTransform().translation_;
-	//	Vector3 targetRotation = player_->GetWorldTransform().rotation_;
-
-	//	Vector3 targetOffsetPos = { -6.487f,9.148f,-24.729f };
-	//	Vector3 targetOffsetRot = { 0.300f,0.171f,-0.000f };
-
-	//	// プレイヤーに追跡
-	//	camera_.GetWorldTransform().translation_ = targetPosition + targetOffsetPos;
-	//	camera_.GetWorldTransform().rotation_ = targetRotation + targetOffsetRot;
-
-	
-	//}
 	if (player_) {
+
+		// カメラ
+		Vector3 targetPosition = player_->GetWorldTransform().translation_;
+		Vector3 targetRotation = player_->GetWorldTransform().rotation_;
+
+		Vector3 targetOffsetPos = Vector3{ -1.262f,18.762f,-20.052f };
+			
+		Vector3 targetOffsetRot = Vector3{ 0.708f,0.058f,-0.000f };
+
+		// プレイヤーに追跡
+		camera_.GetWorldTransform().translation_ = targetPosition + targetOffsetPos;
+		camera_.GetWorldTransform().rotation_ = targetRotation + targetOffsetRot;
 
 		/*
 			プレイヤー更新
 		*/
 		player_->Update();
 
+		// もしプレイヤーがフィールドの下に落ちたら
+		if (player_.get()->GetWorldTransform().translation_.y <= -60.0f) {
+
+			player_->Respown();
+
+		}
+
+
 		camera_.Update();
-		//camera_.SphericalCameraUpdate(player_->GetWorldTransform().translation_,10.0f);
+
 	}
+
+	/*
+		定期的に隕石落下
+	*/
+	float emitDistance = 0.5f;
+
+	if (emitMeteoElapsedTimer >= emitDistance) {
+		
+		EmitMeteo();
+
+		emitMeteoElapsedTimer -= emitDistance;
+	}
+	emitMeteoElapsedTimer += Timer::GetDeltaTime();
+	
 
 
 	/* 更新 */
 	for (const std::unique_ptr<DemoFieldObject>& obj : blocks_) {
+
+
 		obj->Update();
+
+
+		// 隕石、ブロックと判定
+		for (DemoFieldMeteo& meteo : meteos_) {
+
+			if (IsCollision(obj->GetAABB(), meteo.GetAABB())) {
+
+				if (!meteo.IsBreak())
+					meteo.Break();// 破壊
+
+			}
+		}
+
 	}
 
 	for (const std::unique_ptr<DemoGimmick>& gmk : gimmicks_) {
@@ -111,21 +182,26 @@ void FieldExample::Update(Input * input)
 			DemoFieldObject::Collision(player_.get(), obj.get());
 	}
 
+	/*
+		隕石更新
+	*/
+	for (DemoFieldMeteo& meteo : meteos_) {
+		meteo.Update();
+	}
 
-	// もしdeleteフラグがtrueなら削除
+
+	//
+	DeleteJudgeFieldObject(blocks_);
+	DeleteJudgeFieldObject(gimmicks_);
+	DeleteJudgeFieldObject(items_);
+
+	/*
+		隕石削除
+	*/
 	std::erase_if(
-		blocks_, [](std::unique_ptr<DemoFieldObject>& obj) {
-			return obj.get()->IsDelete();
-		}
-	);
-	std::erase_if(
-		gimmicks_, [](std::unique_ptr<DemoGimmick>& obj) {
-			return obj.get()->IsDelete();
-		}
-	);
-	std::erase_if(
-		items_, [](std::unique_ptr<DemoFieldItem>& obj) {
-			return obj.get()->IsDelete();
+		meteos_,
+		[](const DemoFieldMeteo& meteo) {
+			return meteo.IsDelete();
 		}
 	);
 
@@ -133,9 +209,55 @@ void FieldExample::Update(Input * input)
 #ifdef USE_IMGUI
 	ImGui::Begin("FieldExample");
 
+	static Vector3 emitPos;
 
+	if (ImGui::Button("隕石")) {
+		auto& meteo = meteos_.emplace_back();
+		meteo.Initialize(meteoModel_, emitPos,meteoEmitParam,meteoBreakEmitParam);
+	};
+	ImGui::DragFloat3("隕石Ｐｏｓ", &emitPos.x, 0.1f);
+	ImGui::DragFloat3("隕石Velocity", &DemoFieldMeteo::velocity.x, 0.1f);
+
+	emitMeteoRangeAABB.ImGuiView();
+
+	static Vector3 emitMeteoPosition;
+	emitMeteoRangeAABB.UpdatePosition(emitMeteoPosition);
+	
+	/*
+		パーティクルIMGUI
+	*/
+	ImGui::SeparatorText("EmitPropaties");
+
+	if (ImGui::TreeNode("meteoEmitParam")) {
+		meteoEmitParam.ImGuiView();
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("meteoBreakEmitParam")) {
+		meteoBreakEmitParam.ImGuiView();
+		ImGui::TreePop();
+	}
+
+	// セーブ
+	if (ImGui::Button("save")) {
+
+		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+
+		// jsonに
+		if (loder->SaveSwitchJson("resources/Effect/ParticleProp.json")) {
+
+			/* 登録 */
+			loder->SaveGroup("particle");
+
+			// JSONファイルに保存する
+			loder->Save("resources/Effect/ParticleProp.json");
+		}
+	}
+
+
+	//naviText.ImGuiView();
 	//ImGui::Text("mousePosX:%f mousePosY:%f", Input::GetInstance()->GetMousePosition().x, Input::GetInstance()->GetMousePosition().y);
-	camera_.SphericalImGuiView();
+	//camera_.SphericalImGuiView();
 	//player_->ImGuiView();
 
 
@@ -143,20 +265,22 @@ void FieldExample::Update(Input * input)
 	/*
 		てすとUI あにめ
 	*/
-	if (ImGui::Button("アニメ")) {
+	//if (ImGui::Button("アニメ")) {
 
-		UIManager::PlayAnimationElement(
-			"Canvas",
-			"element_1",
-			"NewAnimetest"
-		);
-	};
+	//	UIManager::PlayAnimationElement(
+	//		"Canvas",
+	//		"element_1",
+	//		"NewAnimetest"
+	//	);
+	//};
 
+	ImGui::Separator();
 
 	if (ImGui::Button("Reload")) {
 
 		blocks_.clear();
 		gimmicks_.clear();
+		items_.clear();
 
 		FieldLoad();
 
@@ -185,6 +309,25 @@ void FieldExample::Draw()
 	for (const std::unique_ptr<DemoFieldItem>& itm : items_) {
 		itm->Draw();
 	}
+
+	/*
+		隕石描画
+	*/
+	for (DemoFieldMeteo& meteo : meteos_) {
+		meteo.Draw();
+	}
+
+	//
+	naviText.SetFontOutlineSize(8);
+	naviText.SetFontSize(15);
+
+	naviText.drawString("移動/WASD", { 0,0 }, TextAnchor::LeftTop);
+
+
+	// 隕石範囲の描画
+	DebugLine::GetInstance()->DrawAABB(emitMeteoRangeAABB, { 1.0f,0,0,1.0f });
+
+	
 }
 void FieldExample::FieldLoad() {
 
@@ -326,6 +469,11 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 
 		// ヒエラルキ側にも登録
 		hierarchy.gameObject_ = player_.get();
+
+		// GameObject側
+		player_.get()->SetHierarchy(&hierarchy);
+
+
 		object = player_.get();
 
 		break;
@@ -342,6 +490,10 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 
 		// ヒエラルキ側にも登録
 		hierarchy.gameObject_ = blocks_.back().get();
+
+		// GameObject側
+		blocks_.back().get()->SetHierarchy(&hierarchy);
+
 		object = blocks_.back().get();
 
 		break;
@@ -358,6 +510,12 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 
 		// ヒエラルキ側にも登録
 		hierarchy.gameObject_ = gimmicks_.back().get();
+
+		// GameObject側
+		gimmicks_.back().get()->SetHierarchy(&hierarchy);
+
+
+
 		object = gimmicks_.back().get();
 
 		break;
@@ -374,6 +532,11 @@ void FieldExample::CreateGameObject(const uint32_t& type, const uint32_t& subTyp
 
 		// ヒエラルキ側にも登録
 		hierarchy.gameObject_ = items_.back().get();
+
+		// GameObject側
+		items_.back().get()->SetHierarchy(&hierarchy);
+
+
 		object = items_.back().get();
 
 		break;
@@ -419,6 +582,7 @@ void FieldExample::DeleteFunctionRegion()
 		// テンプレート削除関数をつかって検索
 		if (DeleteObject(blocks_, hierarchy))return;
 		if (DeleteObject(gimmicks_, hierarchy))return;
+		if (DeleteObject(items_, hierarchy))return;
 
 	};
 
@@ -428,6 +592,22 @@ void FieldExample::RecordUniqueId(DemoFieldObject* object)
 {
 	// UniqueIDを取り出して記録
 	uniqueIdMap_[object->GetUniqueID()] = object;
+
+}
+
+void FieldExample::EmitMeteo()
+{
+	/*
+		フィールド上の指定された範囲のランダムな場所を決定してエミットする
+	*/
+	Vector3 emitPos;
+
+	emitPos.x = Random(emitMeteoRangeAABB.min.x, emitMeteoRangeAABB.max.x);
+	emitPos.y = Random(emitMeteoRangeAABB.min.y, emitMeteoRangeAABB.max.y);
+	emitPos.z = Random(emitMeteoRangeAABB.min.z, emitMeteoRangeAABB.max.z);
+
+	auto& meteo = meteos_.emplace_back();
+	meteo.Initialize(meteoModel_->Clone(), emitPos, meteoEmitParam, meteoBreakEmitParam);
 
 }
 

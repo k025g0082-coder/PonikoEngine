@@ -1,0 +1,55 @@
+{
+    "particle": {
+        "playerGetEmit": {
+            "blendMode": 4,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "gravity": 0.1599999964237213,
+            "isBilliboard": true,
+            "isDilute": true,
+            "life": 20,
+            "scaleAmpMax": 4.159999847412109,
+            "scaleAmpMin": 0.7599999904632568,
+            "speed": 1.3700000047683716,
+            "speedAmp": 0.4399999976158142
+        },
+        "playerJumpEmit": {
+            "blendMode": 2,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "gravity": 0.0,
+            "isBilliboard": false,
+            "isDilute": true,
+            "life": 20,
+            "scaleAmpMax": 1.7200000286102295,
+            "scaleAmpMin": 1.2400000095367432,
+            "speed": 0.20000000298023224,
+            "speedAmp": 0.10999999940395355
+        },
+        "playerMoveEmit": {
+            "blendMode": 2,
+            "color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "gravity": 0.0,
+            "isBilliboard": false,
+            "isDilute": true,
+            "life": 20,
+            "scaleAmpMax": 4.519999980926514,
+            "scaleAmpMin": 2.359999895095825,
+            "speed": 0.20999999344348907,
+            "speedAmp": 0.0
+        }
+    }
+}

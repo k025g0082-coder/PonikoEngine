@@ -18,6 +18,8 @@
 #include "Camera.h"
 #include "Model.h"
 
+#include "Text.h"
+
 #include <string>
 
 #include <memory>
@@ -25,6 +27,8 @@
 #include "DemoFieldObject.h"
 #include "DemoGimmick.h"
 #include "DemoFieldItem.h"
+
+#include "DemoFieldMeteo.h"
 
 #include "DemoPlayer.h"
 
@@ -46,6 +50,8 @@ public:
     void Draw();
 
     void FieldLoad();
+
+
 
     void FieldLayerLoad(std::string layerName);
 
@@ -77,6 +83,8 @@ private:
     Model* itemModel_ = nullptr;
     Model* blockModel_ = nullptr;
 
+    Model* meteoModel_ = nullptr;
+
     // プレイヤー
     std::unique_ptr <DemoPlayer> player_;
 
@@ -100,28 +108,46 @@ private:
     std::vector<std::unique_ptr<DemoFieldItem>> items_;
 
 
-    // リスト削除用のテンプレート
-    //template <typename T>
-    //bool DeleteObject(
-    //    std::vector<std::unique_ptr<T>>& objects,
-    //    const Hierarchy<Model>& hierarchy) {
+    /* 隕石ｓ */
+    std::vector<DemoFieldMeteo> meteos_;
 
-    //    auto it = std::find_if(
-    //        objects.begin(),
-    //        objects.end(),
-    //        [&hierarchy](const std::unique_ptr<T>& obj) {
-    //            return obj->GetHierarchy() == &hierarchy;
-    //        }
-    //    );
+    void EmitMeteo();
 
-    //    if (it == objects.end()) {
-    //        return false;
-    //    }
+    AABB emitMeteoRangeAABB;
+    float emitMeteoElapsedTimer = 0.0f;
 
-    //    objects.erase(it);
-    //    return true;
-    //}
-    
+    // 落下中
+    ParticleParam meteoEmitParam;
+
+    // 落下時
+    ParticleParam meteoBreakEmitParam;
+
+
+    // ナビ用文字
+    Text naviText;
+
+
+    // FieldObjectリスト - もしdeleteフラグがtrueなら削除
+    template<typename T>
+    void DeleteJudgeFieldObject(std::vector<std::unique_ptr<T>>& list) {
+
+        std::erase_if(
+            list, [](std::unique_ptr<T>& obj) {
+
+                if (obj->IsDelete()) {
+
+                    auto* model = dynamic_cast<ModelNode*>(obj.get()->GetHierarchy());
+
+                    model->gameObject_ = nullptr; // 削除前にヒエラルキ側のGameObjectをnullにしてから
+                    model->isView_ = false;       // ヒエラルキの表示禁止（描画禁止）
+                    return true;
+                }
+
+                return false;
+            }
+        );
+    }
+
     // リスト削除用           
     template<typename T>
     bool DeleteObject(

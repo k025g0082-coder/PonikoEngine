@@ -29,6 +29,8 @@ void ModelNode::Draw(Camera& camera)
     */
     if (gameObject_)return;
 
+    if (!isView_)return;
+
 
     WorldTransform* world = static_cast<WorldTransform*>(transform_.get());
 
@@ -70,8 +72,10 @@ void ModelNode::ImGuiView()
 
 
     // それに登録されたIMGUI表示！！
-    gameObject_->ImGuiView();
-    
+
+    if (gameObject_) {
+        gameObject_->ImGuiView();
+    }
 
     ImGui::End();
 #endif

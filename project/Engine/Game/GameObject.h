@@ -50,7 +50,8 @@ public:
     void SetAABB(const AABB& aabb) { aabb_ = aabb; }
     AABB& GetAABB() { return aabb_; }
    
-	const HierarchyNode* GetHierarchy() const { return hierarchy; }
+    void SetHierarchy(HierarchyNode* h) { hierarchy = h; }
+	HierarchyNode* GetHierarchy() { return hierarchy; }
 
     const uint32_t& GetId() const { return objectID_; }
     const uint32_t& GetSubId() const { return objectSubID_; }

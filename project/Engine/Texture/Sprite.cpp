@@ -16,6 +16,7 @@ void Sprite::TextTextureInitialize(unsigned char* image,int width,int height) {
 	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
 
 	textTexture_.Initialize(image,width,height);
+	texture_ = &textTexture_;
 
 	imageWidth = width;
 	imageHeight = height;

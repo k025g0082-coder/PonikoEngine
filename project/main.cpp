@@ -19,7 +19,7 @@
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 {
-	PonikoEngine::Initialize(L"ぽにこエンジン");
+	PonikoEngine::Initialize(L"LE2B_05_カヤノ_リョウヤ");
 
 	
 	// 初期Gameシーンの登録

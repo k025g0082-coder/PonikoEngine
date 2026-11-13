@@ -17,6 +17,10 @@
 
 void DemoPlayer::Initialize()
 {
+	//
+	beginPosition_ = worldTransform.translation_;
+
+
 	// 赤
 	model_->ModelColor({ 1.0f,1.0f,0,1.0f });
 
@@ -150,6 +154,12 @@ void DemoPlayer::Draw()
 
 }
 
+void DemoPlayer::Respown()
+{
+	worldTransform.translation_ = beginPosition_;
+	velocity_ = { 0 };
+}
+
 void DemoPlayer::CollisionToAllBlock()
 {
 
@@ -167,7 +177,7 @@ void DemoPlayer::CollisionToAllBlock()
 			auto* model = dynamic_cast<ModelNode*>(hierarchy);
 
 
-			if (model->gameObject_ == nullptr) continue;
+			if (!model->gameObject_) continue;
 
 				auto type = model->gameObject_->GetId();
 				if (type != (uint32_t)DemoFieldObject::Type::kBlock) continue;// ブロックじゃなければReturn
