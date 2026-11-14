@@ -33,6 +33,9 @@
 
 #include "Timer.h"
 
+#include "Ray.h"
+#include "Collision.h"
+
 #include <algorithm>
 #include <numbers>
 #include <memory>
@@ -748,7 +751,7 @@ void Editor::OperationLeftClick()
 	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
 
 		// スクリーンの大きさとスクリーン座標からから、レイ生成
-		Camera::Ray ray = camera_.ScreenPointToRay(Vector2{ maiViewLocalMouseX,mainViewLocalMouseY }, mainViewWidth, mainViewHeight);
+		Ray ray = camera_.ScreenPointToRay(Vector2{ maiViewLocalMouseX,mainViewLocalMouseY }, mainViewWidth, mainViewHeight);
 
 		float distance = 0.0f;
 
@@ -809,7 +812,7 @@ void Editor::OperationLeftClick()
 				AABB* aabb = &model->aabb_;
 
 				// モデルのAABBと判定
-				if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
+				if (IntersectRayAABB(ray, *aabb, distance)) {
 
 					hierarchyPanel_->SetSelectedHierarchyModelIndex(model);
 					selectedModelWorldTransform_ = world;
@@ -831,7 +834,7 @@ void Editor::OperationLeftClick()
 			if (AssetsPanel::GetInstance()->selectedHierarchyResource_.pathId_.empty()) break;
 
 			// グリッドのplaneと判定
-			std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
+			std::optional<Vector3> hit = IntersectRayPlaneArea(ray, grid.plane_);
 
 			// 当たったら
 			if (hit.has_value()) {
@@ -910,7 +913,7 @@ void Editor::OperationRightClick()
 
 
 		// スクリーンの大きさとスクリーン座標からから、レイ生成
-		Camera::Ray ray = camera_.ScreenPointToRay(Vector2{ mouse.x,mouse.y }, mainViewWidth, mainViewHeight);
+		Ray ray = camera_.ScreenPointToRay(Vector2{ mouse.x,mouse.y }, mainViewWidth, mainViewHeight);
 
 		float distance = 0.0f;
 
@@ -945,7 +948,7 @@ void Editor::OperationRightClick()
 			if (AssetsPanel::GetInstance()->selectedHierarchyResource_.pathId_.empty()) break;
 
 			// グリッドのplaneと判定
-			std::optional<Vector3> hit = camera_.IntersectRayPlaneArea(ray, grid.plane_);
+			std::optional<Vector3> hit = IntersectRayPlaneArea(ray, grid.plane_);
 
 			// 当たったら
 			if (hit.has_value()) {
@@ -976,7 +979,7 @@ void Editor::OperationRightClick()
 					AABB* aabb = &model->aabb_;
 
 					// モデルのAABBと判定
-					if (camera_.IntersectRayAABB(ray, *aabb, distance)) {
+					if (IntersectRayAABB(ray, *aabb, distance)) {
 
 						/* 当たったヒエラルキモデルを削除 */
 						hierarchyPanel_->DeleteHierarchyNode(model);

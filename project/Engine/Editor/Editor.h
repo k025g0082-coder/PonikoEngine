@@ -113,13 +113,15 @@ public:
 		return currentSceneData_->hierarchyPanel_->GetHierarchyModelLayer(layerName);
 	}
 
+	// マウスがメインビューないに触れているか
+	bool IsMainViewInside() {
+		return mouse.x >= mainViewPos.x &&
+				mouse.x <= (mainViewPos.x + mainViewSize.x) &&
+				mouse.y >= mainViewPos.y &&
+				mouse.y <= (mainViewPos.y + mainViewSize.y);
+	}
 
-	/// <summary>
-	/// マウスがメインビューの左上を原点0,0として、矩形内ににあるかを返す
-	/// </summary>
-	/// <param name="min">左上の座標</param>
-	/// <param name="max">右上の座標</param>
-	/// <returns>あるか</returns>
+	// マウスがメインビューの左上を原点0,0として、矩形内ににあるかを返す
 	bool IsMainViewInsideMouse(Vector2 min,Vector2 max) {
 		return  maiViewLocalMouseX >= min.x &&
 				maiViewLocalMouseX <= max.x &&

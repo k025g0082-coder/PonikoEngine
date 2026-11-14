@@ -2,6 +2,14 @@
 #include "AABB.h"
 #include "LineSegment.h"
 #include "Sphere.h"
+#include "Plane.h"
+
+#include "Vector.h"
+
+#include "Ray.h"
+
+#include <optional>
+
 
 // 当たり判定クラス
 
@@ -13,6 +21,17 @@ bool IsCollision(const Sphere& s1, const Sphere& s2);
 
 bool IsCollision(const LineSegment& line, const Sphere& sphere);
 bool IsCollision(const LineSegment& line, const AABB& aabb);
+
+// 玉とAABB
+bool IsCollision(const Sphere& sphere, const AABB& aabb);
+
+
+// レイとAABB判定
+bool IntersectRayAABB(const Ray& ray,const AABB& aabb,float& distance);
+
+// レイとPlane判定 あたった座標を返す。当たらなかったらstd::nullopt
+std::optional<Vector3> IntersectRayPlane(const Ray& ray,const Plane& plane);
+std::optional<Vector3> IntersectRayPlaneArea(const Ray& ray,const PlaneArea& planeArea);
 
 
 // 衝突した面を特定するためのフラグ構造体

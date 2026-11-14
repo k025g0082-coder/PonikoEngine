@@ -105,6 +105,29 @@ void UIManager::LoadElementData(std::string sceneName)
 			e.sprite_.GetScreenTransform().translation_ = e.position_;
 			e.sprite_.GetScreenTransform().scale_ = e.scale_;
 			e.sprite_.GetScreenTransform().rotation_ = e.rotation_;
+
+			/*
+				親設定　同じキャンバス内の中から一致する親名のアドレスを設定する
+			*/
+			if (!e.parentName_.empty()) {
+
+				std::string& parentName = e.parentName_;
+
+				// 一致する親名のエレメント検索
+				auto it = std::find_if(
+					data.elements_.begin(),
+					data.elements_.end(),
+					[parentName](const UIElement& element) {
+						return parentName == element.name_;
+					}
+				);
+
+				if (it != data.elements_.end()) {
+					e.parent_ = &(*it);
+					e.sprite_.GetScreenTransform().parent_ = &e.parent_->sprite_.GetScreenTransform();// Spriteも親登録
+				}
+
+			}
 		}
 	}
 }
@@ -220,15 +243,25 @@ void UIManager::UpdateElements()
 
 		// もし削除対象があったら
 		if (deleteElementIndex_ != -1) {
+
+			selectedElemet_ = nullptr;
 			data.elements_.erase(data.elements_.begin() + deleteElementIndex_);
+
+			// シーケンサーの方のにもnullをセット
+			currentSceneUIData_->sequencer_.SetNullSelectElement();
 		}
 	}
 	
 #ifdef USE_IMGUI
+	
+	/* Editorのメインビュー内にマウスがあるか. */
+	bool inside = Editor::GetInstance()->IsMainViewInside();
+
 	/*
-		もし一度も各エレメントの矩形内でクリックされていない場合リセット
+		もし一度も各エレメントの矩形内でクリックされていない & Editorのメインビュー内である場合リセット
 	*/
-	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !anyInside) {
+	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !anyInside && inside) {
+		
 
 		// モーダルが開いていない時のみリセット
 		if (!ImGui::IsPopupOpen("ParentElementPopup")) {
@@ -403,7 +436,21 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::Text("エレメント名：%s", selectedElemet_->name_.c_str());
 
 		if (selectedElemet_->parent_) {
+			
 			ImGui::Text("親：%s", selectedElemet_->parent_->name_.c_str());
+
+			/* 親解除 */
+			//ImGui::PushID("bkk1");
+			if (ImGui::Button("解除")) {
+
+				// 親の相対座標ー＞スクリーン上の座標に戻す（座標を足すだけ）
+				selectedElemet_->sprite_.GetScreenTransform().translation_ += selectedElemet_->parent_->sprite_.GetScreenTransform().translation_;
+
+				selectedElemet_->parent_ = nullptr;
+				selectedElemet_->sprite_.GetScreenTransform().parent_ = nullptr;// ScreenTransformも
+
+			}
+			//ImGui::PopID();
 		}
 		else {
 			ImGui::Text("親：なし");
@@ -526,13 +573,25 @@ void UIManager::SelectedElementAnimationView()
 
 void UIManager::JudgeMouseSelectElement(UIElement& e,int index,bool& anyInside)
 {
+
 	// 現在のEditorのMainViewの比率を得る
 	float radio = Editor::GetInstance()->GetMainViewRatio();
 
+
+	Vector2 parentPosition = { 0 };
+
+	/* 親がいた場合、クリック判定の相対座標を引く */
+	if (e.parent_) {
+		parentPosition = {
+			.x = e.parent_->sprite_.GetScreenTransform().translation_.x,
+			.y = e.parent_->sprite_.GetScreenTransform().translation_.y
+		};
+	}
+
 	// 比率掛けた座標
 	Vector2 position = {
-		.x = e.sprite_.GetScreenTransform().translation_.x * radio,
-		.y = e.sprite_.GetScreenTransform().translation_.y * radio
+		.x = (e.sprite_.GetScreenTransform().translation_.x + parentPosition.x ) * radio,
+		.y = (e.sprite_.GetScreenTransform().translation_.y + parentPosition.y ) * radio
 	};
 
 	// 比率掛けた大きさ
@@ -651,6 +710,13 @@ void UIManager::ParentSelectPopupWindow()
 				/* 親設定 */
 				selectedChildElemet_->parent_ = selectedParentElemet_;
 
+				/* ScreenTransformも親子設定にする */
+				selectedChildElemet_->sprite_.GetScreenTransform().parent_ = &selectedParentElemet_->sprite_.GetScreenTransform();
+
+				// スクリーン上の座標ー＞親の相対座標に（座標引くだけ）
+				selectedChildElemet_->sprite_.GetScreenTransform().translation_ -= selectedParentElemet_->sprite_.GetScreenTransform().translation_;
+
+
 				// ポインタクリア
 				selectedParentElemet_ = nullptr;
 				selectedChildElemet_ = nullptr;
@@ -701,6 +767,43 @@ void UIManager::MoveSelectElement()
 		selectedElemet_->position_ = selectedElemet_->sprite_.GetScreenTransform().translation_;
 
 	}
+}
+
+/*
+	要は今のシーンの中からelement_XXをみてって空き番号とする
+*/
+std::string UIManager::EmptyNameRegister()
+{
+	int c = 0;
+
+	const std::string base = "element_";
+
+
+	for (UIData& data : currentSceneUIData_->elementDatas_) {
+		for (UIElement& e : data.elements_) {
+
+			// 名前中から検索
+			if (e.name_.find(base) != 0) continue;
+
+			// 末尾の数字を取り出す
+			std::string numberStr = e.name_.substr(base.size());
+
+			try {
+				int number = std::stoi(numberStr);// 数字に
+
+				// 大きければ設定？
+				c = (std::max)(c, number);
+
+			}
+			catch (...) {
+				// 数字に変換できなければ無視
+			}
+
+		}
+	}
+
+	// 
+	return  base + std::to_string(c + 1);
 }
 
 
@@ -768,7 +871,7 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 
 
 	// 名前はデフォルトとする
-	element.name_ = "element_" + std::to_string(currentSceneUIData_->nameRegisterCount_);
+	element.name_ = EmptyNameRegister();
 
 	element.groupName_ = "Main";
 

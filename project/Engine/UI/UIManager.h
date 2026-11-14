@@ -152,6 +152,9 @@ private:
 	void MoveSelectElement();
 
 
+	// 名前がない場合の名づけ
+	std::string EmptyNameRegister();
+
 
 	// 現在選択されているエレメントのアニメーションのタグ名
 	std::string currentSelectAnimationTag;

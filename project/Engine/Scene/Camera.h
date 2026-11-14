@@ -7,6 +7,8 @@
 #include "AABB.h"
 #include "Plane.h"
 
+#include "Ray.h"
+
 #include <numbers>
 #include <optional>
 
@@ -75,6 +77,24 @@ public:
 		return Normalize(forward);
 	}
 
+	/*
+		投影タイプ
+	*/
+	enum class ProjectionPlane {
+		XY,// 水平
+		XZ,// 地面など
+		YZ // カメラに対して縦
+	};
+
+	/// <summary>
+	/// ある座標をもとに前方向を作る
+	/// </summary>
+	/// <param name="target">ターゲットの座標</param>
+	/// <param name="plane">投影タイプ</param>
+	/// <returns></returns>
+	Vector3 GetForward(Vector3 target, ProjectionPlane plane = ProjectionPlane::XY) const;
+
+
 	/// <summary>
 	/// ある原点中心にカメラ回す. camera.Updateはよばない
 	/// </summary>
@@ -95,32 +115,19 @@ public:
 
 	Spherical& GetSpherical() { return targetSpherical; }
 
-	// ワールド座標 → スクリーン座標
+
+	/* 
+		ワールド座標 → スクリーン座標
+	*/
 	Vector2 WorldToScreen(const Vector3& worldPosition) const;
 
-	struct Ray {
-		Vector3 origin;    // レイの始点
-		Vector3 direction; // 正規化した方向
-	};
 
-	// 縦横の大きさからレイを作る
+	/*
+		縦横の大きさからRayをつくる
+	*/
 	Ray ScreenPointToRay(Vector2 point, float width, float height);
 
-	// レイとAABB判定
-	bool IntersectRayAABB(
-		const Camera::Ray& ray,
-		const AABB& aabb,
-		float& distance);
 
-	// レイとPlane判定 あたった座標を返す。当たらなかったらstd::nullopt
-	std::optional<Vector3> IntersectRayPlane(
-		const Camera::Ray& ray,
-		const Plane& plane
-	);
-	std::optional<Vector3> IntersectRayPlaneArea(
-		const Camera::Ray& ray,
-		const PlaneArea& planeArea
-	);
 private:
 
 	// 初期カメラ位置

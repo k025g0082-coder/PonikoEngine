@@ -358,6 +358,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Engine\UI\UISequencer.cpp" />
     <ClCompile Include="Engine\Core\WinApp.cpp" />
     <ClCompile Include="Engine\Utility\Random.cpp" />
+    <ClCompile Include="Engine\Utility\Ray.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -440,6 +441,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Engine\Vfx\PostEffectManager.h" />
     <ClInclude Include="Engine\Core\RenderTarget.h" />
     <ClInclude Include="Engine\Utility\Random.h" />
+    <ClInclude Include="Engine\Utility\Ray.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Engine\Scene\Scene.h" />
     <ClInclude Include="Engine\Scene\SceneComponentLoader.h" />

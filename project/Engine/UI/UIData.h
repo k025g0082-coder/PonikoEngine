@@ -87,6 +87,9 @@ struct UIElement {
     // 親のアドレス
     UIElement* parent_ = nullptr;
 
+    // 親の名前(データ輸送用,実際の表示には使わない)
+    std::string parentName_;
+
 };
 
 /* 一つのキャンバス内全てのUIデータ */

@@ -4,6 +4,144 @@
             {
                 "elements": [],
                 "name": "Canvas"
+            },
+            {
+                "elements": [
+                    {
+                        "animationData": {
+                            "animations": [
+                                {
+                                    "animationName": "NewAnime",
+                                    "durationFrames": 60.0,
+                                    "tracks": [
+                                        {
+                                            "items": [
+                                                {},
+                                                {},
+                                                {}
+                                            ]
+                                        },
+                                        {
+                                            "items": [
+                                                {}
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "currentTag": "NewAnime"
+                        },
+                        "groupName": "Main",
+                        "name": "element_0",
+                        "pathID": "resources/Engine/uvChecker.png",
+                        "position": [
+                            81.5928955078125,
+                            57.12946319580078,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.4000000059604645,
+                            1.0,
+                            1.0
+                        ],
+                        "type": 0
+                    },
+                    {
+                        "animationData": {
+                            "animations": [
+                                {
+                                    "animationName": "NewAnime",
+                                    "durationFrames": 60.0,
+                                    "tracks": [
+                                        {
+                                            "items": [
+                                                {},
+                                                {},
+                                                {}
+                                            ]
+                                        },
+                                        {
+                                            "items": [
+                                                {}
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "currentTag": "NewAnime"
+                        },
+                        "groupName": "Main",
+                        "name": "element_1",
+                        "parent": "element_0",
+                        "pathID": "resources/Engine/uvChecker.png",
+                        "position": [
+                            420.8747253417969,
+                            286.1676330566406,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "type": 0
+                    },
+                    {
+                        "animationData": {
+                            "animations": [
+                                {
+                                    "animationName": "NewAnime",
+                                    "durationFrames": 60.0,
+                                    "tracks": [
+                                        {
+                                            "items": [
+                                                {},
+                                                {},
+                                                {}
+                                            ]
+                                        },
+                                        {
+                                            "items": [
+                                                {}
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "currentTag": "NewAnime"
+                        },
+                        "groupName": "Main",
+                        "name": "element_2",
+                        "pathID": "resources/Engine/uvChecker.png",
+                        "position": [
+                            1036.2786865234375,
+                            347.9070129394531,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            1.0,
+                            1.0,
+                            1.0
+                        ],
+                        "type": 0
+                    }
+                ],
+                "name": "teste"
             }
         ]
     }

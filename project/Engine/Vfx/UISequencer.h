@@ -54,6 +54,7 @@ public:
         selectElement = &data;
     }
 
+    void SetNullSelectElement() { selectElement = nullptr; }
 
     /// <summary>
     /// 現在のフレームからキーフレームで補間する

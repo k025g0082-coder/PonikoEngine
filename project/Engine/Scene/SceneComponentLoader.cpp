@@ -1019,6 +1019,12 @@ void SceneComponentLoader::Property(const std::string& name, std::vector< UIData
 					e["type"] = (int)element.type_;
 
 					e["name"] = element.name_;
+
+					// 親がいた場合、親の名前
+					if (element.parent_) {
+						e["parent"] = element.parent_->name_;
+					}
+
 					e["pathID"] = element.pathID_;
 					e["groupName"] = element.groupName_;
 					
@@ -1062,6 +1068,11 @@ void SceneComponentLoader::Property(const std::string& name, std::vector< UIData
 
 					if (item.contains("name"))
 						element.name_ = item.at("name").get<std::string>();
+
+					// 親名
+					if (item.contains("parent"))
+						element.parentName_ = item.at("parent").get<std::string>();
+
 
 					element.pathID_ = item.at("pathID").get<std::string>();
 					element.groupName_ = item.at("groupName").get<std::string>();

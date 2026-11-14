@@ -138,6 +138,18 @@ bool IsCollision(const LineSegment& line, const AABB& aabb) {
     return true;
 }
 
+bool IsCollision(const Sphere& sphere, const AABB& aabb)
+{
+    // AABBの最近接点を使って判定
+    Vector3 closestPoint = {
+       std::clamp(sphere.center.x, aabb.min.x, aabb.max.x),
+       std::clamp(sphere.center.y, aabb.min.y, aabb.max.y),
+       std::clamp(sphere.center.z, aabb.min.z, aabb.max.z)
+    };
+
+    return Length(closestPoint - sphere.center) <= sphere.radius;
+}
+
 CollisionResult ResolveAABBCollision(AABB& playerAABB, Vector3& playerPos, const AABB& wallAABB, const bool& isPushBack) {
 
     CollisionResult result;
@@ -222,4 +234,155 @@ CollisionResult ResolveAABBCollision(AABB& playerAABB, Vector3& playerPos, const
     playerAABB.max = { playerPos.x + width / 2.0f, playerPos.y + height, playerPos.z + depth / 2.0f };
 
     return result; // 衝突して押し戻した
+}
+
+
+bool IntersectRayAABB(
+    const Ray& ray,
+    const AABB& aabb,
+    float& distance)
+{
+    float tMin = 0.0f;
+    float tMax = FLT_MAX;
+
+    const float origin[3] = {
+        ray.origin.x, ray.origin.y, ray.origin.z
+    };
+    const float dir[3] = {
+        ray.direction.x, ray.direction.y, ray.direction.z
+    };
+    const float boxMin[3] = {
+        aabb.min.x, aabb.min.y, aabb.min.z
+    };
+    const float boxMax[3] = {
+        aabb.max.x, aabb.max.y, aabb.max.z
+    };
+
+    for (int i = 0; i < 3; ++i) {
+        if (std::abs(dir[i]) < 1.0e-6f) {
+            // この軸にほぼ平行
+            if (origin[i] < boxMin[i] ||
+                origin[i] > boxMax[i]) {
+                return false;
+            }
+        }
+        else {
+            float t1 = (boxMin[i] - origin[i]) / dir[i];
+            float t2 = (boxMax[i] - origin[i]) / dir[i];
+
+            if (t1 > t2) {
+                std::swap(t1, t2);
+            }
+
+            tMin = (std::max)(tMin, t1);
+            tMax = (std::min)(tMax, t2);
+
+            if (tMin > tMax) {
+                return false;
+            }
+        }
+    }
+
+    distance = tMin;
+    return true;
+}
+
+std::optional<Vector3> IntersectRayPlane(const Ray& ray, const Plane& plane)
+{
+    /*
+
+        レイトレーシング（光線追跡法）
+        直線のベクトル方程式（レイ・放射線の数式）
+
+        P(t) = O + tD
+
+        P(t)　当たった座標
+        O   plane原点
+        t   原点Oからどれだけ進んだか、距離
+        D   Rayの方向。正規化して使う
+
+    */
+
+    // 平面の法線
+    Vector3 normal = Normalize(plane.normal);
+    Vector3 rayDirection = Normalize(ray.direction);
+
+    // レイの方向と法線の内積
+    float denominator = Dot(rayDirection, normal);
+
+    // 0除算対策
+    if (std::abs(denominator) < 0.0001f) {
+        return std::nullopt;
+    }
+
+    // レイの始点から平面までの距離を求める
+    float t = Dot(
+        plane.point - ray.origin,
+        normal
+    ) / denominator;
+
+    // レイの後方に交点がある
+    if (t < 0.0f) {
+        return std::nullopt;
+    }
+
+    /* 公式に則って当たった座標を返す */
+    return ray.origin + t * rayDirection;
+}
+
+std::optional<Vector3> IntersectRayPlaneArea(const Ray& ray, const PlaneArea& planeArea)
+{
+    /*
+
+        当たった座標から２軸を投影して範囲内ならあたった判定らしい
+
+    */
+    // 平面の法線
+    Vector3 normal = Normalize(planeArea.normal);
+    Vector3 rayDirection = Normalize(ray.direction);
+
+    // レイの方向と法線の内積
+    float denominator = Dot(rayDirection, normal);
+
+    // 0除算対策
+    if (std::abs(denominator) < 0.0001f) {
+        return std::nullopt;
+    }
+
+    // レイの始点から平面までの距離を求める
+    float t = Dot(
+        planeArea.point - ray.origin,
+        normal
+    ) / denominator;
+
+    // レイの後方に交点がある
+    if (t < 0.0f) {
+        return std::nullopt;
+    }
+
+    // 交点
+    Vector3 hitPoint = ray.origin + t * rayDirection;
+
+
+    // 平面中心から交点へのベクトル
+    Vector3 offset = hitPoint - planeArea.point;
+
+    // ２軸
+    Vector3 axis1 = Normalize(Cross(
+        Vector3{ 0.0f, 0.0f, 1.0f },
+        normal
+    ));
+    Vector3 axis2 = Normalize(Cross(normal, axis1));
+
+    // 平面の横・縦方向に投影
+    float x = Dot(offset, axis1);
+    float y = Dot(offset, axis2);
+
+    // 範囲外なら交差なし
+    if (std::abs(x) > planeArea.width * 0.5f ||
+        std::abs(y) > planeArea.height * 0.5f) {
+        return std::nullopt;
+    }
+
+    return hitPoint;
 }
