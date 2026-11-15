@@ -152,8 +152,14 @@ private:
 	// 選択しているエレメントを移動
 	void MoveSelectElement();
 
-	// 名前がない場合の名
+
+	// 名前変更時のウインドウ
+	void ElementNamePopupWindow();
+	bool isShowNameWindow_ = false;
+
+	// 名前がない場合の名づけ
 	std::string EmptyNameRegister();
+
 
 
 	// 再帰で「親 → 子 → 孫」の順にリストへ詰める関数
@@ -161,6 +167,7 @@ private:
 
 	// キャンバス全体の描画順リストを取得
 	std::vector<UIElement*> GetOrderedElements(UIData& data);
+
 
 
 	// 現在選択されているエレメントのアニメーションのタグ名

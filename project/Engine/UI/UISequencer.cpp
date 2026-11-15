@@ -6,8 +6,12 @@
 
 #include "UIManager.h"
 
-#include <im-neo-sequencer/imgui_neo_sequencer.h>
+
 #include "ImGuiManager.h"
+
+#include <misc/cpp/imgui_stdlib.h>
+
+#include <im-neo-sequencer/imgui_neo_sequencer.h>
 
 #include <algorithm>
 #include <imgui/IconsFontAwesome.h>
@@ -339,7 +343,7 @@ void UISequencer::AnimationComboView()
 	}
 
 	// 2. コンボボックスの表示開始
-	if (ImGui::BeginCombo("Animation Clip", selectElement->animationDatas_.currentTag_.c_str()))
+	if (ImGui::BeginCombo("　", selectElement->animationDatas_.currentTag_.c_str()))
 	{
 		// Map内の全アニメーションをループして選択肢を作る
 		for (const auto& [name, anime] : animations_)
@@ -368,8 +372,17 @@ void UISequencer::AnimationComboView()
 		ImGui::EndCombo();
 	}
 
+	ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
+
+	// 名前変更
+	ImGui::PushID("aaaa");
+	if (ImGui::Button("名前変更")) {
+		isShowNameWindow_ = true;
+	}
+	ImGui::PopID();
+
 	// 新規アニメーション作成ボタン
-	if (ImGui::Button("New Animation"))
+	if (ImGui::Button("アニメーション追加"))
 	{
 		std::string newName = "Anime_" + std::to_string(animations_.size());
 
@@ -381,6 +394,9 @@ void UISequencer::AnimationComboView()
 		currentSelectAnimationTag = newName;
 		selectElement->animationDatas_.currentTag_ = newName; //
 	}
+
+
+	AnimationNamePopupWindow();
 
 #endif
 }
@@ -483,3 +499,67 @@ void UISequencer::LerpKeyFrame(UIElement* element, float animationFrame, int tra
 
 }
 
+
+void UISequencer::AnimationNamePopupWindow()
+{
+	
+#ifdef USE_IMGUI
+
+	if (isShowNameWindow_) {
+		ImGui::OpenPopup("namePopup");
+		isShowNameWindow_ = false;
+	}
+
+
+	// ポップアップ本体
+	if (ImGui::BeginPopup("namePopup")) {
+
+		ImGui::Text("名前変更：");
+		ImGui::SameLine();
+
+
+		static std::string inputName;
+		ImGui::InputText(" ", &inputName);
+
+		if (ImGui::Button("閉じる")) {
+			// 閉じる
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine();
+
+		/* レイヤー操作 */
+		if (ImGui::Button("OK")) {
+
+			auto& animations_ = selectElement->animationDatas_.animations_;
+
+			// 無ければ
+			if (!animations_.contains(inputName)) {
+
+				// 要素を取り出す
+				auto node = animations_.extract(selectElement->animationDatas_.currentTag_);
+
+				// キーを変更
+				node.key() = inputName;
+
+				// アニメーション名も変更
+				node.mapped().animationName = inputName;
+
+				// 再登録
+				animations_.insert(std::move(node));
+
+
+				// 現在選択中の名前も変更
+				selectElement->animationDatas_.currentTag_ = inputName;
+
+
+				// 閉じる
+				ImGui::CloseCurrentPopup();
+			}
+
+		}
+
+		ImGui::EndPopup();
+	}
+#endif
+}

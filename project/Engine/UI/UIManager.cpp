@@ -11,6 +11,7 @@
 
 #include "SceneComponentLoader.h"
 
+#include <misc/cpp/imgui_stdlib.h>
 #include <imgui/IconsFontAwesome.h>
 
 #include "AssetsPanel.h"
@@ -116,6 +117,10 @@ void UIManager::LoadElementData(std::string sceneName)
 
 				if (it != data.elements_.end()) {
 					e->parent_ = (*it).get();
+
+					// 親側にも追加
+					e->parent_->childrens_.push_back(e.get());
+
 					e->GetScreenTransform().parent_ = &e->parent_->GetScreenTransform();// Spriteも親登録
 				}
 
@@ -224,8 +229,8 @@ void UIManager::UpdateElements()
 				continue;
 			}
 
+		}
 			
-
 #ifdef USE_IMGUI
 
 			/*
@@ -237,16 +242,24 @@ void UIManager::UpdateElements()
 			ImGizmo2D::BeginFrame();
 			*/
 
+		const auto& ordered = GetOrderedElements(data);
+
+		for (int i = static_cast<int>(ordered.size()) - 1; i >= 0; --i) {
+
+			UIElement* target = ordered[i];
 			/*
 				マウス座標と大きさをもとにElementを選択したり削除したり
 			*/
-			JudgeMouseSelectElement(*e.get(), i, anyInside);
+			JudgeMouseSelectElement(*target, i, anyInside);
 
+			if (anyInside)
+				break;
+		}
 #endif
 
 			
 
-		}
+		
 
 		// もし削除対象があったら
 		if (deleteElementIndex_ != -1) {
@@ -262,6 +275,16 @@ void UIManager::UpdateElements()
 					return child == target;
 					});
 			}
+
+			// 削除対象を親に設定されているエレメントにはnullを
+			for (auto& e : data.elements_) {
+				if (e->parent_ == target) {
+					e->GetScreenTransform().translation_ += target->GetScreenTransform().translation_;
+					e->parent_ = nullptr;
+					e->GetScreenTransform().parent_ = nullptr;
+				}
+			}
+
 
 			// リストから削除
 			data.elements_.erase(data.elements_.begin() + deleteElementIndex_);
@@ -293,6 +316,10 @@ void UIManager::UpdateElements()
 
 	//
 	ParentSelectPopupWindow();
+
+	//
+	ElementNamePopupWindow();
+
 
 #endif
 
@@ -434,6 +461,17 @@ void UIManager::SelectedElementAnimationView()
 {
 #ifdef USE_IMGUI
 
+	/*
+		なんかUI用のエレメント追加ボタン
+	*/
+	ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
+	if (ImGui::Button("ﾃｷｽﾄ追加")) {
+
+		//
+		AddUIElement(UIType::kText, Editor::GetInstance()->GetHierarchyPanel().GetSelectedCurrentLayerName());
+
+	}
+
 	if (selectedParentElemet_) {
 		ImGui::Text("親選択：%s", selectedParentElemet_->name_.c_str());
 	}
@@ -449,16 +487,6 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::Text("子選択：なし");
 	}
 
-	/*
-		なんかUI用のエレメント追加ボタン
-	*/
-	if (ImGui::Button("＋")) {
-
-		//
-		AddUIElement(UIType::kText, Editor::GetInstance()->GetHierarchyPanel().GetSelectedCurrentLayerName());
-
-	}
-
 
 	if (selectedElemet_) {
 
@@ -466,6 +494,14 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::AlignTextToFramePadding();
 
 		ImGui::Text("エレメント名：%s", selectedElemet_->name_.c_str());
+
+		ImGui::SameLine(ImGui::GetWindowWidth() - 100.0f);
+		if (ImGui::Button("名前変更")) {
+
+			//f
+			isShowNameWindow_ = true;
+		}
+
 
 		if (selectedElemet_->parent_) {
 			
@@ -600,25 +636,25 @@ void UIManager::JudgeMouseSelectElement(UIElement& e,int index,bool& anyInside)
 	float radio = Editor::GetInstance()->GetMainViewRatio();
 
 
-	Vector2 parentPosition = { 0 };
-	Vector2 parentScale = { 1.0f,1.0f };
-
-	/* 親がいた場合 */
-	if (e.parent_) {
-		parentPosition = e.parent_->GetCenterPosition();
-		parentScale = e.parent_->GetScale();
+	// 親のスケールを考慮した最終スケールを取得
+	Vector2 worldScale = e.GetScale();
+	UIElement* p = e.parent_;
+	while (p) {
+		worldScale.x *= p->GetScale().x;
+		worldScale.y *= p->GetScale().y;
+		p = p->parent_;
 	}
 
 	// 比率を掛けた中心座標
 	Vector2 center = {
-		.x = (e.GetCenterPosition().x + parentPosition.x) * radio,
-		.y = (e.GetCenterPosition().y + parentPosition.y) * radio
+		.x = e.GetCenterPosition().x * radio,
+		.y = e.GetCenterPosition().y * radio
 	};
 
 	// 比率とスケールを掛けた実際の見た目サイズ（Textなら文字全体の幅・高さが返る）
 	Vector2 size = {
-		.x = e.GetWidth()  * e.GetScale().x * parentScale.x * radio,
-		.y = e.GetHeight() * e.GetScale().y * parentScale.y * radio
+		.x = e.GetWidth()  * worldScale.x * radio,
+		.y = e.GetHeight() * worldScale.y * radio
 	};
 
 	Vector2 min = { center.x - size.x * 0.5f, center.y - size.y * 0.5f };
@@ -767,8 +803,19 @@ void UIManager::MoveSelectElement()
 
 	if (isDragSelectedElement_ && radio > 0.0f) {
 
+		Vector2 parentScale = { 1.0f, 1.0f };
+
+		// 親がいる場合
+		if (selectedElemet_->parent_) {
+			parentScale = selectedElemet_->parent_->GetScale();
+		}
+
 		// マウスの移動量を画面スケールで割って、1280x720のゲーム座標系に変換して加算
-		selectedElemet_->SetElapsedDragVelocity(Vector2{ mouseDelta.x / radio ,mouseDelta.y / radio });
+		selectedElemet_->SetElapsedDragVelocity(
+			Vector2{ 
+				(mouseDelta.x / radio) / parentScale.x,
+				(mouseDelta.y / radio) / parentScale.y
+			});
 
 
 		// ?
@@ -780,7 +827,8 @@ void UIManager::MoveSelectElement()
 }
 
 /*
-	要は今のシーンの中からelement_XXをみてって空き番号とする
+	要は今のシーンの中からelement_XXをみてって空き
+	番号とする
 */
 std::string UIManager::EmptyNameRegister()
 {
@@ -973,4 +1021,74 @@ std::vector<UIElement*> UIManager::GetOrderedElements(UIData& data) {
 	}
 
 	return ordered;
+}
+
+
+
+void UIManager::ElementNamePopupWindow()
+{
+	// ここでpopを呼ぶ
+	if (isShowNameWindow_) {
+
+		ImGui::OpenPopup("namePopup");
+		isShowNameWindow_ = false;
+
+	}
+
+
+	// ポップアップ本体
+	if (ImGui::BeginPopup("namePopup")) {
+
+		ImGui::Text("名前変更：");
+		ImGui::SameLine();
+
+
+		static std::string inputName;
+		ImGui::InputText(" ", &inputName);
+
+		if (ImGui::Button("閉じる")) {
+			// 閉じる
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine();
+
+		/* レイヤー操作 */
+		if (ImGui::Button("OK")) {
+
+
+			for (UIData& data : currentSceneUIData_->elementDatas_) {
+
+				// 今開いてるレイヤーはどこかしら♪
+				if (data.name_ == Editor::GetInstance()->GetHierarchyPanel().GetSelectedCurrentLayerName()) {
+
+					// 該当エレメント検索
+					auto it = std::find_if(
+						data.elements_.begin(),
+						data.elements_.end(),
+						[this](auto& data_) {
+							return data_->name_ == inputName;
+						}
+					);
+
+					// なかった
+					if (it == data.elements_.end() && !inputName.empty()) {
+
+						selectedElemet_->name_ = inputName;
+
+						// 閉じる
+						ImGui::CloseCurrentPopup();
+
+						break;
+					}
+
+				}
+
+			}
+			
+		}
+
+		ImGui::EndPopup();
+	}
+
 }

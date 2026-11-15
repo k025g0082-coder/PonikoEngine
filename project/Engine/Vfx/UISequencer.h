@@ -110,7 +110,12 @@ private:
 	int32_t startFrame = 0;
 	int32_t endFrame = 64;
 
-    
+
+    // 名前へんこうじ
+    void AnimationNamePopupWindow();
+    bool isShowNameWindow_ = false;
+
+
     UIElement* selectElement = nullptr;
 
 

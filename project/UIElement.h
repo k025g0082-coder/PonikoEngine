@@ -51,6 +51,8 @@ public:
     virtual void ImGuiView() = 0;
 
 
+
+
     UIType type_ = UIType::kTexture;  //	タイプ
 
     std::string pathID_;			   //   アセット参照用
@@ -67,6 +69,11 @@ public:
 
 
     /*
+        いまマウスが
+    */
+
+
+    /*
         新しい親を設定
     */
     void SetParent(UIElement* NewParent);
@@ -77,9 +84,9 @@ public:
     // 子のアドレス帳
     std::vector<UIElement*> childrens_;
 
-
     // 親の名前(データ輸送用,実際の表示には使わない)
     std::string parentName_;
+
 
 
     // 保存
@@ -106,7 +113,10 @@ public:
     }
 
     Vector2 GetCenterPosition() override {
-        return Vector2{ sprite_.GetScreenTransform().translation_.x, sprite_.GetScreenTransform().translation_.y };
+        return Vector2{ 
+            sprite_.GetScreenTransform().matWorld_.m[3][0],
+            sprite_.GetScreenTransform().matWorld_.m[3][1]
+        };
     }
 
     void SetElapsedDragVelocity(const Vector2& v) override {
@@ -116,7 +126,10 @@ public:
     
 
     Vector2 GetScale() override {
-        return Vector2{ sprite_.GetScreenTransform().scale_.x, sprite_.GetScreenTransform().scale_.y };
+        return Vector2{
+            sprite_.GetScreenTransform().scale_.x,
+            sprite_.GetScreenTransform().scale_.y 
+        };
     }
 
 
@@ -155,9 +168,9 @@ public:
 
     Vector2 GetCenterPosition() override {
 
-        return Vector2{ 
-            text_.GetScreenTransform().translation_.x,
-            text_.GetScreenTransform().translation_.y,
+        return Vector2{
+            text_.GetScreenTransform().matWorld_.m[3][0],
+            text_.GetScreenTransform().matWorld_.m[3][1],
         };
 
     }
