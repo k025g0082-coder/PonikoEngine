@@ -55,9 +55,20 @@ public:
 	// JSON読み込み
 	bool Load(const std::string& filePath);
 
-	// JSONセーブ
-	bool Save(const std::string& filePath);
+	/// <summary>
+	/// JSONセーブ（ダイレクトバージョン）
+	/// </summary>
+	/// <param name="value">jsonData</param>
+	/// <param name="filePath">ファイルパス</param>
 
+	/// <returns></returns>
+	bool Save(const json& value,const std::string& filePath);
+
+	/// <summary>
+	/// JSONセーブ ダイレクトバージョン
+	/// </summary>
+	/// <param name="filePath">ファイルパス</param>
+	bool Save(const std::string& filePath);
 
 	// ワールドトランスフォーム読み取り
 	WorldTransform GetWorldTransformData(std::string tag) {
@@ -191,6 +202,7 @@ public:
 	//* モデルのIDやパスの登録
 	void Property(const std::string& name, std::vector< ModelResource >& value);
 	void Property(const std::string& name, std::vector< TextureResource >& value);
+	void Property(const std::string& name, std::vector< UIElementResource >& value);
 
 	// レイヤー設定
 	void Property(const std::string& name, std::vector< HierarchyLayer >& value);
@@ -222,6 +234,8 @@ public:
 	// WorldTransform->Jsonの形式に変換
 	static json ScreenToJson(const ScreenTransform& screen);
 
+
+	json& GetCurrentJson() { return JsonDatas_[currentJsonPath_].jsonData_; }
 
 private:
 
@@ -266,7 +280,7 @@ private:
 	// .Jsonのファイルパス名から上の情報を得る
 	std::unordered_map<std::string, JsonData> JsonDatas_;
 
-	json& GetCurrentJson() { return JsonDatas_[currentJsonPath_].jsonData_; }
+
 	
 
 	/* 今開いているJsonのパス */

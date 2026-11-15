@@ -232,7 +232,6 @@ void Editor::Update()
 
 	/*   AssetsPanelから、Textureがッドラッグされた際の処理　　*/
 
-
 	if (ImGui::BeginDragDropTarget())
 	{
 		if (const ImGuiPayload* payload =
@@ -247,6 +246,27 @@ void Editor::Update()
 			*/
 			UIManager::GetInstance()->AddUIElement(UIType::kTexture,currentSceneData_->hierarchyPanel_->GetSelectedCurrentLayerName(), resource.pathId);
 			
+		}
+
+		ImGui::EndDragDropTarget();
+	}
+
+	/*   AssetsPanelから、UIPrefabがッドラッグされた際の処理　　*/
+
+	if (ImGui::BeginDragDropTarget())
+	{
+		if (const ImGuiPayload* payload =
+			ImGui::AcceptDragDropPayload("UIELEMENT"))
+		{
+
+			// 受け取ったモデルの配列番号
+			DragUIElementResource resource = *(const DragUIElementResource*)payload->Data;
+
+			/*
+				UIElementを生成
+			*/
+			UIManager::GetInstance()->AddUIElement(currentSceneData_->hierarchyPanel_->GetSelectedCurrentLayerName(), resource.pathId);
+
 		}
 
 		ImGui::EndDragDropTarget();

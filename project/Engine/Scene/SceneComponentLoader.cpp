@@ -42,6 +42,24 @@ bool SceneComponentLoader::Load(const std::string& filePath)
 	return true;
 }
 
+bool SceneComponentLoader::Save(const json& value, const std::string& filePath)
+{
+
+	// 親ディレクトリを自動生成
+	std::filesystem::path path(filePath);
+	std::filesystem::create_directories(path.parent_path());
+
+	std::ofstream file(filePath);
+
+	if (!file.is_open()) {
+		return false;
+	}
+
+	file << value.dump(4);
+
+	return true;
+}
+
 
 bool SceneComponentLoader::Save(const std::string& filePath)
 {
@@ -989,6 +1007,71 @@ void SceneComponentLoader::Property(const std::string& name, std::vector<Texture
 	};
 }
 
+
+
+// 
+void SceneComponentLoader::Property(const std::string& name, std::vector<UIElementResource>& value) {
+
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
+
+		// save
+		[this, &value, name](json& group) {
+
+			// 空でも必ず配列として保存
+			group[name] = json::array();
+
+			for (const auto& resourceProp : value) {
+
+				json item;
+
+				item["pathId"] = resourceProp.pathId_;
+
+				item["name"] = resourceProp.name_;
+				item["folderName"] = resourceProp.folderName_;
+
+				group[name].push_back(item);
+
+			}
+		},
+
+		// load
+		[this, &value, name](const json& group) {
+
+			// なかった場合
+			if (!group.contains(name)) {
+				return;
+			}
+
+			for (const auto& item : group.at(name)) {
+
+				UIElementResource elementResource;
+
+				elementResource.pathId_ = item.at("pathId").get<std::string>();
+				elementResource.name_   = item.at("name").get<std::string>();
+				elementResource.folderName_ = item.at("folderName").get<std::string>();
+
+				// 既に同じIDがあるか検索
+				auto it = std::find_if(
+					value.begin(),
+					value.end(),
+					[&elementResource](const UIElementResource& r) {
+						return r.pathId_ == elementResource.pathId_;
+					}
+				);
+
+				// 無ければ追加
+				if (it == value.end()) {
+					value.push_back(std::move(elementResource));
+				}
+			}
+
+		}
+	};
+}
+
+
+
+
 void SceneComponentLoader::Property(const std::string& name, std::vector< UIData >& value) {
 
 	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
@@ -1090,33 +1173,6 @@ void SceneComponentLoader::Property(const std::string& name, std::vector< UIData
 
 
 					element->Deserialize(item);
-
-
-					// 共通データ読み込み
-					//element->type_ = type;
-
-
-					//if (item.contains("name"))
-					//	element->name_ = item.at("name").get<std::string>();
-
-					//// 親名
-					//if (item.contains("parent"))
-					//	element->parentName_ = item.at("parent").get<std::string>();
-
-
-					//element->pathID_ = item.at("pathID").get<std::string>();
-					//element->groupName_ = item.at("groupName").get<std::string>();
-
-
-					//if (item.contains("animationData")) {
-
-					//	// アニメデータ  (変換時のto_json,from_jsonはヘッダー内に定義してるので使える)
-					//	element->animationDatas_ = item.at("animationData").get<UIElementAnimationDatas>();
-					//}
-
-					//element->position_ = JsonToVector3(item.at("position"));
-					//element->scale_    = JsonToVector3(item.at("scale"));
-					//element->rotation_ = JsonToVector3(item.at("rotation"));
 
 
 					// 所有移動 - 追加

@@ -27,5 +27,14 @@
                 "pathId": "resources/Engine/uvChecker.png"
             }
         ]
+    },
+    "UIElement": {
+        "UIElementResources": [
+            {
+                "folderName": "Main",
+                "name": "element_1",
+                "pathId": "resources/Prefab/UI/element_1.json"
+            }
+        ]
     }
 }

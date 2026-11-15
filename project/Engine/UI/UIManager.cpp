@@ -145,6 +145,60 @@ void UIManager::SaveElementData()
 	}
 }
 
+void UIManager::SaveElementPrefabData()
+{
+
+	const std::string path = "resources/Prefab/UI/"+ selectedElemet_->name_ + ".json";
+
+
+	SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
+
+
+	// JSONデータ化
+	json prefabArray = nlohmann::json::array();
+
+	// 子からそのひ孫まで関係者はすべて詰める
+	SerializeElementRecursive(selectedElemet_, prefabArray);
+
+
+	// セーブ
+	SceneComponentLoader::GetInstance()->Save(prefabArray,path);
+	
+
+	/*
+		AssetsにもPrefabのUIEぇめんｔとしてリソース情報（ＪＳＯＮパス）追加
+	*/
+	// 4. AssetsPanel にも重複しないようにリソース登録
+	auto& uiResources = AssetsPanel::GetInstance()->GetHierarchyUIElementResources();
+	auto it = std::find_if(
+		uiResources.begin(),
+		uiResources.end(),
+		[&path](const UIElementResource& res) {
+			return res.pathId_ == path;
+		}
+	);
+
+	// まだ未登録のプレハブなら新規追加
+	if (it == uiResources.end()) {
+		UIElementResource r;
+		r.name_ = selectedElemet_->name_;
+		r.pathId_ = path;
+		r.folderName_ = "Main"; // デフォルトフォルダ
+		uiResources.push_back(r);
+	}
+}
+
+// 再帰で自分と子孫をすべてJSON配列に詰めるローカル関数
+void UIManager::SerializeElementRecursive(UIElement* element, nlohmann::json& outArray) {
+	nlohmann::json j;
+	element->Serialize(j);// まず自分
+	outArray.push_back(j);
+
+	for (UIElement* child : element->childrens_) {
+		SerializeElementRecursive(child, outArray);// 子の分だけ再帰するので全部詰めれる
+	}
+}
+
 void UIManager::SwitchSceneUIData(std::string sceneName)
 {
 
@@ -186,6 +240,17 @@ void UIManager::UpdateElements()
 	
 	}
 	
+	ImGui::SameLine();
+
+	if (selectedElemet_) {
+
+		// 外部ファイル化
+		if (ImGui::Button("Prefab保存")) {
+
+			SaveElementPrefabData();
+
+		}
+	}
 	//
 	SelectedElementAnimationView();
 
@@ -867,11 +932,141 @@ std::string UIManager::EmptyNameRegister()
 
 
 
-void UIManager::AddUIElement(UIType type, std::string canvasLayerName, std::string pathId)
+void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 {
-	// もしテキスチャのエレメントで空なら
-	if (type == UIType::kTexture && pathId.empty())return;
+	const auto& layers = hierarchyPanel_->GetHierarchyLayers();
 
+	// 該当レイヤー検索
+	auto itt = std::find_if(
+		layers.begin(),
+		layers.end(),
+		[canvasLayerName](const HierarchyLayer& data_) {
+			return data_.layerName_ == canvasLayerName;
+		}
+	);
+
+	if (itt == layers.end() || itt->layerType_ != HierarchyLayerType::kCanvasLayer) {
+		return;
+	}
+
+	// elementData内に同じレイヤー名があるかチェック
+	auto it = std::find_if(
+		currentSceneUIData_->elementDatas_.begin(),
+		currentSceneUIData_->elementDatas_.end(),
+		[canvasLayerName](const UIData& data_) {
+			return data_.name_ == canvasLayerName;
+		}
+	);
+
+	int index = 0;
+	if (it == currentSceneUIData_->elementDatas_.end()) {
+		currentSceneUIData_->elementDatas_.push_back(UIData{ .name_ = canvasLayerName });
+		index = static_cast<int>(currentSceneUIData_->elementDatas_.size()) - 1;
+	}
+	else {
+		index = static_cast<int>(std::distance(currentSceneUIData_->elementDatas_.begin(), it));
+	}
+
+	auto& targetElements = currentSceneUIData_->elementDatas_.at(index).elements_;
+
+	// Elementの一斉読み込み
+	if (SceneComponentLoader::GetInstance()->Load(pathId)) {
+
+		json& j = SceneComponentLoader::GetInstance()->GetCurrentJson();
+		if (!j.is_array()) return;
+
+		// 今回新しく生成した要素だけを一時保持するリスト
+		std::vector<std::unique_ptr<UIElement>> createdElements;
+		std::unordered_map<std::string, std::string> renamedMap; // 旧名 -> 新名（重複回避用）
+
+		for (auto& item : j) {
+			UIType type = UIType::kTexture;
+			if (item.contains("type")) {
+				type = item.at("type").get<UIType>();
+			}
+
+			std::unique_ptr<UIElement> element;
+			if (type == UIType::kTexture) {
+				element = std::make_unique<UIElementTexture>();
+			}
+			else if (type == UIType::kText) {
+				element = std::make_unique<UIElementText>();
+			}
+			if (!element) continue;
+
+			// 1. JSONから復元
+			element->Deserialize(item);
+
+			// 2. 既存要素と名前が被る場合は連番を振って衝突回避
+			std::string originalName = element->name_;
+			std::string uniqueName = originalName;
+			int suffix = 1;
+			while (std::any_of(targetElements.begin(), targetElements.end(),
+				[&uniqueName](const auto& existing) { return existing->name_ == uniqueName; })) {
+				uniqueName = originalName + "_" + std::to_string(suffix++);
+			}
+			element->name_ = uniqueName;
+			renamedMap[originalName] = uniqueName;
+
+			// 3. アセット等の初期化
+			element->Initialize();
+
+			// 4. アニメーションが空のときだけデフォルトを入れる（保存済みアニメを消さない）
+			if (element->animationDatas_.animations_.empty()) {
+				UIElementAnimation newAnime;
+				newAnime.animationName = "NewAnime";
+				UISequencer::SetDefaultTrackDatas(newAnime);
+				element->animationDatas_.animations_["NewAnime"] = newAnime;
+				element->animationDatas_.currentTag_ = "NewAnime";
+			}
+
+			createdElements.push_back(std::move(element));
+		}
+
+		// 5. 今回生成したグループ内で親子関係を復元する
+		UIElement* rootElement = nullptr;
+		for (auto& e : createdElements) {
+			if (!e->parentName_.empty()) {
+				// 親の名前もリネームされていたら更新
+				if (renamedMap.contains(e->parentName_)) {
+					e->parentName_ = renamedMap[e->parentName_];
+				}
+
+				auto parentIt = std::find_if(
+					createdElements.begin(),
+					createdElements.end(),
+					[&e](const auto& candidate) { return candidate->name_ == e->parentName_; }
+				);
+
+				if (parentIt != createdElements.end()) {
+					e->parent_ = parentIt->get();
+					e->parent_->childrens_.push_back(e.get());
+					e->GetScreenTransform().parent_ = &e->parent_->GetScreenTransform();
+				}
+			}
+			else if (!rootElement) {
+				rootElement = e.get(); // ルート（親）を記録
+			}
+		}
+
+		// 6. ルート要素を選択状態にしてシーケンサーへ渡す
+		selectedParentElemet_ = nullptr;
+		selectedChildElemet_ = nullptr;
+		selectedElemet_ = rootElement;
+		if (selectedElemet_) {
+			currentSelectAnimationTag = selectedElemet_->animationDatas_.currentTag_;
+			currentSceneUIData_->sequencer_.SetUIElementAnimationData(*selectedElemet_);
+		}
+
+		// 7. キャンバスのリストへ所有権を移動
+		for (auto& e : createdElements) {
+			targetElements.push_back(std::move(e));
+		}
+	}
+}
+
+void UIManager::AddUIElement(UIType type,std::string canvasLayerName, std::string pathId)
+{
 
 	const auto& layers = hierarchyPanel_->GetHierarchyLayers();
 
@@ -884,16 +1079,16 @@ void UIManager::AddUIElement(UIType type, std::string canvasLayerName, std::stri
 		}
 	);
 
-
+	// なかった
 	if (itt == layers.end()) {
 		return;
 	}
 
 	HierarchyLayerType t = itt->layerType_;
 
+	// キャンバスではない
 	if (t != HierarchyLayerType::kCanvasLayer)
 		return;
-
 
 
 	// elementData内に同じレイヤー名があるかチェック

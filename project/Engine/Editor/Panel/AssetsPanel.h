@@ -6,6 +6,7 @@
 
 
 class HierarchyPanel;
+class UIElement;
 
 
 /* 
@@ -50,6 +51,28 @@ struct DragTextureResource {
 };
 
 
+/*
+	UIPrefabのパスやidなどのリソース情報
+*/
+struct UIElementResource {
+
+	std::string pathId_;     // パスおよびIDの意味を持つ
+
+	UIElement* element_ = nullptr; // 実体
+	std::string name_;		     // 名前表示用
+
+
+	// パネルの所属フォルダ
+	std::string folderName_ = "Main";
+
+};
+
+// DragDropPayload用。　なんか２つ以上登録できないらしいので仕方ない
+struct DragUIElementResource {
+	int index;
+	char pathId[256];		// pathID。構造体とかstd::stringはわたせないらしい。
+};
+
 /* エディタのアセット管理パネル */
 class AssetsPanel
 {
@@ -77,6 +100,7 @@ public:
 	
 	std::vector<ModelResource>& GetHierarchyModelResources() { return hierarchyModelResouces_; }
 	std::vector<TextureResource>& GetHierarchyTextureResources() { return hierarchyTextureResouces_; }
+	std::vector<UIElementResource>& GetHierarchyUIElementResources() { return hierarchyUIElementResouces_; }
 
 	
 	// モデルリソース - 追加	
@@ -103,6 +127,14 @@ public:
 		hierarchyTextureResourceList_.erase(hierarchyTextureResouces_.at(index).pathId_);
 		hierarchyTextureResouces_.erase(hierarchyTextureResouces_.begin() + index);
 	}
+
+
+	// UIElementリソース - 追加	
+	void AddUIElementResource(UIElementResource& e) {
+		hierarchyUIElementResouces_.push_back(e);
+		hierarchyUIElementResourceList_[e.pathId_] = e.element_;
+	}
+
 
 	// ヒエラルキパネルのアドレスをセット
 	void SetHierarchyPanel(HierarchyPanel* h) { hierarchyPanel_ = h; }
@@ -132,8 +164,10 @@ private:
 	// テキスチャ一覧
 	void ViewTextureTreeNode();
 
-
 	void AddModelLayerPopupWindow();
+
+	// UIプレふぁぶ一覧
+	void ViewUIPrefabTreeNode();
 
 
 
@@ -157,10 +191,12 @@ private:
 	//* 各モデルのパスやIDをまとめたもの
 	std::vector<ModelResource> hierarchyModelResouces_;
 	std::vector<TextureResource> hierarchyTextureResouces_;
+	std::vector<UIElementResource> hierarchyUIElementResouces_;
 
 	//* 上のオブジェクトをパス名で登録しておく
 	std::unordered_map<std::string, Model*> hierarchyModelResourceList_;
 	std::unordered_map<std::string, Texture*> hierarchyTextureResourceList_;
+	std::unordered_map<std::string, UIElement*> hierarchyUIElementResourceList_;
 	
 	std::vector<std::string> modelFolderNames_ = {
 		"Main",
@@ -175,6 +211,12 @@ private:
 		"Effect",
 	};
 
+	std::vector<std::string> UIElementFolderNames_ = {
+		"Main",
+		"Title",
+		"Field",
+		"Other",
+	};
 
 	/* よみこむJSONのパス */
 	std::string jsonPath;

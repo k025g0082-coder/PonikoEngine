@@ -5,6 +5,8 @@
 
 #include "FileDropManager.h"
 
+#include "UIElement.h"
+
 #include <misc/cpp/imgui_stdlib.h>
 #include <imgui/IconsFontAwesome.h>
 
@@ -110,6 +112,16 @@ void AssetsPanel::PanelView(bool& show)
 
 				ImGui::EndTabItem();
 			}
+			if (ImGui::BeginTabItem(ICON_FA_PHOTO_FILM "  UI")) {
+
+				/*
+					UIのプレハブ
+				*/
+				ImGui::SeparatorText("UI - prefab");
+				ViewUIPrefabTreeNode();
+
+				ImGui::EndTabItem();
+			}
 			ImGui::EndTabBar();
 		}
 		ImGui::PopStyleColor(2);
@@ -168,10 +180,21 @@ void AssetsPanel::AssetsLoad()
 
 		loder->EndGroup();
 
+		/*
+			UIElement
+		*/
+
+		loder->BeginGroup("UIElement");
+
+			loder->Property("UIElementResources", hierarchyUIElementResouces_);
+
+		loder->EndGroup();
+
 
 			// 読み込み
 		loder->LoadGroup("Model");
 		loder->LoadGroup("Texture");
+		loder->LoadGroup("UIElement");
 
 	}
 
@@ -189,6 +212,7 @@ void AssetsPanel::AssetsSave()
 
 			loder->SaveGroup("Model");
 			loder->SaveGroup("Texture");
+			loder->SaveGroup("UIElement");
 
 			SceneComponentLoader::GetInstance()->Save(jsonPath);
 		}
@@ -1063,6 +1087,118 @@ void AssetsPanel::AddModelLayerPopupWindow()
 		ImGui::EndPopup();
 	}
 #endif
+}
+
+void AssetsPanel::ViewUIPrefabTreeNode()
+{
+
+
+#ifdef USE_IMGUI
+	for (int folderIndex = 0; folderIndex < UIElementFolderNames_.size(); folderIndex++)
+	{
+
+		const auto& folder = UIElementFolderNames_.at(folderIndex);
+
+
+		// Models用の文字列ID（または独自のポインタ）でID空間を区別する
+		ImGui::PushID(("UIElement_" + folder).c_str());
+
+
+		// フォルダ表示
+		bool isOpen = ImGui::TreeNodeEx(
+			folder.c_str(),
+			ImGuiTreeNodeFlags_SpanAvailWidth
+		);
+
+		/*   -ドラッグ終了地点   */
+		if (ImGui::BeginDragDropTarget())
+		{
+			/* indexを受け取る */
+			if (const ImGuiPayload* payload =
+				ImGui::AcceptDragDropPayload("UIELEMENT"))
+			{
+				// 受け取ったモデルの配列番号
+				DragUIElementResource r = *(const DragUIElementResource*)payload->Data;
+				int index = r.index;
+
+				// 所属フォルダを変更
+				hierarchyUIElementResouces_[index].folderName_ = folder;
+			}
+
+			ImGui::EndDragDropTarget();
+		}
+
+		// フォルダの中身 - 表示,一般の処理
+		if (isOpen)
+		{
+			for (int i = 0; i < hierarchyUIElementResouces_.size(); i++)
+			{
+				//
+				auto& resource = hierarchyUIElementResouces_.at(i);
+
+				if (resource.folderName_ == folder)
+				{
+					//ImGui::Text("%s", resource.name_.c_str());
+
+					float size = 24.0f;
+
+					ImGui::PushID(i);
+
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));// 枠無くし
+
+					/* 文字表示 - これがドロップ対象になる */
+					if (ImGui::Selectable((char*)ICON_FA_PHOTO_FILM)) {
+						// クリックされた時しょり（あれば
+					}
+
+					ImGui::PopStyleColor();
+
+
+					/*   -ドラッグ開始地点-    */
+					if (ImGui::BeginDragDropSource())
+					{
+
+						/*
+							ドラッグされた情報をペイロードする。
+							なんか１ついじょうSetDragDropPayloadは同時にできないらしくラップ？した構造体
+						*/
+						DragUIElementResource r{};
+						r.index = i;
+
+						// 受け渡すPathId ＜－リソースPathId  をコピー。
+						strcpy_s(r.pathId, sizeof(r.pathId), resource.pathId_.c_str());
+
+
+						ImGui::SetDragDropPayload(
+							"UIELEMENT",
+							&r,
+							sizeof(DragUIElementResource)
+						);
+
+						// 名前
+						ImGui::Text(resource.name_.c_str());
+
+						ImGui::EndDragDropSource();
+					}
+
+					ImGui::PopID();
+
+
+					ImGui::SameLine();
+
+					// 名前
+					ImGui::Text(resource.name_.c_str());
+				}
+			}
+
+			ImGui::TreePop();
+		}
+
+		// スコープ終了
+		ImGui::PopID();
+	}
+#endif
+
 }
 
 void AssetsPanel::AddHierarchyModel(const ModelResource& resource)

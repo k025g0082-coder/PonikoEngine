@@ -60,6 +60,8 @@ public:
 	/// <param name="texturePathId">TextureResourceのpathId</param>
 	void AddUIElement(UIType type,std::string canvasLayerName,std::string pathId = "");
 
+	void AddUIElement(std::string canvasLayerName,std::string pathId = "");
+
 
 	// 初期化
 	void Initialize(std::string sceneName);
@@ -70,6 +72,10 @@ public:
 
 	// Elementセーブ
 	void SaveElementData();
+
+	// prefabファイルとして外部ファイル保存
+	void SaveElementPrefabData();
+
 
 	/// <summary>
 	/// シーン切り替えの際に
@@ -161,6 +167,8 @@ private:
 	std::string EmptyNameRegister();
 
 
+	// 再帰で自分と子孫をすべてJSON配列に詰めるローカル関数
+	void SerializeElementRecursive(UIElement* element, nlohmann::json& outArray);
 
 	// 再帰で「親 → 子 → 孫」の順にリストへ詰める関数
 	void CollectDrawOrder(UIElement* element, std::vector<UIElement*>& outList);
