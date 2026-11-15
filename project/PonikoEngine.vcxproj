@@ -353,12 +353,13 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Engine\UI\UIData.cpp" />
+    <ClCompile Include="Engine\UI\UIElementAnimation.cpp" />
     <ClCompile Include="Engine\UI\UIManager.cpp" />
     <ClCompile Include="Engine\UI\UISequencer.cpp" />
     <ClCompile Include="Engine\Core\WinApp.cpp" />
     <ClCompile Include="Engine\Utility\Random.cpp" />
     <ClCompile Include="Engine\Utility\Ray.cpp" />
+    <ClCompile Include="UIElement.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -461,12 +462,13 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Engine\Utility\timer.h" />
     <ClInclude Include="Engine\Utility\Transform.h" />
     <ClInclude Include="Engine\Texture\Triangle.h" />
-    <ClInclude Include="Engine\UI\UIData.h" />
+    <ClInclude Include="Engine\UI\UIElementAnimation.h" />
     <ClInclude Include="Engine\UI\UIManager.h" />
     <ClInclude Include="Engine\Vfx\UISequencer.h" />
     <ClInclude Include="Engine\Utility\Vector.h" />
     <ClInclude Include="Engine\Core\WinApp.h" />
     <ClInclude Include="Engine\Utility\WorldTransform.h" />
+    <ClInclude Include="UIElement.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

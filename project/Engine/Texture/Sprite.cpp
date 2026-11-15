@@ -52,56 +52,9 @@ void Sprite::TextTextureInitialize(unsigned char* image,int width,int height) {
 	vertexBufferView.StrideInBytes = sizeof(SpriteVertexData);
 
 	// リソースの箱にデータを書き込んでく
-	SpriteVertexData* vertexDataSprite = nullptr;
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
-
-	float tWidth = static_cast<float>(width);
-	float tHeight = static_cast<float>(height);
-
-	// 1枚目の三角形
-	vertexDataSprite[0].position = { 0.0f, tHeight, 0.0f, 1.0f }; // 左下
-	vertexDataSprite[0].texcoord = { 0.0f, 1.0f };
-
-	vertexDataSprite[1].position = { 0.0f,    0.0f,    0.0f, 1.0f }; // 左上
-	vertexDataSprite[1].texcoord = { 0.0f, 0.0f };
-
-	vertexDataSprite[2].position = { tWidth,  tHeight, 0.0f, 1.0f }; // 右下
-	vertexDataSprite[2].texcoord = { 1.0f, 1.0f };
-
-	// 2枚目の三角形
-	vertexDataSprite[3].position = { 0.0f,    0.0f,    0.0f, 1.0f }; // 左上
-	vertexDataSprite[3].texcoord = { 0.0f, 0.0f };
-
-	vertexDataSprite[4].position = { tWidth,  0.0f,    0.0f, 1.0f }; // 右上
-	vertexDataSprite[4].texcoord = { 1.0f, 0.0f };
-
-	vertexDataSprite[5].position = { tWidth,  tHeight, 0.0f, 1.0f }; // 右下
-	vertexDataSprite[5].texcoord = { 1.0f, 1.0f };
-
-	////Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-	//wvpResource = DirectXUtility::CreateBufferResource(device_, sizeof(Matrix4x4));
-
-	////書き込むためのアドレスを取得
-	//wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&mvpData));
-	////単位行列を書きこんでおく
-	//*mvpData = MakeIdentity4x4();
-
-	//// WVP行列を計算してリソースに書き込む
-	//Matrix4x4 worldMatrix = MakeAffineMatrix(worldTransform_.scale_, worldTransform_.rotation_, worldTransform_.translation_);
-	//Matrix4x4 viewMatrix = MakeIdentity4x4();
-
-	//// カメラ使わないため正射影行列の計算
-	//Matrix4x4 projectionMatrix = MakeOrthographicMatrix(
-	//	0.0f,
-	//	0.0f,
-	//	(float)WinApp::GetInstance()->GetClientWidth(),
-	//	(float)WinApp::GetInstance()->GetClientHeight(),
-	//	0.0f,
-	//	100.0f);
-
-	//*mvpData = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
-
 	
+	SetSize(width, height);
 
 	// これから書き込むRTVのインデックス
 	UINT backBufferIndex = DirectXCommon::GetInstance()->GetSwapChain()->GetCurrentBackBufferIndex();

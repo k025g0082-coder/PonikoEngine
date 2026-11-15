@@ -695,15 +695,60 @@ void HierarchyPanel::CanvasTypeOpenView(HierarchyLayer& h)
 		if (canvasData.name_ == h.layerName_) {
 
 
-			//
+			/*
+				子がいるエレメントは表示させない。
+
+				入れ替える際はそのエレメントから、親がいる非表示のエレメントを除いたルートエレメントを探してその都度入れ替えている
+
+			*/
 			for (int e = 0; e < canvasData.elements_.size(); e++)
 			{
 				auto& element = canvasData.elements_.at(e);
 
+				// 親がいる場合は、名前一覧に下に表示させるため非表示
+				if (element->parent_ != nullptr) continue;
+
 				/*
 					名前表示
 				*/
-				ImGui::BulletText(element.name_.c_str());
+				ImGui::BulletText(element->name_.c_str());
+				
+
+				// 子がある場合一覧表示
+				for (auto child : element.get()->childrens_)
+				{
+					std::string t = "      -  " + child->name_;
+					ImGui::Text(t.c_str());
+				}
+
+
+				ImGui::SameLine(ImGui::GetWindowWidth() - 80.0f);
+
+				ImGui::PushID(e);
+
+				// ↑移動（押された瞬間、上のルート要素を探す）
+				if (ImGui::Button("↑")) {
+					for (int i = e - 1; i >= 0; --i) {
+						if (canvasData.elements_[i]->parent_ == nullptr) {
+							std::swap(canvasData.elements_[e], canvasData.elements_[i]);
+							break;
+						}
+					}
+				}
+
+				ImGui::SameLine();
+
+				// ↓移動（押された瞬間、下のルート要素を探す）
+				if (ImGui::Button("↓")) {
+					for (int i = e + 1; i < canvasData.elements_.size(); ++i) {
+						if (canvasData.elements_[i]->parent_ == nullptr) {
+							std::swap(canvasData.elements_[e], canvasData.elements_[i]);
+							break;
+						}
+					}
+				}
+
+				ImGui::PopID();
 			}
 
 		}

@@ -1,6 +1,9 @@
 
-#include "UIData.h"
+#include "UIElementAnimation.h"
+
 #include "UISequencer.h"
+
+#include "AssetsPanel.h"
 
 /*
 	UIElementAnimationのJson化
@@ -110,14 +113,3 @@ void from_json(const nlohmann::json& j, UIElementAnimationDatas& v)
 	}
 }
 
-//void UIElement::AddChild(std::unique_ptr<UIElement> child)
-//{
-//	if (!child) return;
-//
-//	// 子側に自分のアドレスをセット
-//	child->parent_ = this;
-//
-//	// 所有権を移動 子リストに追加
-//	children_.push_back(std::move(child));
-//
-//}

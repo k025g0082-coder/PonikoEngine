@@ -5,6 +5,8 @@
 
 #include "Input.h"
 
+//#include "ImGizmo2D.h"
+
 #include "Timer.h"
 
 #include "SceneComponentLoader.h"
@@ -83,48 +85,38 @@ void UIManager::LoadElementData(std::string sceneName)
 	}
 
 	for (UIData& data : currentSceneUIData_->elementDatas_) {
-		for (UIElement& e : data.elements_) {
+		for (auto& e : data.elements_) {
 
 			// 名前がない場合付ける
-			if (e.name_.empty()) {
+			if (e->name_.empty()) {
 
-				e.name_ = "element_" + std::to_string( currentSceneUIData_->nameRegisterCount_ );
+				e->name_ = "element_" + std::to_string( currentSceneUIData_->nameRegisterCount_ );
 
 				currentSceneUIData_->nameRegisterCount_++;//
 			}
 
-			/*
-				Spriteの一斉読み込み
-			*/
-
-			// AssetPanelからテキスチャを貰う
-			e.sprite_.Initialize(AssetsPanel::GetInstance()->GethierarchyTextureResourceList()[e.pathID_]);
-			e.sprite_.SetAnchor(Sprite::anchor::Center);
-
-			// SRT
-			e.sprite_.GetScreenTransform().translation_ = e.position_;
-			e.sprite_.GetScreenTransform().scale_ = e.scale_;
-			e.sprite_.GetScreenTransform().rotation_ = e.rotation_;
+			//　各初期化
+			e->Initialize();
 
 			/*
 				親設定　同じキャンバス内の中から一致する親名のアドレスを設定する
 			*/
-			if (!e.parentName_.empty()) {
+			if (!e->parentName_.empty()) {
 
-				std::string& parentName = e.parentName_;
+				std::string& parentName = e->parentName_;
 
 				// 一致する親名のエレメント検索
 				auto it = std::find_if(
 					data.elements_.begin(),
 					data.elements_.end(),
-					[parentName](const UIElement& element) {
-						return parentName == element.name_;
+					[parentName](auto& element) {
+						return parentName == element->name_;
 					}
 				);
 
 				if (it != data.elements_.end()) {
-					e.parent_ = &(*it);
-					e.sprite_.GetScreenTransform().parent_ = &e.parent_->sprite_.GetScreenTransform();// Spriteも親登録
+					e->parent_ = (*it).get();
+					e->GetScreenTransform().parent_ = &e->parent_->GetScreenTransform();// Spriteも親登録
 				}
 
 			}
@@ -204,36 +196,51 @@ void UIManager::UpdateElements()
 	bool anyInside = false;
 
 	//　ElementDataの更新
-	for (UIData& data : currentSceneUIData_->elementDatas_) {
+	for (auto& data : currentSceneUIData_->elementDatas_) {
 
 		//
 		deleteElementIndex_ = -1;
 
 		for (int i = 0; i < data.elements_.size(); i++)
 		{
-			UIElement& e = data.elements_.at(i);
+			auto& e = data.elements_.at(i);
+
+			// あれば
+			e->Update();
+
 
 			/*
 				再生中のアニメの更新
 			*/
-			UpdateElementAnimation(&e);
+			UpdateElementAnimation(e.get());
+
+
+			// スプライトの座標更新
+			e->GetScreenTransform().UpdateMatrix();
 
 
 			// もし現在開いてるレイヤー以外のエレメントは、選択できないようにする
 			if (data.name_ != hierarchyPanel_->GetSelectedCurrentLayerName()) {
-				e.sprite_.UpdateScreenTransform();// 行列だけ更新
 				continue;
 			}
 
-			// スプライトの座標更新
-			e.sprite_.UpdateScreenTransform();
+			
 
 #ifdef USE_IMGUI
 
 			/*
+			*  いつかやる！！
+			*  
+			ImGizmo2D::SetDrawList(ImGui::GetWindowDrawList());
+			ImGizmo2D::SetViewRect(canvasPos, canvasSize);
+			ImGizmo2D::SetViewTransform(0, 0, 1.0f);
+			ImGizmo2D::BeginFrame();
+			*/
+
+			/*
 				マウス座標と大きさをもとにElementを選択したり削除したり
 			*/
-			JudgeMouseSelectElement(e,i,anyInside);
+			JudgeMouseSelectElement(*e.get(), i, anyInside);
 
 #endif
 
@@ -245,6 +252,18 @@ void UIManager::UpdateElements()
 		if (deleteElementIndex_ != -1) {
 
 			selectedElemet_ = nullptr;
+
+			// 削除対象の生ポインタを取得しておく
+			UIElement* target = data.elements_.at(deleteElementIndex_).get();
+
+			// 親がある場合、その子リストからも削除
+			if (target->parent_) {
+				std::erase_if(target->parent_->childrens_, [target](UIElement* child) {
+					return child == target;
+					});
+			}
+
+			// リストから削除
 			data.elements_.erase(data.elements_.begin() + deleteElementIndex_);
 
 			// シーケンサーの方のにもnullをセット
@@ -305,9 +324,14 @@ void UIManager::DrawElements()
 
 		if (!data.isView_)continue;
 
+		/*
+			子が親より前になるよう、再帰的に並び変え 
+		*/
+		const auto& list = GetOrderedElements(data);
+
 		// 描画
-		for (UIElement& e : data.elements_) {
-			e.sprite_.Draw();
+		for (auto* e : list) {
+			e->Draw();
 		}
 
 	}
@@ -385,21 +409,21 @@ void UIManager::PlayAnimationElement(std::string canvasName, std::string element
 		auto itt = std::find_if(
 			it->elements_.begin(),
 			it->elements_.end(),
-			[elementName](const UIElement& data_) {
-				return data_.name_ == elementName;
+			[elementName](auto& data_) {
+				return data_->name_ == elementName;
 			}
 		);
 
 		if (itt != it->elements_.end()) {
 
 			// 現在のアニメを指定
-			itt->animationDatas_.currentTag_ = elementAnimationTag;
+			(*itt)->animationDatas_.currentTag_ = elementAnimationTag;
 
 			// 再生時間リセット
-			itt->animationDatas_.animations_[elementAnimationTag].frame = 0.0f;
+			(*itt)->animationDatas_.animations_[elementAnimationTag].frame = 0.0f;
 
 			// 再生開始
-			itt->animationDatas_.animations_[elementAnimationTag].isPlaying = true;
+			(*itt)->animationDatas_.animations_[elementAnimationTag].isPlaying = true;
 
 		}
 	}
@@ -425,7 +449,15 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::Text("子選択：なし");
 	}
 
+	/*
+		なんかUI用のエレメント追加ボタン
+	*/
+	if (ImGui::Button("＋")) {
 
+		//
+		AddUIElement(UIType::kText, Editor::GetInstance()->GetHierarchyPanel().GetSelectedCurrentLayerName());
+
+	}
 
 
 	if (selectedElemet_) {
@@ -440,17 +472,25 @@ void UIManager::SelectedElementAnimationView()
 			ImGui::Text("親：%s", selectedElemet_->parent_->name_.c_str());
 
 			/* 親解除 */
-			//ImGui::PushID("bkk1");
+
 			if (ImGui::Button("解除")) {
 
 				// 親の相対座標ー＞スクリーン上の座標に戻す（座標を足すだけ）
-				selectedElemet_->sprite_.GetScreenTransform().translation_ += selectedElemet_->parent_->sprite_.GetScreenTransform().translation_;
+				selectedElemet_->GetScreenTransform().translation_ += selectedElemet_->parent_->GetScreenTransform().translation_;
+
+				// 親の子リストからも削除
+
+				std::erase_if(
+					selectedElemet_->parent_->childrens_,
+					[this](UIElement* child) {
+						return child == selectedElemet_;
+					}
+				);
 
 				selectedElemet_->parent_ = nullptr;
-				selectedElemet_->sprite_.GetScreenTransform().parent_ = nullptr;// ScreenTransformも
+				selectedElemet_->GetScreenTransform().parent_ = nullptr;// ScreenTransformも
 
 			}
-			//ImGui::PopID();
 		}
 		else {
 			ImGui::Text("親：なし");
@@ -459,8 +499,8 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::SeparatorText("BaseTransform");
 		ImGui::Dummy(ImVec2{ 0,4.0f });
 
-		if (ImGui::DragFloat3("座標", &selectedElemet_->sprite_.GetScreenTransform().translation_.x, 0.1f)) {
-			selectedElemet_->position_ = selectedElemet_->sprite_.GetScreenTransform().translation_;// ベース座標も同期
+		if (ImGui::DragFloat3("座標", &selectedElemet_->GetScreenTransform().translation_.x, 0.1f)) {
+			selectedElemet_->position_ = selectedElemet_->GetScreenTransform().translation_;// ベース座標も同期
 		}
 
 
@@ -473,7 +513,7 @@ void UIManager::SelectedElementAnimationView()
 			if (selectedElemet_) {
 
 				//座標
-				Vector3 vec = selectedElemet_->sprite_.GetScreenTransform().translation_;
+				Vector3 vec = selectedElemet_->GetScreenTransform().translation_;
 
 				// キーフレーム追加
 				currentSceneUIData_->sequencer_.AddKeyFrame(SequenceItemType::kPosition, KeyFrame<Vector3>{
@@ -487,8 +527,8 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::PopID();
 
 
-		if (ImGui::DragFloat3("拡大", &selectedElemet_->sprite_.GetScreenTransform().scale_.x, 0.1f)) {
-			selectedElemet_->scale_ = selectedElemet_->sprite_.GetScreenTransform().scale_;// ベース大きさも同期
+		if (ImGui::DragFloat3("拡大", &selectedElemet_->GetScreenTransform().scale_.x, 0.1f)) {
+			selectedElemet_->scale_ = selectedElemet_->GetScreenTransform().scale_;// ベース大きさも同期
 		}
 
 		ImGui::SameLine(ImGui::GetWindowWidth() - 50.0f);
@@ -499,7 +539,7 @@ void UIManager::SelectedElementAnimationView()
 			if (selectedElemet_) {
 
 				//　スケール
-				Vector3	scale = selectedElemet_->sprite_.GetScreenTransform().scale_;
+				Vector3	scale = selectedElemet_->GetScreenTransform().scale_;
 
 				// キーフレーム追加
 				currentSceneUIData_->sequencer_.AddKeyFrame(SequenceItemType::kScale, KeyFrame<Vector3>{
@@ -512,8 +552,8 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::PopID();
 
 
-		if (ImGui::DragFloat3("回転", &selectedElemet_->sprite_.GetScreenTransform().rotation_.x, 0.1f)) {
-			selectedElemet_->rotation_ = selectedElemet_->sprite_.GetScreenTransform().rotation_;// ベース回転も同期
+		if (ImGui::DragFloat3("回転", &selectedElemet_->GetScreenTransform().rotation_.x, 0.1f)) {
+			selectedElemet_->rotation_ = selectedElemet_->GetScreenTransform().rotation_;// ベース回転も同期
 		}
 
 
@@ -525,7 +565,7 @@ void UIManager::SelectedElementAnimationView()
 			if (selectedElemet_) {
 
 				//回転
-				Vector3 rot = selectedElemet_->sprite_.GetScreenTransform().rotation_;
+				Vector3 rot = selectedElemet_->GetScreenTransform().rotation_;
 
 				// キーフレーム追加
 				currentSceneUIData_->sequencer_.AddKeyFrame(SequenceItemType::kRotation, KeyFrame<Vector3>{
@@ -542,29 +582,11 @@ void UIManager::SelectedElementAnimationView()
 		ImGui::Dummy(ImVec2{ 0,4.0f });
 
 		/*
-			キー補間タイプ
+		    それぞれにあわせたImGui表示
 		*/
-		static int type = (int)EasingType::None;
+		selectedElemet_->ImGuiView();
 
-		if (ImGui::BeginCombo("Easing", Easing::GetEasingTag()[type]))
-		{
-			for (int i = 0; i < IM_ARRAYSIZE(Easing::GetEasingTag()); i++)
-			{
-				bool isSelected = (type == i);
-
-				if (ImGui::Selectable(Easing::GetEasingTag()[i], isSelected))
-				{
-					type = i;
-				}
-
-				if (isSelected)
-				{
-					ImGui::SetItemDefaultFocus();
-				}
-			}
-
-			ImGui::EndCombo();
-		}
+		ImGui::Dummy(ImVec2{ 0,.0f });
 	}
 
 #endif
@@ -579,37 +601,30 @@ void UIManager::JudgeMouseSelectElement(UIElement& e,int index,bool& anyInside)
 
 
 	Vector2 parentPosition = { 0 };
+	Vector2 parentScale = { 1.0f,1.0f };
 
-	/* 親がいた場合、クリック判定の相対座標を引く */
+	/* 親がいた場合 */
 	if (e.parent_) {
-		parentPosition = {
-			.x = e.parent_->sprite_.GetScreenTransform().translation_.x,
-			.y = e.parent_->sprite_.GetScreenTransform().translation_.y
-		};
+		parentPosition = e.parent_->GetCenterPosition();
+		parentScale = e.parent_->GetScale();
 	}
 
-	// 比率掛けた座標
-	Vector2 position = {
-		.x = (e.sprite_.GetScreenTransform().translation_.x + parentPosition.x ) * radio,
-		.y = (e.sprite_.GetScreenTransform().translation_.y + parentPosition.y ) * radio
+	// 比率を掛けた中心座標
+	Vector2 center = {
+		.x = (e.GetCenterPosition().x + parentPosition.x) * radio,
+		.y = (e.GetCenterPosition().y + parentPosition.y) * radio
 	};
 
-	// 比率掛けた大きさ
+	// 比率とスケールを掛けた実際の見た目サイズ（Textなら文字全体の幅・高さが返る）
 	Vector2 size = {
-		.x = static_cast<float>(e.sprite_.GetImageWidth()) * radio,
-		.y = static_cast<float>(e.sprite_.GetImageHeight()) * radio,
+		.x = e.GetWidth()  * e.GetScale().x * parentScale.x * radio,
+		.y = e.GetHeight() * e.GetScale().y * parentScale.y * radio
 	};
 
+	Vector2 min = { center.x - size.x * 0.5f, center.y - size.y * 0.5f };
+	Vector2 max = { center.x + size.x * 0.5f, center.y + size.y * 0.5f };
 
-	Vector2 min = {
-		position.x - size.x / 2.0f,
-		position.y - size.y / 2.0f
-	};
 
-	Vector2 max = {
-		position.x + size.x / 2.0f,
-		position.y + size.y / 2.0f
-	};
 
 	/* かくエレメントのスプライトの矩形内にまうすがあるか. */
 	inside = Editor::GetInstance()->IsMainViewInsideMouse(min, max);
@@ -707,15 +722,8 @@ void UIManager::ParentSelectPopupWindow()
 
 			if (ImGui::Button("OK", ImVec2(80, 0))) {
 
-				/* 親設定 */
-				selectedChildElemet_->parent_ = selectedParentElemet_;
-
-				/* ScreenTransformも親子設定にする */
-				selectedChildElemet_->sprite_.GetScreenTransform().parent_ = &selectedParentElemet_->sprite_.GetScreenTransform();
-
-				// スクリーン上の座標ー＞親の相対座標に（座標引くだけ）
-				selectedChildElemet_->sprite_.GetScreenTransform().translation_ -= selectedParentElemet_->sprite_.GetScreenTransform().translation_;
-
+				/* 新しい親設定 */
+				selectedChildElemet_->SetParent(selectedParentElemet_);
 
 				// ポインタクリア
 				selectedParentElemet_ = nullptr;
@@ -760,11 +768,13 @@ void UIManager::MoveSelectElement()
 	if (isDragSelectedElement_ && radio > 0.0f) {
 
 		// マウスの移動量を画面スケールで割って、1280x720のゲーム座標系に変換して加算
-		selectedElemet_->sprite_.GetScreenTransform().translation_.x += mouseDelta.x / radio;
-		selectedElemet_->sprite_.GetScreenTransform().translation_.y += mouseDelta.y / radio;
+		selectedElemet_->SetElapsedDragVelocity(Vector2{ mouseDelta.x / radio ,mouseDelta.y / radio });
+
+
+		// ?
 
 		// 座標も同期
-		selectedElemet_->position_ = selectedElemet_->sprite_.GetScreenTransform().translation_;
+		selectedElemet_->position_ = selectedElemet_->GetScreenTransform().translation_;
 
 	}
 }
@@ -780,13 +790,13 @@ std::string UIManager::EmptyNameRegister()
 
 
 	for (UIData& data : currentSceneUIData_->elementDatas_) {
-		for (UIElement& e : data.elements_) {
+		for (auto& e : data.elements_) {
 
 			// 名前中から検索
-			if (e.name_.find(base) != 0) continue;
+			if (e->name_.find(base) != 0) continue;
 
 			// 末尾の数字を取り出す
-			std::string numberStr = e.name_.substr(base.size());
+			std::string numberStr = e->name_.substr(base.size());
 
 			try {
 				int number = std::stoi(numberStr);// 数字に
@@ -809,8 +819,12 @@ std::string UIManager::EmptyNameRegister()
 
 
 
-void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
+void UIManager::AddUIElement(UIType type, std::string canvasLayerName, std::string pathId)
 {
+	// もしテキスチャのエレメントで空なら
+	if (type == UIType::kTexture && pathId.empty())return;
+
+
 	const auto& layers = hierarchyPanel_->GetHierarchyLayers();
 
 	//該当レイヤー検索
@@ -827,9 +841,9 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 		return;
 	}
 
-	HierarchyLayerType type = itt->layerType_;
+	HierarchyLayerType t = itt->layerType_;
 
-	if (type != HierarchyLayerType::kCanvasLayer)
+	if (t != HierarchyLayerType::kCanvasLayer)
 		return;
 
 
@@ -867,23 +881,32 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 	selectedParentElemet_ = nullptr;
 
 	/* emplace_back で末尾に直接要素を作成して参照を受け取る */
-	UIElement& element = currentSceneUIData_->elementDatas_.at(index).elements_.emplace_back();
+	std::unique_ptr<UIElement> element;// =
 
-
-	// 名前はデフォルトとする
-	element.name_ = EmptyNameRegister();
-
-	element.groupName_ = "Main";
+	if (type == UIType::kTexture) {
+		element = std::make_unique<UIElementTexture>();
+	}
+	else if (type == UIType::kText) {
+		element = std::make_unique<UIElementText>();
+	}
 
 	// 
-	element.pathID_ = pathId;
+	element->type_ = type;
 
-	/* Assetパネルからテクスチャのリソースを受けとり、スプライトを初期化 */
-	element.sprite_.Initialize(AssetsPanel::GetInstance()->GethierarchyTextureResourceList()[pathId]);
-	element.sprite_.SetAnchor(Sprite::anchor::Center);
+	// 名前はデフォルトとする
+	element->name_ = EmptyNameRegister();
 
-	// とりあえずスケール初期化？
-	element.scale_ = { 1.0f,1.0f,1.0f };
+	element->groupName_ = "Main";
+
+	// 
+	element->pathID_ = pathId;
+
+
+	/*
+		ここでアセット読み取り等行う
+	*/
+	element->Initialize();
+
 
 	//
 	UIElementAnimation newAnime;
@@ -891,16 +914,22 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 	UISequencer::SetDefaultTrackDatas(newAnime);
 
 	// アニメ情報もセットしておく
-	element.animationDatas_.animations_["NewAnime"] = newAnime;
+	element->animationDatas_.animations_["NewAnime"] = newAnime;
 
 	currentSelectAnimationTag = "NewAnime";
-	element.animationDatas_.currentTag_ = "NewAnime"; //
+	element->animationDatas_.currentTag_ = "NewAnime"; //
 
 	/* 選択中にしとく */
-	selectedElemet_ = &element;
+	selectedElemet_ = element.get();
 
 	// シーケンサー側の参照も最新の安全な参照に更新する
 	currentSceneUIData_->sequencer_.SetUIElementAnimationData(*selectedElemet_);
+
+
+	/*
+		所有権を移動
+	*/
+	currentSceneUIData_->elementDatas_.at(index).elements_.push_back(std::move(element));
 }
 
 
@@ -917,4 +946,31 @@ void UIManager::UIEditorTimeLine()
 #endif
 	
 
+}
+
+
+// 再帰で「親 → 子 → 孫」の順にリストへ詰める関数
+void UIManager::CollectDrawOrder(UIElement* element, std::vector<UIElement*>& outList) {
+
+	outList.push_back(element); // まず自分（親）
+
+	// その直後に自分の子たちを順に詰める（＝親より手前に描画される）
+	for (UIElement* child : element->childrens_) {
+		CollectDrawOrder(child, outList);
+	}
+}
+
+// キャンバス全体の描画順リストを取得
+std::vector<UIElement*> UIManager::GetOrderedElements(UIData& data) {
+
+	std::vector<UIElement*> ordered;
+
+	for (auto& e : data.elements_) {
+		// ルート（親なし）だけを起点にする
+		if (e->parent_ == nullptr) {
+			CollectDrawOrder(e.get(), ordered);
+		}
+	}
+
+	return ordered;
 }

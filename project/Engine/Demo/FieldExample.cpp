@@ -265,14 +265,14 @@ void FieldExample::Update(Input * input)
 	/*
 		てすとUI あにめ
 	*/
-	//if (ImGui::Button("アニメ")) {
+	if (ImGui::Button("アニメ")) {
 
-	//	UIManager::PlayAnimationElement(
-	//		"Canvas",
-	//		"element_1",
-	//		"NewAnimetest"
-	//	);
-	//};
+		UIManager::PlayAnimationElement(
+			"teste",
+			"element_0",
+			"NewAnime"
+		);
+	};
 
 	ImGui::Separator();
 

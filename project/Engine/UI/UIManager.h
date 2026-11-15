@@ -13,8 +13,9 @@
 
 
 
-/* ここに必要な構造体があります */
-#include "UIData.h"
+#include "UIElement.h"// UIElement
+
+#include "UIElementAnimation.h"// UIElementのアニメーション
 
 
 #include "Vector.h"
@@ -54,9 +55,10 @@ public:
 	/// <summary>
 	/// テキスチャからUIElementをつくる
 	/// </summary>
+	/// <param name="UIType">タイプ。テキスチャとかテキストとか</param>
 	/// <param name="canvasLayerName">現在選択されているLayerName</param>
 	/// <param name="texturePathId">TextureResourceのpathId</param>
-	void AddUIElement(std::string canvasLayerName,std::string pathId);
+	void AddUIElement(UIType type,std::string canvasLayerName,std::string pathId = "");
 
 
 	// 初期化
@@ -114,9 +116,9 @@ public:
 
 
 	/* 
-		現在のシーンのUIデータ一覧リストのアドレスのを返す
+		現在のシーンのUIデータ一覧リストのアドレス
 	*/
-	const std::vector<UIData>* const GetCurrentSceneUIData() { 
+	std::vector<UIData>* GetCurrentSceneUIData() { 
 		return &currentSceneUIData_->elementDatas_;
 	}
 
@@ -147,13 +149,18 @@ private:
 	// 親エレメントを選択するかウインドウ
 	void ParentSelectPopupWindow();
 
-
 	// 選択しているエレメントを移動
 	void MoveSelectElement();
 
-
-	// 名前がない場合の名づけ
+	// 名前がない場合の名
 	std::string EmptyNameRegister();
+
+
+	// 再帰で「親 → 子 → 孫」の順にリストへ詰める関数
+	void CollectDrawOrder(UIElement* element, std::vector<UIElement*>& outList);
+
+	// キャンバス全体の描画順リストを取得
+	std::vector<UIElement*> GetOrderedElements(UIData& data);
 
 
 	// 現在選択されているエレメントのアニメーションのタグ名
@@ -169,8 +176,6 @@ private:
 
 	UIElement* selectedParentElemet_ = nullptr;
 	UIElement* selectedChildElemet_ = nullptr;
-
-
 
 	// 選択中のをドラッグ中か
 	bool isDragSelectedElement_ = false;

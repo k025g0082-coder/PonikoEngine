@@ -8,7 +8,9 @@
 #include "Easing.h"
 
 //
-#include "UIData.h"
+#include "UIElement.h"
+
+
 #include "SequencerData.h"
 
 
@@ -52,6 +54,11 @@ public:
 
         // アドレス登録
         selectElement = &data;
+
+        // 選択インデックスをリセット
+        currentSelectTrackIndex = 0;
+        currentSelectItemIndex = -1;
+        currentSelectItemKeyIndex = -1;
     }
 
     void SetNullSelectElement() { selectElement = nullptr; }

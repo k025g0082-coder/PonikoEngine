@@ -17,96 +17,28 @@
                                         {
                                             "items": [
                                                 {},
-                                                {},
-                                                {}
-                                            ]
-                                        },
-                                        {
-                                            "items": [
-                                                {}
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ],
-                            "currentTag": "NewAnime"
-                        },
-                        "groupName": "Main",
-                        "name": "element_0",
-                        "pathID": "resources/Engine/uvChecker.png",
-                        "position": [
-                            81.5928955078125,
-                            57.12946319580078,
-                            0.0
-                        ],
-                        "rotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "scale": [
-                            0.4000000059604645,
-                            1.0,
-                            1.0
-                        ],
-                        "type": 0
-                    },
-                    {
-                        "animationData": {
-                            "animations": [
-                                {
-                                    "animationName": "NewAnime",
-                                    "durationFrames": 60.0,
-                                    "tracks": [
-                                        {
-                                            "items": [
-                                                {},
-                                                {},
-                                                {}
-                                            ]
-                                        },
-                                        {
-                                            "items": [
-                                                {}
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ],
-                            "currentTag": "NewAnime"
-                        },
-                        "groupName": "Main",
-                        "name": "element_1",
-                        "parent": "element_0",
-                        "pathID": "resources/Engine/uvChecker.png",
-                        "position": [
-                            420.8747253417969,
-                            286.1676330566406,
-                            0.0
-                        ],
-                        "rotation": [
-                            0.0,
-                            0.0,
-                            0.0
-                        ],
-                        "scale": [
-                            1.0,
-                            1.0,
-                            1.0
-                        ],
-                        "type": 0
-                    },
-                    {
-                        "animationData": {
-                            "animations": [
-                                {
-                                    "animationName": "NewAnime",
-                                    "durationFrames": 60.0,
-                                    "tracks": [
-                                        {
-                                            "items": [
-                                                {},
-                                                {},
+                                                {
+                                                    "keyFrames": [
+                                                        {
+                                                            "easingType": 3,
+                                                            "frame": 0,
+                                                            "value": {
+                                                                "x": 1.0,
+                                                                "y": 0.0,
+                                                                "z": 1.0
+                                                            }
+                                                        },
+                                                        {
+                                                            "easingType": 0,
+                                                            "frame": 28,
+                                                            "value": {
+                                                                "x": 1.0,
+                                                                "y": 1.0,
+                                                                "z": 1.0
+                                                            }
+                                                        }
+                                                    ]
+                                                },
                                                 {}
                                             ]
                                         },
@@ -124,8 +56,8 @@
                         "name": "element_2",
                         "pathID": "resources/Engine/uvChecker.png",
                         "position": [
-                            1036.2786865234375,
-                            347.9070129394531,
+                            523.605224609375,
+                            233.27317810058594,
                             0.0
                         ],
                         "rotation": [
@@ -139,6 +71,71 @@
                             1.0
                         ],
                         "type": 0
+                    },
+                    {
+                        "animationData": {
+                            "animations": [
+                                {
+                                    "animationName": "NewAnime",
+                                    "durationFrames": 60.0,
+                                    "tracks": [
+                                        {
+                                            "items": [
+                                                {},
+                                                {},
+                                                {}
+                                            ]
+                                        },
+                                        {
+                                            "items": [
+                                                {}
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "currentTag": "NewAnime"
+                        },
+                        "groupName": "Main",
+                        "name": "element_3",
+                        "parent": "element_2",
+                        "pathID": "",
+                        "position": [
+                            -32.8572883605957,
+                            243.218017578125,
+                            0.0
+                        ],
+                        "rotation": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "scale": [
+                            0.6000000238418579,
+                            0.6000000238418579,
+                            1.0
+                        ],
+                        "text": {
+                            "anchor": 1,
+                            "fontName": "default",
+                            "text": "ウインドウ",
+                            "textLayout": {
+                                "isOutlineBlur": false,
+                                "outlineColor": [
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                ],
+                                "outlineSize": 0,
+                                "textColor": [
+                                    255.0,
+                                    255.0,
+                                    255.0
+                                ],
+                                "textSize": 31
+                            }
+                        },
+                        "type": 1
                     }
                 ],
                 "name": "teste"

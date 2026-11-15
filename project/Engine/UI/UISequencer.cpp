@@ -48,11 +48,46 @@ void UISequencer::Update()
 		currentFloatFrame = 0;
 	}
 
+	/*
+		キー補間タイプ
+	*/
+	auto& tracks = selectElement->animationDatas_.animations_[selectElement->animationDatas_.currentTag_].tracks;
+
+	if (currentSelectTrackIndex >= 0 && currentSelectTrackIndex < static_cast<int>(tracks.size())) {
+		auto& itemsVec = tracks[currentSelectTrackIndex].items;
+
+		if (currentSelectItemIndex >= 0 && currentSelectItemIndex < static_cast<int>(itemsVec.size())) {
+			auto& keyFrames = itemsVec[currentSelectItemIndex].keyFrames;
+
+			if (currentSelectItemKeyIndex >= 0 && currentSelectItemKeyIndex < static_cast<int>(keyFrames.size())) {
+				auto& item = keyFrames[currentSelectItemKeyIndex];
+				auto& type = item.easingType;
+
+				ImGui::SameLine();
+
+				if (ImGui::BeginCombo("Easing", Easing::GetEasingTag()[(int)type]))
+				{
+					for (int i = 0; i < static_cast<int>(EasingType::count); i++)
+					{
+						bool isSelected = ((int)type == i);
+						if (ImGui::Selectable(Easing::GetEasingTag()[i], isSelected))
+						{
+							type = (EasingType)i;
+						}
+						if (isSelected)
+						{
+							ImGui::SetItemDefaultFocus();
+						}
+					}
+					ImGui::EndCombo();
+				}
+			}
+		}
+	}
 
 	ImGui::Text("currentSelectTrackIndex: %d", currentSelectTrackIndex);
 	ImGui::Text("currentSelectItemIndex: %d", currentSelectItemIndex);
 	ImGui::Text("currentSelectItemKeyIndex: %d", currentSelectItemKeyIndex);
-
 
 	if (ImGui::BeginNeoSequencer("Sequencer", &currentFrame, &startFrame, &endFrame, { 0, 0 },
 		ImGuiNeoSequencerFlags_EnableSelection |
@@ -86,6 +121,9 @@ void UISequencer::Update()
 				if (ImGui::IsNeoTimelineSelected())
 				{
 					currentSelectTrackIndex = track; // 選択されたGroupのインデックス
+
+					currentSelectItemIndex = -1;
+					currentSelectItemKeyIndex = -1;
 				}
 
 				/* 
@@ -100,6 +138,8 @@ void UISequencer::Update()
 						if (ImGui::IsNeoTimelineSelected())
 						{
 							currentSelectItemIndex = i; // 選択中のインデックスを更新
+
+							currentSelectItemKeyIndex = -1;
 						}
 
 						// 全てのキー
@@ -394,7 +434,7 @@ void UISequencer::LerpKeyFrame(UIElement* element, float animationFrame, int tra
 			case SequenceItemType::kPosition:
 
 				// 補間
-				element->sprite_.GetScreenTransform().translation_ =
+				element->GetScreenTransform().translation_ =
 					Lerp(key.value, nextKey.value, Easing::Get(t, key.easingType));
 
 				break;
@@ -403,7 +443,7 @@ void UISequencer::LerpKeyFrame(UIElement* element, float animationFrame, int tra
 			case SequenceItemType::kScale:
 
 				// 補間
-				element->sprite_.GetScreenTransform().scale_ =
+				element->GetScreenTransform().scale_ =
 					Lerp(key.value, nextKey.value, Easing::Get(t, key.easingType));
 
 				break;
@@ -412,7 +452,7 @@ void UISequencer::LerpKeyFrame(UIElement* element, float animationFrame, int tra
 			case SequenceItemType::kRotation:
 
 				// 補間
-				element->sprite_.GetScreenTransform().rotation_ =
+				element->GetScreenTransform().rotation_ =
 					Lerp(key.value, nextKey.value, Easing::Get(t, key.easingType));
 
 				break;
@@ -426,13 +466,13 @@ void UISequencer::LerpKeyFrame(UIElement* element, float animationFrame, int tra
 
 				// 終点と位置が一緒なら動かない
 			case SequenceItemType::kPosition:
-				UIManager::GetInstance()->GetSelectedElement()->sprite_.GetScreenTransform().translation_ = key.value;
+				UIManager::GetInstance()->GetSelectedElement()->GetScreenTransform().translation_ = key.value;
 				break;
 			case SequenceItemType::kScale:
-				UIManager::GetInstance()->GetSelectedElement()->sprite_.GetScreenTransform().scale_ = key.value;
+				UIManager::GetInstance()->GetSelectedElement()->GetScreenTransform().scale_ = key.value;
 				break;
 			case SequenceItemType::kRotation:
-				UIManager::GetInstance()->GetSelectedElement()->sprite_.GetScreenTransform().rotation_ = key.value;
+				UIManager::GetInstance()->GetSelectedElement()->GetScreenTransform().rotation_ = key.value;
 				break;
 			}
 

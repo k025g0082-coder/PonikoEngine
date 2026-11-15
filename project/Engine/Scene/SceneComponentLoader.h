@@ -42,6 +42,9 @@ json Vector4ToJson(const Vector4& value);
 Vector3 JsonToVector3(const json& value);
 Vector4 JsonToVector4(const json& value);
 
+// Json <-> TextDatas
+TextDatas JsonToTextDatas(const json& value);
+json TextDatasToJson(const TextDatas& data);
 
 class SceneComponentLoader
 {
@@ -219,21 +222,10 @@ public:
 	// WorldTransform->Jsonの形式に変換
 	static json ScreenToJson(const ScreenTransform& screen);
 
+
 private:
 
 	//json jsonData_;
-
-	
-
-
-
-
-	// Json <-> TextDatas
-	TextDatas JsonToTextDatas(const json& value);
-	json TextDatasToJson(const TextDatas& data);
-
-	
-
 
 	/* ラムダ式。 */
 

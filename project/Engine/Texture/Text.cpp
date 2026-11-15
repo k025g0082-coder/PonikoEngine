@@ -33,6 +33,7 @@ void Text::Init() {
 
 	// テキストテキスチャ用の初期化
 	sprite.TextTextureInitialize(image, width, height);
+	sprite.SetAnchor(Sprite::anchor::Center); // Sprite自体のアンカーを中心にする
 }
 
 // フォント設定
@@ -115,22 +116,17 @@ void Text::SetFontSize(int size)
 // 文字列描画
 void Text::drawString(const std::string& text, Vector2 position, TextAnchor anchor)
 {
-
-	//// もし前回までと同じ文字ならすぐ帰る
-	//if (text == previousText_) {
-	//	sprite.SetPosition(position);
-	//	sprite.Draw();
-	//	return;
-	//}
-
-	//previousText_ = text;
-	// 
 		// もし前回までと同じ文字かレイアウトならすぐ帰る
 	if (text == previousText_ && textLayout == previewTextLayout_) {
 		sprite.SetPosition(position);
 		sprite.Draw();
 		return;
 	}
+
+	/*
+		座標はせっていされたのにんする
+	*/
+	sprite.GetScreenTransform().translation_ = { position.x,position.y,1.0f };
 
 	previousText_ = text;
 	previewTextLayout_ = textLayout;
@@ -145,7 +141,9 @@ void Text::drawString(const std::string& text, Vector2 position, TextAnchor anch
 
 	// だいにゅ０－
 	anchor_ = anchor;
-	position_ = position;
+
+	
+
 	u32text_ = u32text;
 
 	textWidth = 0;
@@ -172,7 +170,14 @@ void Text::drawString(const std::string& text, Vector2 position, TextAnchor anch
 	{
 		if (c == U'\n')
 		{
-			curPosX = static_cast<int>(position.x);
+
+			if (anchor == TextAnchor::LeftTop) {
+				curPosX = textLayout.outlineSize;
+			}
+			else if (anchor == TextAnchor::Center) {
+				curPosX = (width - textWidth) / 2;
+			}
+
 			curPosY += fontHeight;
 		}
 		else
@@ -249,13 +254,16 @@ void Text::drawString(const std::string& text, Vector2 position, TextAnchor anch
 	sprite.Draw();
 }
 
-// 文字列描画(内蔵型)
+// 文字列描画(内蔵型(ScreenTtanform))
 void Text::drawString(const std::string& text, TextAnchor anchor)
 {
 
 	// もし前回までと同じ文字かレイアウトならすぐ帰る
 	if (text == previousText_ && textLayout == previewTextLayout_) {
-		sprite.SetPosition(position_);
+
+		anchor_ = anchor;
+
+		sprite.GetScreenTransform().UpdateMatrix();
 		sprite.Draw();
 		return;
 	}
@@ -298,7 +306,7 @@ void Text::drawString(const std::string& text, TextAnchor anchor)
 	{
 		if (c == U'\n')
 		{
-			curPosX = static_cast<int>(position_.x);
+			//curPosX = static_cast<int>(position_.x);
 			curPosY += fontHeight;
 		}
 		else
@@ -335,7 +343,7 @@ void Text::drawString(const std::string& text, TextAnchor anchor)
 	{
 		if (c == U'\n')
 		{
-			curPosX = static_cast<int>(position_.x);
+			//curPosX = static_cast<int>(position_.x);
 			curPosY += fontHeight;
 		}
 		else
@@ -391,7 +399,7 @@ void Text::CursorSet() {
 	// 左上原点
 	if (anchor_ == TextAnchor::LeftTop) {
 
-		sprite.SetPosition(position_);
+		//sprite.SetPosition(position_);
 
 		//
 		int maxBitmapTop = 0;
@@ -426,12 +434,12 @@ void Text::CursorSet() {
 
 		// スプライトをposition中央にずらす
 
-		Vector2 spriteCenter = {
-			position_.x - (float)sprite.GetImageWidth() / 2.0f,
-			position_.y - (float)sprite.GetImageHeight() / 2.0f,
-		};
+		//Vector2 spriteCenter = {
+		//	position_.x - (float)sprite.GetImageWidth() / 2.0f,
+		//	position_.y - (float)sprite.GetImageHeight() / 2.0f,
+		//};
 
-		sprite.SetPosition(spriteCenter);
+		//sprite.SetPosition(spriteCenter);
 
 	}
 }
@@ -447,9 +455,7 @@ void Text::ImGuiView() {
 
 #ifdef USE_IMGUI
 
-	if (ImGui::TreeNode(previousText_.c_str())) {
-
-		ImGui::DragFloat2("pos", &position_.x, 3.0f);
+//	if (ImGui::TreeNode(previousText_.c_str())) {
 
 		ImGui::Text("FontName:%s", textLayout.fontName.c_str());
 		
@@ -487,8 +493,8 @@ void Text::ImGuiView() {
 
 		ImGui::Checkbox("Outline Blur", &textLayout.isOutlineBlur);
 
-		ImGui::TreePop();
-	}
+	//	ImGui::TreePop();
+	//}
 
 #endif
 
@@ -496,35 +502,50 @@ void Text::ImGuiView() {
 
 int Text::GetTextWidth(const std::string& text)
 {
-	std::u32string u32text = ToU32String(text);
+	if (!font || text.empty()) return 0;
 
-	int width = 0;
+	// 自分のフォントサイズを必ず適用する
+	SetFontSize(textLayout.textSize);
+
+	std::u32string u32text = ToU32String(text);
+	int maxWidth = 0;
+	int currentWidth = 0;
 
 	for (char32_t c : u32text)
 	{
+		if (c == U'\n') {
+			maxWidth = (std::max)(maxWidth, currentWidth);
+			currentWidth = 0;
+			continue;
+		}
 		if (FT_Load_Char(font->face, c, FT_LOAD_DEFAULT))
 			continue;
 
-		width += font->slot->advance.x >> 6;
+		currentWidth += font->slot->advance.x >> 6;
 	}
+	maxWidth = (std::max)(maxWidth, currentWidth);
 
-	return width;
+	// 縁取り分の幅を左右分足す
+	return maxWidth + textLayout.outlineSize * 2;
 }
 int Text::GetTextHeight(const std::string& text)
 {
+	if (!font || text.empty()) return 0;
+
+	// 自分のフォントサイズを必ず適用する
+	SetFontSize(textLayout.textSize);
+
 	std::u32string u32text = ToU32String(text);
-
-	int height = 0;
-
-	for (char32_t c : u32text)
-	{
-		if (FT_Load_Char(font->face, c, FT_LOAD_DEFAULT))
-			continue;
-
-		height = (std::max)(height, static_cast<int>(font->slot->bitmap.rows));
+	int lineCount = 1;
+	for (char32_t c : u32text) {
+		if (c == U'\n') lineCount++;
 	}
 
-	return height;
+	// CursorSet() と同じ基準の高さを使うことで中心が完全に一致する
+	int lineHeight = font->face->size->metrics.height >> 6;
+
+	// 行数分の高さ ＋ 縁取り分の上下分
+	return (lineHeight * lineCount) + textLayout.outlineSize * 2;
 }
 
 //生成された位置も自分の画像データをimageにコピーする(RGBAにも変換するみたい)

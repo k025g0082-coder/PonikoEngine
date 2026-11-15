@@ -1011,30 +1011,31 @@ void SceneComponentLoader::Property(const std::string& name, std::vector< UIData
 				/* データ内のElements読み込み */
 				for (auto& element : data.elements_) {
 					
-					// 空データなら
-					if (element.pathID_.empty()) continue;
+					// 空データなら(名前が空なら)
+					if (element->name_.empty()) continue;
 
 					json e;
 					
-					e["type"] = (int)element.type_;
+					element->Serialize(e);
+					//e["type"] = (int)element->type_;
 
-					e["name"] = element.name_;
+					//e["name"] = element->name_;
 
-					// 親がいた場合、親の名前
-					if (element.parent_) {
-						e["parent"] = element.parent_->name_;
-					}
+					//// 親がいた場合、親の名前
+					//if (element->parent_) {
+					//	e["parent"] = element->parent_->name_;
+					//}
 
-					e["pathID"] = element.pathID_;
-					e["groupName"] = element.groupName_;
-					
-					// アニメデータ  (変換時のto_json,from_jsonはヘッダー内に定義してるので使える)
-					e["animationData"] = element.animationDatas_;
+					//e["pathID"] = element->pathID_;
+					//e["groupName"] = element->groupName_;
+					//
+					//// アニメデータ  (変換時のto_json,from_jsonはヘッダー内に定義してるので使える)
+					//e["animationData"] = element->animationDatas_;
 
 
-					e["position"] = Vector3ToJson(element.position_);
-					e["scale"]    = Vector3ToJson(element.scale_);
-					e["rotation"] = Vector3ToJson(element.rotation_);
+					//e["position"] = Vector3ToJson(element->position_);
+					//e["scale"]    = Vector3ToJson(element->scale_);
+					//e["rotation"] = Vector3ToJson(element->rotation_);
 
 					//
 					item["elements"].push_back(e);
@@ -1058,36 +1059,68 @@ void SceneComponentLoader::Property(const std::string& name, std::vector< UIData
 				UIData& data_ = value.emplace_back();
 
 				data_.name_ = data.at("name").get<std::string>();
+				
 
 				// Elementの一斉読み込み
 				for (auto& item : data.at("elements")) {
 
-					UIElement& element = data_.elements_.emplace_back();
-
-					element.type_   = item.at("type").get<UIType>();
-
-					if (item.contains("name"))
-						element.name_ = item.at("name").get<std::string>();
-
-					// 親名
-					if (item.contains("parent"))
-						element.parentName_ = item.at("parent").get<std::string>();
+					UIType type = UIType::kTexture;
 
 
-					element.pathID_ = item.at("pathID").get<std::string>();
-					element.groupName_ = item.at("groupName").get<std::string>();
-
-
-					if (item.contains("animationData")) {
-
-						// アニメデータ  (変換時のto_json,from_jsonはヘッダー内に定義してるので使える)
-						element.animationDatas_ = item.at("animationData").get<UIElementAnimationDatas>();
+					if (item.contains("type")) {
+						type = item.at("type").get<UIType>();
 					}
 
-					element.position_ = JsonToVector3(item.at("position"));
-					element.scale_    = JsonToVector3(item.at("scale"));
-					element.rotation_ = JsonToVector3(item.at("rotation"));
+					// 派生クラス生成
+					std::unique_ptr<UIElement> element;
 
+					switch (type) {
+
+					case UIType::kTexture:
+						element = std::make_unique<UIElementTexture>();
+						break;
+
+					case UIType::kText:
+					    element = std::make_unique<UIElementText>();
+					    break;
+
+					default:
+						continue;
+					}
+
+
+					element->Deserialize(item);
+
+
+					// 共通データ読み込み
+					//element->type_ = type;
+
+
+					//if (item.contains("name"))
+					//	element->name_ = item.at("name").get<std::string>();
+
+					//// 親名
+					//if (item.contains("parent"))
+					//	element->parentName_ = item.at("parent").get<std::string>();
+
+
+					//element->pathID_ = item.at("pathID").get<std::string>();
+					//element->groupName_ = item.at("groupName").get<std::string>();
+
+
+					//if (item.contains("animationData")) {
+
+					//	// アニメデータ  (変換時のto_json,from_jsonはヘッダー内に定義してるので使える)
+					//	element->animationDatas_ = item.at("animationData").get<UIElementAnimationDatas>();
+					//}
+
+					//element->position_ = JsonToVector3(item.at("position"));
+					//element->scale_    = JsonToVector3(item.at("scale"));
+					//element->rotation_ = JsonToVector3(item.at("rotation"));
+
+
+					// 所有移動 - 追加
+					data_.elements_.push_back(std::move(element));
 				}
 
 			}
@@ -1326,7 +1359,7 @@ ScreenTransform  SceneComponentLoader::JsonToScreen(const json& value) {
 }
 
 
-TextDatas SceneComponentLoader::JsonToTextDatas(const json& value)
+TextDatas JsonToTextDatas(const json& value)
 {
 	TextDatas data;
 
@@ -1358,10 +1391,10 @@ TextDatas SceneComponentLoader::JsonToTextDatas(const json& value)
 		layout["isOutlineBlur"].get<bool>();
 
 	// position
-	data.position_ = Vector2{
-		value["position"][0].get<float>(),
-		value["position"][1].get<float>()
-	};
+	//data.position_ = Vector2{
+	//	value["position"][0].get<float>(),
+	//	value["position"][1].get<float>()
+	//};
 
 	// anchor
 	data.anchor_ =
@@ -1370,7 +1403,7 @@ TextDatas SceneComponentLoader::JsonToTextDatas(const json& value)
 	return data;
 }
 
-json  SceneComponentLoader::TextDatasToJson(const TextDatas& data)
+json TextDatasToJson(const TextDatas& data)
 {
 	json value;
 
@@ -1397,10 +1430,10 @@ json  SceneComponentLoader::TextDatasToJson(const TextDatas& data)
 		{"isOutlineBlur", data.textLayout.isOutlineBlur}
 	};
 
-	value["position"] = {
-		data.position_.x,
-		data.position_.y
-	};
+	//value["position"] = {
+	//	data.position_.x,
+	//	data.position_.y
+	//};
 
 	value["anchor"] =
 		static_cast<int>(data.anchor_);

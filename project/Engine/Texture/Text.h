@@ -69,7 +69,6 @@ struct TextDatas {
 	std::string text;     // 文字
 	std::string fontName; // 使用するフォント名
 	fontLayout textLayout;// レイアウト
-	Vector2 position_;    // 座標
 	TextAnchor anchor_;   // アンカー
 
 };
@@ -128,16 +127,16 @@ public:
 	// ImGui
 	void ImGuiView();
 
-	Vector2 GetPosition() { return position_; }
-	void SetPosition(Vector2 p) { position_ = p; }
+	// あー
+	ScreenTransform& GetScreenTransform() { return sprite.GetScreenTransform(); }
+
 
 	// JSON用
-	TextDatas GetTextDatas() {
+	TextDatas GetTextDatas() const{
 		TextDatas data = {
 			.text = previousText_,
 			.fontName = textLayout.fontName,
 			.textLayout = textLayout,
-			.position_ = position_,
 			.anchor_ = anchor_,
 		};
 		return data;
@@ -147,7 +146,6 @@ public:
 		textLayout = data.textLayout;
 		textLayout.fontName = data.textLayout.fontName;
 		anchor_ = data.anchor_;
-		position_ = data.position_;
 	}
 
 private:
@@ -184,7 +182,6 @@ private:
 	fontLayout previewTextLayout_;
 
 	std::u32string u32text_;
-	Vector2 position_;
 	TextAnchor anchor_;
 
 	int curPosX = 0;

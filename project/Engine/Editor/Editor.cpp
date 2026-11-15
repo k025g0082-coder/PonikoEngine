@@ -241,11 +241,11 @@ void Editor::Update()
 
 			// 受け取ったモデルの配列番号
 			DragTextureResource resource = *(const DragTextureResource*)payload->Data;
-
+			
 			/*
 				UIElementを生成
 			*/
-			UIManager::GetInstance()->AddUIElement(currentSceneData_->hierarchyPanel_->GetSelectedCurrentLayerName(), resource.pathId);
+			UIManager::GetInstance()->AddUIElement(UIType::kTexture,currentSceneData_->hierarchyPanel_->GetSelectedCurrentLayerName(), resource.pathId);
 			
 		}
 
