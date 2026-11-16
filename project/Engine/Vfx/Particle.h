@@ -3,6 +3,8 @@
 #include "Model.h"
 #include "Camera.h"
 
+#include "Texture.h"
+
 #include "ParticleEmit.h"
 
 #include "ImGuiManager.h"

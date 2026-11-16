@@ -22,6 +22,7 @@
 
 #include "UIManager.h"
 
+#include "EffectManager.h"
 #include "PostEffectManager.h"
 
 #include "UIManager.h"
@@ -1163,6 +1164,11 @@ void Editor::LoadScene(std::string sceneName)
 */
 void Editor::SwitchActiveScene(std::string sceneName,bool firstInit)
 {
+	// リセット
+
+	EffectManager::ResetEffect();
+	PostEffectManager::GetInstance()->Reset();
+
 	//
 	// *設定
 	selectedModelWorldTransform_ = nullptr;

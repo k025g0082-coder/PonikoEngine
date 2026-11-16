@@ -375,3 +375,10 @@ void RenderTarget::ImGuiView()
 
 #endif
 }
+
+void RenderTarget::ClearRenderTargetView()
+{
+	/* 画面クリア（バリア転移までやる）*/
+	BeginRender(true, { 0.0f, 0.0f, 0.0f, 0.0f }, false);
+	EndRender();
+}

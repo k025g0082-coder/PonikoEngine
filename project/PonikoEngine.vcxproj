@@ -361,6 +361,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Engine\Core\WinApp.cpp" />
     <ClCompile Include="Engine\Utility\Random.cpp" />
     <ClCompile Include="Engine\Utility\Ray.cpp" />
+    <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="UIElement.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -446,6 +447,7 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Engine\Core\RenderTarget.h" />
     <ClInclude Include="Engine\Utility\Random.h" />
     <ClInclude Include="Engine\Utility\Ray.h" />
+    <ClInclude Include="ModelManager.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Engine\Scene\Scene.h" />
     <ClInclude Include="Engine\Scene\SceneComponentLoader.h" />

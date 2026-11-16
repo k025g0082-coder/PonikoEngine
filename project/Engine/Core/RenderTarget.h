@@ -121,6 +121,10 @@ public:
 	// RenderTargetの描画区域など
 	void ImGuiView();
 
+	/// <summary>
+	/// 画面クリア　 (0,0,0,0)
+	/// </summary>
+	void ClearRenderTargetView();
 
 	// シザー矩形
 	D3D12_RECT scissorRect;

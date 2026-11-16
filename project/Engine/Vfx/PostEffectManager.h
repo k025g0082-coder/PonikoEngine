@@ -118,9 +118,7 @@ public:
 	}
 
 	// リセット
-	void Reset() {
-		bloomModelPropaties_.clear();
-	}
+	void Reset();
 
 
 	/// <summary>

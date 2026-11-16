@@ -284,7 +284,13 @@ void PostEffectManager::ApplyScene() {
 			// 2.5)* 解像度を戻の解像度に戻す
 			//bloomRenderTarget_.ChangeViewResolution(1.0f);
 		}
-
+		else {
+			// ブルーム対象が0個のときは、合成に使われる blurRenderTargets_ を黒でクリアする！
+			for (RenderTarget& rt : blurRenderTargets_) {
+				rt.BeginRender(true, { 0.0f, 0.0f, 0.0f, 0.0f }, false);
+				rt.EndRender();
+			}
+		}
 
 
 		/*
@@ -387,7 +393,21 @@ void PostEffectManager::ImGuiView(bool& show) {
 }
 
 
-	/*=== ポストエフェクト用、DSV(Depth)の作成 === */
+void PostEffectManager::Reset()
+{
+	
+	/* 画面クリア */
+	bloomRenderTarget_.ClearRenderTargetView();
+
+	for (RenderTarget& rt : blurRenderTargets_) {
+		rt.ClearRenderTargetView();
+	}
+
+	bloomModelPropaties_.clear();
+	
+}
+
+/*=== ポストエフェクト用、DSV(Depth)の作成 === */
 void PostEffectManager::CreateOffscreenDSV(int w,int h, bool resize) {
 
 	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
@@ -506,6 +526,9 @@ void PostEffectManager::DrawBloomExtract()
 				model->DrawBloom(*world, *Scene::GetSceneCamera(), bloomParamResource.Get());
 			}
 		}
+
+		// リストをリセット
+		bloomModelPropaties_.clear();
 
 		/* シーン全体をBloomしたときのやつ */
 		/* SceneBloom の Rootsignatureと、パイプラインの設定 */

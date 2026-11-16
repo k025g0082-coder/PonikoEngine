@@ -1,11 +1,6 @@
 #pragma once
 
-#include "Texture.h"
 #include "Camera.h"
-
-//#include "DirectionalLight.h"
-//#include "SpotLight.h"
-//#include "PointLight.h"
 
 #include "LightingManager.h"
 
@@ -53,6 +48,9 @@ struct ModelSkinningParam {
 	float padding[3];
 };
 
+/*
+	頂点・アニメボーン、アニメ
+*/
 struct ModelData {
 
 	std::vector<ModelVertexData> vertices;  // 頂点データ
@@ -62,7 +60,8 @@ struct ModelData {
 
 	//std::vector <MaterialData> materials;   // 複数対応マテリアル
 	// 
-	// ボーン
+
+	// アニメのボーン
 	std::vector<Bone> bones;
 
 	// 対応表？
@@ -75,6 +74,35 @@ struct ModelData {
 
 	// アニメがあるか
 	bool isSkinning = false;
+};
+
+/*
+*		ModelManagerで共有される情報
+*/
+struct SharedModelData
+{
+	// ファイルパス名
+	std::string filePath;
+
+	// 頂点・ボーンアニメ等
+	ModelData modelData;
+
+	// 頂点リソース
+	ComPtr <ID3D12Resource> vertexResource;
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+
+	// 頂点をまとめるインデックスリソース
+	ComPtr <ID3D12Resource> indexResource;
+	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
+
+	// アニメ有り無しか
+	ComPtr<ID3D12Resource> skinningParamResource_;
+	ModelSkinningParam* skinningParam = nullptr;
+
+
+	// テクスチャManagerから受け取ったTexutre管理番号
+	//uint32_t textureIndex_;
+
 };
 
 
@@ -143,9 +171,9 @@ public:
 
 
 	// テクスチャーをセット
-	void SetTexture(Texture* t) {
-		texture = t;
-	}
+	//void SetTexture(Texture* t) {
+	//	texture = t;
+	//}
 
 	// モデルデータ読み取り関数
 	static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
@@ -165,6 +193,11 @@ public:
 	void SetBloomToWorldTransform(WorldTransform* worldTransform);
 	
 private:
+	/*
+		ModelManagerにあるモデルの実体のアドレス
+	*/
+	SharedModelData* shareModelData_ = nullptr;
+
 
 	// キーを探してLerpで補完する
 	Vector3 SampleTransition(NodeAnimation& nodeAnim, float currentTick);
@@ -184,10 +217,10 @@ private:
 	ComPtr <ID3D12Resource> materialResource;
 
 	// 頂点リソース
-	ComPtr <ID3D12Resource> vertexResource;
+	//ComPtr <ID3D12Resource> vertexResource;
 
 	// モデルデータ
-	ModelData modelData;
+	//ModelData modelData;
 
 	// 時間計測アニメ用
 	float animationTime_ = 0.0f;
@@ -200,6 +233,9 @@ private:
 	
 	bool isLoop_ = true;
 
+
+	// アニメのボーン
+	std::vector<Bone> bones;
 
 	/*
 		次のポーズへの切り替え用。
@@ -217,19 +253,19 @@ private:
 
 	// スキニングデータ転送用の
 	Microsoft::WRL::ComPtr<ID3D12Resource> skinningResource_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> skinningParamResource_;
+	//Microsoft::WRL::ComPtr<ID3D12Resource> skinningParamResource_;
 
 	SkinningData* skinningData_ = nullptr;
-	ModelSkinningParam* skinningParam = nullptr;
+	//ModelSkinningParam* skinningParam = nullptr;
 
 	// WorldTransform,扱いやすくメンバ変数のほう
 	WorldTransform worldTransform_;
 
 
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+	//D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 
-	// テクスチャ
-	Texture* texture = nullptr;
+	// テクスチャManagerから受け取ったTexutre管理番号
+	uint32_t textureIndex_;
 
 
 	Material* materialData = nullptr;
@@ -240,9 +276,6 @@ private:
 	DirectionalLight* directionalLight_;
 	SpotLight* spotLight_;
 	PointLight* pointLight_;
-
-	ID3D12Resource* indexResource;
-	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
 
 	// アニメーションスピード
 	float animationSpeed = 1.0f;

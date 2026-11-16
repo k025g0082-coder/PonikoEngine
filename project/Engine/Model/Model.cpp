@@ -8,6 +8,9 @@
 
 #include "ImGuiManager.h"
 
+#include "TextureManager.h"
+#include "ModelManager.h"
+
 #include "ModelLoader.h"
 
 #include "ShadowManager.h"
@@ -20,6 +23,7 @@
 
 #include <fstream>
 #include <sstream>
+
 Model* Model::Clone() const
 {
 	Model* clone = new Model();
@@ -28,9 +32,8 @@ Model* Model::Clone() const
 	// CPU側のモデルデータ
 	// =========================
 
-	// 頂点・インデックス・ボーン・アニメーション等
-	// 読み込み済みデータをコピー
-	clone->modelData = modelData;
+	// モデルデータ参照先のアドレスを共有
+	clone->shareModelData_ = shareModelData_;
 
 	// =========================
 	// アニメーション状態
@@ -68,23 +71,23 @@ Model* Model::Clone() const
 	// =========================
 
 	// 頂点バッファ
-	clone->vertexResource = vertexResource;
+	//clone->vertexResource = vertexResource;
 
 	// Material
 	clone->materialResource = materialResource;
 
 	// IndexBuffer
-	clone->indexResource = indexResource;
+	//clone->indexResource = indexResource;
 
 	// これらは同じGPUリソースを参照してOK
-	clone->vertexBufferView = vertexBufferView;
-	clone->indexBufferView = indexBufferView;
+	//clone->vertexBufferView = vertexBufferView;
+	//clone->indexBufferView = indexBufferView;
 
 	// =========================
 	// テクスチャ
 	// =========================
 
-	clone->texture = texture;
+	clone->textureIndex_ = textureIndex_;
 
 	// =========================
 	// Material
@@ -114,36 +117,36 @@ Model* Model::CreateOBJ(const std::string& modelPath) {
 
 	Model* model = new Model();
 
-	model->modelData = ModelLoader::LoadObjModel(modelPath);
+	// 読み込み
+	ModelManager::GetInstance()->LoadModel(modelPath);
 
-	model ->texture = new Texture();
-	model->texture->Initialize(model->modelData.materials.textureFilePath);
+	/*
+		ModelManagerからモデルデータを貰う
+	*/
+	model->shareModelData_ = ModelManager::GetInstance()->GetModelDataByFilePath(modelPath);
+	auto* data = model->shareModelData_;
 
-	//頂点リソースを作る
-	model->vertexResource = DirectXUtility::CreateBufferResource(
-		DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(ModelVertexData) * model->modelData.vertices.size());
+	
+	// テクスチャの管理番号 取得
+	model->textureIndex_ = TextureManager::GetInstance()->GetTextureIndexByFilePath(data->modelData.materials.textureFilePath);
 
-	model->vertexBufferView = {};
-	model->vertexBufferView.BufferLocation = model->vertexResource->GetGPUVirtualAddress();
-	model->vertexBufferView.SizeInBytes =
-		UINT(sizeof(ModelVertexData) * model->modelData.vertices.size());
-	model->vertexBufferView.StrideInBytes = sizeof(ModelVertexData);
 
-	ModelVertexData* vertexData = nullptr;
-	model->vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-
-	std::memcpy(
-		vertexData,
-		model->modelData.vertices.data(),
-		sizeof(ModelVertexData) * model->modelData.vertices.size());
+	/*
+		読み込んだボーンのデータ一覧をモデルのメンバの方のにコピー
+	*/
+	model->bones = data->modelData.bones,
+	
 
 	// 初期化しとく
 	model->Initialize();
+
 
 	return model;
 }
 
 void Model::Initialize(){
+
+	auto& modelData = shareModelData_->modelData;
 
 	/* 
 		ボーン数にあわせて初期化時にリサイズ
@@ -161,35 +164,6 @@ void Model::Initialize(){
 	materialData->enableLighting = false; // ライティングはOFFにする
 	materialData->uvTransform = MakeIdentity4x4();
 
-	// 頂点データ
-	indexResource = DirectXUtility::CreateBufferResource(DirectXCommon::GetInstance()->GetDevice().Get(), sizeof(uint32_t) * modelData.indices.size());
-
-	// リソースの先頭のアドレスから使う
-	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
-
-	//使用するリソースのサイズはインデックスmodelData.indices.size()つ分のサイズ
-	indexBufferView.SizeInBytes =
-		static_cast<UINT>(sizeof(uint32_t) * modelData.indices.size());//インデックスはuint32_tとする
-
-	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
-
-	uint32_t* indexData = nullptr;
-
-	indexResource->Map(
-		0,
-		nullptr,
-		reinterpret_cast<void**>(&indexData)
-	);
-
-	// コピー
-	std::memcpy(
-		indexData,
-		modelData.indices.data(),
-		sizeof(uint32_t) * modelData.indices.size()
-	);
-
-	indexResource->Unmap(0, nullptr);
-
 	if (modelData.isSkinning) {
 
 		// 生成
@@ -203,22 +177,6 @@ void Model::Initialize(){
 
 	}
 
-	skinningParamResource_ =
-		DirectXUtility::CreateBufferResource(
-			DirectXCommon::GetInstance()->GetDevice().Get(),
-			sizeof(ModelSkinningParam)
-		);
-
-	skinningParamResource_->Map(
-		0,
-		nullptr,
-		reinterpret_cast<void**>(&skinningParam)
-	);
-
-	// アニメ有り無し
-	skinningParam->isSkinning =
-		modelData.isSkinning ? 1 : 0;
-	
 	worldTransform_.Initialize();
 	worldTransform_.UpdateMatrix();
 
@@ -244,15 +202,15 @@ void Model::Update(){
 	}
 
 
-	if (!modelData.animations.empty())
+	if (!shareModelData_->modelData.animations.empty())
 	{
-		// アニメーションできないので工事中
+		// アニメ更新
 		UpdateAnimation();
 	}
 	else
 	{
 		// ボーンはあるけどアニメ無
-		for (size_t i = 0; i < modelData.bones.size(); i++)
+		for (size_t i = 0; i < shareModelData_->modelData.bones.size(); i++)
 		{
 
 			skinningData_->boneMatrices[i] = ModelLoader::ConvertYZ();
@@ -267,14 +225,14 @@ void Model::Update(){
 void Model::UpdateAnimation() {
 	
 	// 空なら帰る
-	if (modelData.animations.empty())
+	if (shareModelData_->modelData.animations.empty())
 	{
 		return;
 	}
 
 	// アニメ情報読み取り。
 	Animation& animation =
-		modelData.animations[animationIndex_];
+		shareModelData_->modelData.animations[animationIndex_];
 
 	// 秒→Tick
 	// assimpは例、120tick / 30tick = 4秒のようになるので。
@@ -307,8 +265,8 @@ void Model::UpdateAnimation() {
 	// arm, leg, など各部位ひとつづつ取り出し更新
 	for (NodeAnimation& nodeAnim : animation.nodeAnimations)
 	{
-		auto it = modelData.boneMap.find(nodeAnim.boneName);
-		if (it == modelData.boneMap.end()) continue;
+		auto it = shareModelData_->modelData.boneMap.find(nodeAnim.boneName);
+		if (it == shareModelData_->modelData.boneMap.end()) continue;
 
 		uint32_t boneIndex = it->second;
 
@@ -320,9 +278,9 @@ void Model::UpdateAnimation() {
 		//}
 
 		Vector3 position = {
-			modelData.bones[boneIndex].localBindMatrix[3][0],
-			modelData.bones[boneIndex].localBindMatrix[3][1],
-			modelData.bones[boneIndex].localBindMatrix[3][2]
+			shareModelData_->modelData.bones[boneIndex].localBindMatrix[3][0],
+			shareModelData_->modelData.bones[boneIndex].localBindMatrix[3][1],
+			shareModelData_->modelData.bones[boneIndex].localBindMatrix[3][2]
 		};
 		Vector4 rotation = { 0.0f, 0.0f, 0.0f, 1.0f };  // 単位クォータニオン
 
@@ -368,7 +326,7 @@ void Model::UpdateAnimation() {
 		/*
 			アニメがあれば、いまのポーズの情報を保存
 		*/
-		if (modelData.isSkinning) {
+		if (shareModelData_->modelData.isSkinning) {
 
 			currentPose_[boneIndex] = {
 				.translation_ = position,
@@ -405,14 +363,14 @@ void Model::UpdateAnimation() {
 			0, 0, 0, 1
 		);
 
-		modelData.bones[boneIndex].localMatrix =
+		bones[boneIndex].localMatrix =
 			(translateAiMatrix *
 			rotateAiMatrix) *
 			scaleAiMatrix;
 		
 		/*modelData.bones[boneIndex].localMatrix = modelData.bones[boneIndex].localBindMatrix;*/
 
-		Bone bone = modelData.bones[boneIndex];
+		Bone bone = bones[boneIndex];
 		//DirectXUtility::Log("%f %f %f\n",
 		//	bone.localBindMatrix.a4,
 		//	bone.localBindMatrix.b4,
@@ -422,9 +380,9 @@ void Model::UpdateAnimation() {
 	// 親子関係を基に計算する
 	
 	// ルートボーンから再帰で計算
-	for (size_t i = 0; i < modelData.bones.size(); i++)
+	for (size_t i = 0; i < shareModelData_->modelData.bones.size(); i++)
 	{
-		if (modelData.bones[i].parentIndex == -1)
+		if (shareModelData_->modelData.bones[i].parentIndex == -1)
 		{
 			aiMatrix4x4 identity;
 			identity = aiMatrix4x4();
@@ -435,13 +393,11 @@ void Model::UpdateAnimation() {
 	
 
 	//// 毎回コピーする
-	for (size_t i = 0; i < modelData.bones.size(); i++)
+	for (size_t i = 0; i < shareModelData_->modelData.bones.size(); i++)
 	{
-		//boneMatrices_[i] = modelData.bones[i].finalMatrix;
-
 		skinningData_->boneMatrices[i] = Multiply(
 			ModelLoader::ConvertMatrix(
-				modelData.bones[i].finalMatrix),
+				bones[i].finalMatrix),
 			ModelLoader::ConvertYZ());
 	}
 	
@@ -460,7 +416,7 @@ void Model::UpdateAnimation() {
 
 void Model::ChangeAnimeIndex(int index, bool isloop)
 {
-	if (index < modelData.animations.size()) {
+	if (index < shareModelData_->modelData.animations.size()) {
 
 		// 変更
 		animationIndex_ = index;
@@ -488,7 +444,7 @@ void Model::SetBloomToWorldTransform(WorldTransform* worldTransform)
 // 再帰でグローバル行列を計算する関数
 void Model::CalculateGlobalMatrices(int boneIndex, const aiMatrix4x4& parentGlobal)
 {
-	Bone& bone = modelData.bones[boneIndex];
+	Bone& bone = bones[boneIndex];
 
 	// 親 * ローカル に変更
 	bone.globalMatrix = parentGlobal *  bone.localMatrix;
@@ -733,7 +689,7 @@ void Model::Draw(Camera camera) {
 
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
 
-	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+	commandList->IASetVertexBuffers(0, 1, &shareModelData_->vertexBufferView);
 
 	//RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Model).rootSignature);
@@ -741,7 +697,7 @@ void Model::Draw(Camera camera) {
 	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Model).graphicsPipelineState);
 
 
-	commandList->IASetIndexBuffer(&indexBufferView);
+	commandList->IASetIndexBuffer(&shareModelData_->indexBufferView);
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -760,7 +716,7 @@ void Model::Draw(Camera camera) {
 			commandList->SetGraphicsRootConstantBufferView(5, pointLight_->GetResource()->GetGPUVirtualAddress());
 	}
 
-	commandList->SetGraphicsRootConstantBufferView(7, skinningParamResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(7, shareModelData_->skinningParamResource_->GetGPUVirtualAddress());
 
 
 	ID3D12DescriptorHeap* heaps[] = {
@@ -774,10 +730,10 @@ void Model::Draw(Camera camera) {
 	//	texture[mesh.materialIndex];
 
 	// SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
-	commandList->SetGraphicsRootDescriptorTable(2, texture->GetTextureSrvHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex_));
 
 	// もしアニメがあったら
-	if (modelData.isSkinning) {
+	if (shareModelData_->modelData.isSkinning) {
 		commandList->SetGraphicsRootConstantBufferView(
 			6,
 			skinningResource_->GetGPUVirtualAddress());
@@ -797,7 +753,7 @@ void Model::Draw(Camera camera) {
 		ShadowManager::GetInstance()->GetShadowMapSrvHandle()
 	);
 
-	commandList->DrawIndexedInstanced(static_cast<UINT>(modelData.indices.size()), 1, 0, 0, 0);
+	commandList->DrawIndexedInstanced(static_cast<UINT>(shareModelData_->modelData.indices.size()), 1, 0, 0, 0);
 }
 
 
@@ -811,7 +767,7 @@ void Model::Draw(WorldTransform& world,Camera camera){
 
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
 
-	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+	commandList->IASetVertexBuffers(0, 1, &shareModelData_->vertexBufferView);
 
 	//RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Model).rootSignature);
@@ -819,7 +775,7 @@ void Model::Draw(WorldTransform& world,Camera camera){
 	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Model).graphicsPipelineState);
 
 
-	commandList->IASetIndexBuffer(&indexBufferView);
+	commandList->IASetIndexBuffer(&shareModelData_->indexBufferView);
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -832,7 +788,7 @@ void Model::Draw(WorldTransform& world,Camera camera){
 		commandList->SetGraphicsRootConstantBufferView(5, pointLight_->GetResource()->GetGPUVirtualAddress());
 	}
 
-	commandList->SetGraphicsRootConstantBufferView(7, skinningParamResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(7, shareModelData_->skinningParamResource_->GetGPUVirtualAddress());
 
 	ID3D12DescriptorHeap* heaps[] = {
 	DirectXCommon::GetInstance()->GetSrvHeap().Get()
@@ -841,16 +797,16 @@ void Model::Draw(WorldTransform& world,Camera camera){
 	commandList->SetDescriptorHeaps(1, heaps);
 
 	// SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
-	commandList->SetGraphicsRootDescriptorTable(2, texture->GetTextureSrvHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex_));
 
 	// もしアニメがあったら
-	if (modelData.isSkinning) {
+	if (shareModelData_->modelData.isSkinning) {
 		commandList->SetGraphicsRootConstantBufferView(
 			6,
 			skinningResource_->GetGPUVirtualAddress());
 	}
 
-	commandList->DrawIndexedInstanced(static_cast<UINT>(modelData.indices.size()), 1, 0, 0, 0);
+	commandList->DrawIndexedInstanced(static_cast<UINT>(shareModelData_->modelData.indices.size()), 1, 0, 0, 0);
 }
 
 // 影
@@ -866,7 +822,7 @@ void Model::DrawShadow(Matrix4x4 lightView_, Matrix4x4 lightProjection_) {
 
 	ID3D12GraphicsCommandList* commandList = DirectXCommon::GetInstance()->GetCommandList().Get();
 
-	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+	commandList->IASetVertexBuffers(0, 1, &shareModelData_->vertexBufferView);
 
 	//RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Shadow).rootSignature);
@@ -874,14 +830,14 @@ void Model::DrawShadow(Matrix4x4 lightView_, Matrix4x4 lightProjection_) {
 	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::Shadow).graphicsPipelineState);
 
 
-	commandList->IASetIndexBuffer(&indexBufferView);
+	commandList->IASetIndexBuffer(&shareModelData_->indexBufferView);
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// WVPをb0に設定
 	commandList->SetGraphicsRootConstantBufferView(0, worldTransform_.GetWvpResource()->GetGPUVirtualAddress());
 
-	commandList->DrawIndexedInstanced(static_cast<UINT>(modelData.indices.size()), 1, 0, 0, 0);
+	commandList->DrawIndexedInstanced(static_cast<UINT>(shareModelData_->modelData.indices.size()), 1, 0, 0, 0);
 }
 
 void Model::DrawBloom(WorldTransform& world,Camera camera, ID3D12Resource* bloomParamResource)
@@ -904,14 +860,14 @@ void Model::DrawBloom(WorldTransform& world,Camera camera, ID3D12Resource* bloom
 	commandList->SetGraphicsRootSignature(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::ModelBloom).rootSignature);
 	commandList->SetPipelineState(PipelineStateManager::GetInstance()->GetPipelineState(PipelineType::ModelBloom).graphicsPipelineState);
 	
-	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-	commandList->IASetIndexBuffer(&indexBufferView);
+	commandList->IASetVertexBuffers(0, 1, &shareModelData_->vertexBufferView);
+	commandList->IASetIndexBuffer(&shareModelData_->indexBufferView);
 
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	
-	commandList->SetGraphicsRootDescriptorTable(1, texture->GetTextureSrvHandleGPU());
+	commandList->SetGraphicsRootDescriptorTable(1, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex_));
 
 	// ブルーム　パラメータ値
 	commandList->SetGraphicsRootConstantBufferView(2, bloomParamResource->GetGPUVirtualAddress());
@@ -919,17 +875,17 @@ void Model::DrawBloom(WorldTransform& world,Camera camera, ID3D12Resource* bloom
 	commandList->SetGraphicsRootConstantBufferView(3, world.GetWvpResource()->GetGPUVirtualAddress());
 
 	// もしアニメがあったら
-	if (modelData.isSkinning) {
+	if (shareModelData_->modelData.isSkinning) {
 		commandList->SetGraphicsRootConstantBufferView(
 			4,
 			skinningResource_->GetGPUVirtualAddress());
 	}
 
 	// アニメ有り無し
-	commandList->SetGraphicsRootConstantBufferView(5, skinningParamResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(5, shareModelData_->skinningParamResource_->GetGPUVirtualAddress());
 
 
 
 	// 描画
-	commandList->DrawIndexedInstanced(static_cast<UINT>(modelData.indices.size()), 1, 0, 0, 0);
+	commandList->DrawIndexedInstanced(static_cast<UINT>(shareModelData_->modelData.indices.size()), 1, 0, 0, 0);
 }

@@ -34,6 +34,11 @@
                 "folderName": "Main",
                 "name": "element_1",
                 "pathId": "resources/Prefab/UI/element_1.json"
+            },
+            {
+                "folderName": "Main",
+                "name": "element_2",
+                "pathId": "resources/Prefab/UI/element_2.json"
             }
         ]
     }

@@ -325,10 +325,10 @@ void FieldExample::Draw()
 	}
 
 	//
-	naviText.SetFontOutlineSize(8);
-	naviText.SetFontSize(15);
+	//naviText.SetFontOutlineSize(8);
+	//naviText.SetFontSize(15);
 
-	naviText.drawString("移動/WASD", { 0,0 }, TextAnchor::LeftTop);
+	//naviText.drawString("移動/WASD", { 0,0 }, TextAnchor::LeftTop);
 
 
 	// 隕石範囲の描画
@@ -614,7 +614,7 @@ void FieldExample::EmitMeteo()
 	emitPos.z = Random(emitMeteoRangeAABB.min.z, emitMeteoRangeAABB.max.z);
 
 	auto& meteo = meteos_.emplace_back();
-	meteo.Initialize(meteoModel_->Clone(), emitPos, meteoEmitParam, meteoBreakEmitParam);
+	meteo.Initialize(Model::CreateOBJ("resources/Models/block/cube.obj"), emitPos, meteoEmitParam, meteoBreakEmitParam);
 
 }
 

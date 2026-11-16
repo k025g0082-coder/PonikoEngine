@@ -5,9 +5,21 @@
 #include "ScreenTransform.h"
 #include <d3d12.h>
 
+#include <string>
+#include <memory>
+
+class Texture;
+
+// テクスチャの頂点データ。要はVS.hlslに送るレイアウト
+struct SpriteVertexData {
+	Vector4 position;
+	Vector2 texcoord;
+};
 
 class Sprite {
 public:
+	Sprite();
+	~Sprite();
 
 	void Initialize(std::string texturePath);
 
@@ -207,7 +219,7 @@ private:
 
 
 	// テキスト用
-	Texture textTexture_;
+	std::unique_ptr<Texture> textTexture_;
 
 
 	ID3D12Device* device_;

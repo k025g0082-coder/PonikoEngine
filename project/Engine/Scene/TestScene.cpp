@@ -126,8 +126,6 @@ void TestScene::Init() {
 
 	world.Initialize();
 
-	/* モデル光らせ登録 - Worldも必要になるので同時に */
-	PostEffectManager::GetInstance()->AddBloomModel(model,&world);
 	//PostEffectManager::GetInstance()->AddBloomModel(fieldModel, &world);
 
 
@@ -307,9 +305,12 @@ void TestScene::Draw() {
 
 	};
 
-	//model->Draw(camera);f
+	model->Draw(*Scene::GetSceneCamera());
 
-	model->Draw(camera);
+	// 毎フレーム呼ぶ（光らせる場合）
+	PostEffectManager::GetInstance()->AddBloomModel(model, &world);
+
+
 	// model2->Draw(camera);
 	//fieldModel->Draw(backWorld2,camera);
 

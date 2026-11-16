@@ -9,12 +9,6 @@ using namespace Microsoft::WRL;
 
 #include <string>
 
-// テクスチャの頂点データ。要はVS.hlslに送るレイアウト
-struct SpriteVertexData {
-	Vector4 position;
-	Vector2 texcoord;
-};
-
 class Texture
 {
 public:

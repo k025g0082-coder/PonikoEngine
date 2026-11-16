@@ -5,6 +5,7 @@
 
 #include "Editor.h"
 
+#include "ModelManager.h"
 #include "TextureManager.h"
 #include "EffekseerManager.h"
 
@@ -37,6 +38,10 @@ namespace PonikoEngine {
 
 		// テクスチャマネージャー初期化
 		TextureManager::GetInstance()->Initialize();
+
+		// モデルマネージャー初期化
+		ModelManager::GetInstance()->Initialize();
+
 
 		// ポストエフェクトの初期化
 		PostEffectManager::GetInstance()->Initialize();
@@ -154,6 +159,7 @@ namespace PonikoEngine {
 		Input::GetInstance()->Finalize();
 		SoundManager::GetInstance()->Finalize();
 		TextureManager::GetInstance()->Finalize();
+		ModelManager::GetInstance()->Finalize();
 
 		CoUninitialize();
 

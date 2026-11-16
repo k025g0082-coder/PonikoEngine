@@ -58,6 +58,8 @@ void UIElementTexture::Deserialize(const nlohmann::json & j)
 
 void UIElementText::Initialize()
 {
+	//
+	text_.Init();
 
 	// SRT
 	text_.GetScreenTransform().translation_ = position_;
@@ -75,8 +77,6 @@ void UIElementText::Initialize()
 
 	// もしAddElementで追加された場合
 	if (text_.GetFontLayout().fontName.empty()) {
-		
-		text_.Init();
 
 		text_.setFont("default");
 		text_.SetFontSize(10);

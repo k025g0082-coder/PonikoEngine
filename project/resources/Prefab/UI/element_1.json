@@ -27,8 +27,8 @@
         "name": "element_1",
         "pathID": "resources/Engine/uvChecker.png",
         "position": [
-            652.2293090820313,
-            230.3184814453125,
+            531.974609375,
+            383.1845703125,
             0.0
         ],
         "rotation": [
@@ -42,5 +42,135 @@
             1.0
         ],
         "type": 0
+    },
+    {
+        "animationData": {
+            "animations": [
+                {
+                    "animationName": "NewAnime",
+                    "durationFrames": 60.0,
+                    "tracks": [
+                        {
+                            "items": [
+                                {},
+                                {},
+                                {}
+                            ]
+                        },
+                        {
+                            "items": [
+                                {}
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "currentTag": "NewAnime"
+        },
+        "groupName": "Main",
+        "name": "element_2",
+        "parent": "element_1",
+        "pathID": "",
+        "position": [
+            -2.0383920669555664,
+            -6.1146955490112305,
+            0.0
+        ],
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "text": {
+            "anchor": 1,
+            "fontName": "default",
+            "text": "Text",
+            "textLayout": {
+                "isOutlineBlur": false,
+                "outlineColor": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "outlineSize": 0,
+                "textColor": [
+                    255.0,
+                    255.0,
+                    255.0
+                ],
+                "textSize": 10
+            }
+        },
+        "type": 1
+    },
+    {
+        "animationData": {
+            "animations": [
+                {
+                    "animationName": "NewAnime",
+                    "durationFrames": 60.0,
+                    "tracks": [
+                        {
+                            "items": [
+                                {},
+                                {},
+                                {}
+                            ]
+                        },
+                        {
+                            "items": [
+                                {}
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "currentTag": "NewAnime"
+        },
+        "groupName": "Main",
+        "name": "element_3",
+        "parent": "element_1",
+        "pathID": "",
+        "position": [
+            497.3248596191406,
+            438.216552734375,
+            0.0
+        ],
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "text": {
+            "anchor": 1,
+            "fontName": "default",
+            "text": "Text",
+            "textLayout": {
+                "isOutlineBlur": false,
+                "outlineColor": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "outlineSize": 0,
+                "textColor": [
+                    255.0,
+                    255.0,
+                    255.0
+                ],
+                "textSize": 10
+            }
+        },
+        "type": 1
     }
 ]

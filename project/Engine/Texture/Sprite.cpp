@@ -6,6 +6,7 @@
 #include "WinApp.h"
 #include "PipelineStateManager.h"
 
+#include "Texture.h"
 #include "TextureManager.h"
 
 #include "ShadowManager.h"
@@ -13,12 +14,18 @@
 #include "DirectXCommon.h"
 #include "DirectXUtility.h"
 
+
+Sprite::Sprite() = default;
+Sprite::~Sprite() = default;
+
+
 void Sprite::TextTextureInitialize(unsigned char* image,int width,int height) {
 
 	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
 
-	textTexture_.Initialize(image,width,height);
-	texture_ = &textTexture_;
+	textTexture_ = std::make_unique<Texture>();
+	textTexture_->Initialize(image,width,height);
+	texture_ = textTexture_.get();
 
 	imageWidth = width;
 	imageHeight = height;
@@ -74,10 +81,6 @@ void Sprite::TextTextureInitialize(unsigned char* image,int width,int height) {
 void Sprite::Initialize(std::string texturePath)
 {
 
-	// テクスチャ
-	//texture_ = new Texture();
-	//texture_->Initialize(texturePath);
-	
 	// テクスチャ読み込み
 	TextureManager::GetInstance()->LoadTexture(texturePath);
 
@@ -315,7 +318,7 @@ void Sprite::Initialize(Texture* texture)
 void Sprite::TextTextureUpdate(unsigned char* image) {
 
 	// テクスチャ更新
-	textTexture_.TextTextureUpdate(image);
+	textTexture_->TextTextureUpdate(image);
 };
 
 

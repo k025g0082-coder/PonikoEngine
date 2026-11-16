@@ -7,6 +7,7 @@
 #include "FileDropManager.h"
 
 #include "EffectManager.h"
+#include "PostEffectManager.h"
 
 #include "Editor.h"
 
@@ -54,6 +55,8 @@ void Scene::ProcessChange() {
 		// エフェクト全削除
 		EffectManager::ResetEffect();
 
+		// PostエフェクトのBloom対象などの全削除
+		PostEffectManager::GetInstance()->Reset();
 
 		/*
 			Editorモードの場合、Editorから提供されたＳｃｅｎｅを設定する
@@ -62,9 +65,12 @@ void Scene::ProcessChange() {
 
 			/*  　Editor側の切り替え処理 　 */
 			Editor::GetInstance()->SwitchActiveScene(nextSceneName);
-	
+			
 			/* 　Editorからインスタンスをもらう　 */
 			instance = Editor::GetInstance()->GetActiveSceneInstance();
+
+			// 初期化
+			instance->Init();
 
 		}
 		else

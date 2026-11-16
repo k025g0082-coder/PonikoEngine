@@ -361,6 +361,9 @@
     <ClCompile Include="Engine\Texture\TextureManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="ModelManager.cpp">
+      <Filter>Engine\Source\ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -661,6 +664,9 @@
     </ClInclude>
     <ClInclude Include="Engine\Texture\TextureManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelManager.h">
+      <Filter>Engine\Source\ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
