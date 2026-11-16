@@ -60,18 +60,31 @@ public:
     std::string name_;                 //   エレメントの名前。
     std::string groupName_ = "Main";   //   グループの名前。
 
-    UIElementAnimationDatas animationDatas_; // アニメーションのデータ？
+
+    /*
+        アニメーション
+    */
+
+    /// <summary>
+    /// 指定アニメーションを再生
+    /// </summary>
+    /// <param name="animeTag"></param>
+    void PlayAnimation(std::string animeTag);
+
+
+    UIElementAnimationDatas animationDatas_; // アニメーションのデータ
 
     // SRT
     Vector3 position_;
     Vector3 scale_;
     Vector3 rotation_;
 
-
-    /*
-        いまマウスが
-    */
-
+    /// <summary>
+    /// 目的のエレメント名から、ルートから子を再帰的に検索してそのアドレスを返す
+    /// </summary>
+    /// <param name="childElementName"></param>
+    /// <returns></returns>
+    UIElement* FindChild(std::string childElementName);
 
     /*
         新しい親を設定
@@ -87,6 +100,10 @@ public:
     // 親の名前(データ輸送用,実際の表示には使わない)
     std::string parentName_;
 
+
+
+    // どうしてもキャストさせる必要があったためここに定義しておき実装は派生で描くとする
+    virtual void SetText(std::string t) { t; }
 
 
     // 保存
@@ -191,6 +208,13 @@ public:
     // 選択時のIMGUI画面
     void ImGuiView()override;
 
+    /// <summary>
+    /// 表示させる文字セット
+    /// </summary>
+    /// <param name="t">文字列</param>
+    void SetText(std::string t) override {
+        text = t;
+    }
 
     // 保存
     void Serialize(nlohmann::json& j) const override;

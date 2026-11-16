@@ -1166,7 +1166,7 @@ void AssetsPanel::ViewUIPrefabTreeNode()
 						r.index = i;
 
 						// 受け渡すPathId ＜－リソースPathId  をコピー。
-						strcpy_s(r.pathId, sizeof(r.pathId), resource.pathId_.c_str());
+						strcpy_s(r.name, sizeof(r.name), resource.name_.c_str());
 
 
 						ImGui::SetDragDropPayload(

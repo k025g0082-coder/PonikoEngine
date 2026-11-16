@@ -1,0 +1,198 @@
+[
+    {
+        "animationData": {
+            "animations": [
+                {
+                    "animationName": "open",
+                    "durationFrames": 60.0,
+                    "tracks": [
+                        {
+                            "items": [
+                                {},
+                                {
+                                    "keyFrames": [
+                                        {
+                                            "easingType": 8,
+                                            "frame": 1,
+                                            "value": {
+                                                "x": 1.0,
+                                                "y": 0.0,
+                                                "z": 1.0
+                                            }
+                                        },
+                                        {
+                                            "easingType": 0,
+                                            "frame": 20,
+                                            "value": {
+                                                "x": 1.0,
+                                                "y": 1.0,
+                                                "z": 1.0
+                                            }
+                                        }
+                                    ]
+                                },
+                                {}
+                            ]
+                        },
+                        {
+                            "items": [
+                                {}
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "animationName": "still",
+                    "durationFrames": 60.0,
+                    "tracks": [
+                        {
+                            "items": [
+                                {},
+                                {},
+                                {}
+                            ]
+                        },
+                        {
+                            "items": [
+                                {}
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "animationName": "close",
+                    "durationFrames": 60.0,
+                    "tracks": [
+                        {
+                            "items": [
+                                {},
+                                {
+                                    "keyFrames": [
+                                        {
+                                            "easingType": 6,
+                                            "frame": 0,
+                                            "value": {
+                                                "x": 1.0,
+                                                "y": 0.991583526134491,
+                                                "z": 1.0
+                                            }
+                                        },
+                                        {
+                                            "easingType": 6,
+                                            "frame": 11,
+                                            "value": {
+                                                "x": 1.0,
+                                                "y": 0.0,
+                                                "z": 1.0
+                                            }
+                                        },
+                                        {
+                                            "easingType": 0,
+                                            "frame": 31,
+                                            "value": {
+                                                "x": 1.0,
+                                                "y": 0.0,
+                                                "z": 1.0
+                                            }
+                                        }
+                                    ]
+                                },
+                                {}
+                            ]
+                        },
+                        {
+                            "items": [
+                                {}
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "currentTag": "still"
+        },
+        "groupName": "Main",
+        "name": "window",
+        "pathID": "resources/Engine/uvChecker.png",
+        "position": [
+            409.68145751953125,
+            364.8408203125,
+            0.0
+        ],
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            0.0,
+            1.0
+        ],
+        "type": 0
+    },
+    {
+        "animationData": {
+            "animations": [
+                {
+                    "animationName": "NewAnime",
+                    "durationFrames": 60.0,
+                    "tracks": [
+                        {
+                            "items": [
+                                {},
+                                {},
+                                {}
+                            ]
+                        },
+                        {
+                            "items": [
+                                {}
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "currentTag": "NewAnime"
+        },
+        "groupName": "Main",
+        "name": "text",
+        "parent": "window",
+        "pathID": "",
+        "position": [
+            -10.191189765930176,
+            -2.0381059646606445,
+            0.0
+        ],
+        "rotation": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "scale": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "text": {
+            "anchor": 1,
+            "fontName": "default",
+            "text": "おてすと",
+            "textLayout": {
+                "isOutlineBlur": false,
+                "outlineColor": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "outlineSize": 0,
+                "textColor": [
+                    255.0,
+                    255.0,
+                    255.0
+                ],
+                "textSize": 10
+            }
+        },
+        "type": 1
+    }
+]

@@ -34,6 +34,8 @@
 
 #include "HierarchyNode.h"
 
+#include "UIElement.h"
+
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
@@ -76,6 +78,10 @@ public:
     }
 
 private:
+
+    // てｓｔ
+    UIElement* ui = nullptr;
+
 
     Camera camera_;
 

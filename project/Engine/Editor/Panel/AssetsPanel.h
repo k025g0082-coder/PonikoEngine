@@ -59,7 +59,7 @@ struct UIElementResource {
 	std::string pathId_;     // パスおよびIDの意味を持つ
 
 	UIElement* element_ = nullptr; // 実体
-	std::string name_;		     // 名前表示用
+	std::string name_;		       // エレメント名
 
 
 	// パネルの所属フォルダ
@@ -70,7 +70,7 @@ struct UIElementResource {
 // DragDropPayload用。　なんか２つ以上登録できないらしいので仕方ない
 struct DragUIElementResource {
 	int index;
-	char pathId[256];		// pathID。構造体とかstd::stringはわたせないらしい。
+	char name[256];		// prefabの名前。構造体とかstd::stringはわたせないらしい。
 };
 
 /* エディタのアセット管理パネル */

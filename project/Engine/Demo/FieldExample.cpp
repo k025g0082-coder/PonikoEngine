@@ -92,6 +92,17 @@ void FieldExample::Init()
 		loder->LoadGroup("particle");
 	}
 
+
+	/*
+		指定のキャンバス内にUIElementを生成
+	*/
+	ui = UIManager::AddUIElement("teste", "window");
+
+	// 中の子要素（テキスト）を取得して文字を動的に書き換える
+	if (auto* elem = ui->FindChild("text")) {
+		elem->SetText("おてすと");
+	}
+
 }
 
 void FieldExample::Update(Input * input)
@@ -210,6 +221,18 @@ void FieldExample::Update(Input * input)
 
 #ifdef USE_IMGUI
 	ImGui::Begin("FieldExample");
+
+	if (ui) {
+		ImGui::Text("UI");
+
+		//アニメ
+		if (ImGui::Button("open")) {
+			ui->PlayAnimation("open");
+		}
+		if (ImGui::Button("close")) {
+			ui->PlayAnimation("close");
+		}
+	}
 
 	static Vector3 emitPos;
 

@@ -23,9 +23,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 
 	
 	// 初期Gameシーンの登録
-	//Game::GetInstance()->StartGameScene("FieldExample");
+	Game::GetInstance()->StartGameScene("FieldExample");
 
-	Game::GetInstance()->StartGameScene("TestScene");
+	//Game::GetInstance()->StartGameScene("TestScene");
 
 
 

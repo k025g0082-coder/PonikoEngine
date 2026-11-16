@@ -53,14 +53,20 @@ public:
 	static UIManager* GetInstance();
 
 	/// <summary>
-	/// テキスチャからUIElementをつくる
+	/// UIElementをつくる(タイプ指定版)
 	/// </summary>
 	/// <param name="UIType">タイプ。テキスチャとかテキストとか</param>
 	/// <param name="canvasLayerName">現在選択されているLayerName</param>
 	/// <param name="texturePathId">TextureResourceのpathId</param>
 	void AddUIElement(UIType type,std::string canvasLayerName,std::string pathId = "");
 
-	void AddUIElement(std::string canvasLayerName,std::string pathId = "");
+	/// <summary>
+	/// Assetsマネージャーに登録されているPrefab一覧のなかから、新しくUIElementをつくる.
+	/// </summary>
+	/// <param name="canvasLayerName">生成するLayerName</param>
+	/// <param name="prefabJsonPath">prefab名</param>
+	/// <returns>UIElementのアドレス</returns>
+	static UIElement* AddUIElement(std::string canvasLayerName,std::string prefabName = "");
 
 
 	// 初期化
@@ -179,18 +185,18 @@ private:
 
 
 	// 現在選択されているエレメントのアニメーションのタグ名
-	std::string currentSelectAnimationTag;
+	static std::string currentSelectAnimationTag;
 
 
 	// 選択中のエレメント
-	UIElement* selectedElemet_ = nullptr;
+	static UIElement* selectedElemet_;
 
 
 	// Ctrl時の、親子選択の対象ウインドウ
 	bool isShowParentWindow_ = false;
 
-	UIElement* selectedParentElemet_ = nullptr;
-	UIElement* selectedChildElemet_ = nullptr;
+	static UIElement* selectedParentElemet_;
+	static UIElement* selectedChildElemet_;
 
 	// 選択中のをドラッグ中か
 	bool isDragSelectedElement_ = false;
@@ -208,7 +214,7 @@ private:
 	bool inside = false;
 
 
-	HierarchyPanel* hierarchyPanel_ = nullptr;
+	static HierarchyPanel* hierarchyPanel_;
 
 };
 

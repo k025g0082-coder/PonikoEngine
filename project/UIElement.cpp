@@ -149,6 +149,39 @@ void UIElementText::Deserialize(const nlohmann::json & j)
 
 }
 
+/*
+	アニメ再生
+*/
+void UIElement::PlayAnimation(std::string animeTag)
+{
+	// もしそのアニメーション名が含まれていたら
+	if (animationDatas_.animations_.contains(animeTag)) {
+
+		// 再生中に
+		animationDatas_.animations_[animeTag].isPlaying = true;
+		animationDatas_.animations_[animeTag].frame = 0.0f;// 再生時間はその都度リセット
+
+		animationDatas_.currentTag_ = animeTag;//
+
+	}
+
+}
+
+// 子エレメント検索
+UIElement* UIElement::FindChild(std::string childElementName)
+{
+	for (UIElement* child : childrens_) {
+
+		// 一致したらそのアドレスを返す
+		if (child->name_ == childElementName) return child;
+
+		// 孫以降も再帰で探す
+		if (auto* found = child->FindChild(childElementName)) return found;
+
+	}
+	return nullptr;
+	
+}
 
 /*
 	親設定

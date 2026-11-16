@@ -18,6 +18,15 @@
 
 SceneUIData* UIManager::currentSceneUIData_;
 
+UIElement* UIManager::selectedElemet_ = nullptr;
+
+std::string UIManager::currentSelectAnimationTag;
+
+UIElement* UIManager::selectedParentElemet_ = nullptr;
+UIElement* UIManager::selectedChildElemet_ = nullptr;
+
+HierarchyPanel* UIManager::hierarchyPanel_ = nullptr;
+
 
 UIManager* UIManager::GetInstance()
 {
@@ -932,7 +941,7 @@ std::string UIManager::EmptyNameRegister()
 
 
 
-void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
+UIElement* UIManager::AddUIElement(std::string canvasLayerName, std::string prefabName)
 {
 	const auto& layers = hierarchyPanel_->GetHierarchyLayers();
 
@@ -945,8 +954,9 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 		}
 	);
 
+	// もしレイヤー名がなかったorキャンバスレイヤーではない
 	if (itt == layers.end() || itt->layerType_ != HierarchyLayerType::kCanvasLayer) {
-		return;
+		return nullptr;
 	}
 
 	// elementData内に同じレイヤー名があるかチェック
@@ -967,13 +977,39 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 		index = static_cast<int>(std::distance(currentSceneUIData_->elementDatas_.begin(), it));
 	}
 
+
+	/*
+		Assetsマネージャーから一致するPrefabあるか検索
+	*/
+	auto& list = AssetsPanel::GetInstance()->GetHierarchyUIElementResources();
+
+	// 
+	auto ittttt = std::find_if(
+		list.begin(),
+		list.end(),
+		[prefabName](const UIElementResource& r) {
+			return r.name_ == prefabName;
+		}
+	);
+	
+	// みつからなかった
+	if (ittttt == list.end()) {
+		return nullptr;// null
+	}
+
+	/*
+		prefabのパスを取得
+	*/
+	std::string pathId = ittttt->pathId_;
+
+
 	auto& targetElements = currentSceneUIData_->elementDatas_.at(index).elements_;
 
 	// Elementの一斉読み込み
 	if (SceneComponentLoader::GetInstance()->Load(pathId)) {
 
 		json& j = SceneComponentLoader::GetInstance()->GetCurrentJson();
-		if (!j.is_array()) return;
+		if (!j.is_array()) return nullptr;
 
 		// 今回新しく生成した要素だけを一時保持するリスト
 		std::vector<std::unique_ptr<UIElement>> createdElements;
@@ -1062,7 +1098,13 @@ void UIManager::AddUIElement(std::string canvasLayerName, std::string pathId)
 		for (auto& e : createdElements) {
 			targetElements.push_back(std::move(e));
 		}
+
+		// ルートのアドレスを返す
+		return rootElement;
 	}
+
+	// ここまできたということはload失敗ってこと
+	return nullptr;
 }
 
 void UIManager::AddUIElement(UIType type,std::string canvasLayerName, std::string pathId)
@@ -1173,6 +1215,7 @@ void UIManager::AddUIElement(UIType type,std::string canvasLayerName, std::strin
 		所有権を移動
 	*/
 	currentSceneUIData_->elementDatas_.at(index).elements_.push_back(std::move(element));
+
 }
 
 

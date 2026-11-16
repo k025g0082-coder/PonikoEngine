@@ -266,7 +266,7 @@ void Editor::Update()
 			/*
 				UIElementを生成
 			*/
-			UIManager::GetInstance()->AddUIElement(currentSceneData_->hierarchyPanel_->GetSelectedCurrentLayerName(), resource.pathId);
+			UIManager::GetInstance()->AddUIElement(currentSceneData_->hierarchyPanel_->GetSelectedCurrentLayerName(), resource.name);
 
 		}
 
