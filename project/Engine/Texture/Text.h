@@ -7,8 +7,12 @@ using namespace Microsoft::WRL;
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include "Sprite.h"
+class Sprite;
 
+#include "Vector.h"
+#include "ScreenTransform.h"
+
+#include <memory>
 #include <string>
 #include <map>
 
@@ -76,6 +80,9 @@ struct TextDatas {
 class Text {
 public:
 
+	Text();   // 
+	~Text();  // 
+
 	// 使うフォント名
 	void Init();
 
@@ -128,8 +135,7 @@ public:
 	void ImGuiView();
 
 	// あー
-	ScreenTransform& GetScreenTransform() { return sprite.GetScreenTransform(); }
-
+	ScreenTransform& GetScreenTransform();
 
 	// JSON用
 	TextDatas GetTextDatas() const{
@@ -158,7 +164,7 @@ private:
 	};
 	static std::map<std::string, FontData> fonts;  /* フォントたち */
 
-	unsigned char* image;
+	unsigned char* image = nullptr;
 
 	// 描画開始位置などを設定
 	void CursorSet();
@@ -172,7 +178,7 @@ private:
 	FontData* font = nullptr;
 
 	// 描画用
-	Sprite sprite;
+	std::unique_ptr<Sprite> sprite;
 
 	int width;
 	int height;

@@ -358,6 +358,9 @@
     <ClCompile Include="UIElement.cpp">
       <Filter>Engine\Source\ソース ファイル\Editor\UI</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Texture\TextureManager.cpp">
+      <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\Engine\Shader\Model.hlsli">
@@ -655,6 +658,9 @@
     </ClInclude>
     <ClInclude Include="UIElement.h">
       <Filter>Engine\Source\ヘッダー ファイル\Editor\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Texture\TextureManager.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

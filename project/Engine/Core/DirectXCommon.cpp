@@ -30,6 +30,9 @@ D3D12_DEPTH_STENCIL_DESC DirectXCommon::depthStencilDesc = {};
 uint32_t DirectXCommon::srvIndex_ = 1;
 uint32_t DirectXCommon::depthSRVIndex_ = 0;
 
+//
+const uint32_t DirectXCommon::kMaxSRVCount = 512;
+
 
 DirectXCommon* DirectXCommon::GetInstance() {
 	static DirectXCommon instance;
@@ -48,7 +51,7 @@ void DirectXCommon::Initialize() {
 	CreateRTV();
 
 	// SRV作成.
-	srvHeap_ = DirectXUtility::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+	srvHeap_ = DirectXUtility::CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
 	
 	CreateDSV();
 	CreateFence();

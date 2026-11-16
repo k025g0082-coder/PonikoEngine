@@ -7,13 +7,19 @@
 
 #include "ImGuiManager.h"
 
+#include "Sprite.h"
+
 #include <Windows.h>
 
 #define NOMINMAX
 #include <algorithm>
+#include <memory>
 
 std::map<std::string, Text::FontData> Text::fonts;
 FT_Library Text::library = nullptr;
+
+Text::Text() = default;
+Text::~Text() = default;
 
 void Text::Init() {
 
@@ -31,9 +37,13 @@ void Text::Init() {
 	// イメージのキャンバスのメモリを先に確保？？
 	memset(image, 0, width * height * 4);
 
+
+	//
+	sprite = std::make_unique<Sprite>();
+
 	// テキストテキスチャ用の初期化
-	sprite.TextTextureInitialize(image, width, height);
-	sprite.SetAnchor(Sprite::anchor::Center); // Sprite自体のアンカーを中心にする
+	sprite->TextTextureInitialize(image, width, height);
+	sprite->SetAnchor(Sprite::anchor::Center); // Sprite自体のアンカーを中心にする
 }
 
 // フォント設定
@@ -118,15 +128,15 @@ void Text::drawString(const std::string& text, Vector2 position, TextAnchor anch
 {
 		// もし前回までと同じ文字かレイアウトならすぐ帰る
 	if (text == previousText_ && textLayout == previewTextLayout_) {
-		sprite.SetPosition(position);
-		sprite.Draw();
+		sprite->SetPosition(position);
+		sprite->Draw();
 		return;
 	}
 
 	/*
 		座標はせっていされたのにんする
 	*/
-	sprite.GetScreenTransform().translation_ = { position.x,position.y,1.0f };
+	sprite->GetScreenTransform().translation_ = { position.x,position.y,1.0f };
 
 	previousText_ = text;
 	previewTextLayout_ = textLayout;
@@ -249,9 +259,9 @@ void Text::drawString(const std::string& text, Vector2 position, TextAnchor anch
 		}
 	}
 
-	sprite.TextTextureUpdate(image);
+	sprite->TextTextureUpdate(image);
 
-	sprite.Draw();
+	sprite->Draw();
 }
 
 // 文字列描画(内蔵型(ScreenTtanform))
@@ -263,8 +273,8 @@ void Text::drawString(const std::string& text, TextAnchor anchor)
 
 		anchor_ = anchor;
 
-		sprite.GetScreenTransform().UpdateMatrix();
-		sprite.Draw();
+		sprite->GetScreenTransform().UpdateMatrix();
+		sprite->Draw();
 		return;
 	}
 
@@ -378,9 +388,9 @@ void Text::drawString(const std::string& text, TextAnchor anchor)
 		}
 	}
 
-	sprite.TextTextureUpdate(image);
+	sprite->TextTextureUpdate(image);
 
-	sprite.Draw();
+	sprite->Draw();
 }
 
 
@@ -498,6 +508,11 @@ void Text::ImGuiView() {
 
 #endif
 
+}
+
+ScreenTransform& Text::GetScreenTransform()
+{
+	return sprite->GetScreenTransform();
 }
 
 int Text::GetTextWidth(const std::string& text)

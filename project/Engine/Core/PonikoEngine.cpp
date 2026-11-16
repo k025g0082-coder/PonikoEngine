@@ -5,10 +5,12 @@
 
 #include "Editor.h"
 
+#include "TextureManager.h"
 #include "EffekseerManager.h"
 
-
 #include "UIManager.h"
+
+
 
 
 namespace PonikoEngine {
@@ -32,6 +34,9 @@ namespace PonikoEngine {
 			DirectXCommon::GetInstance()->GetDevice().Get(),
 			DirectXCommon::GetInstance()->GetCommandQueue().Get()
 		);
+
+		// テクスチャマネージャー初期化
+		TextureManager::GetInstance()->Initialize();
 
 		// ポストエフェクトの初期化
 		PostEffectManager::GetInstance()->Initialize();
@@ -148,6 +153,7 @@ namespace PonikoEngine {
 		ImGuiManager::GetInstance()->Finalize();
 		Input::GetInstance()->Finalize();
 		SoundManager::GetInstance()->Finalize();
+		TextureManager::GetInstance()->Finalize();
 
 		CoUninitialize();
 

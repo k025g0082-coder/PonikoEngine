@@ -6,6 +6,8 @@
 #include "WinApp.h"
 #include "PipelineStateManager.h"
 
+#include "TextureManager.h"
+
 #include "ShadowManager.h"
 
 #include "DirectXCommon.h"
@@ -73,8 +75,14 @@ void Sprite::Initialize(std::string texturePath)
 {
 
 	// テクスチャ
-	texture_ = new Texture();
-	texture_->Initialize(texturePath);
+	//texture_ = new Texture();
+	//texture_->Initialize(texturePath);
+	
+	// テクスチャ読み込み
+	TextureManager::GetInstance()->LoadTexture(texturePath);
+
+	// 管理番号 取得
+	textureIndex_ = TextureManager::GetInstance()->GetTextureIndexByFilePath(texturePath);
 
 
 	device_ = DirectXCommon::GetInstance()->GetDevice().Get();
@@ -119,8 +127,8 @@ void Sprite::Initialize(std::string texturePath)
 		SUCCEEDED(hr)
 	);
 
-	int tWidth = (int)texture_->GetTextureWidth();
-	int tHeight = (int)texture_->GetTextureHeight();
+	int tWidth  = static_cast<int>(TextureManager::GetInstance()->GetTextureWidth(textureIndex_));
+	int tHeight = static_cast<int>(TextureManager::GetInstance()->GetTextureHeight(textureIndex_));
 
 
 
@@ -368,8 +376,14 @@ void Sprite::Draw() {
 
 	commandList->SetDescriptorHeaps(1, heaps);
 
-	// SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
-	commandList->SetGraphicsRootDescriptorTable(2, texture_->GetTextureSrvHandleGPU());
+	if (!texture_) {
+		// テクスチャの管理番号
+		commandList->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex_));
+	}
+	else {
+		// 外部のテクスチャポインタの場合
+		commandList->SetGraphicsRootDescriptorTable(2, texture_->GetTextureSrvHandleGPU());
+	}
 
 	//描画!(DrawCall/ドローコール)
 	commandList->DrawInstanced(6, 1, 0, 0);
@@ -461,10 +475,28 @@ void Sprite::Draw(ScreenTransform& screenTransform_) {
 
 	commandList->SetDescriptorHeaps(1, heaps);
 
-	// SRVDescriptorTableの先頭を設定。２，はRootParametor[2]の２
-	commandList->SetGraphicsRootDescriptorTable(2, texture_->GetTextureSrvHandleGPU());
+	if (!texture_) {
+		// テクスチャの管理番号
+		commandList->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex_));
+	}
+	else {
+		// 外部のテクスチャポインタの場合
+		commandList->SetGraphicsRootDescriptorTable(2, texture_->GetTextureSrvHandleGPU());
+	}
+
 
 	//描画!(DrawCall/ドローコール)
 	commandList->DrawInstanced(6, 1, 0, 0);
 
+}
+
+bool Sprite::IsLoaded()
+{
+	
+		if (texture_) {
+			return texture_->GetTextureSrvHandleGPU().ptr != 0;
+		}
+		// textureIndex_ を使う場合はこちら
+		return TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex_).ptr != 0;
+	
 }

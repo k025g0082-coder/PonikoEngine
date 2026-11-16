@@ -101,9 +101,11 @@ public:
 		return depthSRVHandleGPU;
 	}
 
-
     // SRV管理番号を返す
     static uint32_t GetAllocateSrv() { return srvIndex_++; }
+
+    // 最大SRV数
+    static const uint32_t kMaxSRVCount;
 
 private:
 

@@ -1,11 +1,10 @@
 #pragma once
 
-#include "PipelineStateManager.h"
+#include "Vector.h"
 
-#include "Texture.h"
-
-#include "Matrix.h"
 #include "ScreenTransform.h"
+#include <d3d12.h>
+
 
 class Sprite {
 public:
@@ -187,9 +186,7 @@ public:
 	}
 
 	// よみこめたか（多分あってない）
-	bool IsLoaded() {
-		return texture_->GetTextureSrvHandleGPU().ptr != 0;
-	};
+	bool IsLoaded();
 
 	// てくうちゃSRV
 
@@ -201,7 +198,11 @@ private:
 	// ScreenTransform,扱いやすくメンバ変数のほう
 	ScreenTransform screenTransform_;
 
-	// テクスチャ
+	// テクスチャManagerから受け取ったTexutre管理番号
+	uint32_t textureIndex_ = 0;
+
+
+	// 外部からテキスチャを貰う場合 またはテキスト用のテキスチャ
 	Texture* texture_ = nullptr;
 
 
