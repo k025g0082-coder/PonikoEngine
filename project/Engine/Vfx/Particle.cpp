@@ -335,10 +335,14 @@ void Particle::RegionParticleTexture(std::string tag, std::string path) {
         }
     }
 
-    Texture* data = new Texture();
-    data->Initialize(path);
+    /*
+        TextureManagerに読み込み・登録する
+    */
+    TextureManager::GetInstance()->LoadTexture(path);
 
-    particleTextureDatas_[tag] = data;
+    // テキスチャのアドレス
+    particleTextureDatas_[tag] = TextureManager::GetInstance()->GetTextureByFilePath(path);
+
 }
 
 
