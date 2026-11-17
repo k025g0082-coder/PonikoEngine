@@ -96,12 +96,12 @@ void FieldExample::Init()
 	/*
 		指定のキャンバス内にUIElementを生成
 	*/
-	ui = UIManager::AddUIElement("teste", "window");
+	//ui = UIManager::AddUIElement("teste", "window");
 
-	// 中の子要素（テキスト）を取得して文字を動的に書き換える
-	if (auto* elem = ui->FindChild("text")) {
-		elem->SetText("おてすと");
-	}
+	//// 中の子要素（テキスト）を取得して文字を動的に書き換える
+	//if (auto* elem = ui->FindChild("text")) {
+	//	elem->SetText("おてすと");
+	//}
 
 }
 

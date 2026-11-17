@@ -61,6 +61,9 @@ public:
         currentSelectItemKeyIndex = -1;
     }
 
+    UIElement* GetUIElement() {
+        return selectElement;
+    }
     void SetNullSelectElement() { selectElement = nullptr; }
 
     /// <summary>

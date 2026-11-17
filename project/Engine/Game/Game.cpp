@@ -45,9 +45,9 @@ Game* Game::GetInstance() {
 	return &game;
 };
 
-void Game::StartGameScene(std::string sceneName)
+void Game::StartGameScene(std::string sceneName, std::string sceneHierarchyJsonPath)
 {
-	Scene::StartGameScene(sceneName);
+	Scene::StartGameScene(sceneName, sceneHierarchyJsonPath);
 }
 
 void Game::Init() {

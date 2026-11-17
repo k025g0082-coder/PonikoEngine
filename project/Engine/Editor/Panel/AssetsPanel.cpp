@@ -306,7 +306,7 @@ void AssetsPanel::AddDropModel()
 			resource.model_ = std::move(model);		// 上のローカル変数から所有権いどう
 
 			//*  デフォルトでライトセット  *//
-			resource.model_->SetLightSets();
+			//resource.model_->SetLightSets();
 
 			resource.name_ = FileDropManager::GetFileNameWithoutExtension(path);// 表示名 拡張子を抜いたのを設定する
 
@@ -323,9 +323,6 @@ void AssetsPanel::AddDropModel()
 
 				}
 			}
-
-			// モデルリソース追加
-			AddModelResource(resource);
 
 			/* モデルのヒエラルキ追加 */
 			auto h = std::make_unique<ModelNode>();
@@ -351,6 +348,11 @@ void AssetsPanel::AddDropModel()
 			/* シーン側のGameObjectに干渉してたら一緒に増やす */
 			hierarchyPanel_->GameObjectAddCheck();
 
+
+			/*
+				モデルリソース追加 (resourceの所有権を移動するため最後に描く)
+			*/
+			AddModelResource(resource);
 
 		}
 

@@ -439,6 +439,78 @@ void UIManager::DrawElements()
 
 }
 
+void UIManager::DeleteUIElement(std::string canvasName, UIElement* element)
+{
+
+	//該当レイヤー検索
+	auto it = std::find_if(
+		currentSceneUIData_->elementDatas_.begin(),
+		currentSceneUIData_->elementDatas_.end(),
+		[canvasName](const UIData& data_) {
+			return data_.name_ == canvasName;
+		}
+	);
+
+	// みつからない
+	if (it == currentSceneUIData_->elementDatas_.end()) {
+		return;
+	}
+
+
+	// もし親がいた場合その中から自分を消す
+	if (element->parent_) {
+
+		auto& siblings = element->parent_->childrens_;
+
+		siblings.erase(
+			std::remove(
+				siblings.begin(),
+				siblings.end(),
+				element),
+			siblings.end()
+		);
+	}
+	std::vector<UIElement*> deleteList;
+
+
+	// 再帰的に　親子階層をすべて削除対象にしたリストを生成する
+	CorrectDeleteUIElementList(element, deleteList);
+
+
+	// 選択中のUIが削除対象に含まれていたら選択解除する
+	if (std::find(deleteList.begin(), deleteList.end(), selectedElemet_) != deleteList.end()) {
+		selectedElemet_ = nullptr;
+	}
+
+	if (std::find(deleteList.begin(), deleteList.end(), selectedChildElemet_) != deleteList.end()) {
+		selectedChildElemet_ = nullptr;
+	}
+	if (std::find(deleteList.begin(), deleteList.end(), selectedParentElemet_) != deleteList.end()) {
+		selectedParentElemet_ = nullptr;
+	}
+
+	// シーケンサー内で設定しているのも検索して、削除対象にあったらnullに
+	if (std::find(deleteList.begin(), deleteList.end(), currentSceneUIData_->sequencer_.GetUIElement()) != deleteList.end()) {
+		currentSceneUIData_->sequencer_.SetNullSelectElement();// Nullに
+	}
+
+
+	// 消す
+	it->elements_.erase(
+		std::remove_if(
+			it->elements_.begin(),
+			it->elements_.end(),
+			[&deleteList](const std::unique_ptr<UIElement>& ptr) {
+				return std::find(deleteList.begin(), deleteList.end(), ptr.get()) != deleteList.end();
+			}
+		),
+		it->elements_.end()
+	);
+
+
+
+}
+
 void UIManager::UpdateElementAnimation(UIElement* element)
 {
 	// 現在設定されている、タグのアニメ
@@ -905,6 +977,20 @@ void UIManager::MoveSelectElement()
 
 	}
 #endif
+}
+
+//
+void UIManager::CorrectDeleteUIElementList(UIElement* e, std::vector<UIElement*>& elements)
+{
+	if (!e)return;
+
+	elements.push_back(e);
+
+	for (auto child : e->childrens_) {
+
+		// 再帰
+		CorrectDeleteUIElementList(child, elements);
+	}
 }
 
 /*

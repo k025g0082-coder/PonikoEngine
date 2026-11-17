@@ -25,7 +25,7 @@ void Triangle::Initialize()
 	D3D12_RESOURCE_DESC vertexResourceDesc{};
 
 	vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	vertexResourceDesc.Width = sizeof(SpriteVertexData) * 3;
+	//vertexResourceDesc.Width = sizeof(SpriteVertexData) * 3;
 
 	vertexResourceDesc.Height = 1;
 	vertexResourceDesc.DepthOrArraySize = 1;
@@ -47,34 +47,34 @@ void Triangle::Initialize()
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 
 	// 使用するリソースのサイズは頂点３つ分
-	vertexBufferView.SizeInBytes = sizeof(SpriteVertexData) * 3;
+	//vertexBufferView.SizeInBytes = sizeof(SpriteVertexData) * 3;
 
 	//　１頂点のサイズ
-	vertexBufferView.StrideInBytes = sizeof(SpriteVertexData);
+	//vertexBufferView.StrideInBytes = sizeof(SpriteVertexData);
 
 	// リソースの箱にデータを書き込んでく
-	SpriteVertexData* vertexData = nullptr;
+//	SpriteVertexData* vertexData = nullptr;
 
 	// 書き込むアドレスを取得
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	//vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 
 	// 左下
-	vertexData[0].position = { -0.5f,-0.5f,0.0f,1.0f };
-	vertexData[0].texcoord = { 0.0f,1.0f };
+	///vertexData[0].position = { -0.5f,-0.5f,0.0f,1.0f };
+	//vertexData[0].texcoord = { 0.0f,1.0f };
 
-	// 上
-	vertexData[1].position = { 0.0f,0.5f,0.0f,1.0f };
-	vertexData[1].texcoord = { 0.5f,0.0f };
+	//// 上
+	//vertexData[1].position = { 0.0f,0.5f,0.0f,1.0f };
+	//vertexData[1].texcoord = { 0.5f,0.0f };
 
-	// 右下
-	vertexData[2].position = { 0.5f,-0.5f,0.0f,1.0f };
-	vertexData[2].texcoord = { 1.0f,1.0f };
+	//// 右下
+	//vertexData[2].position = { 0.5f,-0.5f,0.0f,1.0f };
+	//vertexData[2].texcoord = { 1.0f,1.0f };
 
 	// これから書き込むRTVのインデックス
 	UINT backBufferIndex = DirectXCommon::GetInstance()->GetSwapChain()->GetCurrentBackBufferIndex();
 
 	// マテリアル用のリソース
-	materialResource = DirectXUtility::CreateBufferResource(device_, sizeof(SpriteVertexData));
+	//materialResource = DirectXUtility::CreateBufferResource(device_, sizeof(SpriteVertexData));
 	Vector4* materialData = nullptr;
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	*materialData = { 1.0f,1.0f,1.0f,1.0f }; // 白色

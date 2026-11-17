@@ -37,9 +37,12 @@ public:
 	/// </summary>
 	virtual void Draw() = 0;
 
-
-	// ゲーム開始時
-	static void StartGameScene(std::string sceneName);
+	/// <summary>
+	/// ゲーム開始のシーン
+	/// </summary>
+	/// <param name="sceneName">シーン名</param>
+	/// <param name="sceneHierarchyJsonPath">カスタムのHierarchyのjsonパスがある際はここ</param>
+	static void  StartGameScene(std::string sceneName, std::string sceneHierarchyJsonPath = "");
 
 
 	/// <summary>
@@ -60,8 +63,11 @@ public:
 	/// 別のシーンに切り替え
 	/// </summary>
 	/// <param name="sceneName">シーン名</param>
-	static void RequestChange(std::string sceneName) {
+	/// <param name="requestHierarchyJsonPath">これを設定するとシーン先でそのヒエラルキー情報が読み取られる</param>
+	static void RequestChange(std::string sceneName, std::string requestHierarchyJsonPath = "") {
 		nextSceneName = sceneName;
+		nextSceneHierarchyJsonPath = requestHierarchyJsonPath;
+
 		isChanging = true;
 	}
 
@@ -92,6 +98,7 @@ protected:
 private:
 
 	static std::string nextSceneName;
+	static std::string nextSceneHierarchyJsonPath;
 
 	static Scene* instance;
 

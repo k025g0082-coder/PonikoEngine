@@ -43,6 +43,10 @@ struct SceneData {
 	// シーン名
 	std::string sceneName_; 
 
+	// 
+	std::string sceneHierarchyPath_;
+
+
 	// シーンのインスタンス（保持しておく）
 	Scene* scene_ = nullptr;
 
@@ -69,7 +73,7 @@ public:
 
 
 	/* 各パネルの初期化 */
-	void PanelInit(std::string sceneName);
+	void PanelInit(std::string sceneName, std::string sceneHierarchyJsonPath);
 
 
 	/* モデル選択モード */
@@ -137,7 +141,7 @@ public:
 	/*
 		Editor内のシーンタブの切り替え
 	*/
-	void SwitchActiveScene(std::string sceneName, bool firstInit = false);
+	void SwitchActiveScene(std::string sceneName,std::string sceneHierarchyPath, bool firstInit = false);
 
 	/*
 		現在アクティブなシーンのアドレスを返す

@@ -92,7 +92,7 @@ void Editor::Initialize() {
 
 }
 
-void Editor::PanelInit(std::string sceneName)
+void Editor::PanelInit(std::string sceneName, std::string sceneHierarchyJsonPath)
 {
 	//
 	currentSceneName_ = sceneName;
@@ -105,8 +105,19 @@ void Editor::PanelInit(std::string sceneName)
 	AssetsPanel::GetInstance()->Initialize();
 	AssetsPanel::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
 
-	// アセットをもとにヒエラルキ生成
-	currentSceneData_->hierarchyPanel_.get()->Initialize(sceneName,grid);
+	// アセットをもとにヒエラルキ生成.初期化時は下のjsonを参照とする
+	std::string jsonPath;
+	
+	if (sceneHierarchyJsonPath.empty()) {
+		jsonPath = "resources/Scene/" + sceneName + "/hierarchy.json";
+	}
+	else {
+		jsonPath = sceneHierarchyJsonPath;
+	}
+
+	currentSceneData_->sceneHierarchyPath_ = jsonPath;
+	currentSceneData_->hierarchyPanel_.get()->Initialize(jsonPath,grid);
+
 
 	/* UIManagerにセット */
 	UIManager::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
@@ -197,7 +208,7 @@ void Editor::Update()
 			// タブの描画（選択されたら true）
 			if (ImGui::BeginTabItem(data.sceneName_.c_str(), &open)) {
 
-				// ★ タブが切り替わったら、アクティブなシーンを変更する
+				// タブが切り替わったら、アクティブなシーンを変更する
 				if (currentSceneData_ != &data) {
 					currentSceneData_ = &data;
 
@@ -207,7 +218,7 @@ void Editor::Update()
 					Scene::SetActiveInstanceReference(data.scene_);
 
 					/* データ等も切り替え */
-					SwitchActiveScene(currentSceneData_->sceneName_);
+					SwitchActiveScene(currentSceneData_->sceneName_,currentSceneData_->sceneHierarchyPath_);
 
 				}
 
@@ -1172,7 +1183,7 @@ void Editor::LoadScene(std::string sceneName)
 	シーン切り替え
 
 */
-void Editor::SwitchActiveScene(std::string sceneName,bool firstInit)
+void Editor::SwitchActiveScene(std::string sceneName, std::string sceneHierarchyPath, bool firstInit)
 {
 	// リセット
 
@@ -1233,7 +1244,25 @@ void Editor::SwitchActiveScene(std::string sceneName,bool firstInit)
 
 			if (!firstInit) {
 
-				sceneData.hierarchyPanel_.get()->Initialize(sceneName, grid);
+				/*
+					読み込むjsonのパスをここで設定
+				*/
+
+				std::string jsonPath_;
+
+				/* もし読み込むjsonが指定されていたら・・ */
+				if (!sceneHierarchyPath.empty()) {
+
+					// 指定されたヒエラルキーのjsonファイル
+					jsonPath_ = sceneHierarchyPath;
+				}
+				else {
+					// シーンファイル内の特定のjsonファイル
+					jsonPath_ = "resources/Scene/" + sceneName + "/hierarchy.json";
+				}
+
+				sceneData.sceneHierarchyPath_ = jsonPath_;
+				sceneData.hierarchyPanel_.get()->Initialize(jsonPath_, grid);
 
 				AssetsPanel::GetInstance()->SetHierarchyPanel(sceneData.hierarchyPanel_.get());
 

@@ -98,6 +98,13 @@ public:
 	void DrawElements();
 
 
+	/// <summary>
+	/// 削除
+	/// </summary>
+	/// <param name="layerName">レイヤー名</param>
+	/// <param name="element">削除するエレメントのあどれす</param>
+	void DeleteUIElement(std::string layerName, UIElement* element);
+
 	
 	// アニメーション補間
 	void UpdateElementAnimation(UIElement* element);
@@ -163,6 +170,10 @@ private:
 
 	// 選択しているエレメントを移動
 	void MoveSelectElement();
+
+
+	// 消す際の消すエレメントを親子階層をもとに再帰で全部リストアップする
+	void CorrectDeleteUIElementList(UIElement* e, std::vector<UIElement*>& elements);
 
 
 	// 名前変更時のウインドウ

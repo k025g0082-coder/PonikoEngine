@@ -10,8 +10,12 @@ public:
 	// シングルトン
 	static Game* GetInstance();
 
-	// 最初に実行するSceneのとうろく
-	void StartGameScene(std::string sceneName);
+	/// <summary>
+	/// 最初に実行されるSceneの登録
+	/// </summary>
+	/// <param name="sceneName">シーン名</param>
+	/// <param name="sceneHierarchyJsonPath">カスタムなJsonの場合はここ</param>
+	void StartGameScene(std::string sceneName, std::string sceneHierarchyJsonPath = "");
 
 	void Init();
 	void Update();

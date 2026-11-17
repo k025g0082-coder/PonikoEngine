@@ -100,7 +100,7 @@ class HierarchyPanel
 {
 public:
 
-	void Initialize(const std::string sceneName ,EditorGrid& g);
+	void Initialize(const std::string jsonPath ,EditorGrid& g);
 
 	// 常に更新
 	void Update();
@@ -138,8 +138,8 @@ public:
 	// 設定されたJsonパスで保存
 	void HierarchySave();
 
-	// シーン名から読込
-	void HierarchyLoad(const std::string sceneName);
+	// ヒエラルキ読み込み
+	void HierarchyLoad();
 
 
 	/* 読み取り専用 */

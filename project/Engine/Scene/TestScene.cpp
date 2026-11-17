@@ -154,7 +154,7 @@ void TestScene::Init() {
 void TestScene::Update(Input* input) {
 
 	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		Scene::RequestChange("FieldExample");
+		Scene::RequestChange("FieldExample","resources/Scene/Field/stage/stage1.json");
 	}
 
 	model->Update();

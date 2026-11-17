@@ -14,6 +14,7 @@
 
 Scene* Scene::instance = nullptr;
 std::string Scene::nextSceneName;
+std::string Scene::nextSceneHierarchyJsonPath;
 
 bool Scene::isChanging = false;
 
@@ -27,13 +28,15 @@ void Scene::Draw(){
 
 }
 
-void Scene::StartGameScene(std::string sceneName)
+void Scene::StartGameScene(std::string sceneName, std::string sceneHierarchyJsonPath)
 {
-	/*  　Editor側の切り替え処理 　 */
-	Editor::GetInstance()->SwitchActiveScene(sceneName,true);
+	/*
+	　Editor側の切り替え処理
+	*/
+	Editor::GetInstance()->SwitchActiveScene(sceneName, sceneHierarchyJsonPath,true);//			最初からカスタムのJsonファイルをmain.cppから読み込むなんで無いっしょｗｗｗｗ
 
 	// 各パネルの初期化
-	Editor::GetInstance()->PanelInit(sceneName);
+	Editor::GetInstance()->PanelInit(sceneName, sceneHierarchyJsonPath);
 
 
 	/* 　Editorからインスタンスをもらう　 */
@@ -64,7 +67,7 @@ void Scene::ProcessChange() {
 		if (Editor::IsEditorMode()) {
 
 			/*  　Editor側の切り替え処理 　 */
-			Editor::GetInstance()->SwitchActiveScene(nextSceneName);
+			Editor::GetInstance()->SwitchActiveScene(nextSceneName,nextSceneHierarchyJsonPath);
 			
 			/* 　Editorからインスタンスをもらう　 */
 			instance = Editor::GetInstance()->GetActiveSceneInstance();

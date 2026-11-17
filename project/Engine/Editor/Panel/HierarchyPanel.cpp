@@ -31,12 +31,13 @@ const char* kLayerTypeNames[] = {
 	(char*)ICON_FA_PEN  "  CanvasLayer"
 };
 
-void HierarchyPanel::Initialize(const std::string sceneName, EditorGrid& g)
+void HierarchyPanel::Initialize(const std::string jsonPath, EditorGrid& g)
 {	
 	grid = &g;
+	jsonPath_ = jsonPath;
 
 	/* 初期化で読込んどく */
-	HierarchyLoad(sceneName);
+	HierarchyLoad();
 }
 
 void HierarchyPanel::Update()
@@ -722,9 +723,19 @@ void HierarchyPanel::CanvasTypeOpenView(HierarchyLayer& h)
 				}
 
 
-				ImGui::SameLine(ImGui::GetWindowWidth() - 80.0f);
+				ImGui::SameLine(ImGui::GetWindowWidth() - 130.0f);
 
 				ImGui::PushID(e);
+
+				// 削除
+				if (ImGui::Button("ｘ")) {
+					
+					UIManager::GetInstance()->DeleteUIElement(canvasData.name_, element.get());
+					ImGui::PopID();
+					break;
+				}
+
+				ImGui::SameLine();
 
 				// ↑移動（押された瞬間、上のルート要素を探す）
 				if (ImGui::Button("↑")) {
@@ -766,16 +777,9 @@ void HierarchyPanel::HierarchyClear()
 
 
 
-void HierarchyPanel::HierarchyLoad(const std::string sceneName) {
+void HierarchyPanel::HierarchyLoad() {
 
-	if (sceneName.empty()) return;
-
-	/* 
-		読み込むjsonのパスをここで設定
-	*/
-	
-	jsonPath_ = "resources/Scene/" + sceneName + "/hierarchy.json";
-	
+	if (jsonPath_.empty()) return;
 
 	/* 
 		もし存在しない場合つくる
@@ -798,7 +802,7 @@ void HierarchyPanel::HierarchyLoad(const std::string sceneName) {
 
 
 	// 読込み
-	if (SceneComponentLoader::GetInstance()->Load(jsonPath_)) {
+ 	if (SceneComponentLoader::GetInstance()->Load(jsonPath_)) {
 
 		SceneComponentLoader* loder = SceneComponentLoader::GetInstance();
 
