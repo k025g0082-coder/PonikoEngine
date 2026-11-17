@@ -233,7 +233,7 @@ void DemoPlayer::onCollisionToItem(DemoFieldItem* item, CollisionResult result)
 
 void DemoPlayer::ImGuiView()
 {
-
+#ifdef USE_IMGUI
 	//moveEmitParam.ImGuiView();
 	getEmitParam.ImGuiView();
 	if (ImGui::Button("getVfx")) {
@@ -256,4 +256,5 @@ void DemoPlayer::ImGuiView()
 	}
 	//
 	//DemoFieldObject::ImGuiView();
+#endif
 }

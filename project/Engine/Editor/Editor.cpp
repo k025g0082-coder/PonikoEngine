@@ -500,7 +500,7 @@ void Editor::Draw() {
 
 void Editor::TopMenuVar()
 {
-
+#ifdef USE_IMGUI
 	/* メニュー表示 */
 	if (ImGui::BeginMainMenuBar()) {
 
@@ -644,7 +644,7 @@ void Editor::TopMenuVar()
 
 		ImGui::EndMainMenuBar();
 	}
-
+#endif
 }
 
 void Editor::DrawMainImageView()
@@ -684,7 +684,7 @@ void Editor::DrawMainImageView()
 
 void Editor::DrawViewManipulate()
 {
-
+#ifdef USE_IMGUI
 	/*カメラ視点の回転 */
 	ImVec2 manipulateSize = ImVec2(128.0f, 128.0f);
 	ImVec2 manipulatePos = ImVec2(mainViewPos.x + mainViewSize.x - manipulateSize.x - 10.0f, mainViewPos.y + 10.0f);
@@ -724,7 +724,7 @@ void Editor::DrawViewManipulate()
 		// 変更されたView行列をそのまま反映
 		camera_.SetViewMatrix(viewMatrix);
 	}
-
+#endif
 }
 
 void Editor::UpdateHierarchySelection()
@@ -735,6 +735,8 @@ void Editor::UpdateHierarchySelection()
 
 void Editor::OperationKeyBoard()
 {
+#ifdef USE_IMGUI
+
 	if (selectedModelWorldTransform_) {
 
 		/* 回転キーなどショトカ */
@@ -758,10 +760,12 @@ void Editor::OperationKeyBoard()
 		}
 
 	}
+#endif
 }
 
 void Editor::OperationLeftClick()
 {
+#ifdef USE_IMGUI
 	/*
 		現在開かれているシーンのヒエラルキー
 	*/
@@ -919,10 +923,12 @@ void Editor::OperationLeftClick()
 
 		}
 	}
+#endif
 }
 
 void Editor::OperationRightClick()
 {
+#ifdef USE_IMGUI
 	/*
 		現在開かれているシーンのヒエラルキー
 	*/
@@ -1015,6 +1021,7 @@ void Editor::OperationRightClick()
 		}
 
 	}
+#endif
 }
 
 void Editor::OperationWheel()
@@ -1062,6 +1069,8 @@ void Editor::OperationWheel()
 
 void Editor::DrawArrowToSelectedTransform()
 {
+#ifdef USE_IMGUI
+
 	if (isEditorMode_) {
 
 		/*
@@ -1140,6 +1149,7 @@ void Editor::DrawArrowToSelectedTransform()
 		}
 		
 	}
+#endif
 }
 
 
@@ -1323,6 +1333,7 @@ void Editor::FreeMoveCamera()
 
 void Editor::PropartyTab()
 {
+#ifdef USE_IMGUI
 	/*
 		現在開かれているシーンのヒエラルキー
 	*/
@@ -1478,6 +1489,7 @@ void Editor::PropartyTab()
 		// 色の
 		ImGui::PopStyleColor();
 	}
+#endif
 }
 
 void Editor::LightingManagerTab(bool& show) {
@@ -1829,6 +1841,8 @@ Vector3 Editor::ExtractRotation(const Matrix4x4& m, const Vector3& scale)
 
 bool Editor::ToggleSwitch(const char* label, bool* value)
 {
+	bool clicked = false;
+#ifdef USE_IMGUI
 	ImVec2 p = ImGui::GetCursorScreenPos();
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
 
@@ -1839,7 +1853,7 @@ bool Editor::ToggleSwitch(const char* label, bool* value)
 	ImGui::InvisibleButton(label, ImVec2(width, height));
 
 	// クリックした瞬間に状態を切り替える
-	bool clicked = ImGui::IsItemClicked();
+	clicked = ImGui::IsItemClicked();
 
 	if (clicked)
 	{
@@ -1894,7 +1908,7 @@ bool Editor::ToggleSwitch(const char* label, bool* value)
 		radius - 1.5f,
 		IM_COL32(255, 255, 255, 255)
 	);
-
+#endif
 	/* 押した瞬間を返す */
 	return clicked;
 }
@@ -2065,6 +2079,8 @@ void Editor::Notification::PopText(const char* t, ImVec2 s)
 // ここら辺ゴミコードすぎワロタ
 void Editor::Notification::Draw()
 {
+#ifdef USE_IMGUI
+
 	if (!isPop_) return;
 
 	ease.Step();
@@ -2131,4 +2147,5 @@ void Editor::Notification::Draw()
 		ImGui::GetColorU32(textCol_),
 		text
 	);
+#endif
 }

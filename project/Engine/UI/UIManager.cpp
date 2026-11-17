@@ -705,6 +705,7 @@ void UIManager::SelectedElementAnimationView()
 
 void UIManager::JudgeMouseSelectElement(UIElement& e,int index,bool& anyInside)
 {
+#ifdef USE_IMGUI
 
 	// 現在のEditorのMainViewの比率を得る
 	float radio = Editor::GetInstance()->GetMainViewRatio();
@@ -807,11 +808,13 @@ void UIManager::JudgeMouseSelectElement(UIElement& e,int index,bool& anyInside)
 			deleteElementIndex_ = index;
 		}
 	}
-
+#endif
 }
 
 void UIManager::ParentSelectPopupWindow()
 {
+#ifdef USE_IMGUI
+
 	// ポップアップ開く要求フラグが立っていたら1度だけ実行
 	if (isShowParentWindow_) {
 		ImGui::OpenPopup("ParentElementPopup");
@@ -856,11 +859,14 @@ void UIManager::ParentSelectPopupWindow()
 
 		ImGui::EndPopup();
 	}
+#endif
 }
 
 
 void UIManager::MoveSelectElement()
 {
+#ifdef USE_IMGUI
+
 	if (!selectedElemet_)return;
 
 	// 左マウスが離されたら選択中のドラッグ解除
@@ -898,6 +904,7 @@ void UIManager::MoveSelectElement()
 		selectedElemet_->position_ = selectedElemet_->GetScreenTransform().translation_;
 
 	}
+#endif
 }
 
 /*
@@ -1265,6 +1272,8 @@ std::vector<UIElement*> UIManager::GetOrderedElements(UIData& data) {
 
 void UIManager::ElementNamePopupWindow()
 {
+#ifdef USE_IMGUI
+
 	// ここでpopを呼ぶ
 	if (isShowNameWindow_) {
 
@@ -1328,5 +1337,5 @@ void UIManager::ElementNamePopupWindow()
 
 		ImGui::EndPopup();
 	}
-
+#endif
 }

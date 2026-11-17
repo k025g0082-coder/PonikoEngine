@@ -553,7 +553,7 @@ void HierarchyPanel::ChangeHierarchyLayer(bool b, std::string layerName)
 
 void HierarchyPanel::AddLayerPopupWindow()
 {
-	
+#ifdef USE_IMGUI
 	// ポップアップ本体
 	if (ImGui::BeginPopup("Popup")) {
 
@@ -599,7 +599,7 @@ void HierarchyPanel::AddLayerPopupWindow()
 
 		ImGui::EndPopup();
 	}
-
+#endif
 }
 
 void HierarchyPanel::ModelTypeOpenView(HierarchyLayer& h)
