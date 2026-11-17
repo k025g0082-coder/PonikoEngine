@@ -4,6 +4,9 @@
 #include <map>
 #include <string>
 
+#include <mfapi.h>
+#pragma comment(lib,"mfplat.lib")
+
 #include <xaudio2.h>
 #pragma comment(lib, "xaudio2.lib")
 
@@ -34,10 +37,9 @@ struct SoundData {
 
 	//波形フォーマット
 	WAVEFORMATEX wfex;
-	//バッファの先頭アドレス
-	BYTE* pBuffer;
-	// バッファのサイズ
-	unsigned int bufferSize;
+
+	// バッファ
+	std::vector<BYTE> buffer;
 
 	// ループ
 	bool isLoop = false;
@@ -66,8 +68,12 @@ public:
 	// 毎回更新
 	void Update();
 	
-	// wavファイル読込
-	void LoadWave(const std::string& name, const char* filename);
+	/// <summary>
+	/// 音声ファイルファイル読込
+	/// </summary>
+	/// <param name="name">名前</param>
+	/// <param name="filename">ファイルネーム</param>
+	void LoadFile(const std::string& name, const char* filename);
 
 	// 再生
 	void Play(const std::string& name, float playSpeed = 1.0f, float startTime = 0.0f);
@@ -108,7 +114,7 @@ private:
 	std::vector<IXAudio2SourceVoice*> pSourceVoices;
 
 	// 読込
-	SoundData SoundLoadWave(const char* filename);
+	SoundData SoundLoad(const char* filename);
 
 	// 廃棄
 	void SoundUnload(SoundData* soundData);
