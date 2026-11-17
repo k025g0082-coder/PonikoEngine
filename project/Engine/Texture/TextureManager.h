@@ -46,13 +46,20 @@ public:
 	/// <returns></returns>
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(uint32_t textureIndex);
 
+	/// <summary>
+	/// ファイルパスからTextureのアドレスゲット
+	/// </summary>
+	/// <param name="filePath">読み込むテキスチャのファイルのパス</param>
+	/// <returns></returns>
+	Texture* GetTextureByFilePath(const std::string& filePath);
+
 
 	// テキスチャの横幅
 	float GetTextureWidth(uint32_t textureIndex){
 		// 範囲外エラー
 		assert(textureIndex < textureDatas.size());
 
-		return textureDatas.at(textureIndex).GetTextureWidth();
+		return textureDatas.at(textureIndex)->GetTextureWidth();
 	}
 
 	// テキスチャの縦幅
@@ -60,11 +67,11 @@ public:
 		// 範囲外エラー
 		assert(textureIndex < textureDatas.size());
 
-		return textureDatas.at(textureIndex).GetTextureHeight();
+		return textureDatas.at(textureIndex)->GetTextureHeight();
 	}
 private:
 
 	// テクスチャデータまとめ
-	std::vector<Texture> textureDatas;
+	std::vector< std::unique_ptr<Texture>> textureDatas;
 
 };

@@ -14,6 +14,8 @@
 
 #include "timer.h"
 
+#include <memory>
+
 
 void DemoPlayer::Initialize()
 {
@@ -238,7 +240,7 @@ void DemoPlayer::ImGuiView()
 	getEmitParam.ImGuiView();
 	if (ImGui::Button("getVfx")) {
 		//Particle::GetInstance()->MakeNewParticle("plane", "symbol_02", worldTransform.translation_, 6, getEmitParam);
-		EffectManager::AddEffect(new ExampleEffect, worldTransform.translation_);
+		EffectManager::AddEffect(std::make_unique<ExampleEffect>(), worldTransform.translation_);
 	}
 	if (ImGui::Button("Save")) {
 

@@ -896,7 +896,7 @@ void Editor::OperationLeftClick()
 				model->modelId_ = AssetsPanel::GetInstance()->selectedHierarchyResource_.pathId_;
 				model->name_ = AssetsPanel::GetInstance()->selectedHierarchyResource_.name_;
 
-				model->modelResource_ = AssetsPanel::GetInstance()->selectedHierarchyResource_.model_;
+				model->modelResource_ = AssetsPanel::GetInstance()->selectedHierarchyResource_.model_.get();
 
 				// WorldTransform座標決定
 				model->transform_ = std::make_unique<WorldTransform>();

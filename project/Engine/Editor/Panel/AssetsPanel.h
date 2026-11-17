@@ -1,13 +1,14 @@
 #pragma once
 #include "SceneViewport.h"
-#include "Texture.h"
 
 #include <unordered_map>
-
+#include <memory>
 
 class HierarchyPanel;
-class UIElement;
 
+#include "Model.h"
+#include "Texture.h"
+#include "UIElement.h"
 
 /* 
 	モデルのパスやidなどのリソース情報
@@ -16,7 +17,7 @@ struct ModelResource {
 
 	std::string pathId_;     // パスおよびIDの意味を持つ
 
-	Model* model_ = nullptr; // モデルの実体
+	std::unique_ptr <Model> model_; // モデルの実体
 	std::string name_;		 // 名前表示用
 
 	bool isView_ = true;	 // 表示非表示
@@ -35,7 +36,7 @@ struct TextureResource {
 
 	std::string pathId_;     // パスおよびIDの意味を持つ
 
-	Texture* texture_ = nullptr; // 実体
+	std::unique_ptr <Texture> texture_; // 実体
 	std::string name_;		 // 名前表示用
 
 
@@ -58,7 +59,7 @@ struct UIElementResource {
 
 	std::string pathId_;     // パスおよびIDの意味を持つ
 
-	UIElement* element_ = nullptr; // 実体
+	std::unique_ptr < UIElement > element_; // 実体
 	std::string name_;		       // エレメント名
 
 
@@ -105,8 +106,8 @@ public:
 	
 	// モデルリソース - 追加	
 	void AddModelResource(ModelResource& r) {
-		hierarchyModelResouces_.push_back(r);
-		hierarchyModelResourceList_[r.pathId_] = r.model_;
+		hierarchyModelResouces_.push_back(std::move(r));// 構造体内にunique_ptrがあるためコピー不可。moveする
+		hierarchyModelResourceList_[r.pathId_] = r.model_.get();// アドレス
 	}
 
 	// モデルリソース - 削除
@@ -118,8 +119,8 @@ public:
 
 	// Textureリソース - 追加
 	void AddTextureResource(TextureResource& r) {
-		hierarchyTextureResouces_.push_back(r);
-		hierarchyTextureResourceList_[r.pathId_] = r.texture_;
+		hierarchyTextureResouces_.push_back(std::move(r));// 構造体内にunique_ptrがあるためコピー不可。moveする
+		hierarchyTextureResourceList_[r.pathId_] = r.texture_.get();// アドレス
 	}
 
 	// Textureリソース - 削除
@@ -131,8 +132,8 @@ public:
 
 	// UIElementリソース - 追加	
 	void AddUIElementResource(UIElementResource& e) {
-		hierarchyUIElementResouces_.push_back(e);
-		hierarchyUIElementResourceList_[e.pathId_] = e.element_;
+		hierarchyUIElementResouces_.push_back(std::move(e));// 構造体内にunique_ptrがあるためコピー不可。moveする
+		hierarchyUIElementResourceList_[e.pathId_] = e.element_.get();// アドレス
 	}
 
 
@@ -193,7 +194,7 @@ private:
 	std::vector<TextureResource> hierarchyTextureResouces_;
 	std::vector<UIElementResource> hierarchyUIElementResouces_;
 
-	//* 上のオブジェクトをパス名で登録しておく
+	//* 上のオブジェクトをパス名->実体へのポインタ
 	std::unordered_map<std::string, Model*> hierarchyModelResourceList_;
 	std::unordered_map<std::string, Texture*> hierarchyTextureResourceList_;
 	std::unordered_map<std::string, UIElement*> hierarchyUIElementResourceList_;

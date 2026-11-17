@@ -193,7 +193,7 @@ void UIManager::SaveElementPrefabData()
 		r.name_ = selectedElemet_->name_;
 		r.pathId_ = path;
 		r.folderName_ = "Main"; // デフォルトフォルダ
-		uiResources.push_back(r);
+		uiResources.push_back(std::move(r));
 	}
 }
 

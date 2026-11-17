@@ -5,8 +5,6 @@
 
 #include "FileDropManager.h"
 
-#include "UIElement.h"
-
 #include <misc/cpp/imgui_stdlib.h>
 #include <imgui/IconsFontAwesome.h>
 
@@ -34,30 +32,34 @@ void AssetsPanel::Initialize()
 	{
 		ModelResource& r = hierarchyModelResouces_.at(i);
 
-		r.model_ = Model::CreateOBJ(r.pathId_);
+
+		// Uniqueに代入
+		r.model_.reset(Model::CreateOBJ(r.pathId_));
+
 
 		/* ライティングはデフォルトでON */
 		r.model_->SetLightSets();
 
 		// モデルのポインタ登録
-		hierarchyModelResourceList_[r.pathId_] = r.model_;
+		hierarchyModelResourceList_[r.pathId_] = r.model_.get();
 		r.name_ = FileDropManager::GetFileNameWithoutExtension(FileDropManager::ToWide(r.pathId_));// 表示名 拡張子を抜いたのを設定する
 	
 	}
 
 	/* JSONをもとにテクスチャー生成 */
 	for (auto& resource : hierarchyTextureResouces_) {
+		
+		auto texture = std::make_unique<Texture>();
 
-		Texture* texture = new Texture();
 		texture->Initialize(resource.pathId_);
 
 		// 読み込めたら
 		if (texture->IsLoaded()) {
 
-			resource.texture_ = texture;
+			resource.texture_ = std::move(texture);// 上のローカル変数textureから所有権いどう
 			resource.name_ = FileDropManager::GetFileNameWithoutExtension(FileDropManager::ToWide(resource.pathId_));// 表示名 拡張子を抜いたのを設定す
 
-			hierarchyTextureResourceList_[resource.pathId_] = texture;
+			hierarchyTextureResourceList_[resource.pathId_] = resource.texture_.get();// アドレス
 		}
 	}
 
@@ -289,9 +291,9 @@ void AssetsPanel::AddDropModel()
 			}
 		}
 
-
 		// モデル生成
-		Model* model = Model::CreateOBJ(relativePath);
+		std::unique_ptr<Model> model;
+		model.reset(Model::CreateOBJ(relativePath));// 生成？
 
 
 		// 読み込めた
@@ -301,7 +303,7 @@ void AssetsPanel::AddDropModel()
 			ModelResource resource;
 
 			resource.pathId_ = relativePath;
-			resource.model_ = model;		// モデル登録
+			resource.model_ = std::move(model);		// 上のローカル変数から所有権いどう
 
 			//*  デフォルトでライトセット  *//
 			resource.model_->SetLightSets();
@@ -333,7 +335,7 @@ void AssetsPanel::AddDropModel()
 			h->name_ = resource.name_;
 			h->layerName_ = hierarchyPanel_->GetSelectedCurrentLayerName();
 
-			h->modelResource_ = resource.model_;
+			h->modelResource_ = resource.model_.get();
 
 			h->isView_ = true;
 
@@ -401,7 +403,8 @@ void AssetsPanel::AddDropSprite()
 
 
 		// texture生成
-		Texture* texture = new Texture();
+		auto texture = std::make_unique<Texture>();
+
 		texture->Initialize(relativePath);
 
 		// 読み込めた
@@ -411,7 +414,7 @@ void AssetsPanel::AddDropSprite()
 			TextureResource resource;
 
 			resource.pathId_ = relativePath;
-			resource.texture_ = texture;		// モデル登録
+			resource.texture_ = std::move(texture);		// 移動
 
 			resource.name_ = FileDropManager::GetFileNameWithoutExtension(path);// 表示名 拡張子を抜いたのを設定する
 
@@ -1212,7 +1215,7 @@ void AssetsPanel::AddHierarchyModel(const ModelResource& resource)
 	h->name_ = resource.name_;
 	h->layerName_ = hierarchyPanel_->GetSelectedCurrentLayerName();
 
-	h->modelResource_ = resource.model_;
+	h->modelResource_ = resource.model_.get();
 
 	h->isView_ = true;
 

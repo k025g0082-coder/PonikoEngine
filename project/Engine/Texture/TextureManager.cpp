@@ -26,8 +26,8 @@ void TextureManager::LoadTexture(const std::string& filePath)
     auto it = std::find_if(
         textureDatas.begin(),
         textureDatas.end(),
-        [filePath](Texture& texture) {
-            return texture.texturePath_ == filePath;
+        [filePath](const std::unique_ptr<Texture>& texture) {
+            return texture->texturePath_ == filePath;
         }
     );
 
@@ -35,9 +35,12 @@ void TextureManager::LoadTexture(const std::string& filePath)
     if (textureDatas.end() != it) return;
 
     //　読み込み
-    auto& texture = textureDatas.emplace_back();
+    auto texture = std::make_unique<Texture>();
 
-    texture.Initialize(filePath);// 初期化
+    texture->Initialize(filePath);// 初期化
+
+    // 移動
+    textureDatas.push_back(std::move(texture));
 
 }
 
@@ -47,8 +50,8 @@ uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
     auto it = std::find_if(
         textureDatas.begin(),
         textureDatas.end(),
-        [filePath](Texture& texture) {
-            return texture.texturePath_ == filePath;
+        [filePath](const std::unique_ptr<Texture>& texture) {
+            return texture->texturePath_ == filePath;
         }
     );
 
@@ -70,5 +73,27 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(uint32_t textureInde
     assert(textureIndex < textureDatas.size());
 
     // 返す
-    return textureDatas.at(textureIndex).GetTextureSrvHandleGPU();
+    return textureDatas.at(textureIndex)->GetTextureSrvHandleGPU();
+}
+
+Texture* TextureManager::GetTextureByFilePath(const std::string& filePath)
+{
+    
+    // 検索
+    auto it = std::find_if(
+        textureDatas.begin(),
+        textureDatas.end(),
+        [filePath](const std::unique_ptr<Texture>& texture) {
+            return texture->texturePath_ == filePath;
+        }
+    );
+
+    // すでにあったらアドレスを返す
+    if (textureDatas.end() != it) {
+        return (*it).get();
+    }
+
+    // ないのでエラー
+    assert(0);
+    return nullptr;
 }

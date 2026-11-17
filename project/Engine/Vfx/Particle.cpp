@@ -9,6 +9,9 @@
 
 #include "ModelLoader.h"
 
+#include "ModelManager.h"
+#include "TextureManager.h"
+
 #include "Matrix.h"
 
 #include "Scene.h"
@@ -181,6 +184,7 @@ void Particle::RegionParticleModel(std::string tag,std::string path) {
         }
     }
 
+    // 登録
     ParticleModelData* data = &particleModelDatas_[tag];
 
     data->modelPath = path;
@@ -268,9 +272,15 @@ void Particle::RegionParticleModel(std::string tag,std::string path) {
 
     data->indexResource->Unmap(0, nullptr);
 
-    // テキスチャ
-    data->texture = new Texture();
-    data->texture->Initialize(data->modelData.materials.textureFilePath);
+
+    // テキスチャ読込
+    TextureManager::GetInstance()->LoadTexture(data->modelData.materials.textureFilePath);
+
+    data->modelPath = data->modelData.materials.textureFilePath;
+
+    // テキスチャのアドレス
+    data->texture = TextureManager::GetInstance()->GetTextureByFilePath(data->modelData.materials.textureFilePath);
+
 
     //頂点リソースを作る
     data->vertexResource = DirectXUtility::CreateBufferResource(

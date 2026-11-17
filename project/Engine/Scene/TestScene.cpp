@@ -236,7 +236,7 @@ void TestScene::Update(Input* input) {
 	if (ImGui::Button("Effect")) {
 
 		// とうろく
-		EffectManager::AddEffect(new ExampleEffect, {0,0,0});
+		EffectManager::AddEffect(std::make_unique<ExampleEffect>(), {0,0,0});
 
 	}
 	if (ImGui::Button("FadeStopBgm")) {

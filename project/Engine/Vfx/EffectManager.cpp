@@ -1,10 +1,10 @@
 #include "EffectManager.h"
 #include "Particle.h"
 
-std::vector<Effect*> EffectManager::effects_{};
+std::vector<std::unique_ptr<Effect>> EffectManager::effects_{};
 int EffectManager::nextEffectId_ = 0;
 
-void EffectManager::AddEffect(Effect* effect, Vector3 position,bool isDebugMode) {
+void EffectManager::AddEffect(std::unique_ptr<Effect> effect, Vector3 position,bool isDebugMode) {
 
     // 初期化
     effect->Initialize(position);
@@ -15,7 +15,7 @@ void EffectManager::AddEffect(Effect* effect, Vector3 position,bool isDebugMode)
     effect->SetImGuiId(nextEffectId_++);
 
 	// 追加
-	effects_.push_back(effect);
+	effects_.push_back(std::move(effect));
 
 }
 
@@ -28,7 +28,7 @@ void EffectManager::Update() {
 
         // エフェクト終了なら
         if ((*it)->IsFinished()) {
-            delete* it;
+            it->reset();
             it = effects_.erase(it);
         }
         else {
@@ -40,7 +40,7 @@ void EffectManager::Update() {
 
 // すべてのエフェクト終了
 void EffectManager::ResetEffect() {
-    for (Effect* e : effects_) {
+    for (auto& e : effects_) {
         e->FinishEffect();
     }
 }

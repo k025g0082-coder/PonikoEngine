@@ -109,7 +109,10 @@ struct SharedModelData
 class Model
 {
 public:
-	
+
+	Model() {};
+	~Model() {};
+
 	// クローンを作る
 	Model* Clone() const;
 

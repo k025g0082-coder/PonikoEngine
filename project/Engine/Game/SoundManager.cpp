@@ -5,11 +5,10 @@
 
 #include <wrl.h>
 
-#include "DirectXUtility.h"
 
-#include <mfreadwrite.h>
-#pragma comment(lib, "Mfreadwrite.lib")
-#pragma comment(lib, "mfuuid.lib")
+
+
+#include "DirectXUtility.h"
 
 // シングルトン
 SoundManager* SoundManager::GetInstance() {
@@ -360,7 +359,7 @@ void SoundManager::SoundPlayWave(IXAudio2* xAudio2, SoundData& soundData,float s
 	// 再生する波形データの設定
 	XAUDIO2_BUFFER buf{};
 	buf.pAudioData = soundData.buffer.data();
-	buf.AudioBytes = soundData.buffer.size();
+	buf.AudioBytes = static_cast<UINT32>(soundData.buffer.size());
 	buf.Flags = XAUDIO2_END_OF_STREAM;
 
 	// 無限ループ

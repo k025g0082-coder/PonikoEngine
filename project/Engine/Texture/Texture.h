@@ -12,6 +12,9 @@ using namespace Microsoft::WRL;
 class Texture
 {
 public:
+	Texture() {};
+	~Texture() {};
+
 	void Initialize(std::string texturePath);
 
 	void Initialize(unsigned char* image, int width, int height);

@@ -1,17 +1,25 @@
 #pragma once
 
-#include <cassert>
-#include <map>
-#include <string>
+
+#include <windows.h>
 
 #include <mfapi.h>
-#pragma comment(lib,"mfplat.lib")
+#include <mfidl.h>
+#include <mfreadwrite.h>
+#pragma comment(lib, "mfplat.lib")
+#pragma comment(lib, "mfreadwrite.lib")
+#pragma comment(lib, "mfuuid.lib")
 
 #include <xaudio2.h>
 #pragma comment(lib, "xaudio2.lib")
 
+
+#include <cassert>
+#include <map>
+#include <string>
 #include <fstream>
 #include <vector>
+
 
 //ここから音用
 
