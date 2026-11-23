@@ -26,6 +26,11 @@ public:
     virtual void Update() = 0;
     virtual void Draw() = 0;
 
+    /// <summary>
+    /// リセットされた場合の処理
+    /// </summary>
+    virtual void Reset() = 0;
+
 
     // エレメントの横幅
     virtual float GetWidth() = 0;
@@ -60,6 +65,8 @@ public:
     std::string pathID_;			   //   アセット参照用
 
     std::string name_;                 //   エレメントの名前。
+    std::string originalElementName_;  //   エレメントのオリジナルの名前。（上のは同名のelementが生成された場合に、element＿１とかで回避するため）
+
     std::string groupName_ = "Main";   //   グループの名前。
 
 
@@ -72,6 +79,12 @@ public:
     /// </summary>
     /// <param name="animeTag"></param>
     void PlayAnimation(std::string animeTag);
+
+    /// <summary>
+   /// アニメーションをリセットし最初の位置に戻る
+   /// </summary>
+   /// <param name="animeTag"></param>
+    void ResetAnimation();
 
 
     UIElementAnimationDatas animationDatas_; // アニメーションのデータ
@@ -123,6 +136,8 @@ public:
     void Initialize() override;
     void Update() override;
     void Draw()   override;
+
+    void Reset() override;
 
     float GetWidth() override {
         return static_cast<float>(sprite_.GetImageWidth());
@@ -177,6 +192,8 @@ public:
     void Initialize() override;
     void Update() override;
     void Draw()   override;
+
+    void Reset() override;
 
     float GetWidth() override {
         return static_cast<float>(text_.GetTextWidth(text));

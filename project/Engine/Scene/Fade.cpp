@@ -95,7 +95,13 @@ void Fade::Start(Status status, float duration, FadeColor color) {
 	counter_ = 0.0f;
 }
 
-void Fade::Stop() { status_ = Status::None; };
+void Fade::Stop() { status_ = Status::None; }
+
+void Fade::Reset()
+{
+	isFading_ = false;
+	status_ = Status::None;
+};
 
 bool Fade::IsFinished() const {
 	// フェード状態による分岐

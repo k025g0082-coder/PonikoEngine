@@ -16,6 +16,8 @@
 #include "HierarchyPanel.h"
 #include "AssetsPanel.h"
 
+#include "EventCommand.h"
+
 #include "UISequencer.h"
 
 #include <vector>
@@ -27,6 +29,7 @@
 #include "LightingManager.h"
 
 #include "UIManager.h"
+
 
 #include "HierarchyNode.h"
 
@@ -210,6 +213,10 @@ public:
 	// UIデータ
 	void Property(const std::string& name, std::vector< UIData >& value);
 
+	// イベント
+	void Property(const std::string& name, std::vector< EventCommandAsset >& value);
+
+	
 
 	/// <summary>
 	/// セーブ前のJsonデータの切り替え

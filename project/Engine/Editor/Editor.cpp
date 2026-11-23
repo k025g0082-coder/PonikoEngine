@@ -46,7 +46,8 @@
 //HierarchyPanel Editor::hierarchyPanel_;
 EditorGrid Editor::grid;
 std::string Editor::currentSceneJsonPath;
-SceneData* Editor::currentSceneData_;
+std::vector<SceneData>  Editor::sceneDatas_;
+std::string Editor::currentSceneName_;
 
 bool Editor::isEditorMode_ = false;
 
@@ -103,7 +104,7 @@ void Editor::PanelInit(std::string sceneName, std::string sceneHierarchyJsonPath
 
 	// モデルなどアセット読み込み
 	AssetsPanel::GetInstance()->Initialize();
-	AssetsPanel::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
+	AssetsPanel::GetInstance()->SetHierarchyPanel(GetCurrentSceneData()->hierarchyPanel_.get());
 
 	// アセットをもとにヒエラルキ生成.初期化時は下のjsonを参照とする
 	std::string jsonPath;
@@ -115,16 +116,18 @@ void Editor::PanelInit(std::string sceneName, std::string sceneHierarchyJsonPath
 		jsonPath = sceneHierarchyJsonPath;
 	}
 
-	currentSceneData_->sceneHierarchyPath_ = jsonPath;
-	currentSceneData_->hierarchyPanel_.get()->Initialize(jsonPath,grid);
+	GetCurrentSceneData()->sceneHierarchyPath_ = jsonPath;
+	GetCurrentSceneData()->hierarchyPanel_.get()->Initialize(jsonPath,grid);
 
 
 	/* UIManagerにセット */
-	UIManager::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
+	UIManager::GetInstance()->SetHierarchyPanel(GetCurrentSceneData()->hierarchyPanel_.get());
 
 	/* UIManagerの初期化 */
 	UIManager::GetInstance()->Initialize(sceneName);
 
+	/* イベントパネル初期化 */
+	EventPanel::GetInstance()->Initialize();
 }
 
 static bool showProperty = true; //
@@ -182,10 +185,10 @@ void Editor::Update()
 	*/
 
 	// 現在のシーンのヒエラルキー
-	currentSceneData_->hierarchyPanel_->Update();
+	GetCurrentSceneData()->hierarchyPanel_->Update();
 
 	AssetsPanel::GetInstance()->Update();
-
+	EventPanel::GetInstance()->Update();
 
 #ifdef USE_IMGUI
 
@@ -205,21 +208,37 @@ void Editor::Update()
 			// タブが開いているかどうか（xボタン対応）
 			bool open = true;
 
-			// タブの描画（選択されたら true）
-			if (ImGui::BeginTabItem(data.sceneName_.c_str(), &open)) {
 
-				// タブが切り替わったら、アクティブなシーンを変更する
-				if (currentSceneData_ != &data) {
-					currentSceneData_ = &data;
+			// プログラム側からシーンが変更された場合、該当タブに SetSelected フラグを渡して下の処理を走らせる
+			ImGuiTabItemFlags flags = ImGuiTabItemFlags_None;
+			if (isSceneTabDirty_ && GetCurrentSceneData() == &data) {
+				flags |= ImGuiTabItemFlags_SetSelected;
+			}
+
+			// タブの描画（選択されたら true）
+			if (ImGui::BeginTabItem(data.sceneName_.c_str(), &open,flags)) {
+
+
+				// プログラム側からの強制切り替えを完了
+				if (isSceneTabDirty_ && GetCurrentSceneData() == &data) {
+					isSceneTabDirty_ = false;
+				}
+
+				// ユーザーがタブを押して、切り替わったらアクティブなシーンを変更する
+				else if (!isSceneTabDirty_ && GetCurrentSceneData() != &data) {
 
 					/*
 						シーンのインスタンスを置き換える
 					*/
-					Scene::SetActiveInstanceReference(data.scene_);
+					Scene::SetActiveInstanceReference(data.scene_.get());
+
+					std::string clickedSceneName = data.sceneName_;
+					std::string clickedJsonPath = data.sceneHierarchyPath_;
 
 					/* データ等も切り替え */
-					SwitchActiveScene(currentSceneData_->sceneName_,currentSceneData_->sceneHierarchyPath_);
+					SwitchActiveScene(clickedSceneName, clickedJsonPath);
 
+					isSceneTabDirty_ = false;//
 				}
 
 				// --- ゲーム画面の描画 ---
@@ -256,7 +275,7 @@ void Editor::Update()
 			/*
 				UIElementを生成
 			*/
-			UIManager::GetInstance()->AddUIElement(UIType::kTexture,currentSceneData_->hierarchyPanel_->GetSelectedCurrentLayerName(), resource.pathId);
+			UIManager::GetInstance()->AddUIElement(UIType::kTexture,GetCurrentSceneData()->hierarchyPanel_->GetSelectedCurrentLayerName(), resource.pathId);
 			
 		}
 
@@ -277,7 +296,7 @@ void Editor::Update()
 			/*
 				UIElementを生成
 			*/
-			UIManager::GetInstance()->AddUIElement(currentSceneData_->hierarchyPanel_->GetSelectedCurrentLayerName(), resource.name);
+			UIManager::GetInstance()->AddUIElement(GetCurrentSceneData()->hierarchyPanel_->GetSelectedCurrentLayerName(), resource.name);
 
 		}
 
@@ -335,7 +354,7 @@ ImGui::End();
 
 		// ヒエラルキーパネル
 		if (showHierarchy) {
-			currentSceneData_->hierarchyPanel_->ViewPanel(showHierarchy);
+			GetCurrentSceneData()->hierarchyPanel_->ViewPanel(showHierarchy);
 		}
 
 		/* エフェクトタイムライン */
@@ -469,13 +488,13 @@ void Editor::Draw() {
 		// 選択中のヒエラルキのAABB描画
 		if (isDrawAABB_ && selectedModelWorldTransform_ != nullptr) {
 
-			auto* model = dynamic_cast<ModelNode*>(currentSceneData_->hierarchyPanel_->GetSelectedHierarchy());
+			auto* model = dynamic_cast<ModelNode*>(GetCurrentSceneData()->hierarchyPanel_->GetSelectedHierarchy());
 
 			DebugLine::DrawAABB(model->aabb_, { 0.0f,1,1,0.5f });
 		}
 
 		/* ヒエラルキーモデルの描画 */
-		for (const std::unique_ptr<HierarchyNode>& hierarchy : currentSceneData_->hierarchyPanel_->GetHierarchys()) {
+		for (const std::unique_ptr<HierarchyNode>& hierarchy : GetCurrentSceneData()->hierarchyPanel_->GetHierarchys()) {
 
 			// 非表示なら描画スキップ
 			if (!hierarchy->isView_) continue;
@@ -764,7 +783,7 @@ void Editor::OperationKeyBoard()
 		// ペースト
 		if (Input::GetInstance()->TriggerKey(DIK_V)) {
 
-			selectedModelWorldTransform_ = currentSceneData_->hierarchyPanel_->PasteHierarchyModel();
+			selectedModelWorldTransform_ = GetCurrentSceneData()->hierarchyPanel_->PasteHierarchyModel();
 
 			// コピー処理が成功したタイミングで呼ぶ
 			notification_.PopText("Model Pasted!!", ImVec2(170.0f, 30.0f));
@@ -780,7 +799,7 @@ void Editor::OperationLeftClick()
 	/*
 		現在開かれているシーンのヒエラルキー
 	*/
-	auto hierarchyPanel_ = currentSceneData_->hierarchyPanel_.get();
+	auto hierarchyPanel_ = GetCurrentSceneData()->hierarchyPanel_.get();
 
 
 	/* 左クリックを押された際の処理 */
@@ -943,7 +962,7 @@ void Editor::OperationRightClick()
 	/*
 		現在開かれているシーンのヒエラルキー
 	*/
-	auto hierarchyPanel_ = currentSceneData_->hierarchyPanel_.get();
+	auto hierarchyPanel_ = GetCurrentSceneData()->hierarchyPanel_.get();
 
 
 	/* ImGuiの枠にかさならないよう右クリックを押された際の処理 */
@@ -1087,7 +1106,7 @@ void Editor::DrawArrowToSelectedTransform()
 		/*
 			現在開かれているシーンのヒエラルキー
 		*/
-		auto hierarchyPanel_ = currentSceneData_->hierarchyPanel_.get();
+		auto hierarchyPanel_ = GetCurrentSceneData()->hierarchyPanel_.get();
 
 
 		// 選択中のモデルがあるときだけ操作
@@ -1175,7 +1194,7 @@ void Editor::LoadScene(std::string sceneName)
 		現在開かれているシーンのヒエラルキー
 	*/
 
-	currentSceneData_->hierarchyPanel_.get()->Initialize(sceneName, grid);
+	GetCurrentSceneData()->hierarchyPanel_.get()->Initialize(sceneName, grid);
 }
 
 /*
@@ -1209,14 +1228,26 @@ void Editor::SwitchActiveScene(std::string sceneName, std::string sceneHierarchy
 		currentSceneName_ = sceneName;
 
 		// 見つかった場合、現在のシーンデータに
-		currentSceneData_ = &(*it);
+		//GetCurrentSceneData() = &(*it);
+
+		// カスタムのHierarchyパスが指定されている、またはパスが変わっていたら再読込する
+		std::string targetJsonPath = 
+			sceneHierarchyPath.empty()
+			? "resources/Scene/" + sceneName + "/hierarchy.json"
+			: sceneHierarchyPath;
+
+		if (!firstInit && GetCurrentSceneData()->sceneHierarchyPath_ != targetJsonPath) {
+			GetCurrentSceneData()->sceneHierarchyPath_ = targetJsonPath;
+			GetCurrentSceneData()->hierarchyPanel_->Initialize(targetJsonPath, grid);
+		}
 
 		// 現在のシーンのデータをセット・読み込み
-		AssetsPanel::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
+		AssetsPanel::GetInstance()->SetHierarchyPanel(GetCurrentSceneData()->hierarchyPanel_.get());
 
-		UIManager::GetInstance()->SetHierarchyPanel(currentSceneData_->hierarchyPanel_.get());
+		UIManager::GetInstance()->SetHierarchyPanel(GetCurrentSceneData()->hierarchyPanel_.get());
 		UIManager::GetInstance()->SwitchSceneUIData(sceneName);
 
+		EventPanel::GetInstance()->SwitchScene(sceneName);
 
 	}
 	else {
@@ -1234,7 +1265,7 @@ void Editor::SwitchActiveScene(std::string sceneName, std::string sceneHierarchy
 			// 追加
 			auto& sceneData = sceneDatas_.emplace_back();
 
-			sceneData.scene_ = scene.release();// 移動
+			sceneData.scene_ = std::move(scene);// 移動
 	
 			// 名前登録
 			sceneData.sceneName_ = sceneName;
@@ -1269,14 +1300,35 @@ void Editor::SwitchActiveScene(std::string sceneName, std::string sceneHierarchy
 				UIManager::GetInstance()->SetHierarchyPanel(sceneData.hierarchyPanel_.get());
 				UIManager::GetInstance()->SwitchSceneUIData(sceneName);
 
+				EventPanel::GetInstance()->SwitchScene(sceneName);
+
 			}
 			// 現在のシーンに登録
-			currentSceneData_ = &sceneDatas_.back();
+			//GetCurrentSceneData() = &sceneDatas_.back();
 
 			// 名前設定
 			currentSceneName_ = sceneName;
 		}
 	}
+	//
+	isSceneTabDirty_ = true;
+}
+
+SceneData* Editor::GetCurrentSceneData()
+{
+
+	auto it = std::find_if(
+		sceneDatas_.begin(),
+		sceneDatas_.end(),
+		[](const SceneData& s) {
+			return s.sceneName_ == currentSceneName_;
+		}
+	);
+	if (it != sceneDatas_.end()) {
+		return &(*it);
+	}
+	return nullptr;
+	
 }
 
 
@@ -1366,7 +1418,7 @@ void Editor::PropartyTab()
 	/*
 		現在開かれているシーンのヒエラルキー
 	*/
-	auto hierarchyPanel_ = currentSceneData_->hierarchyPanel_.get();
+	auto hierarchyPanel_ = GetCurrentSceneData()->hierarchyPanel_.get();
 
 	// プロパティー
 	if (showProperty) {

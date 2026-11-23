@@ -1185,6 +1185,45 @@ void SceneComponentLoader::Property(const std::string& name, std::vector< UIData
 	};
 }
 
+/*
+	コマンドイベント
+*/
+void  SceneComponentLoader::Property(const std::string& name, std::vector< EventCommandAsset >& value) {
+	
+	JsonDatas_[currentJsonPath_].properties_[currentGroup_][name] = {
+
+		// save
+		[this, &value, name](json& group) {
+
+			// 空でも必ず配列として保存
+			group[name] = json::array();
+
+			for (const auto& prop : value) {
+
+				group[name].push_back(prop);
+
+			}
+		},
+
+		// load
+		[this, &value, name](const json& group) {
+
+			// なかった場合
+			if (!group.contains(name)) {
+				return;
+			}
+
+			for (const auto& item : group.at(name)) {
+
+				// 追加
+				value.push_back(item.get<EventCommandAsset>());
+
+			}
+
+		}
+	};
+}
+
 
 bool SceneComponentLoader::SaveSwitchJson(std::string jsonPath)
 {

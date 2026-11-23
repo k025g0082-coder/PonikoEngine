@@ -254,9 +254,14 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
   <ItemGroup>
     <ClCompile Include="Engine\Demo\DemoFieldItem.cpp" />
     <ClCompile Include="Engine\Demo\DemoFieldMeteo.cpp" />
+    <ClCompile Include="Engine\Editor\Panel\EventPanel.cpp" />
+    <ClCompile Include="Engine\Game\EventCommand.cpp" />
+    <ClCompile Include="Engine\Game\CommandEventManager.cpp" />
+    <ClCompile Include="Engine\Model\ModelManager.cpp" />
     <ClCompile Include="Engine\Shapes\AABB.cpp" />
     <ClCompile Include="Engine\Editor\Panel\AssetsPanel.cpp" />
     <ClCompile Include="Engine\Texture\TextureManager.cpp" />
+    <ClCompile Include="Engine\UI\UIElement.cpp" />
     <ClCompile Include="Engine\Utility\BaseFactory.cpp" />
     <ClCompile Include="Engine\Animation\Bone.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
@@ -406,8 +411,6 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClCompile Include="Engine\Core\WinApp.cpp" />
     <ClCompile Include="Engine\Utility\Random.cpp" />
     <ClCompile Include="Engine\Utility\Ray.cpp" />
-    <ClCompile Include="ModelManager.cpp" />
-    <ClCompile Include="UIElement.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -420,10 +423,15 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
   <ItemGroup>
     <ClInclude Include="Engine\Demo\DemoFieldItem.h" />
     <ClInclude Include="Engine\Demo\DemoFieldMeteo.h" />
+    <ClInclude Include="Engine\Editor\Panel\EventPanel.h" />
+    <ClInclude Include="Engine\Game\EventCommand.h" />
+    <ClInclude Include="Engine\Game\CommandEventManager.h" />
+    <ClInclude Include="Engine\Model\ModelManager.h" />
     <ClInclude Include="Engine\Shapes\AABB.h" />
     <ClInclude Include="Engine\Model\Animation.h" />
     <ClInclude Include="Engine\Editor\Panel\AssetsPanel.h" />
     <ClInclude Include="Engine\Texture\TextureManager.h" />
+    <ClInclude Include="Engine\UI\UIElement.h" />
     <ClInclude Include="Engine\Utility\BaseFactory.h" />
     <ClInclude Include="Engine\Animation\Bone.h" />
     <ClInclude Include="Engine\Scene\Camera.h" />
@@ -492,7 +500,6 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Engine\Core\RenderTarget.h" />
     <ClInclude Include="Engine\Utility\Random.h" />
     <ClInclude Include="Engine\Utility\Ray.h" />
-    <ClInclude Include="ModelManager.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Engine\Scene\Scene.h" />
     <ClInclude Include="Engine\Scene\SceneComponentLoader.h" />
@@ -520,7 +527,6 @@ xcopy /E /I /Y "$(ProjectDir)resources\Engine" "C:\Users\k025g\Desktop\source\Po
     <ClInclude Include="Engine\Utility\Vector.h" />
     <ClInclude Include="Engine\Core\WinApp.h" />
     <ClInclude Include="Engine\Utility\WorldTransform.h" />
-    <ClInclude Include="UIElement.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

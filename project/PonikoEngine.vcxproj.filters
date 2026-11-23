@@ -115,6 +115,12 @@
     <Filter Include="test\FactoryObjectDemo\.h\fieldObject">
       <UniqueIdentifier>{2bf6d36b-0273-462b-98fc-65b6a446a73e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Source\ソース ファイル\Game\Event">
+      <UniqueIdentifier>{fa0c6501-7d17-4ead-b280-770b0fcff19a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Source\ヘッダー ファイル\Game\Event">
+      <UniqueIdentifier>{f4041daf-29e2-4519-bdd4-fa51fff8e042}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Core\WinApp.cpp">
@@ -355,14 +361,23 @@
     <ClCompile Include="Engine\Utility\Ray.cpp">
       <Filter>Engine\Source\ソース ファイル\math</Filter>
     </ClCompile>
-    <ClCompile Include="UIElement.cpp">
-      <Filter>Engine\Source\ソース ファイル\Editor\UI</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Texture\TextureManager.cpp">
       <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="ModelManager.cpp">
-      <Filter>Engine\Source\ソース ファイル</Filter>
+    <ClCompile Include="Engine\Game\EventCommand.cpp">
+      <Filter>Engine\Source\ソース ファイル\Game\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Game\CommandEventManager.cpp">
+      <Filter>Engine\Source\ソース ファイル\Game\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Editor\Panel\EventPanel.cpp">
+      <Filter>Engine\Source\ソース ファイル\Editor\Panel</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\UI\UIElement.cpp">
+      <Filter>Engine\Source\ソース ファイル\Editor\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Model\ModelManager.cpp">
+      <Filter>Engine\Source\ソース ファイル\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -659,14 +674,23 @@
     <ClInclude Include="Engine\Utility\Ray.h">
       <Filter>Engine\Source\ヘッダー ファイル\math</Filter>
     </ClInclude>
-    <ClInclude Include="UIElement.h">
-      <Filter>Engine\Source\ヘッダー ファイル\Editor\UI</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Texture\TextureManager.h">
       <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="ModelManager.h">
-      <Filter>Engine\Source\ヘッダー ファイル</Filter>
+    <ClInclude Include="Engine\Game\EventCommand.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Game\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Game\CommandEventManager.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Game\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Editor\Panel\EventPanel.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Editor\Panel</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\UI\UIElement.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Editor\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Model\ModelManager.h">
+      <Filter>Engine\Source\ヘッダー ファイル\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

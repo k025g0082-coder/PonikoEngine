@@ -1,0 +1,43 @@
+{
+    "Events": {
+        "CommandEvents": [
+            {
+                "commands": [
+                    {
+                        "TriggerName": "",
+                        "elementAnimationName": "open",
+                        "elementRootName": "window",
+                        "elementTextChangeTexts": "",
+                        "elementTextName": "",
+                        "type": 1
+                    },
+                    {
+                        "TriggerName": "",
+                        "elementAnimationName": "",
+                        "elementRootName": "window",
+                        "elementTextChangeTexts": "よし",
+                        "elementTextName": "text",
+                        "type": 2
+                    },
+                    {
+                        "TriggerName": "button",
+                        "elementAnimationName": "",
+                        "elementRootName": "",
+                        "elementTextChangeTexts": "",
+                        "elementTextName": "",
+                        "type": 0
+                    },
+                    {
+                        "TriggerName": "",
+                        "elementAnimationName": "close",
+                        "elementRootName": "window",
+                        "elementTextChangeTexts": "",
+                        "elementTextName": "",
+                        "type": 1
+                    }
+                ],
+                "eventName": "NewEvent"
+            }
+        ]
+    }
+}

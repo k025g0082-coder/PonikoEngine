@@ -46,6 +46,7 @@ void Scene::StartGameScene(std::string sceneName, std::string sceneHierarchyJson
 		ここで初めてScene初期化
 	*/
 	instance->Init();
+
 }
 
 void Scene::ProcessChange() {
@@ -61,41 +62,20 @@ void Scene::ProcessChange() {
 		// PostエフェクトのBloom対象などの全削除
 		PostEffectManager::GetInstance()->Reset();
 
-		/*
-			Editorモードの場合、Editorから提供されたＳｃｅｎｅを設定する
-		*/
-		if (Editor::IsEditorMode()) {
 
-			/*  　Editor側の切り替え処理 　 */
-			Editor::GetInstance()->SwitchActiveScene(nextSceneName,nextSceneHierarchyJsonPath);
+
+		/*  　Editor側の切り替え処理 　 */
+		Editor::GetInstance()->SwitchActiveScene(nextSceneName,nextSceneHierarchyJsonPath);
 			
-			/* 　Editorからインスタンスをもらう　 */
-			instance = Editor::GetInstance()->GetActiveSceneInstance();
+		/* 　
+			Editorからインスタンスをもらう
+		*/
+		instance = Editor::GetInstance()->GetActiveSceneInstance();
 
-			// 初期化
-			instance->Init();
+		// 初期化
+		instance->Init();
 
-		}
-		else
-		{
-			// 通常　releaseモードの場合
-
-			/*
-				現在のインスタンスを破棄
-			*/
-			delete instance;
-
-			auto scene = SceneFactory::Create(nextSceneName);
-
-			/* 読み込めた */
-			if (scene) {
-
-				instance = scene.release();// 移動
-				instance->Init();
-
-				
-			}
-		}
+		
 
 		// 読み込みの有無にかかわらずfade終わったか切り替え
 		isChanging = false;

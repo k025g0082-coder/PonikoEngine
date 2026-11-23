@@ -40,6 +40,18 @@ void UIElementTexture::Draw()
 	sprite_.Draw();
 }
 
+//
+void UIElementTexture::Reset()
+{
+	UIElement::Reset();//
+
+	// 初期のSRTに戻す
+	sprite_.GetScreenTransform().translation_ = position_;
+	sprite_.GetScreenTransform().rotation_    = rotation_;
+	sprite_.GetScreenTransform().scale_       = scale_;
+
+}
+
 // 保存
 void UIElementTexture::Serialize(nlohmann::json& j) const
 {
@@ -94,6 +106,17 @@ void UIElementText::Draw()
 {
 	// 文字表示
 	text_.drawString(text, TextAnchor::Center);
+}
+
+void UIElementText::Reset()
+{
+	UIElement::Reset();
+
+	// テキストの方のテクスチャのSRTも戻す
+	text_.GetScreenTransform().translation_ = position_;
+	text_.GetScreenTransform().scale_ = scale_;
+	text_.GetScreenTransform().rotation_ = rotation_;
+
 }
 
 void UIElementText::ImGuiView()
@@ -167,13 +190,26 @@ void UIElement::PlayAnimation(std::string animeTag)
 
 }
 
+void UIElement::ResetAnimation()
+{
+	if (animationDatas_.currentTag_.empty())return;
+
+	//// リセット
+	//animationDatas_.currentTag_.clear();
+	animationDatas_.animations_[animationDatas_.currentTag_].isPlaying = false;
+	animationDatas_.animations_[animationDatas_.currentTag_].frame = 0.0f;
+
+	// SRTを元のに戻す
+
+}
+
 // 子エレメント検索
 UIElement* UIElement::FindChild(std::string childElementName)
 {
 	for (UIElement* child : childrens_) {
 
-		// 一致したらそのアドレスを返す
-		if (child->name_ == childElementName) return child;
+		// オリジナルの名前（element＿１の＿１とかついてない）の一致したらそのアドレスを返す
+		if (child->originalElementName_ == childElementName) return child;
 
 		// 孫以降も再帰で探す
 		if (auto* found = child->FindChild(childElementName)) return found;
@@ -222,6 +258,7 @@ void UIElement::Serialize(nlohmann::json& j) const
 {
 	j["type"] = type_;
 	j["name"] = name_;
+	j["originalName"] = originalElementName_;
 
 	// 親がいた場合、親の名前
 	if (parent_) {
@@ -248,6 +285,9 @@ void UIElement::Deserialize(const nlohmann::json & j)
 	if (j.contains("name"))
 		name_ = j.at("name").get<std::string>();
 
+	if (j.contains("originalName"))
+		originalElementName_ = j.at("originalName").get<std::string>();
+
 	if (j.contains("parent"))
 		parentName_ = j.at("parent").get<std::string>();
 
@@ -268,4 +308,26 @@ void UIElement::Deserialize(const nlohmann::json & j)
 
 	if (j.contains("rotation"))
 		rotation_ = JsonToVector3(j.at("rotation"));
+}
+
+void UIElement::Reset()
+{
+	//
+	if (!animationDatas_.animations_.empty()) {
+		animationDatas_.currentTag_ = animationDatas_.animations_.begin()->first;
+	}
+	else {
+		animationDatas_.currentTag_ = "";
+	}
+
+	// 全アニメリセット
+	for (auto& anime : animationDatas_.animations_) {
+		anime.second.isPlaying = false;
+		anime.second.frame = 0.0f;
+	}
+
+	// 子供も再帰的にリセット
+	for (auto& child : childrens_) {
+		child->Reset();
+	}
 }

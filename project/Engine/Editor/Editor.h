@@ -18,6 +18,7 @@
 // 各パネル
 #include "HierarchyPanel.h"
 #include "AssetsPanel.h"
+#include "EventPanel.h"
 
 
 
@@ -48,7 +49,7 @@ struct SceneData {
 
 
 	// シーンのインスタンス（保持しておく）
-	Scene* scene_ = nullptr;
+	std::unique_ptr < Scene > scene_;
 
 	// シーン内の各ヒエラルキーなどの情報
 	std::unique_ptr<HierarchyPanel> hierarchyPanel_;
@@ -83,7 +84,7 @@ public:
 	};
 
 
-	HierarchyPanel& GetHierarchyPanel() { return *currentSceneData_->hierarchyPanel_.get(); }
+	HierarchyPanel& GetHierarchyPanel() { return *GetCurrentSceneData()->hierarchyPanel_.get(); }
 
 
 	// エンジン閉じる際の設定
@@ -105,7 +106,7 @@ public:
 	/// </summary>
 	/// <returns></returns>
 	static std::vector<std::string>* GetAlignHierarchyLayerNames() {
-		return currentSceneData_->hierarchyPanel_->getAlignHierarchyLayerNames();
+		return GetCurrentSceneData()->hierarchyPanel_->getAlignHierarchyLayerNames();
 	}
 
 	/// <summary>
@@ -114,7 +115,7 @@ public:
 	/// <param name="layerName">レイヤー名</param>
 	/// <returns></returns>
 	static std::vector<HierarchyNode*>& GetHierarchyModelLayer(std::string layerName) {
-		return currentSceneData_->hierarchyPanel_->GetHierarchyModelLayer(layerName);
+		return GetCurrentSceneData()->hierarchyPanel_->GetHierarchyModelLayer(layerName);
 	}
 
 	// マウスがメインビューないに触れているか
@@ -143,10 +144,14 @@ public:
 	*/
 	void SwitchActiveScene(std::string sceneName,std::string sceneHierarchyPath, bool firstInit = false);
 
+
+	//
+	static SceneData* GetCurrentSceneData();
+
 	/*
 		現在アクティブなシーンのアドレスを返す
 	*/
-	Scene* GetActiveSceneInstance() { return currentSceneData_->scene_; }
+	Scene* GetActiveSceneInstance() { return GetCurrentSceneData()->scene_.get(); }
 
 
 	/*
@@ -168,16 +173,12 @@ private:
 	/*
 		シーン一覧
 	*/
-	std::vector<SceneData> sceneDatas_;
-
-	// 今のシーンデータ（のポインタ）
-	static SceneData* currentSceneData_;
-
+	static std::vector<SceneData> sceneDatas_;
 
 	/*
 		今読み込んでるシーン名
 	*/
-	std::string currentSceneName_;
+	static std::string currentSceneName_;
 
 	/* 
 		今読み込んでるシーンのJsonパス
@@ -294,7 +295,11 @@ private:
 	float selectedSphereTheta_;
 	float selectedSpherePhi_;
 
+
+	// プログラム側からシーンが切り替わったフラグ
+	bool isSceneTabDirty_ = false; 
 	
+
 	Vector3 ExtractScale(const Matrix4x4& m);
 	Vector3 ExtractRotation(const Matrix4x4& m, const Vector3& scale);
 

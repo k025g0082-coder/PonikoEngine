@@ -709,10 +709,21 @@ void HierarchyPanel::CanvasTypeOpenView(HierarchyLayer& h)
 				// 親がいる場合は、名前一覧に下に表示させるため非表示
 				if (element->parent_ != nullptr) continue;
 
-				/*
-					名前表示
-				*/
-				ImGui::BulletText(element->name_.c_str());
+
+				// 名前表示
+				ImGui::Selectable(element->name_.c_str());
+
+				/*   -ドラッグ開始地点-    */
+				if (ImGui::BeginDragDropSource())
+				{
+					//  ドラッグ開始したUIElementのアドレスを渡す  //
+					ImGui::SetDragDropPayload("UI_ELEMENT_PTR", &element, sizeof(UIElement*));
+
+					// ドラッグ中に出す1名前。　オリジナルじゃない方の名前
+					ImGui::Text("UI: %s", element.get()->name_.c_str());
+
+					ImGui::EndDragDropSource();
+				}
 				
 
 				// 子がある場合一覧表示

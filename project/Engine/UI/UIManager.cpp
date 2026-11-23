@@ -15,6 +15,7 @@
 #include <imgui/IconsFontAwesome.h>
 
 #include "AssetsPanel.h"
+#include "EventPanel.h"
 
 SceneUIData* UIManager::currentSceneUIData_;
 
@@ -1137,6 +1138,11 @@ UIElement* UIManager::AddUIElement(std::string canvasLayerName, std::string pref
 			element->name_ = uniqueName;
 			renamedMap[originalName] = uniqueName;
 
+
+			// オリジナルの名前も保存
+			element->originalElementName_ = originalName;
+
+
 			// 3. アセット等の初期化
 			element->Initialize();
 
@@ -1191,6 +1197,12 @@ UIElement* UIManager::AddUIElement(std::string canvasLayerName, std::string pref
 		for (auto& e : createdElements) {
 			targetElements.push_back(std::move(e));
 		}
+
+		/*
+			シーン内のイベントリストを全詮索して一致した名前があればアドレスを格納しておく
+		*/
+		EventPanel::GetInstance()->RegionUIElementAddress(rootElement);
+
 
 		// ルートのアドレスを返す
 		return rootElement;
@@ -1273,6 +1285,8 @@ void UIManager::AddUIElement(UIType type,std::string canvasLayerName, std::strin
 
 	// 名前はデフォルトとする
 	element->name_ = EmptyNameRegister();
+	element->originalElementName_ = element->name_;
+
 
 	element->groupName_ = "Main";
 
@@ -1309,6 +1323,11 @@ void UIManager::AddUIElement(UIType type,std::string canvasLayerName, std::strin
 	*/
 	currentSceneUIData_->elementDatas_.at(index).elements_.push_back(std::move(element));
 
+
+	/*
+		シーン内のイベントリストを全詮索して一致した名前があればアドレスを格納しておく
+	*/
+	EventPanel::GetInstance()->RegionUIElementAddress(element.get());
 }
 
 
@@ -1408,6 +1427,7 @@ void UIManager::ElementNamePopupWindow()
 					if (it == data.elements_.end() && !inputName.empty()) {
 
 						selectedElemet_->name_ = inputName;
+						selectedElemet_->originalElementName_ = inputName;
 
 						// 閉じる
 						ImGui::CloseCurrentPopup();

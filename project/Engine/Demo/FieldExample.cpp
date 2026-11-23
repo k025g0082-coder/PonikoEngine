@@ -12,6 +12,8 @@
 #include "ImGuiManager.h"
 #include "UIManager.h"
 
+#include "EventPanel.h"
+
 #include "Timer.h"
 
 #include "Random.h"
@@ -91,17 +93,20 @@ void FieldExample::Init()
 		/* 読込 */
 		loder->LoadGroup("particle");
 	}
-
+	if (ui)
+	ui->Reset();
 
 	/*
 		指定のキャンバス内にUIElementを生成
 	*/
-	//ui = UIManager::AddUIElement("teste", "window");
+	if (!ui)
+		ui = UIManager::AddUIElement("teste", "window");
 
-	//// 中の子要素（テキスト）を取得して文字を動的に書き換える
-	//if (auto* elem = ui->FindChild("text")) {
-	//	elem->SetText("おてすと");
-	//}
+	// 中の子要素（テキスト）を取得して文字を動的に書き換える
+	if (auto* elem = ui->FindChild("text")) {
+		elem->SetText("おてすと");
+	}
+
 
 }
 
@@ -232,7 +237,22 @@ void FieldExample::Update(Input * input)
 		if (ImGui::Button("close")) {
 			ui->PlayAnimation("close");
 		}
+		
+		/*
+			コマンドイベント用のトリガーとなるタグを発行する
+		*/
+		if (ImGui::Button("Trigger")) {
+			EventPanel::GetInstance()->NotifyTrigger("button");
+		}
+		
 	}
+
+	//
+	if (ImGui::Button("転移")) {
+		//
+		Scene::RequestChange("TestScene");
+	}
+
 
 	static Vector3 emitPos;
 

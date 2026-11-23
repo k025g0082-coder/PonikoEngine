@@ -31,6 +31,8 @@ public:
 	void Start(Status status, float dration,FadeColor color = FadeColor::kBlack);
 	void Stop();
 
+	void Reset();
+
 	// 再生ちゅうか
 	bool IsPlayFading() { return isFading_; }
 
