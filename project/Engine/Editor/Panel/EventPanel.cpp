@@ -7,6 +7,7 @@
 
 
 #include <nlohmann/json.hpp>
+#include <misc/cpp/imgui_stdlib.h>
 #include <string>
 #include <vector>
 
@@ -83,6 +84,10 @@ void EventPanel::PanelView()
 
 		}
 	}
+
+	// 改名window
+	EventNamePopupWindow();
+
 
     ImGui::End();
 
@@ -335,6 +340,9 @@ void EventPanel::ShowCommandEventLeftView()
 			// 3. 右クリックメニュー（削除や複製など）
 			if (ImGui::BeginPopupContextItem()) { // 直前のアイテム（Selectable）の右クリックを自動検知
 
+				if (ImGui::MenuItem("名前変更")) {
+					isShowNameWindow_ = true;
+				}
 				if (ImGui::MenuItem("Duplicate")) {
 					// 複製処理
 				}
@@ -604,5 +612,71 @@ void EventPanel::DrawUIElementDropRow(EventCommand& cmd)
 		ImGui::EndDragDropTarget();
 	}
 
+#endif
+}
+
+
+void EventPanel::EventNamePopupWindow()
+{
+	if (currentSceneName_.empty())return;
+	if (selectedCommandEvent_ == nullptr) return;
+
+#ifdef USE_IMGUI
+	
+	// ここでpopを呼ぶ
+	if (isShowNameWindow_) {
+
+		ImGui::OpenPopup("namePopup");
+		isShowNameWindow_ = false;
+
+	}
+
+
+	// ポップアップ本体
+	if (ImGui::BeginPopup("namePopup")) {
+
+		ImGui::Text("名前変更：");
+		ImGui::SameLine();
+
+
+		static std::string inputName;
+		ImGui::InputText(" ", &inputName);
+
+		if (ImGui::Button("閉じる")) {
+			// 閉じる
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine();
+
+		/* レイヤー操作 */
+		if (ImGui::Button("OK")) {
+
+			auto& list = sceneEvents_[currentSceneName_].commandEventManager.GetEventList();
+
+			// 該当イベント名検索
+			auto it = std::find_if(
+				list.begin(),
+				list.end(),
+				[this](const EventCommandAsset& e) {
+					return e.eventName_ == inputName;
+				}
+			);
+
+			// なかった
+			if (it == list.end() && !inputName.empty()) {
+
+				// 改名処理
+				selectedCommandEvent_->eventName_ = inputName;
+
+				// 閉じる
+				ImGui::CloseCurrentPopup();
+
+			}
+
+		}
+
+		ImGui::EndPopup();
+	}
 #endif
 }

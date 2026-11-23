@@ -73,6 +73,10 @@ private:
 	*/
 	std::unordered_map< std::string, EventManagers > sceneEvents_;
 
+	//
+	bool isShowNameWindow_ = false;
+	void EventNamePopupWindow();
+
 
 	// 共通ヘルパー：テーブルの1行（左ラベル・右InputText）を描く
 	void DrawInputRow(const char* label, std::string& targetStr);
